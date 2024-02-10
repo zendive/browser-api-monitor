@@ -34,7 +34,7 @@ function serve() {
 export default {
   input: 'src/main.ts',
   output: {
-    sourcemap: false,
+    sourcemap: !production,
     format: 'iife',
     name: 'app',
     file: 'public/build/bundle.js',
@@ -42,7 +42,7 @@ export default {
   plugins: [
     svelte({
       preprocess: sveltePreprocess({ sourceMap: !production }),
-			compilerOptions: {
+      compilerOptions: {
         // enable run-time checks when not in production
         dev: !production,
       },
@@ -62,10 +62,10 @@ export default {
       exportConditions: ['svelte'],
     }),
     commonjs(),
-		typescript({
-			sourceMap: !production,
-			inlineSources: !production
-		}),
+    typescript({
+      sourceMap: !production,
+      inlineSources: !production,
+    }),
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated
