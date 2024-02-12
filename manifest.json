@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "spy-api",
+  "version": "0.0.1",
+  "description": "Spy on SPA api",
+  "minimum_chrome_version": "120.0",
+  "homepage_url": "https://github.com/zendive/spy-api",
+  "author": "calexblock@gmail.com",
+  "permissions": ["storage"],
+  "host_permissions": ["*://*/*"],
+  "devtools_page": "public/devtools.html",
+  "icons": {
+    "28": "public/img/panel-icon28.png",
+    "64": "public/img/panel-icon64.png",
+    "128": "public/img/panel-icon128.png"
+  },
+  "content_scripts": [
+    {
+      "world": "MAIN",
+      "js": ["public/build/cs-main.js"],
+      "matches": ["<all_urls>"],
+      "match_origin_as_fallback": true,
+      "all_frames": false,
+      "run_at": "document_start"
+    },
+    {
+      "js": ["public/build/cs-isolated.js"],
+      "matches": ["<all_urls>"],
+      "match_origin_as_fallback": true,
+      "all_frames": false,
+      "run_at": "document_start"
+    }
+  ]
+}

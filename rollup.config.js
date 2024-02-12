@@ -1,45 +1,58 @@
-import { spawn } from 'child_process';
+// created using: ```npx degit sveltejs/template svelte-app```
+
 import svelte from 'rollup-plugin-svelte';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
-import livereload from 'rollup-plugin-livereload';
+import replace from '@rollup/plugin-replace';
 import css from 'rollup-plugin-css-only';
 import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
 
 const production = !process.env.ROLLUP_WATCH;
-
-function serve() {
-  let server;
-
-  function toExit() {
-    if (server) server.kill(0);
-  }
-
-  return {
-    writeBundle() {
-      if (server) return;
-      server = spawn('npm', ['run', 'start', '--', '--dev'], {
-        stdio: ['ignore', 'inherit', 'inherit'],
-        shell: true,
-      });
-
-      process.on('SIGTERM', toExit);
-      process.on('exit', toExit);
-    },
-  };
-}
-
-export default {
-  input: 'src/main.ts',
+/**
+ * @type {import('rollup').RollupOptions}
+ */
+const extensionFileOptions = {
   output: {
-    sourcemap: !production,
+    sourcemap: production ? false : 'inline',
     format: 'iife',
-    name: 'app',
-    file: 'public/build/bundle.js',
+    dir: 'public/build',
   },
   plugins: [
+    replace({
+      preventAssignment: true,
+      values: {
+        __development__: !production,
+      },
+    }),
+    commonjs(),
+    typescript({
+      sourceMap: !production,
+      inlineSources: !production,
+    }),
+    production && terser(),
+  ],
+  watch: {
+    clearScreen: false,
+  },
+};
+/**
+ * @type {import('rollup').RollupOptions}
+ */
+const svelteViewOptions = {
+  output: {
+    sourcemap: production ? false : 'inline',
+    format: 'module',
+    dir: 'public/build',
+  },
+  plugins: [
+    replace({
+      preventAssignment: true,
+      values: {
+        __development__: !production,
+      },
+    }),
     svelte({
       preprocess: sveltePreprocess({ sourceMap: !production }),
       compilerOptions: {
@@ -66,20 +79,19 @@ export default {
       sourceMap: !production,
       inlineSources: !production,
     }),
-
-    // In dev mode, call `npm run start` once
-    // the bundle has been generated
-    !production && serve(),
-
-    // Watch the `public` directory and refresh the
-    // browser on changes when not in production
-    !production && livereload('public'),
-
-    // If we're building for production (npm run build
-    // instead of npm run dev), minify
     production && terser(),
   ],
   watch: {
     clearScreen: false,
   },
 };
+
+/**
+ * @type {import('rollup').RollupOptions[]}
+ */
+export default [
+  { input: 'src/devtools.ts', ...extensionFileOptions },
+  { input: 'src/cs-main.ts', ...extensionFileOptions },
+  { input: 'src/cs-isolated.ts', ...extensionFileOptions },
+  { input: 'src/dt-view.ts', ...svelteViewOptions },
+];
