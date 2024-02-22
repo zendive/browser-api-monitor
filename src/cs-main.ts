@@ -1,41 +1,67 @@
 import {
+  EVENT_METRICS,
   EVENT_OBSERVE_START,
   EVENT_OBSERVE_STOP,
+  EVENT_SETUP,
   windowListen,
   windowPost,
 } from './api/communication';
+import { UI_UPDATE_FREQUENCY } from './api/const';
+import { setupTimekit } from './api/time';
+import { wrapApis } from './api/wrappers';
 
-let tick = 0;
-const apis = {
-  setTimeout: { native: setTimeout },
-  setInterval: { native: setInterval },
-};
-const tabIds: number[] = [];
+(() => {
+  const $ = wrapApis();
+  const timekit = setupTimekit(
+    $.apis.timers.setTimeout.native,
+    $.apis.timers.clearTimeout.native
+  );
+  const secondStopper = new timekit.Stopper();
+  let tickStopperTime = '';
+  const tick = new timekit.Timer(
+    () => {
+      if (secondStopper.now() > 1e3) {
+        secondStopper.start();
+        tickStopperTime = tick.stopper?.toString() || '';
+      }
 
-function startObserve() {
-  stopObserve();
-  tick = setInterval(() => {
-    const videosEl = document.querySelectorAll('video');
-    windowPost('from-cs-main', {
-      videosCount: videosEl.length,
-      tabIds,
-      timestamp: Date.now(),
-    });
-  }, 1e3);
-}
+      const videosEl = document.querySelectorAll('video');
+      const audiosEl = document.querySelectorAll('audio');
 
-function stopObserve() {
-  clearInterval(tick);
-}
+      windowPost(EVENT_METRICS, {
+        videosCount: videosEl.length,
+        audiosCount: audiosEl.length,
 
-windowListen(EVENT_OBSERVE_START, startObserve);
-windowListen(EVENT_OBSERVE_STOP, stopObserve);
+        timersUsages: $.apis.timersUsages.map((v) => [v[0], v[2]]),
+        timers: Object.keys($.apis.timers).map((key) => {
+          const api = $.apis.timers[key as keyof typeof $.apis.timers];
+          return {
+            name: key,
+            invocations: api.invocations,
+          };
+        }),
+        dangerEval: { invocations: $.apis.danger.eval.invocations },
+        tickTook: tickStopperTime,
+      });
+    },
+    UI_UPDATE_FREQUENCY,
+    { interval: true, animation: true, measurable: true /*TODO: IS_DEV?*/ }
+  );
 
-windowListen('from-panel', ({ tabId }) => {
-  console.log('currentTab', tabId);
-  if (!tabIds.includes(tabId)) {
-    tabIds.push(tabId);
+  function startObserve() {
+    stopObserve();
+    secondStopper.start();
+    tick.start();
   }
-});
 
-console.log('cs-main.ts');
+  function stopObserve() {
+    tick.stop();
+    secondStopper.stop();
+  }
+
+  windowListen(EVENT_SETUP, () => {});
+  windowListen(EVENT_OBSERVE_START, startObserve);
+  windowListen(EVENT_OBSERVE_STOP, stopObserve);
+
+  // console.debug('cs-main.ts');
+})();

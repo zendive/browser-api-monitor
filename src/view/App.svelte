@@ -1,40 +1,84 @@
 <script lang="ts">
-  import { runtimeListen, portPost } from '@/api/communication';
-  export let isDev: boolean;
+  import {
+    runtimeListen,
+    portPost,
+    EVENT_METRICS,
+    EVENT_SETUP,
+  } from '@/api/communication';
+  import Number from './components/Number.svelte';
+  import { IS_DEV } from '@/api/const';
+  import { setupTimekit } from '@/api/time';
 
+  const timekit = setupTimekit();
+  let fpsValue = 0;
+  const fps = new timekit.Fps((value) => (fpsValue = value)).start();
+  let tickTook = '';
   let videosCount = 0;
-  let timestamp = 0;
-  let csTabs: number[] = [];
-  let updates = 0;
+  let audiosCount = 0;
+  let timers: any[] = []; // TODO: fix `any`
+  let timersUsages: (number | boolean)[][] = [];
+  let dangerEval: any = {};
 
-  function onPostTabId() {
-    portPost('from-panel', { tabId: chrome.devtools.inspectedWindow.tabId });
-  }
+  $: timeoutUsagesStr = `[${timersUsages
+    .filter((v: (number | boolean)[]) => !v[0])
+    .map((v: any) => v[1])
+    .sort((a, b) => b - a) // descending
+    .join(', ')}]`;
+  $: intervalUsagesStr = `[${timersUsages
+    .filter((v: (number | boolean)[]) => v[0])
+    .map((v: (number | boolean)[]) => v[1])
+    .sort((a, b) => b - a) // descending
+    .join(', ')}]`;
 
-  runtimeListen('from-cs-main', (o) => {
+  portPost(EVENT_SETUP, {});
+  runtimeListen(EVENT_METRICS, (o) => {
     videosCount = o.videosCount;
-    timestamp = o.timestamp;
-    csTabs = o.tabIds;
-    updates++;
+    audiosCount = o.audiosCount;
+    timers = o.timers;
+    timersUsages = o.timersUsages;
+    dangerEval = o.dangerEval;
+    tickTook = o.tickTook;
+    fps.tick();
   });
-
-  console.log('App.svelte', chrome.devtools.inspectedWindow.tabId);
 </script>
 
 <main>
-  {#if isDev}<button on:click={() => location.reload()}>Reload</button>{/if}
-  <button on:click={onPostTabId}>post tab id</button>
+  {#if IS_DEV}<button on:click={() => location.reload()}>♻️</button>{/if}
 
-  <p>{updates}</p>
-  <p>videos: {videosCount}, timestamp: {timestamp}</p>
-  <p>csTabs: {csTabs.join(',')}</p>
+  <div><Number bind:value={fpsValue} />fps [{tickTook}]</div>
+
+  {#if videosCount}
+    <div>Videos: <Number bind:value={videosCount} /></div>
+  {/if}
+  {#if audiosCount}
+    <div>Audios: <Number bind:value={audiosCount} /></div>
+  {/if}
+
+  {#each timers as api}
+    <div>
+      {#if api.invocations}
+        <strong>{api.name}:</strong>
+        <Number bind:value={api.invocations} />
+        {#if api.name === 'setTimeout'}
+          {timeoutUsagesStr}
+        {/if}
+        {#if api.name === 'setInterval'}
+          {intervalUsagesStr}
+        {/if}
+      {/if}
+    </div>
+  {/each}
+
+  {#if dangerEval.invocations}
+    <div>
+      <strong>eval:</strong>
+      <Number bind:value={dangerEval.invocations} />
+    </div>
+  {/if}
 </main>
 
 <style>
   main {
-    text-align: center;
-    padding: 1em;
-    max-width: 240px;
-    margin: 0 auto;
+    padding: 1rem;
   }
 </style>

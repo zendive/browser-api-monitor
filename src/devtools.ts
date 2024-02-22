@@ -1,7 +1,9 @@
 import {
+  EVENT_CONTENT_SCRIPT_LOADED,
   EVENT_PANEL_HIDDEN,
   EVENT_PANEL_SHOWN,
   portPost,
+  runtimeListen,
   runtimePost,
 } from './api/communication';
 
@@ -23,3 +25,7 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
     }
   );
 }
+
+runtimeListen(EVENT_CONTENT_SCRIPT_LOADED, () => {
+  portPost(EVENT_PANEL_SHOWN);
+});
