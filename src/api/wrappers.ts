@@ -1,13 +1,19 @@
+export interface TTimersUsagesStack {
+  name: string;
+  link: string;
+}
 export type TTimersUsages = [
   isInterval: boolean,
   handler: number,
   delay: number,
-  stack: string
+  stack: TTimersUsagesStack[]
 ];
 export type TTimerApi = typeof apis;
 
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
 const STACK_CLEAN_PREFIX = /^Error: stub\W*/;
+const STACK_NAME_REPLACE_PATTERN = /^(.+)\(.*/;
+const STACK_LINK_REPLACE_PATTERN = /.*\((.*)\).*/;
 const apis = {
   timersUsages: [] as TTimersUsages[],
   timersUsagesAdd(
@@ -17,9 +23,15 @@ const apis = {
   ) {
     const e = new Error('stub');
     const stack = e.stack?.replace(STACK_CLEAN_PREFIX, '') || '';
-    // TODO: remove self-mentions from stack
-    // TODO: regroup to manageble format like [name,link]
-    this.timersUsages.push([isInterval, handler, delay || 0, stack]);
+    let arr = stack.split(/\Wat\W/);
+    arr.splice(0, 2);
+    const usagesStack = <TTimersUsagesStack[]>arr.map((v) => {
+      return {
+        name: v.replace(STACK_NAME_REPLACE_PATTERN, '$1').trim(),
+        link: v.replace(STACK_LINK_REPLACE_PATTERN, '$1').trim(),
+      };
+    });
+    this.timersUsages.push([isInterval, handler, delay || 0, usagesStack]);
   },
   timersUsagesRemove(handler?: number) {
     this.timersUsages = this.timersUsages.filter(

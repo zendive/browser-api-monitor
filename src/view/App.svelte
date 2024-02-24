@@ -72,13 +72,21 @@
           {#if api.name === 'setTimeout'}
             [<Number bind:value={m.timersUsages.timeouts.length} />]
             {#each m.timersUsages.timeouts as v}
-              <li>{v[0]}, {v[1]}</li>
+              <li>
+                {v[0]}, [{#each v[1] as stack, index}
+                  {#if index > 0}▪️{/if}<a href={stack.link}>{stack.name}</a
+                  >{/each}]
+              </li>
             {/each}
           {/if}
           {#if api.name === 'setInterval'}
             [<Number bind:value={m.timersUsages.intervals.length} />]
             {#each m.timersUsages.intervals as v}
-              <li>{v[0]}, {v[1]}</li>
+              <li>
+                {v[0]}, [{#each v[1] as stack, index}
+                  {#if index > 0}▪️{/if}<a href={stack.link}>{stack.name}</a
+                  >{/each}]
+              </li>
             {/each}
           {/if}
         {/if}

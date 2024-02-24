@@ -9,8 +9,9 @@ import {
 import { UI_UPDATE_FREQUENCY } from './api/const';
 import { Stopper, Timer } from './api/time';
 import { wrapApis } from './api/wrappers';
+import type { TTimersUsagesStack } from './api/wrappers';
 
-export type TMetricTimersUsages = [delay: number, stack: string];
+export type TMetricTimersUsages = [delay: number, stack: TTimersUsagesStack[]];
 export interface TMetrics {
   videosCount: number;
   audiosCount: number;
