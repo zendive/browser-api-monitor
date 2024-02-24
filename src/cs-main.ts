@@ -7,18 +7,14 @@ import {
   windowPost,
 } from './api/communication';
 import { UI_UPDATE_FREQUENCY } from './api/const';
-import { setupTimekit } from './api/time';
+import { Stopper, Timer } from './api/time';
 import { wrapApis } from './api/wrappers';
 
 (() => {
   const $ = wrapApis();
-  const timekit = setupTimekit(
-    $.apis.timers.setTimeout.native,
-    $.apis.timers.clearTimeout.native
-  );
-  const secondStopper = new timekit.Stopper();
+  const secondStopper = new Stopper();
   let tickStopperTime = '';
-  const tick = new timekit.Timer(
+  const tick = new Timer(
     () => {
       if (secondStopper.now() > 1e3) {
         secondStopper.start();
@@ -32,7 +28,16 @@ import { wrapApis } from './api/wrappers';
         videosCount: videosEl.length,
         audiosCount: audiosEl.length,
 
-        timersUsages: $.apis.timersUsages.map((v) => [v[0], v[2]]),
+        timersUsages: {
+          timeouts: $.apis.timersUsages
+            .filter((v) => !v[0])
+            .map((v) => [v[2], v[3]])
+            .sort((a, b) => b[0] - a[0]), // descending by delay
+          intervals: $.apis.timersUsages
+            .filter((v) => v[0])
+            .map((v) => [v[2], v[3]])
+            .sort((a, b) => b[0] - a[0]),
+        },
         timers: Object.keys($.apis.timers).map((key) => {
           const api = $.apis.timers[key as keyof typeof $.apis.timers];
           return {

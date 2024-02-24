@@ -1,21 +1,20 @@
 <script lang="ts">
-  export let value: number;
+  import { Timer } from '@/api/time';
 
+  export let value: number;
   let isAnimated = false;
   $: isEven = 0 === value % 2;
 
   function animateChange(node: HTMLElement, value: number) {
-    let timeout: number;
+    const timer = new Timer(() => (isAnimated = false), 100);
     return {
       update(value: number) {
         isAnimated = true;
-        timeout = setTimeout(() => {
-          isAnimated = false;
-        }, 100);
+        timer.start();
       },
 
       destroy() {
-        clearTimeout(timeout);
+        timer.stop();
       },
     };
   }

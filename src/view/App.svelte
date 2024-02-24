@@ -4,32 +4,28 @@
     portPost,
     EVENT_METRICS,
     EVENT_SETUP,
+    EVENT_PANEL_HIDDEN,
+    EVENT_PANEL_SHOWN,
+    EVENT_CONTENT_SCRIPT_LOADED,
   } from '@/api/communication';
-  import Number from './components/Number.svelte';
   import { IS_DEV } from '@/api/const';
-  import { setupTimekit } from '@/api/time';
+  import { Fps } from '@/api/time';
+  import Number from './components/Number.svelte';
 
-  const timekit = setupTimekit();
   let fpsValue = 0;
-  const fps = new timekit.Fps((value) => (fpsValue = value)).start();
+  const fps = new Fps((value) => (fpsValue = value)).start();
   let tickTook = '';
   let videosCount = 0;
   let audiosCount = 0;
   let timers: any[] = []; // TODO: fix `any`
-  let timersUsages: (number | boolean)[][] = [];
+  let timersUsages: { timeouts: []; intervals: [] };
   let dangerEval: any = {};
+  let paused = false;
 
-  $: timeoutUsagesStr = `[${timersUsages
-    .filter((v: (number | boolean)[]) => !v[0])
-    .map((v: any) => v[1])
-    .sort((a, b) => b - a) // descending
-    .join(', ')}]`;
-  $: intervalUsagesStr = `[${timersUsages
-    .filter((v: (number | boolean)[]) => v[0])
-    .map((v: (number | boolean)[]) => v[1])
-    .sort((a, b) => b - a) // descending
-    .join(', ')}]`;
-
+  runtimeListen(EVENT_CONTENT_SCRIPT_LOADED, () => {
+    paused = false;
+    portPost(EVENT_PANEL_SHOWN);
+  });
   portPost(EVENT_SETUP, {});
   runtimeListen(EVENT_METRICS, (o) => {
     videosCount = o.videosCount;
@@ -40,12 +36,34 @@
     tickTook = o.tickTook;
     fps.tick();
   });
+
+  function onTogglePause() {
+    paused = !paused;
+    if (paused) {
+      portPost(EVENT_PANEL_HIDDEN);
+    } else {
+      portPost(EVENT_PANEL_SHOWN);
+    }
+  }
 </script>
 
 <main>
-  {#if IS_DEV}<button on:click={() => location.reload()}>♻️</button>{/if}
+  <div>
+    {#if IS_DEV}<button on:click={() => location.reload()} title="Reload"
+        >♻️</button
+      >{/if}
+    <button on:click={onTogglePause} title="Toggle pause"
+      >{#if paused}🔴{:else}🟢{/if}</button
+    >
+    <span><Number bind:value={fpsValue} />fps [{tickTook}]</span>
+  </div>
 
-  <div><Number bind:value={fpsValue} />fps [{tickTook}]</div>
+  {#if dangerEval.invocations}
+    <div>
+      <strong>eval:</strong>
+      <Number bind:value={dangerEval.invocations} />
+    </div>
+  {/if}
 
   {#if videosCount}
     <div>Videos: <Number bind:value={videosCount} /></div>
@@ -60,21 +78,20 @@
         <strong>{api.name}:</strong>
         <Number bind:value={api.invocations} />
         {#if api.name === 'setTimeout'}
-          {timeoutUsagesStr}
+          [<Number bind:value={timersUsages.timeouts.length} />]
+          {#each timersUsages.timeouts as v}
+            <li>{v[0]}, {v[1]}</li>
+          {/each}
         {/if}
         {#if api.name === 'setInterval'}
-          {intervalUsagesStr}
+          [<Number bind:value={timersUsages.intervals.length} />]
+          {#each timersUsages.intervals as v}
+            <li>{v[0]}, {v[1]}</li>
+          {/each}
         {/if}
       {/if}
     </div>
   {/each}
-
-  {#if dangerEval.invocations}
-    <div>
-      <strong>eval:</strong>
-      <Number bind:value={dangerEval.invocations} />
-    </div>
-  {/if}
 </main>
 
 <style>

@@ -1,12 +1,15 @@
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
+const STACK_CLEAN_PREFIX = /^Error: stub\W*/;
 const apis = {
-  timersUsages: [] as Array<Array<number | boolean>>,
+  timersUsages: [] as Array<Array<any>>,
   timersUsagesAdd(
     isInterval: boolean,
     handler: number,
     delay: number | undefined
   ) {
-    this.timersUsages.push([isInterval, handler, delay || 0]);
+    const e = new Error('stub');
+    const stack = e.stack?.replace(STACK_CLEAN_PREFIX, '');
+    this.timersUsages.push([isInterval, handler, delay || 0, stack]);
   },
   timersUsagesRemove(handler?: number) {
     this.timersUsages = this.timersUsages.filter(
