@@ -10,6 +10,19 @@ import { UI_UPDATE_FREQUENCY } from './api/const';
 import { Stopper, Timer } from './api/time';
 import { wrapApis } from './api/wrappers';
 
+export type TMetricTimersUsages = [delay: number, stack: string];
+export interface TMetrics {
+  videosCount: number;
+  audiosCount: number;
+  timersUsages: {
+    timeouts: TMetricTimersUsages[];
+    intervals: TMetricTimersUsages[];
+  };
+  timers: { name: string; invocations: number }[];
+  dangerEval: { invocations: number };
+  tickTook: string;
+}
+
 (() => {
   const $ = wrapApis();
   const secondStopper = new Stopper();
@@ -24,7 +37,7 @@ import { wrapApis } from './api/wrappers';
       const videosEl = document.querySelectorAll('video');
       const audiosEl = document.querySelectorAll('audio');
 
-      windowPost(EVENT_METRICS, {
+      windowPost(EVENT_METRICS, <TMetrics>{
         videosCount: videosEl.length,
         audiosCount: audiosEl.length,
 
@@ -32,11 +45,13 @@ import { wrapApis } from './api/wrappers';
           timeouts: $.apis.timersUsages
             .filter((v) => !v[0])
             .map((v) => [v[2], v[3]])
-            .sort((a, b) => b[0] - a[0]), // descending by delay
+            // descending by delay
+            .sort((a: any, b: any) => b[0] - a[0]),
           intervals: $.apis.timersUsages
             .filter((v) => v[0])
             .map((v) => [v[2], v[3]])
-            .sort((a, b) => b[0] - a[0]),
+            // descending by delay
+            .sort((a: any, b: any) => b[0] - a[0]),
         },
         timers: Object.keys($.apis.timers).map((key) => {
           const api = $.apis.timers[key as keyof typeof $.apis.timers];
@@ -64,7 +79,9 @@ import { wrapApis } from './api/wrappers';
     secondStopper.stop();
   }
 
-  windowListen(EVENT_SETUP, () => {});
+  windowListen(EVENT_SETUP, () => {
+    // absorb setups oprtions?
+  });
   windowListen(EVENT_OBSERVE_START, startObserve);
   windowListen(EVENT_OBSERVE_STOP, stopObserve);
 

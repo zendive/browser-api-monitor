@@ -1,14 +1,24 @@
+export type TTimersUsages = [
+  isInterval: boolean,
+  handler: number,
+  delay: number,
+  stack: string
+];
+export type TTimerApi = typeof apis;
+
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
 const STACK_CLEAN_PREFIX = /^Error: stub\W*/;
 const apis = {
-  timersUsages: [] as Array<Array<any>>,
+  timersUsages: [] as TTimersUsages[],
   timersUsagesAdd(
     isInterval: boolean,
     handler: number,
     delay: number | undefined
   ) {
     const e = new Error('stub');
-    const stack = e.stack?.replace(STACK_CLEAN_PREFIX, '');
+    const stack = e.stack?.replace(STACK_CLEAN_PREFIX, '') || '';
+    // TODO: remove self-mentions from stack
+    // TODO: regroup to manageble format like [name,link]
     this.timersUsages.push([isInterval, handler, delay || 0, stack]);
   },
   timersUsagesRemove(handler?: number) {

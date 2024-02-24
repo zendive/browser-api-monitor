@@ -1,4 +1,4 @@
-export const APPLICATION_NAME = 'Api';
+export const APPLICATION_NAME = 'ApiMonitor';
 export const IS_DEV = __development__;
 export const ERROR_NO_CONNECTION =
   'Could not establish connection. Receiving end does not exist.';

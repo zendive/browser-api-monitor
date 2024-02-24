@@ -1,6 +1,7 @@
 # <img src="./public/img/icon.svg" width="26"/> Browser API Monitor
 
 Browser extension to monitor browser API calls
+
 🚧 work in progress 🚧
 
 ### Build requirements
