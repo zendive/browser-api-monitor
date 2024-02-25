@@ -1,14 +1,14 @@
 <script lang="ts">
   import { Timer } from '@/api/time';
 
-  export let value: number;
+  export let value: unknown;
   let isAnimated = false;
-  $: isEven = 0 === value % 2;
+  $: isEven = typeof value === 'number' ? 0 === value % 2 : false;
 
-  function animateChange(node: HTMLElement, value: number) {
+  function animateChange(node: HTMLElement, value: unknown) {
     const timer = new Timer(() => (isAnimated = false), 100);
     return {
-      update(value: number) {
+      update(value: unknown) {
         isAnimated = true;
         timer.start();
       },

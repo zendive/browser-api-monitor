@@ -10,7 +10,7 @@
     <table class="events">
       <caption class="group-caption">Events</caption>
       {#each Object.entries(metrics.events) as [label, value]}
-        <tr>
+        <tr class:isPassive={0 === value} class:isActive={0 !== value}>
           <td class="item-label">{label}</td>
           <td class="item-value"><Number bind:value /></td>
         </tr>
@@ -20,9 +20,15 @@
     <table class="props">
       <caption class="group-caption">Properties</caption>
       {#each Object.entries(metrics.props) as [label, value]}
-        <tr>
+        <tr class:isPassive={null === value} class:isActive={true === value}>
           <td class="item-label">{label}</td>
-          <td class="item-value">{value}</td>
+          <td class="item-value">
+            {#if ['networkState', 'readyState'].includes(label)}
+              <Number bind:value />
+            {:else}
+              {value}
+            {/if}
+          </td>
         </tr>
       {/each}
     </table>
@@ -41,6 +47,13 @@
     background-color: black;
     color: white;
     text-align: center;
+  }
+  .isPassive {
+    color: gray;
+    font-weight: normal;
+  }
+  .isActive {
+    font-weight: bold;
   }
   .item-label {
     text-align: right;
