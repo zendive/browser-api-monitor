@@ -1,5 +1,4 @@
-const setTimeout = window.setTimeout;
-const clearTimeout = window.clearTimeout;
+import { setTimeout, clearTimeout } from './const';
 
 /**
  * Measure time between calls

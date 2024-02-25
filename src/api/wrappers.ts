@@ -1,3 +1,10 @@
+import {
+  setTimeout,
+  clearTimeout,
+  setInterval,
+  clearInterval,
+} from '@/api/const';
+
 export interface TTimersUsagesStack {
   name: string;
   link: string;
@@ -40,19 +47,19 @@ const apis = {
   },
   timers: {
     setTimeout: {
-      native: window.setTimeout.bind(window),
+      native: setTimeout,
       invocations: 0,
     },
     clearTimeout: {
-      native: window.clearTimeout.bind(window),
+      native: clearTimeout,
       invocations: 0,
     },
     setInterval: {
-      native: window.setInterval.bind(window),
+      native: setInterval,
       invocations: 0,
     },
     clearInterval: {
-      native: window.clearInterval.bind(window),
+      native: clearInterval,
       invocations: 0,
     },
   },

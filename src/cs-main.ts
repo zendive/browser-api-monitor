@@ -8,12 +8,13 @@ import {
 } from './api/communication';
 import { UI_UPDATE_FREQUENCY } from './api/const';
 import { Stopper, Timer } from './api/time';
+import { listVideos, meetVideos, type TVideoMetrics } from './api/videoMonitor';
 import { wrapApis } from './api/wrappers';
 import type { TTimersUsagesStack } from './api/wrappers';
 
 export type TMetricTimersUsages = [delay: number, stack: TTimersUsagesStack[]];
 export interface TMetrics {
-  videosCount: number;
+  videos: TVideoMetrics[];
   audiosCount: number;
   timersUsages: {
     timeouts: TMetricTimersUsages[];
@@ -35,11 +36,11 @@ export interface TMetrics {
         tickStopperTime = tick.stopper?.toString() || '';
       }
 
-      const videosEl = document.querySelectorAll('video');
+      meetVideos(document.querySelectorAll('video'));
       const audiosEl = document.querySelectorAll('audio');
 
       windowPost(EVENT_METRICS, <TMetrics>{
-        videosCount: videosEl.length,
+        videos: listVideos(),
         audiosCount: audiosEl.length,
 
         timersUsages: {

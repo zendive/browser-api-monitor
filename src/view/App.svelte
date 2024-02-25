@@ -12,6 +12,7 @@
   import { Fps } from '@/api/time';
   import Number from './components/Number.svelte';
   import type { TMetrics } from '@/cs-main';
+  import VideoMetrics from './components/VideoMetrics.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -57,8 +58,11 @@
       </div>
     {/if}
 
-    {#if m.videosCount}
-      <div>Videos: <Number bind:value={m.videosCount} /></div>
+    {#if m.videos.length}
+      <div>Videos: <Number bind:value={m.videos.length} /></div>
+      {#each m.videos as videoMetrics}
+        <VideoMetrics bind:metrics={videoMetrics} />
+      {/each}
     {/if}
     {#if m.audiosCount}
       <div>Audios: <Number bind:value={m.audiosCount} /></div>
@@ -74,7 +78,7 @@
             {#each m.timersUsages.timeouts as v}
               <li>
                 {v[0]}, [{#each v[1] as stack, index}
-                  {#if index > 0}▪️{/if}<a href={stack.link}>{stack.name}</a
+                  {#if index > 0}|{/if}<a href={stack.link}>{stack.name}</a
                   >{/each}]
               </li>
             {/each}
@@ -84,7 +88,7 @@
             {#each m.timersUsages.intervals as v}
               <li>
                 {v[0]}, [{#each v[1] as stack, index}
-                  {#if index > 0}▪️{/if}<a href={stack.link}>{stack.name}</a
+                  {#if index > 0}|{/if}<a href={stack.link}>{stack.name}</a
                   >{/each}]
               </li>
             {/each}
