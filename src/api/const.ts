@@ -1,9 +1,9 @@
 export const APPLICATION_NAME = 'ApiMonitor';
 export const IS_DEV = __development__;
-export const ERROR_NO_CONNECTION =
-  'Could not establish connection. Receiving end does not exist.';
-export const ERROR_PORT_CLOSED =
-  'The message port closed before a response was received.';
+export const ERRORS_IGNORED = [
+  'Could not establish connection. Receiving end does not exist.',
+  'The message port closed before a response was received.',
+];
 export const UI_UPDATE_FREQUENCY = 16; // ms
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);

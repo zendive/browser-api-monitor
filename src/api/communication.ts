@@ -10,11 +10,7 @@
  *      panel: runtimeListen
  */
 
-import {
-  APPLICATION_NAME,
-  ERROR_NO_CONNECTION,
-  ERROR_PORT_CLOSED,
-} from './const';
+import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
 
 export function portPost(appEvent: string, payload?: any) {
   const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
@@ -105,15 +101,10 @@ function handleRuntimeMessageResponse(appEvent: string): void {
 
   if (
     error &&
-    error.message !== ERROR_NO_CONNECTION &&
-    error.message !== ERROR_PORT_CLOSED
+    typeof error.message === 'string' &&
+    !ERRORS_IGNORED.includes(error.message)
   ) {
     console.error(appEvent, error.message);
-  }
-
-  /*DBG*/
-  if (error) {
-    // console.error(appEvent, error.message);
   }
 }
 
