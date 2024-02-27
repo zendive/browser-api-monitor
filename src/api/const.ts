@@ -74,3 +74,10 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
   'poster',
 ];
+
+export const REGEX_STACKTRACE_CLEAN_PREFIX = /^Error: stub\W*/;
+export const REGEX_STACKTRACE_NAME = /^(.+)\(.*/;
+export const REGEX_STACKTRACE_LINK = /.*\((.*)\).*/;
+export const REGEX_STACKTRACE_CLEAN_URL = /(.*):\d+:\d+$/;
+export const REGEX_STACKTRACE_LINE_NUMBER = /.*:(\d+):\d+$/;
+export const REGEX_STACKTRACE_COLUMN_NUMBER = /.*:\d+:(\d+)$/;

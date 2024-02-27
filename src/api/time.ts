@@ -60,10 +60,10 @@ interface TimerOptions {
 export class Timer {
   #fn: Function;
   delay: number;
-  options: TimerOptions;
   #handler: number = 0;
   #pending: boolean = false;
-  stopper?: Stopper;
+  readonly options: TimerOptions;
+  readonly stopper?: Stopper;
 
   constructor(
     fn: Function,

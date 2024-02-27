@@ -6,7 +6,7 @@ import {
   windowListen,
   windowPost,
 } from './api/communication';
-import { UI_UPDATE_FREQUENCY } from './api/const';
+import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
 import { Stopper, Timer } from './api/time';
 import { listVideos, meetVideos, type TVideoMetrics } from './api/videoMonitor';
 import { wrapApis } from './api/wrappers';
@@ -87,5 +87,5 @@ export interface TMetrics {
   windowListen(EVENT_OBSERVE_START, startObserve);
   windowListen(EVENT_OBSERVE_STOP, stopObserve);
 
-  // console.debug('cs-main.ts');
+  IS_DEV && console.debug('cs-main.ts');
 })();

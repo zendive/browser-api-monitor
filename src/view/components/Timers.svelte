@@ -2,6 +2,8 @@
   import type { TMetrics } from '@/cs-main';
   import Number from './Number.svelte';
 
+  import StackTraceLink from './StackTraceLink.svelte';
+
   export let timers: TMetrics['timers'];
   export let timersUsages: TMetrics['timersUsages'];
 </script>
@@ -16,7 +18,10 @@
         {#each timersUsages.timeouts as v}
           <li>
             {v[0]}, [{#each v[1] as stack, index}
-              {#if index > 0}|{/if}<a href={stack.link}>{stack.name}</a>{/each}]
+              {#if index > 0}|{/if}<StackTraceLink
+                bind:href={stack.link}
+                bind:name={stack.name}
+              />{/each}]
           </li>
         {/each}
       {/if}
@@ -25,7 +30,10 @@
         {#each timersUsages.intervals as v}
           <li>
             {v[0]}, [{#each v[1] as stack, index}
-              {#if index > 0}|{/if}<a href={stack.link}>{stack.name}</a>{/each}]
+              {#if index > 0}|{/if}<StackTraceLink
+                bind:href={stack.link}
+                bind:name={stack.name}
+              />{/each}]
           </li>
         {/each}
       {/if}

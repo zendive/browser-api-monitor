@@ -3,6 +3,9 @@ import {
   clearTimeout,
   setInterval,
   clearInterval,
+  REGEX_STACKTRACE_CLEAN_PREFIX,
+  REGEX_STACKTRACE_NAME,
+  REGEX_STACKTRACE_LINK,
 } from '@/api/const';
 
 export interface TTimersUsagesStack {
@@ -18,9 +21,6 @@ export type TTimersUsages = [
 export type TTimerApi = typeof apis;
 
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
-const STACK_CLEAN_PREFIX = /^Error: stub\W*/;
-const STACK_NAME_REPLACE_PATTERN = /^(.+)\(.*/;
-const STACK_LINK_REPLACE_PATTERN = /.*\((.*)\).*/;
 const apis = {
   timersUsages: [] as TTimersUsages[],
   timersUsagesAdd(
@@ -29,13 +29,13 @@ const apis = {
     delay: number | undefined
   ) {
     const e = new Error('stub');
-    const stack = e.stack?.replace(STACK_CLEAN_PREFIX, '') || '';
+    const stack = e.stack?.replace(REGEX_STACKTRACE_CLEAN_PREFIX, '') || '';
     let arr = stack.split(/\Wat\W/);
     arr.splice(0, 2);
     const usagesStack = <TTimersUsagesStack[]>arr.map((v) => {
       return {
-        name: v.replace(STACK_NAME_REPLACE_PATTERN, '$1').trim(),
-        link: v.replace(STACK_LINK_REPLACE_PATTERN, '$1').trim(),
+        name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
+        link: v.replace(REGEX_STACKTRACE_LINK, '$1').trim(),
       };
     });
     this.timersUsages.push([isInterval, handler, delay || 0, usagesStack]);
