@@ -1,41 +1,38 @@
 <script lang="ts">
   import type { TMetrics } from '@/cs-main';
   import Variable from './Variable.svelte';
-  import StackTraceLink from './StackTraceLink.svelte';
+  import TimersMetrics from './TimersMetrics.svelte';
 
-  export let timers: TMetrics['timers'];
-  export let timersUsages: TMetrics['timersUsages'];
+  export let invocations: TMetrics['timersInvocations'];
+  export let usages: TMetrics['timersUsages'];
 </script>
 
-{#each timers as api}
+<section>
   <div>
-    {#if api.invocations}
-      <strong>{api.name}:</strong>
-      <Variable bind:value={api.invocations} />
-      {#if api.name === 'setTimeout'}
-        [<Variable bind:value={timersUsages.timeouts.length} />]
-        {#each timersUsages.timeouts as v}
-          <li>
-            {v[0]}, [{#each v[1] as stack, index}
-              {#if index > 0}|{/if}<StackTraceLink
-                bind:href={stack.link}
-                bind:name={stack.name}
-              />{/each}]
-          </li>
-        {/each}
-      {/if}
-      {#if api.name === 'setInterval'}
-        [<Variable bind:value={timersUsages.intervals.length} />]
-        {#each timersUsages.intervals as v}
-          <li>
-            {v[0]}, [{#each v[1] as stack, index}
-              {#if index > 0}|{/if}<StackTraceLink
-                bind:href={stack.link}
-                bind:name={stack.name}
-              />{/each}]
-          </li>
-        {/each}
-      {/if}
-    {/if}
+    <span
+      ><strong>setTimeout</strong>: <Variable
+        bind:value={invocations.setTimeout}
+      /></span
+    >
+    <span
+      ><strong>clearTimeout</strong>: <Variable
+        bind:value={invocations.clearTimeout}
+      /></span
+    >
+    <TimersMetrics bind:metrics={usages.timeouts} />
   </div>
-{/each}
+
+  <div>
+    <span
+      ><strong>setInterval</strong>: <Variable
+        bind:value={invocations.setInterval}
+      /></span
+    >
+    <span
+      ><strong>clearInterval</strong>: <Variable
+        bind:value={invocations.clearInterval}
+      /></span
+    >
+    <TimersMetrics bind:metrics={usages.intervals} />
+  </div>
+</section>

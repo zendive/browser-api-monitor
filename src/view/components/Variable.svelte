@@ -27,18 +27,18 @@
   use:animateChange={value}>{value}</span
 >
 
-<style>
+<style lang="scss">
   .number {
-    font-size: 1rem;
+    // font-size: 1rem;
     font-weight: bold;
 
     &.even {
       text-decoration: underline;
     }
-  }
-  .animated {
-    -webkit-text-stroke: 1px #00000070;
-    animation: effect 100ms ease-in-out;
+    &.animated {
+      -webkit-text-stroke: 1px #00000070;
+      animation: effect 100ms ease-in-out;
+    }
   }
 
   @keyframes effect {

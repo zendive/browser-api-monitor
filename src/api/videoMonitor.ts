@@ -40,7 +40,7 @@ export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
   }
 }
 
-export function listVideos(): TVideoMetrics[] {
+export function collectVideosUsages(): TVideoMetrics[] {
   return videos.map((v) => {
     // refresh props metrics
     for (const prop of MEDIA_ELEMENT_PROPS) {

@@ -8,19 +8,27 @@ import {
 } from './api/communication';
 import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
 import { Stopper, Timer } from './api/time';
-import { listVideos, meetVideos, type TVideoMetrics } from './api/videoMonitor';
+import {
+  collectVideosUsages,
+  meetVideos,
+  type TVideoMetrics,
+} from './api/videoMonitor';
 import { wrapApis } from './api/wrappers';
-import type { TTimersUsagesStack } from './api/wrappers';
+import type { TTimerMetrics } from './api/wrappers';
 
-export type TMetricTimersUsages = [delay: number, stack: TTimersUsagesStack[]];
 export interface TMetrics {
   videos: TVideoMetrics[];
   audiosCount: number;
   timersUsages: {
-    timeouts: TMetricTimersUsages[];
-    intervals: TMetricTimersUsages[];
+    timeouts: TTimerMetrics[];
+    intervals: TTimerMetrics[];
   };
-  timers: { name: string; invocations: number }[];
+  timersInvocations: {
+    setTimeout: number;
+    clearTimeout: number;
+    setInterval: number;
+    clearInterval: number;
+  };
   dangerEval: { invocations: number };
   tickTook: string;
 }
@@ -40,28 +48,15 @@ export interface TMetrics {
       const audiosEl = document.querySelectorAll('audio');
 
       windowPost(EVENT_METRICS, <TMetrics>{
-        videos: listVideos(),
+        videos: collectVideosUsages(),
         audiosCount: audiosEl.length,
-
-        timersUsages: {
-          timeouts: $.apis.timersUsages
-            .filter((v) => !v[0])
-            .map((v) => [v[2], v[3]])
-            // descending by delay
-            .sort((a: any, b: any) => b[0] - a[0]),
-          intervals: $.apis.timersUsages
-            .filter((v) => v[0])
-            .map((v) => [v[2], v[3]])
-            // descending by delay
-            .sort((a: any, b: any) => b[0] - a[0]),
+        timersUsages: $.apis.collectTimersUsages(),
+        timersInvocations: {
+          setTimeout: $.apis.timers.setTimeout.invocations,
+          clearTimeout: $.apis.timers.clearTimeout.invocations,
+          setInterval: $.apis.timers.setInterval.invocations,
+          clearInterval: $.apis.timers.clearInterval.invocations,
         },
-        timers: Object.keys($.apis.timers).map((key) => {
-          const api = $.apis.timers[key as keyof typeof $.apis.timers];
-          return {
-            name: key,
-            invocations: api.invocations,
-          };
-        }),
         dangerEval: { invocations: $.apis.danger.eval.invocations },
         tickTook: tickStopperTime,
       });

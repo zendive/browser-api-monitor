@@ -69,7 +69,10 @@
       <div>Audios: <Variable bind:value={m.audiosCount} /></div>
     {/if}
 
-    <Timers bind:timers={m.timers} bind:timersUsages={m.timersUsages} />
+    <Timers
+      bind:invocations={m.timersInvocations}
+      bind:usages={m.timersUsages}
+    />
   </main>
 {/if}
 

@@ -3,47 +3,80 @@ import {
   clearTimeout,
   setInterval,
   clearInterval,
-  REGEX_STACKTRACE_CLEAN_PREFIX,
   REGEX_STACKTRACE_NAME,
   REGEX_STACKTRACE_LINK,
+  TRACE_ERROR_MESSAGE,
+  REGEX_STACKTRACE_PREFIX,
 } from '@/api/const';
 
-export interface TTimersUsagesStack {
+export type TCallstack = {
   name: string;
   link: string;
-}
-export type TTimersUsages = [
-  isInterval: boolean,
-  handler: number,
-  delay: number,
-  stack: TTimersUsagesStack[]
-];
+};
+export type TTimerMetrics = {
+  delay: number;
+  handler: number;
+  trace: TCallstack[];
+  rawTrace?: string; // for debugging
+};
+export type TTimersUsages = [isInterval: boolean, descriptor: TTimerMetrics];
 export type TTimerApi = typeof apis;
 
+function createCallstack(e: Error): TCallstack[] {
+  const arr = e.stack?.split('\n') || [];
+  if (arr.length) {
+    arr.splice(0, 2); // remove first internal calls
+  }
+  const trace = <TCallstack[]>arr.map((v) => {
+    v = v.replace(REGEX_STACKTRACE_PREFIX, '');
+    return {
+      name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
+      link: v.replace(REGEX_STACKTRACE_LINK, '$1').trim(),
+    };
+  });
+
+  return trace;
+}
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
 const apis = {
   timersUsages: [] as TTimersUsages[],
   timersUsagesAdd(
     isInterval: boolean,
     handler: number,
-    delay: number | undefined
+    delay: number | undefined = 0,
+    stubError: Error
   ) {
-    const e = new Error('stub');
-    const stack = e.stack?.replace(REGEX_STACKTRACE_CLEAN_PREFIX, '') || '';
-    let arr = stack.split(/\Wat\W/);
-    arr.splice(0, 2);
-    const usagesStack = <TTimersUsagesStack[]>arr.map((v) => {
-      return {
-        name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
-        link: v.replace(REGEX_STACKTRACE_LINK, '$1').trim(),
-      };
-    });
-    this.timersUsages.push([isInterval, handler, delay || 0, usagesStack]);
+    this.timersUsages.push([
+      isInterval,
+      {
+        handler,
+        delay,
+        trace: createCallstack(stubError),
+        // rawTrace: stubError.stack,
+      },
+    ]);
   },
   timersUsagesRemove(handler?: number) {
     this.timersUsages = this.timersUsages.filter(
-      (handlerDelayPair) => handlerDelayPair[1] !== handler
+      ([, timerMetric]) => timerMetric.handler !== handler
     );
+  },
+  collectTimersUsages() {
+    const timeouts: TTimerMetrics[] = [];
+    const intervals: TTimerMetrics[] = [];
+
+    for (const usage of this.timersUsages) {
+      if (usage[0]) {
+        intervals.push(usage[1]);
+      } else {
+        timeouts.push(usage[1]);
+      }
+    }
+
+    return {
+      timeouts: timeouts.sort((a, b) => b.delay - a.delay), // sort by delay descending
+      intervals: intervals.sort((a, b) => b.delay - a.delay),
+    };
   },
   timers: {
     setTimeout: {
@@ -109,7 +142,7 @@ function wrapTimers(
       delay,
       ...args
     );
-    add(false, handler, delay);
+    add(false, handler, delay, new Error(TRACE_ERROR_MESSAGE));
     return handler;
   };
 
@@ -125,7 +158,8 @@ function wrapTimers(
       (...params: any[]) => {
         remove(handler);
         if (typeof code === 'string') {
-          lessEval(code); // see https://developer.mozilla.org/docs/Web/API/setInterval
+          // see https://developer.mozilla.org/docs/Web/API/setInterval
+          lessEval(code);
         } else {
           code(...params);
         }
@@ -133,7 +167,7 @@ function wrapTimers(
       delay,
       ...args
     );
-    add(true, handler, delay);
+    add(true, handler, delay, new Error(TRACE_ERROR_MESSAGE));
     return handler;
   };
 

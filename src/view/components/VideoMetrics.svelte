@@ -57,12 +57,10 @@
   }
   .item-label {
     text-align: right;
-    word-wrap: break-word;
   }
   .item-value {
     text-align: left;
     margin-left: 1rem;
-    word-wrap: break-word;
-    text-wrap: wrap;
+    word-break: break-all;
   }
 </style>
