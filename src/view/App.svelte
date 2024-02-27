@@ -11,7 +11,7 @@
   import { IS_DEV } from '@/api/const';
   import { Fps } from '@/api/time';
   import type { TMetrics } from '@/cs-main';
-  import Number from './components/Number.svelte';
+  import Variable from './components/Variable.svelte';
   import VideoMetrics from './components/VideoMetrics.svelte';
   import Timers from './components/Timers.svelte';
 
@@ -49,24 +49,24 @@
       <button on:click={onTogglePause} title="Toggle pause"
         >{#if paused}🔴{:else}🟢{/if}</button
       >
-      <span><Number bind:value={fpsValue} />fps [{m.tickTook}]</span>
+      <span><Variable bind:value={fpsValue} />fps [{m.tickTook}]</span>
     </div>
 
     {#if m.dangerEval.invocations}
       <div>
         <strong>eval:</strong>
-        <Number bind:value={m.dangerEval.invocations} />
+        <Variable bind:value={m.dangerEval.invocations} />
       </div>
     {/if}
 
     {#if m.videos.length}
-      <div>Videos: <Number bind:value={m.videos.length} /></div>
+      <div>Videos: <Variable bind:value={m.videos.length} /></div>
       {#each m.videos as videoMetrics}
         <VideoMetrics bind:metrics={videoMetrics} />
       {/each}
     {/if}
     {#if m.audiosCount}
-      <div>Audios: <Number bind:value={m.audiosCount} /></div>
+      <div>Audios: <Variable bind:value={m.audiosCount} /></div>
     {/if}
 
     <Timers bind:timers={m.timers} bind:timersUsages={m.timersUsages} />

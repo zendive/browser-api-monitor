@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Number from './Number.svelte';
+  import Variable from './Variable.svelte';
   import type { TVideoMetrics } from '@/api/videoMonitor';
 
   export let metrics: TVideoMetrics | null = null;
@@ -12,7 +12,7 @@
       {#each Object.entries(metrics.events) as [label, value]}
         <tr class:isPassive={0 === value} class:isActive={0 !== value}>
           <td class="item-label">{label}</td>
-          <td class="item-value"><Number bind:value /></td>
+          <td class="item-value"><Variable bind:value /></td>
         </tr>
       {/each}
     </table>
@@ -24,7 +24,7 @@
           <td class="item-label">{label}</td>
           <td class="item-value">
             {#if ['networkState', 'readyState'].includes(label)}
-              <Number bind:value />
+              <Variable bind:value />
             {:else}
               {value}
             {/if}
