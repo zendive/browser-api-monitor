@@ -124,6 +124,8 @@ export class Wrapper {
     const timerUsage = this.timersUsages.find((v) => v[1].handler === handler);
     if (timerUsage) {
       handlerDelay = timerUsage[1].delay;
+    } else if (existing) {
+      handlerDelay = existing.handlerDelay;
     }
 
     if (existing) {
