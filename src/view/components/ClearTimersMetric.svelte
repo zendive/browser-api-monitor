@@ -1,33 +1,34 @@
 <script lang="ts">
-  import type { TTimerMetrics } from '@/api/wrappers';
+  import type { TClearTimerMetrics } from '@/api/wrappers';
   import Variable from './Variable.svelte';
   import CallstackLink from './CallstackLink.svelte';
-  import { IS_DEV } from '@/api/const';
 
   export let caption: string = '';
-  export let metrics: TTimerMetrics[] = [];
+  export let metrics: TClearTimerMetrics[] = [];
 </script>
 
 <table>
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
-  <tr><th>Delay</th><th>Handler</th><th>Callstack</th></tr>
+  <tr><th>Callstack</th><th>Calls</th><th>Handler</th><th>Delay</th></tr>
   {#each metrics as metric}
-    <tr>
-      <td class="ta-r">{metric.delay}</td>
-      <td class="ta-c"><Variable bind:value={metric.handler} /></td>
+    <tr
+      class:bc-error={typeof metric.recentHandler !== 'number' ||
+        metric.recentHandler < 1}
+    >
       <td>
         {#each metric.trace as stack, index}
           {#if index > 0}
             &nbsp;|
           {/if}<CallstackLink bind:href={stack.link} bind:name={stack.name} />
         {/each}
-
-        {#if IS_DEV && metric.rawTrace}
-          <pre>{metric.rawTrace}</pre>
-        {/if}
       </td>
+      <td class="ta-c"
+        ><Variable bind:value={metric.individualInvocations} /></td
+      >
+      <td class="ta-c"><Variable bind:value={metric.recentHandler} /></td>
+      <td class="ta-r">{metric.handlerDelay}</td>
     </tr>
   {/each}
 </table>

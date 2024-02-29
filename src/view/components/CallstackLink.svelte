@@ -17,7 +17,7 @@
     href.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
     10
   );
-  $: hasError = !isFinite(lineNumber);
+  $: hasError = !isFinite(lineNumber) || href.startsWith('<anonymous>');
 
   function showStackTraceResource(e: MouseEvent) {
     e.preventDefault();
@@ -38,7 +38,7 @@
 </script>
 
 {#if hasError}
-  <span>{name} {href}</span>
+  <span>{name} {href === name ? '' : href}</span>
 {:else}
   <a
     {href}
@@ -51,9 +51,10 @@
 <style lang="scss">
   a {
     word-break: break-all;
+    color: var(--link);
 
     &.beenClicked {
-      background-color: rgb(247 184 0 / 50%);
+      background-color: var(--link-bg-visited);
     }
   }
 </style>

@@ -2,6 +2,7 @@
   import type { TMetrics } from '@/cs-main';
   import Variable from './Variable.svelte';
   import TimersMetrics from './TimersMetrics.svelte';
+  import ClearTimersMetric from './ClearTimersMetric.svelte';
 
   export let invocations: TMetrics['timersInvocations'];
   export let usages: TMetrics['timersUsages'];
@@ -19,7 +20,11 @@
         bind:value={invocations.clearTimeout}
       /></span
     >
-    <TimersMetrics bind:metrics={usages.timeouts} />
+    <TimersMetrics caption="Active Timeouts" bind:metrics={usages.timeouts} />
+    <ClearTimersMetric
+      caption="Cleared Timeouts"
+      bind:metrics={usages.clearTimeouts}
+    />
   </div>
 
   <div>
@@ -33,6 +38,10 @@
         bind:value={invocations.clearInterval}
       /></span
     >
-    <TimersMetrics bind:metrics={usages.intervals} />
+    <TimersMetrics caption="Active Intervals" bind:metrics={usages.intervals} />
+    <ClearTimersMetric
+      caption="Cleared Intervals"
+      bind:metrics={usages.clearIntervals}
+    />
   </div>
 </section>

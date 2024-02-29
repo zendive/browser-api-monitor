@@ -6,9 +6,9 @@
 </script>
 
 {#if metrics}
-  <div class="group">
+  <section class="group">
     <table class="events">
-      <caption class="group-caption">Events</caption>
+      <caption class="bc-invert ta-l">Events</caption>
       {#each Object.entries(metrics.events) as [label, value]}
         <tr class:isPassive={0 === value} class:isActive={0 !== value}>
           <td class="item-label">{label}</td>
@@ -18,7 +18,7 @@
     </table>
 
     <table class="props">
-      <caption class="group-caption">Properties</caption>
+      <caption class="bc-invert ta-l">Properties</caption>
       {#each Object.entries(metrics.props) as [label, value]}
         <tr class:isPassive={null === value} class:isActive={true === value}>
           <td class="item-label">{label}</td>
@@ -32,21 +32,20 @@
         </tr>
       {/each}
     </table>
-  </div>
+  </section>
 {/if}
 
 <style>
   .group {
     display: flex;
+
+    &:not(:first-child) {
+      border-left: 1px solid silver;
+    }
   }
   .events,
   .props {
     border: none;
-  }
-  .group-caption {
-    background-color: black;
-    color: white;
-    text-align: center;
   }
   .isPassive {
     color: gray;

@@ -12,8 +12,8 @@
   import { Fps } from '@/api/time';
   import type { TMetrics } from '@/cs-main';
   import Variable from './components/Variable.svelte';
-  import VideoMetrics from './components/VideoMetrics.svelte';
   import Timers from './components/Timers.svelte';
+  import Videos from './components/Videos.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -61,9 +61,7 @@
 
     {#if m.videos.length}
       <div>Videos: <Variable bind:value={m.videos.length} /></div>
-      {#each m.videos as videoMetrics}
-        <VideoMetrics bind:metrics={videoMetrics} />
-      {/each}
+      <Videos bind:metrics={m.videos} />
     {/if}
     {#if m.audiosCount}
       <div>Audios: <Variable bind:value={m.audiosCount} /></div>

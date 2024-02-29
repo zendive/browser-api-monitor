@@ -5,10 +5,12 @@ export const ERRORS_IGNORED = [
   'The message port closed before a response was received.',
 ];
 export const UI_UPDATE_FREQUENCY = 16; // ms
+// store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);
 export const setInterval = window.setInterval.bind(window);
 export const clearInterval = window.clearInterval.bind(window);
+
 export const MEDIA_ELEMENT_EVENTS = [
   'loadstart',
   'progress',

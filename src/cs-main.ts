@@ -13,8 +13,8 @@ import {
   meetVideos,
   type TVideoMetrics,
 } from './api/videoMonitor';
-import { wrapApis } from './api/wrappers';
-import type { TTimerMetrics } from './api/wrappers';
+import { Wrapper } from './api/wrappers';
+import type { TTimerMetrics, TClearTimerMetrics } from './api/wrappers';
 
 export interface TMetrics {
   videos: TVideoMetrics[];
@@ -22,7 +22,10 @@ export interface TMetrics {
   timersUsages: {
     timeouts: TTimerMetrics[];
     intervals: TTimerMetrics[];
+    clearTimeouts: TClearTimerMetrics[];
+    clearIntervals: TClearTimerMetrics[];
   };
+
   timersInvocations: {
     setTimeout: number;
     clearTimeout: number;
@@ -34,7 +37,9 @@ export interface TMetrics {
 }
 
 (() => {
-  const $ = wrapApis();
+  const wrapper = new Wrapper();
+  wrapper.wrapApis();
+
   const secondStopper = new Stopper();
   let tickStopperTime = '';
   const tick = new Timer(
@@ -50,14 +55,14 @@ export interface TMetrics {
       windowPost(EVENT_METRICS, <TMetrics>{
         videos: collectVideosUsages(),
         audiosCount: audiosEl.length,
-        timersUsages: $.apis.collectTimersUsages(),
+        timersUsages: wrapper.collectTimersUsages(),
         timersInvocations: {
-          setTimeout: $.apis.timers.setTimeout.invocations,
-          clearTimeout: $.apis.timers.clearTimeout.invocations,
-          setInterval: $.apis.timers.setInterval.invocations,
-          clearInterval: $.apis.timers.clearInterval.invocations,
+          setTimeout: wrapper.timers.setTimeout.invocations,
+          clearTimeout: wrapper.timers.clearTimeout.invocations,
+          setInterval: wrapper.timers.setInterval.invocations,
+          clearInterval: wrapper.timers.clearInterval.invocations,
         },
-        dangerEval: { invocations: $.apis.danger.eval.invocations },
+        dangerEval: { invocations: wrapper.danger.eval.invocations },
         tickTook: tickStopperTime,
       });
     },
