@@ -1,3 +1,22 @@
+:root{
+	--bg: rgb(255 255 255);
+	--bg-invert: rgb(10% 10% 10% / 70%);
+	--bg-table-even: rgb(30% 30% 30% / 10%);
+	--text: rgb(26 26 26);
+	--text-invert: rgb(100% 100% 100% / 70%);
+	--link: rgb(0 140 255);
+	--link-bg-visited: rgb(79 189 36 / 0.24);
+}
+.dark {
+	--bg: rgb(10% 10% 10%);
+	--bg-invert: rgb(255 255 255 / 70%);
+	--bg-table-even: rgb(70% 70% 70% / 10%);
+	--text: rgb(100% 100% 100%);
+	--text-invert: rgb(26 26 26 / 70%);
+	--link: rgb(11% 74% 100%);
+	--link-bg-visited: rgb(55 0 255 / 49%);
+}
+
 html, body {
 	position: relative;
 	width: 100%;
@@ -5,7 +24,8 @@ html, body {
 }
 
 body {
-	color: #333;
+	background: var(--bg);
+	color: var(--text);
 	margin: 0;
 	padding: 8px;
 	box-sizing: border-box;
@@ -60,4 +80,12 @@ button:not(:disabled):active {
 
 button:focus {
 	border-color: #666;
+}
+
+
+.ta-r {
+	text-align: right;
+}
+.ta-c {
+	text-align: center;
 }
