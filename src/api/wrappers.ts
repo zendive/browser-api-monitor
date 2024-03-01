@@ -34,7 +34,7 @@ export type TEvalMetrics = {
   trace: TCallstack[];
   individualInvocations: number;
   returnedValue: any;
-  code: string;
+  code: any;
 };
 
 function createCallstack(e: Error): TCallstack[] {
@@ -163,17 +163,15 @@ export class Wrapper {
       (v) => v.traceId === traceId
     );
 
-    // TODO: solve "TrustedScript object could not be cloned."
-
     if (existing) {
-      // existing.code = code;
-      // existing.returnedValue = returnedValue;
+      existing.code = cloneObjectSafely(code);
+      existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.individualInvocations++;
     } else {
       this.danger.evalMetrics.usages.push({
         individualInvocations: 1,
-        code: '', // code
-        returnedValue: '', //cloneObjectSafely(returnedValue),
+        code: cloneObjectSafely(code),
+        returnedValue: cloneObjectSafely(returnedValue),
         trace,
         traceId,
       });
