@@ -1,49 +1,51 @@
 import { setTimeout, clearTimeout } from './const';
 
 /**
- * Measure time between calls
+ * Measure time between start/stop calls
  * programmatic alternative to console.time/console.endTime
  */
 export class Stopper {
   #start: number;
-  finish: number;
+  #finish: number;
 
   constructor() {
     this.#start = 0;
-    this.finish = 0;
+    this.#finish = 0;
   }
 
   start() {
-    this.#start = performance.now();
+    this.#finish = this.#start = performance.now();
     return this;
   }
 
   stop() {
-    this.finish = this.now();
+    this.#finish = performance.now();
     return this;
   }
 
-  now() {
+  elapsed() {
     return performance.now() - this.#start;
   }
 
-  toString() {
-    const elapsed = this.now();
+  value() {
+    return this.#finish - this.#start;
+  }
 
-    if (elapsed < 1) {
-      return `${~~(elapsed * 1e3)}μs`;
-    } else if (elapsed < 1e3) {
-      return `${~~elapsed}ms`;
-    } else if (elapsed < 60e3) {
-      const s = ~~(elapsed / 1e3) % 60;
-      const ms = elapsed % 1e3;
+  static toString(msTime: number) {
+    if (msTime < 1) {
+      return `${~~(msTime * 1e3)}μs`;
+    } else if (msTime < 1e3) {
+      return `${~~msTime}ms`;
+    } else if (msTime < 60e3) {
+      const s = ~~(msTime / 1e3) % 60;
+      const ms = msTime % 1e3;
 
       return `${s}.${ms.toString().padStart(3, '0')}s`;
     }
 
-    const h = ~~(elapsed / 1e3 / 60 / 60);
-    const m = ~~(elapsed / 1e3 / 60) % 60;
-    const s = ~~(elapsed / 1e3) % 60;
+    const h = ~~(msTime / 1e3 / 60 / 60);
+    const m = ~~(msTime / 1e3 / 60) % 60;
+    const s = ~~(msTime / 1e3) % 60;
 
     return `${h.toString().padStart(2, '0')}:${m
       .toString()
@@ -57,13 +59,19 @@ interface TimerOptions {
   measurable?: boolean;
 }
 
+/**
+ * Universal abstraction of setTimeout/setInterval/requestAnimationFrame
+ * with an optional measurement of the callback's execution time
+ */
 export class Timer {
-  #fn: Function;
   delay: number;
+  readonly options: TimerOptions;
+  executionTime: number = -1;
+
+  #fn: Function;
   #handler: number = 0;
   #pending: boolean = false;
-  readonly options: TimerOptions;
-  readonly stopper?: Stopper;
+  readonly #stopper?: Stopper;
 
   constructor(
     fn: Function,
@@ -75,7 +83,7 @@ export class Timer {
     this.options = o;
 
     if (this.options.measurable) {
-      this.stopper = new Stopper();
+      this.#stopper = new Stopper();
     }
   }
 
@@ -110,9 +118,11 @@ export class Timer {
   }
 
   trigger(...args: any[]) {
-    this.stopper?.start();
+    this.#stopper?.start();
     this.#fn(...args);
-    this.stopper?.stop();
+    if (this.#stopper) {
+      this.executionTime = this.#stopper.stop().value();
+    }
 
     return this;
   }
@@ -140,6 +150,7 @@ export class Timer {
  * for use in hot code paths
  */
 export class Fps {
+  /** registered number of calls */
   value = 0;
   #ticks = 0;
   #interval: Timer;
@@ -170,6 +181,49 @@ export class Fps {
 
   stop() {
     this.#interval.stop();
+    return this;
+  }
+}
+
+export class MeanAggregator {
+  numberOfSamples = 0;
+  mean = 0;
+  variance = 0;
+  standardDeviation = 0;
+  minimum = 0;
+  maximum = 0;
+
+  #M2 = 0;
+
+  reset() {
+    this.numberOfSamples = 0;
+    this.mean = 0;
+    this.variance = 0;
+    this.standardDeviation = 0;
+    this.minimum = 0;
+    this.maximum = 0;
+    this.#M2 = 0;
+
+    return this;
+  }
+
+  add(value: number) {
+    ++this.numberOfSamples;
+
+    if (1 === this.numberOfSamples) {
+      this.minimum = value;
+      this.maximum = value;
+    } else {
+      this.minimum = Math.min(this.minimum, value);
+      this.maximum = Math.max(this.maximum, value);
+    }
+
+    const delta = value - this.mean;
+    this.mean += delta / this.numberOfSamples;
+    this.#M2 += delta * (value - this.mean);
+    this.variance = this.#M2 / this.numberOfSamples;
+    this.standardDeviation = Math.sqrt(this.variance);
+
     return this;
   }
 }

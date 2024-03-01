@@ -5,8 +5,8 @@
     REGEX_STACKTRACE_LINE_NUMBER,
   } from '@/api/const';
 
-  export let href = '';
-  export let name = '';
+  export let href: string = '';
+  export let name: string = '';
   let beenClicked = false;
 
   $: lineNumber = parseInt(
@@ -17,13 +17,10 @@
     href.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
     10
   );
-  $: hasError = !isFinite(lineNumber) || href.startsWith('<anonymous>');
+  $: isSourceLess = !isFinite(lineNumber) || href.startsWith('<anonymous>');
 
   function showStackTraceResource(e: MouseEvent) {
     e.preventDefault();
-    if (hasError) {
-      return;
-    }
 
     const cleanUrl = href.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
 
@@ -37,7 +34,7 @@
   }
 </script>
 
-{#if hasError}
+{#if isSourceLess}
   <span>{name} {href === name ? '' : href}</span>
 {:else}
   <a

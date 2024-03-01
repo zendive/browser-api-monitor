@@ -9,6 +9,7 @@ import {
   REGEX_STACKTRACE_PREFIX,
   REGEX_STACKTRACE_CLEAN_URL,
 } from '@/api/const';
+import { cloneObjectSafely } from './clone';
 
 export type TCallstack = {
   name: string;
@@ -21,13 +22,20 @@ export type TTimerMetrics = {
   rawTrace?: string; // for debugging
 };
 export type TClearTimerMetrics = {
+  traceId: string;
   individualInvocations: number;
   recentHandler: number;
   handlerDelay: number | undefined;
   trace: TCallstack[];
-  traceId: string;
 };
 export type TTimersUsages = [isInterval: boolean, descriptor: TTimerMetrics];
+export type TEvalMetrics = {
+  traceId: string;
+  trace: TCallstack[];
+  individualInvocations: number;
+  returnedValue: any;
+  code: string;
+};
 
 function createCallstack(e: Error): TCallstack[] {
   const arr = e.stack?.split('\n') || [];
@@ -45,6 +53,7 @@ function createCallstack(e: Error): TCallstack[] {
     v = v.replace(REGEX_STACKTRACE_PREFIX, '');
     const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
+    // skip self references, that some times happen
     if (link.indexOf(selfCallLink) < 0) {
       trace.push({
         name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
@@ -83,7 +92,10 @@ export class Wrapper {
   danger = {
     eval: {
       navite: lessEval,
-      invocations: 0,
+    },
+    evalMetrics: {
+      totalInvocations: 0,
+      usages: [] as TEvalMetrics[],
     },
   };
 
@@ -144,6 +156,30 @@ export class Wrapper {
     }
   }
 
+  updateEvalMetrics(code: string, returnedValue: any, error: Error) {
+    const trace = createCallstack(error);
+    const traceId = trace.map((v) => `${v.name}${v.link}`).join('');
+    const existing = this.danger.evalMetrics.usages.find(
+      (v) => v.traceId === traceId
+    );
+
+    // TODO: solve "TrustedScript object could not be cloned."
+
+    if (existing) {
+      // existing.code = code;
+      // existing.returnedValue = returnedValue;
+      existing.individualInvocations++;
+    } else {
+      this.danger.evalMetrics.usages.push({
+        individualInvocations: 1,
+        code: '', // code
+        returnedValue: '', //cloneObjectSafely(returnedValue),
+        trace,
+        traceId,
+      });
+    }
+  }
+
   collectTimersUsages() {
     const timeouts: TTimerMetrics[] = [];
     const intervals: TTimerMetrics[] = [];
@@ -172,8 +208,10 @@ export class Wrapper {
   wrapEval() {
     const self = this;
     window.eval = function WrappedLessEval(code: string) {
-      self.danger.eval.invocations++;
-      self.danger.eval.navite(code);
+      self.danger.evalMetrics.totalInvocations++;
+      const rv = self.danger.eval.navite(code);
+      void self.updateEvalMetrics(code, rv, new Error(TRACE_ERROR_MESSAGE));
+      return rv;
     };
   }
 

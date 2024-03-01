@@ -17,8 +17,8 @@ export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
   for (const entry of videos) {
     let found = false;
 
-    for (const el of els) {
-      if (entry.el === el) {
+    for (let i = 0, I = els.length; i < I; i++) {
+      if (entry.el === els[i]) {
         found = true;
         break;
       }
@@ -31,11 +31,11 @@ export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
   }
 
   // meet new
-  for (const el of els) {
-    if (!el.dataset?.apiMon) {
+  for (let i = 0, I = els.length; i < I; i++) {
+    if (!els[i].dataset?.apiMon) {
       const id = crypto.randomUUID();
-      el.dataset.apiMon = id;
-      videos.push(startMonitorVideo(el));
+      els[i].dataset.apiMon = id;
+      videos.push(startMonitorVideo(els[i]));
     }
   }
 }

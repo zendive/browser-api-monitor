@@ -14,6 +14,7 @@
   import Variable from './components/Variable.svelte';
   import Timers from './components/Timers.svelte';
   import Videos from './components/Videos.svelte';
+  import EvalMetrics from './components/EvalMetrics.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -52,12 +53,8 @@
       <span><Variable bind:value={fpsValue} />fps [{m.tickTook}]</span>
     </div>
 
-    {#if m.dangerEval.invocations}
-      <div>
-        <strong>eval:</strong>
-        <Variable bind:value={m.dangerEval.invocations} />
-      </div>
-    {/if}
+    <!-- {#if m.evalMetrics.totalInvocations}{/if} -->
+    <EvalMetrics bind:metrics={m.evalMetrics} />
 
     {#if m.videos.length}
       <div>Videos: <Variable bind:value={m.videos.length} /></div>

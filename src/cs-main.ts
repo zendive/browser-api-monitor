@@ -7,14 +7,18 @@ import {
   windowPost,
 } from './api/communication';
 import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
-import { Stopper, Timer } from './api/time';
+import { MeanAggregator, Stopper, Timer } from './api/time';
 import {
   collectVideosUsages,
   meetVideos,
   type TVideoMetrics,
 } from './api/videoMonitor';
-import { Wrapper } from './api/wrappers';
-import type { TTimerMetrics, TClearTimerMetrics } from './api/wrappers';
+import {
+  Wrapper,
+  type TTimerMetrics,
+  type TClearTimerMetrics,
+  type TEvalMetrics,
+} from './api/wrappers';
 
 export interface TMetrics {
   videos: TVideoMetrics[];
@@ -32,60 +36,69 @@ export interface TMetrics {
     setInterval: number;
     clearInterval: number;
   };
-  dangerEval: { invocations: number };
+  evalMetrics: {
+    totalInvocations: number;
+    usages: TEvalMetrics[];
+  };
   tickTook: string;
 }
 
-(() => {
-  const wrapper = new Wrapper();
-  wrapper.wrapApis();
+const wrapper = new Wrapper();
+wrapper.wrapApis();
 
-  const secondStopper = new Stopper();
-  let tickStopperTime = '';
-  const tick = new Timer(
-    () => {
-      if (secondStopper.now() > 1e3) {
-        secondStopper.start();
-        tickStopperTime = tick.stopper?.toString() || '';
-      }
+let reportedTickExecutionTime = '';
+const meanExecutionTime = new MeanAggregator();
+const secondInterval = new Timer(
+  () => {
+    reportedTickExecutionTime = Stopper.toString(meanExecutionTime.mean);
+    meanExecutionTime.reset();
+  },
+  1e3,
+  { interval: true }
+);
+const tick = new Timer(
+  () => {
+    meanExecutionTime.add(tick.executionTime);
 
-      meetVideos(document.querySelectorAll('video'));
-      const audiosEl = document.querySelectorAll('audio');
+    meetVideos(document.querySelectorAll('video'));
+    // TODO: ...
+    const audiosEl = document.querySelectorAll('audio');
 
-      windowPost(EVENT_METRICS, <TMetrics>{
-        videos: collectVideosUsages(),
-        audiosCount: audiosEl.length,
-        timersUsages: wrapper.collectTimersUsages(),
-        timersInvocations: {
-          setTimeout: wrapper.timers.setTimeout.invocations,
-          clearTimeout: wrapper.timers.clearTimeout.invocations,
-          setInterval: wrapper.timers.setInterval.invocations,
-          clearInterval: wrapper.timers.clearInterval.invocations,
-        },
-        dangerEval: { invocations: wrapper.danger.eval.invocations },
-        tickTook: tickStopperTime,
-      });
-    },
-    UI_UPDATE_FREQUENCY,
-    { interval: true, animation: true, measurable: true /*TODO: IS_DEV?*/ }
-  );
+    const metrics: TMetrics = {
+      videos: collectVideosUsages(),
+      audiosCount: audiosEl.length,
+      timersUsages: wrapper.collectTimersUsages(),
+      timersInvocations: {
+        setTimeout: wrapper.timers.setTimeout.invocations,
+        clearTimeout: wrapper.timers.clearTimeout.invocations,
+        setInterval: wrapper.timers.setInterval.invocations,
+        clearInterval: wrapper.timers.clearInterval.invocations,
+      },
+      evalMetrics: wrapper.danger.evalMetrics,
+      tickTook: reportedTickExecutionTime,
+    };
 
-  function startObserve() {
-    stopObserve();
-    secondStopper.start();
-    tick.start();
-  }
+    windowPost(EVENT_METRICS, metrics);
+  },
+  UI_UPDATE_FREQUENCY,
+  { interval: true, animation: true, measurable: true /*TODO: IS_DEV?*/ }
+);
 
-  function stopObserve() {
-    tick.stop();
-    secondStopper.stop();
-  }
+function startObserve() {
+  stopObserve();
+  tick.start();
+  secondInterval.start();
+}
 
-  windowListen(EVENT_SETUP, () => {
-    // absorb setups oprtions?
-  });
-  windowListen(EVENT_OBSERVE_START, startObserve);
-  windowListen(EVENT_OBSERVE_STOP, stopObserve);
+function stopObserve() {
+  tick.stop();
+  secondInterval.stop();
+}
 
-  IS_DEV && console.debug('cs-main.ts');
-})();
+windowListen(EVENT_SETUP, () => {
+  // absorb setups oprtions?
+});
+windowListen(EVENT_OBSERVE_START, startObserve);
+windowListen(EVENT_OBSERVE_STOP, stopObserve);
+
+IS_DEV && console.debug('cs-main.ts');

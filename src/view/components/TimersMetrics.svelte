@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TTimerMetrics } from '@/api/wrappers';
   import Variable from './Variable.svelte';
-  import CallstackLink from './CallstackLink.svelte';
+  import Callstack from './Callstack.svelte';
   import { IS_DEV } from '@/api/const';
 
   export let caption: string = '';
@@ -18,11 +18,7 @@
       <td class="ta-r">{metric.delay}</td>
       <td class="ta-c"><Variable bind:value={metric.handler} /></td>
       <td>
-        {#each metric.trace as stack, index}
-          {#if index > 0}
-            &nbsp;|
-          {/if}<CallstackLink bind:href={stack.link} bind:name={stack.name} />
-        {/each}
+        <Callstack bind:trace={metric.trace} />
 
         {#if IS_DEV && metric.rawTrace}
           <pre>{metric.rawTrace}</pre>

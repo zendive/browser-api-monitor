@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TClearTimerMetrics } from '@/api/wrappers';
   import Variable from './Variable.svelte';
-  import CallstackLink from './CallstackLink.svelte';
+  import Callstack from './Callstack.svelte';
 
   export let caption: string = '';
   export let metrics: TClearTimerMetrics[] = [];
@@ -17,13 +17,7 @@
       class:bc-error={typeof metric.recentHandler !== 'number' ||
         metric.recentHandler < 1}
     >
-      <td>
-        {#each metric.trace as stack, index}
-          {#if index > 0}
-            &nbsp;|
-          {/if}<CallstackLink bind:href={stack.link} bind:name={stack.name} />
-        {/each}
-      </td>
+      <td><Callstack bind:trace={metric.trace} /></td>
       <td class="ta-c"
         ><Variable bind:value={metric.individualInvocations} /></td
       >
