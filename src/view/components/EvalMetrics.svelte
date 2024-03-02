@@ -7,13 +7,28 @@
     totalInvocations: 0,
     usages: [],
   };
+
+  function dynamicValue(value: unknown): string {
+    if (value === '⟪undefined⟫') {
+      return '';
+    } else if (typeof value === 'string') {
+      return value;
+    } else if (value && typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+
+    return String(value);
+  }
 </script>
 
 <table>
   <caption class="bc-invert ta-l"
     >Eval Usages <Variable bind:value={metrics.totalInvocations} /></caption
   >
-  <tr><th>Callstack</th><th>Calls</th><th>Code</th><th>Returned Value</th></tr>
+  <tr
+    ><th>Callstack</th><th>Calls</th><th>Recent Code</th><th>Recent Return</th
+    ></tr
+  >
   {#each metrics.usages as metric}
     <tr>
       <td><Callstack bind:trace={metric.trace} /></td>
@@ -21,10 +36,10 @@
         <Variable bind:value={metric.individualInvocations} />
       </td>
       <td class="limit-width">
-        <div class="code">{metric.code}</div>
+        <div class="code">{dynamicValue(metric.code)}</div>
       </td>
       <td class="limit-width">
-        <div class="code">{JSON.stringify(metric.returnedValue)}</div>
+        <div class="code">{dynamicValue(metric.returnedValue)}</div>
       </td>
     </tr>
   {/each}
@@ -40,10 +55,11 @@
   }
 
   .code {
-    max-height: 12rem;
     max-width: 12rem;
+    display: -webkit-box;
+    max-width: 200px;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 </style>

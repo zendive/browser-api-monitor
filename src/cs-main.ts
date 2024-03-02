@@ -9,10 +9,10 @@ import {
 import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
 import { MeanAggregator, Stopper, Timer } from './api/time';
 import {
-  collectVideosUsages,
-  meetVideos,
-  type TVideoMetrics,
-} from './api/videoMonitor';
+  collectMediaUsages as collectMediaMetrics,
+  meetMedia,
+  type TMediaMetrics,
+} from './api/mediaMonitor';
 import {
   Wrapper,
   type TTimerMetrics,
@@ -21,9 +21,8 @@ import {
 } from './api/wrappers';
 
 export interface TMetrics {
-  videos: TVideoMetrics[];
-  audiosCount: number;
-  timersUsages: {
+  mediaMetrics: TMediaMetrics[];
+  timeMetrics: {
     timeouts: TTimerMetrics[];
     intervals: TTimerMetrics[];
     clearTimeouts: TClearTimerMetrics[];
@@ -48,7 +47,7 @@ wrapper.wrapApis();
 
 let reportedTickExecutionTime = '';
 const meanExecutionTime = new MeanAggregator();
-const secondInterval = new Timer(
+const eachSecond = new Timer(
   () => {
     reportedTickExecutionTime = Stopper.toString(meanExecutionTime.mean);
     meanExecutionTime.reset();
@@ -60,14 +59,11 @@ const tick = new Timer(
   () => {
     meanExecutionTime.add(tick.executionTime);
 
-    meetVideos(document.querySelectorAll('video'));
-    // TODO: ...
-    const audiosEl = document.querySelectorAll('audio');
+    meetMedia(document.querySelectorAll('video,audio'));
 
     const metrics: TMetrics = {
-      videos: collectVideosUsages(),
-      audiosCount: audiosEl.length,
-      timersUsages: wrapper.collectTimersUsages(),
+      mediaMetrics: collectMediaMetrics(),
+      timeMetrics: wrapper.collectTimersMetrics(),
       timersInvocations: {
         setTimeout: wrapper.timers.setTimeout.invocations,
         clearTimeout: wrapper.timers.clearTimeout.invocations,
@@ -87,12 +83,12 @@ const tick = new Timer(
 function startObserve() {
   stopObserve();
   tick.start();
-  secondInterval.start();
+  eachSecond.start();
 }
 
 function stopObserve() {
   tick.stop();
-  secondInterval.stop();
+  eachSecond.stop();
 }
 
 windowListen(EVENT_SETUP, () => {

@@ -178,7 +178,7 @@ export class Wrapper {
     }
   }
 
-  collectTimersUsages() {
+  collectTimersMetrics() {
     const timeouts: TTimerMetrics[] = [];
     const intervals: TTimerMetrics[] = [];
 

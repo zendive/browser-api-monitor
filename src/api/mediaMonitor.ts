@@ -1,20 +1,25 @@
 import { MEDIA_ELEMENT_EVENTS, MEDIA_ELEMENT_PROPS } from './const';
 
-type TVideoEntry = {
-  el: HTMLVideoElement;
-  metrics: TVideoMetrics;
+type TMediaModel = {
+  el: HTMLMediaElement;
+  metrics: TMediaMetrics;
   eventListener: (e: Event) => void;
 };
-export type TVideoMetrics = {
+export enum TMediaType {
+  VIDEO = 0,
+  AUDIO = 1,
+}
+export type TMediaMetrics = {
+  type: TMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
 };
 
-let videos: TVideoEntry[] = [];
+let mediaCollection: TMediaModel[] = [];
 
-export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
+export function meetMedia(els: NodeListOf<HTMLMediaElement>) {
   // farewell old
-  for (const entry of videos) {
+  for (const entry of mediaCollection) {
     let found = false;
 
     for (let i = 0, I = els.length; i < I; i++) {
@@ -25,8 +30,8 @@ export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
     }
 
     if (!found) {
-      stopMonitorVideo(entry);
-      videos = videos.filter((v) => v.el !== entry.el);
+      stopMonitorMedia(entry);
+      mediaCollection = mediaCollection.filter((v) => v.el !== entry.el);
     }
   }
 
@@ -35,17 +40,17 @@ export function meetVideos(els: NodeListOf<HTMLVideoElement>) {
     if (!els[i].dataset?.apiMon) {
       const id = crypto.randomUUID();
       els[i].dataset.apiMon = id;
-      videos.push(startMonitorVideo(els[i]));
+      mediaCollection.push(startMonitorMedia(els[i]));
     }
   }
 }
 
-export function collectVideosUsages(): TVideoMetrics[] {
-  return videos.map((v) => {
+export function collectMediaUsages(): TMediaMetrics[] {
+  return mediaCollection.map((v) => {
     // refresh props metrics
     for (const prop of MEDIA_ELEMENT_PROPS) {
       v.metrics.props[prop] = formatPropValue(
-        v.el[prop as keyof HTMLVideoElement]
+        v.el[prop as keyof HTMLMediaElement]
       );
     }
     return v.metrics;
@@ -72,18 +77,23 @@ function formatPropValue(value: unknown): any {
   return rv;
 }
 
-function stopMonitorVideo(entry: TVideoEntry) {
+function stopMonitorMedia(entry: TMediaModel) {
   for (const eventType of MEDIA_ELEMENT_EVENTS) {
     entry.el.removeEventListener(eventType, entry.eventListener);
   }
 }
 
-function startMonitorVideo(el: HTMLVideoElement): TVideoEntry {
-  const events: TVideoMetrics['events'] = {};
-  const props: TVideoMetrics['props'] = {};
+function startMonitorMedia(el: HTMLMediaElement): TMediaModel {
+  const events: TMediaMetrics['events'] = {};
+  const props: TMediaMetrics['props'] = {};
   const rv = {
     el,
-    metrics: { events, props },
+    metrics: {
+      type:
+        el instanceof HTMLVideoElement ? TMediaType.VIDEO : TMediaType.AUDIO,
+      events,
+      props,
+    },
     eventListener: function (this: typeof events, e: Event) {
       this[e.type]++;
     }.bind(events),

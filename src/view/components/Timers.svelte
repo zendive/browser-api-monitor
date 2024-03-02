@@ -5,7 +5,7 @@
   import ClearTimersMetric from './ClearTimersMetric.svelte';
 
   export let invocations: TMetrics['timersInvocations'];
-  export let usages: TMetrics['timersUsages'];
+  export let usages: TMetrics['timeMetrics'];
 </script>
 
 <section>

@@ -13,7 +13,7 @@
   import type { TMetrics } from '@/cs-main';
   import Variable from './components/Variable.svelte';
   import Timers from './components/Timers.svelte';
-  import Videos from './components/Videos.svelte';
+  import Media from './components/Media.svelte';
   import EvalMetrics from './components/EvalMetrics.svelte';
 
   let fpsValue = 0;
@@ -53,20 +53,13 @@
       <span><Variable bind:value={fpsValue} />fps [{m.tickTook}]</span>
     </div>
 
-    <!-- {#if m.evalMetrics.totalInvocations}{/if} -->
     <EvalMetrics bind:metrics={m.evalMetrics} />
 
-    {#if m.videos.length}
-      <div>Videos: <Variable bind:value={m.videos.length} /></div>
-      <Videos bind:metrics={m.videos} />
-    {/if}
-    {#if m.audiosCount}
-      <div>Audios: <Variable bind:value={m.audiosCount} /></div>
-    {/if}
+    <Media bind:metrics={m.mediaMetrics} />
 
     <Timers
       bind:invocations={m.timersInvocations}
-      bind:usages={m.timersUsages}
+      bind:usages={m.timeMetrics}
     />
   </main>
 {/if}
