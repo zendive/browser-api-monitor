@@ -23,3 +23,4 @@ all:
 	make zip_chrome
 
 .PHONY: clean install dev prod zip_chrome all
+.DEFAULT_GOAL := dev
