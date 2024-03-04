@@ -281,7 +281,6 @@ export class Wrapper {
 
       const handler = self.native.setInterval(
         (...params: any[]) => {
-          self.timerOffline(handler);
           if (typeof code === 'string') {
             // see https://developer.mozilla.org/docs/Web/API/setInterval
             lessEval(code);
