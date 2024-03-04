@@ -35,7 +35,7 @@
 </script>
 
 {#if isSourceLess}
-  <span>{name} {href === name ? '' : href}</span>
+  <span>{`${name} ${href === name ? '' : href}`}</span>
 {:else}
   <a
     {href}

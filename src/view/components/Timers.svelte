@@ -1,47 +1,60 @@
 <script lang="ts">
   import type { TMetrics } from '@/cs-main';
   import Variable from './Variable.svelte';
-  import TimersMetrics from './TimersMetrics.svelte';
-  import ClearTimersMetric from './ClearTimersMetric.svelte';
+  import ActiveTimers from './ActiveTimers.svelte';
+  import TimersHistory from './TimersHistory.svelte';
 
-  export let invocations: TMetrics['timersInvocations'];
-  export let usages: TMetrics['timeMetrics'];
+  export let callCounter: TMetrics['callCounter'];
+  export let metrics: TMetrics['timeMetrics'];
 </script>
 
 <section>
   <div>
     <span
       ><strong>setTimeout</strong>: <Variable
-        bind:value={invocations.setTimeout}
+        bind:value={callCounter.setTimeout}
       /></span
     >
     <span
       ><strong>clearTimeout</strong>: <Variable
-        bind:value={invocations.clearTimeout}
+        bind:value={callCounter.clearTimeout}
       /></span
     >
-    <TimersMetrics caption="Active Timeouts" bind:metrics={usages.timeouts} />
-    <ClearTimersMetric
-      caption="Cleared Timeouts"
-      bind:metrics={usages.clearTimeouts}
-    />
-  </div>
-
-  <div>
     <span
       ><strong>setInterval</strong>: <Variable
-        bind:value={invocations.setInterval}
+        bind:value={callCounter.setInterval}
       /></span
     >
     <span
       ><strong>clearInterval</strong>: <Variable
-        bind:value={invocations.clearInterval}
+        bind:value={callCounter.clearInterval}
       /></span
     >
-    <TimersMetrics caption="Active Intervals" bind:metrics={usages.intervals} />
-    <ClearTimersMetric
-      caption="Cleared Intervals"
-      bind:metrics={usages.clearIntervals}
-    />
   </div>
+
+  <ActiveTimers
+    caption="Active Intervals"
+    bind:metrics={metrics.onlineIntervals}
+  />
+  <ActiveTimers
+    caption="Active Timeouts"
+    bind:metrics={metrics.onlineTimeouts}
+  />
+
+  <TimersHistory
+    caption="setTimeout History"
+    bind:metrics={metrics.setTimeoutHistory}
+  />
+  <TimersHistory
+    caption="clearTimeout History"
+    bind:metrics={metrics.clearTimeoutHistory}
+  />
+  <TimersHistory
+    caption="setInterval History"
+    bind:metrics={metrics.setIntervalHistory}
+  />
+  <TimersHistory
+    caption="clearInterval History"
+    bind:metrics={metrics.clearIntervalHistory}
+  />
 </section>

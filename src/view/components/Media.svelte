@@ -22,7 +22,7 @@
 
 <section>
   <div class="label bc-invert">
-    Audio: <Variable bind:value={audios.length} />
+    Audios: <Variable bind:value={audios.length} />
   </div>
   <div class="list">
     {#each audios as audioMetrics}

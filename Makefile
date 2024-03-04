@@ -12,7 +12,7 @@ dev:
 
 prod:
 	npx svelte-check
-	npx rollup -c
+	time npx rollup -c
 
 zip_chrome:
 	rm -rf $(ZIP_CHROME_FILE)

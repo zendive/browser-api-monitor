@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { TTimerMetrics } from '@/api/wrappers';
+  import type { TActiveTimerMetrics } from '@/api/wrappers';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
   import { IS_DEV } from '@/api/const';
 
   export let caption: string = '';
-  export let metrics: TTimerMetrics[] = [];
+  export let metrics: TActiveTimerMetrics[] = [];
 </script>
 
 <table>

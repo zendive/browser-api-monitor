@@ -15,20 +15,19 @@ export type TCallstack = {
   name: string;
   link: string;
 };
-export type TTimerMetrics = {
+export type TActiveTimerMetrics = {
   delay: number;
   handler: number;
   trace: TCallstack[];
   rawTrace?: string; // for debugging
 };
-export type TClearTimerMetrics = {
+export type TTimerHistory = {
   traceId: string;
   individualInvocations: number;
   recentHandler: number;
   handlerDelay: number | undefined;
   trace: TCallstack[];
 };
-export type TTimersUsages = [isInterval: boolean, descriptor: TTimerMetrics];
 export type TEvalMetrics = {
   traceId: string;
   trace: TCallstack[];
@@ -37,16 +36,19 @@ export type TEvalMetrics = {
   code: any;
 };
 
+type TOnlineTimer = [isInterval: boolean, metrics: TActiveTimerMetrics];
+
+let selfCallLink = '';
 function createCallstack(e: Error): TCallstack[] {
   const arr = e.stack?.split('\n') || [];
-  const selfCall = arr[1];
-  const selfCallLink = selfCall
-    .replace(REGEX_STACKTRACE_LINK, '$1')
-    .trim()
-    .replace(REGEX_STACKTRACE_CLEAN_URL, '$1')
-    .trim();
 
-  arr.splice(0, 2); // remove first self call
+  if (!selfCallLink) {
+    selfCallLink = arr[1]
+      .replace(REGEX_STACKTRACE_LINK, '$1')
+      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+  }
+
+  arr.splice(0, 2); // remove error message and first self call
 
   const trace: TCallstack[] = [];
   for (let v of arr) {
@@ -54,12 +56,14 @@ function createCallstack(e: Error): TCallstack[] {
     const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
     // skip self references, that some times happen
-    if (link.indexOf(selfCallLink) < 0) {
-      trace.push({
-        name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
-        link,
-      });
+    if (link.indexOf(selfCallLink) >= 0) {
+      continue;
     }
+
+    trace.push({
+      name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
+      link,
+    });
   }
 
   return trace;
@@ -68,46 +72,36 @@ function createCallstack(e: Error): TCallstack[] {
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
 
 export class Wrapper {
-  timersUsages: TTimersUsages[] = [];
-  clearTimeoutsUsages: TClearTimerMetrics[] = [];
-  clearIntervalUsages: TClearTimerMetrics[] = [];
-  timers = {
-    setTimeout: {
-      native: setTimeout,
-      invocations: 0,
-    },
-    clearTimeout: {
-      native: clearTimeout,
-      invocations: 0,
-    },
-    setInterval: {
-      native: setInterval,
-      invocations: 0,
-    },
-    clearInterval: {
-      native: clearInterval,
-      invocations: 0,
-    },
+  onlineTimers: TOnlineTimer[] = [];
+  setTimeoutHistory: TTimerHistory[] = [];
+  clearTimeoutHistory: TTimerHistory[] = [];
+  setIntervalHistory: TTimerHistory[] = [];
+  clearIntervalHistory: TTimerHistory[] = [];
+  evalHistory: TEvalMetrics[] = [];
+  callCounter = {
+    setTimeout: 0,
+    clearTimeout: 0,
+    setInterval: 0,
+    clearInterval: 0,
+    eval: 0,
   };
-  danger = {
-    eval: {
-      navite: lessEval,
-    },
-    evalMetrics: {
-      totalInvocations: 0,
-      usages: [] as TEvalMetrics[],
-    },
+  native = {
+    setTimeout: setTimeout,
+    clearTimeout: clearTimeout,
+    setInterval: setInterval,
+    clearInterval: clearInterval,
+    eval: lessEval,
   };
 
   constructor() {}
 
-  timersUsagesAdd(
+  timerOnline(
     isInterval: boolean,
     handler: number,
     delay: number | undefined = 0,
     stubError: Error
   ) {
-    this.timersUsages.push([
+    this.onlineTimers.push([
       isInterval,
       {
         handler,
@@ -118,24 +112,23 @@ export class Wrapper {
     ]);
   }
 
-  timersUsagesRemove(handler?: number) {
-    this.timersUsages = this.timersUsages.filter(
+  timerOffline(handler?: number) {
+    this.onlineTimers = this.onlineTimers.filter(
       ([, timerMetric]) => timerMetric.handler !== handler
     );
   }
 
-  clearTimerUsagesSet(isInterval: boolean, handler: number, stubError: Error) {
+  updateHistory(history: TTimerHistory[], handler: number, stubError: Error) {
     const trace = createCallstack(stubError);
     const traceId = trace.map((v) => `${v.name}${v.link}`).join('');
     let handlerDelay;
-    const collection = isInterval
-      ? this.clearIntervalUsages
-      : this.clearTimeoutsUsages;
-    const existing = collection.find((v) => v.traceId === traceId);
+    const existing = history.find((v) => v.traceId === traceId);
+    const onlineTimer = this.onlineTimers.find(
+      ([, t]) => t.handler === handler
+    );
 
-    const timerUsage = this.timersUsages.find((v) => v[1].handler === handler);
-    if (timerUsage) {
-      handlerDelay = timerUsage[1].delay;
+    if (onlineTimer) {
+      handlerDelay = onlineTimer[1].delay;
     } else if (existing) {
       handlerDelay = existing.handlerDelay;
     }
@@ -145,30 +138,28 @@ export class Wrapper {
       existing.handlerDelay = handlerDelay;
       existing.individualInvocations++;
     } else {
-      collection.push({
+      history.push({
         traceId,
         recentHandler: handler,
         individualInvocations: 1,
         handlerDelay,
         trace,
       });
-      collection.sort((a, b) => (b.handlerDelay || 0) - (a.handlerDelay || 0));
+      history.sort((a, b) => (b.handlerDelay || 0) - (a.handlerDelay || 0));
     }
   }
 
-  updateEvalMetrics(code: string, returnedValue: any, error: Error) {
+  updateEvalHistory(code: string, returnedValue: any, error: Error) {
     const trace = createCallstack(error);
     const traceId = trace.map((v) => `${v.name}${v.link}`).join('');
-    const existing = this.danger.evalMetrics.usages.find(
-      (v) => v.traceId === traceId
-    );
+    const existing = this.evalHistory.find((v) => v.traceId === traceId);
 
     if (existing) {
       existing.code = cloneObjectSafely(code);
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.individualInvocations++;
     } else {
-      this.danger.evalMetrics.usages.push({
+      this.evalHistory.push({
         individualInvocations: 1,
         code: cloneObjectSafely(code),
         returnedValue: cloneObjectSafely(returnedValue),
@@ -179,10 +170,10 @@ export class Wrapper {
   }
 
   collectTimersMetrics() {
-    const timeouts: TTimerMetrics[] = [];
-    const intervals: TTimerMetrics[] = [];
+    const timeouts: TActiveTimerMetrics[] = [];
+    const intervals: TActiveTimerMetrics[] = [];
 
-    for (const usage of this.timersUsages) {
+    for (const usage of this.onlineTimers) {
       if (usage[0]) {
         intervals.push(usage[1]);
       } else {
@@ -191,11 +182,21 @@ export class Wrapper {
     }
 
     return {
-      timeouts: timeouts.sort((a, b) => b.delay - a.delay), // sort by delay descending
-      intervals: intervals.sort((a, b) => b.delay - a.delay),
-      clearTimeouts: this.clearTimeoutsUsages,
-      clearIntervals: this.clearIntervalUsages,
+      onlineTimeouts: timeouts.sort((a, b) => b.delay - a.delay), // sort by delay descending
+      onlineIntervals: intervals.sort((a, b) => b.delay - a.delay),
+      setTimeoutHistory: this.setTimeoutHistory,
+      clearTimeoutHistory: this.clearTimeoutHistory,
+      setIntervalHistory: this.setIntervalHistory,
+      clearIntervalHistory: this.clearIntervalHistory,
     };
+  }
+
+  unwrapApis() {
+    window.setTimeout = this.native.setTimeout;
+    window.clearTimeout = this.native.clearTimeout;
+    window.setInterval = this.native.setInterval;
+    window.clearInterval = this.native.clearInterval;
+    window.eval = this.native.eval;
   }
 
   wrapApis() {
@@ -206,9 +207,9 @@ export class Wrapper {
   wrapEval() {
     const self = this;
     window.eval = function WrappedLessEval(code: string) {
-      self.danger.evalMetrics.totalInvocations++;
-      const rv = self.danger.eval.navite(code);
-      void self.updateEvalMetrics(code, rv, new Error(TRACE_ERROR_MESSAGE));
+      self.callCounter.eval++;
+      const rv = self.native.eval(code);
+      void self.updateEvalHistory(code, rv, new Error(TRACE_ERROR_MESSAGE));
       return rv;
     };
   }
@@ -217,11 +218,11 @@ export class Wrapper {
     const self = this;
 
     window.setTimeout = function setTimeout(code, delay, ...args) {
-      self.timers.setTimeout.invocations++;
+      self.callCounter.setTimeout++;
 
-      const handler = self.timers.setTimeout.native(
+      const handler = self.native.setTimeout(
         (...params: any[]) => {
-          self.timersUsagesRemove(handler);
+          self.timerOffline(handler);
           if (typeof code === 'string') {
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
             lessEval(code);
@@ -233,10 +234,10 @@ export class Wrapper {
         ...args
       );
 
-      self.timersUsagesAdd(
-        false,
+      self.timerOnline(false, handler, delay, new Error(TRACE_ERROR_MESSAGE));
+      self.updateHistory(
+        self.setTimeoutHistory,
         handler,
-        delay,
         new Error(TRACE_ERROR_MESSAGE)
       );
 
@@ -244,25 +245,26 @@ export class Wrapper {
     };
 
     window.clearTimeout = function clearTimeout(handler: number | undefined) {
-      self.timers.clearTimeout.invocations++;
+      self.callCounter.clearTimeout++;
 
       if (handler !== undefined) {
-        self.clearTimerUsagesSet(
-          false,
+        self.updateHistory(
+          self.clearTimeoutHistory,
           handler,
           new Error(TRACE_ERROR_MESSAGE)
         );
-        self.timersUsagesRemove(handler);
+        self.timerOffline(handler);
       }
 
-      self.timers.clearTimeout.native(handler);
+      self.native.clearTimeout(handler);
     };
 
     window.setInterval = function setInterval(code, delay, ...args) {
-      self.timers.setInterval.invocations++;
-      const handler = self.timers.setInterval.native(
+      self.callCounter.setInterval++;
+
+      const handler = self.native.setInterval(
         (...params: any[]) => {
-          self.timersUsagesRemove(handler);
+          self.timerOffline(handler);
           if (typeof code === 'string') {
             // see https://developer.mozilla.org/docs/Web/API/setInterval
             lessEval(code);
@@ -273,24 +275,30 @@ export class Wrapper {
         delay,
         ...args
       );
-      self.timersUsagesAdd(
-        true,
+
+      self.timerOnline(true, handler, delay, new Error(TRACE_ERROR_MESSAGE));
+      self.updateHistory(
+        self.setIntervalHistory,
         handler,
-        delay,
         new Error(TRACE_ERROR_MESSAGE)
       );
+
       return handler;
     };
 
     window.clearInterval = function clearInterval(handler: number | undefined) {
-      self.timers.clearInterval.invocations++;
+      self.callCounter.clearInterval++;
 
       if (handler !== undefined) {
-        self.clearTimerUsagesSet(true, handler, new Error(TRACE_ERROR_MESSAGE));
-        self.timersUsagesRemove(handler);
+        self.updateHistory(
+          self.clearIntervalHistory,
+          handler,
+          new Error(TRACE_ERROR_MESSAGE)
+        );
+        self.timerOffline(handler);
       }
 
-      self.timers.clearInterval.native(handler);
+      self.native.clearInterval(handler);
     };
   }
 }

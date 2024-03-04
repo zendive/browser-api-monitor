@@ -15,21 +15,22 @@ import {
 } from './api/mediaMonitor';
 import {
   Wrapper,
-  type TTimerMetrics,
-  type TClearTimerMetrics,
+  type TActiveTimerMetrics,
+  type TTimerHistory,
   type TEvalMetrics,
 } from './api/wrappers';
 
 export interface TMetrics {
   mediaMetrics: TMediaMetrics[];
   timeMetrics: {
-    timeouts: TTimerMetrics[];
-    intervals: TTimerMetrics[];
-    clearTimeouts: TClearTimerMetrics[];
-    clearIntervals: TClearTimerMetrics[];
+    onlineTimeouts: TActiveTimerMetrics[];
+    onlineIntervals: TActiveTimerMetrics[];
+    setTimeoutHistory: TTimerHistory[];
+    clearTimeoutHistory: TTimerHistory[];
+    setIntervalHistory: TTimerHistory[];
+    clearIntervalHistory: TTimerHistory[];
   };
-
-  timersInvocations: {
+  callCounter: {
     setTimeout: number;
     clearTimeout: number;
     setInterval: number;
@@ -64,13 +65,16 @@ const tick = new Timer(
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(),
       timeMetrics: wrapper.collectTimersMetrics(),
-      timersInvocations: {
-        setTimeout: wrapper.timers.setTimeout.invocations,
-        clearTimeout: wrapper.timers.clearTimeout.invocations,
-        setInterval: wrapper.timers.setInterval.invocations,
-        clearInterval: wrapper.timers.clearInterval.invocations,
+      callCounter: {
+        setTimeout: wrapper.callCounter.setTimeout,
+        clearTimeout: wrapper.callCounter.clearTimeout,
+        setInterval: wrapper.callCounter.setInterval,
+        clearInterval: wrapper.callCounter.clearInterval,
       },
-      evalMetrics: wrapper.danger.evalMetrics,
+      evalMetrics: {
+        totalInvocations: wrapper.callCounter.eval,
+        usages: wrapper.evalHistory,
+      },
       tickTook: reportedTickExecutionTime,
     };
 

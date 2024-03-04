@@ -33,19 +33,22 @@ export class Stopper {
 
   static toString(msTime: number) {
     if (msTime < 1) {
-      return `${~~(msTime * 1e3)}μs`;
+      return `${Math.trunc(msTime * 1e3)}μs`;
+    } else if (msTime < 3) {
+      const ms = Math.trunc(msTime);
+      return `${ms}.${Math.trunc((msTime - ms) * 1e3)}ms`;
     } else if (msTime < 1e3) {
-      return `${~~msTime}ms`;
+      return `${Math.trunc(msTime)}ms`;
     } else if (msTime < 60e3) {
-      const s = ~~(msTime / 1e3) % 60;
+      const s = Math.trunc(msTime / 1e3) % 60;
       const ms = msTime % 1e3;
 
       return `${s}.${ms.toString().padStart(3, '0')}s`;
     }
 
-    const h = ~~(msTime / 1e3 / 60 / 60);
-    const m = ~~(msTime / 1e3 / 60) % 60;
-    const s = ~~(msTime / 1e3) % 60;
+    const h = Math.trunc(msTime / 1e3 / 60 / 60);
+    const m = Math.trunc(msTime / 1e3 / 60) % 60;
+    const s = Math.trunc(msTime / 1e3) % 60;
 
     return `${h.toString().padStart(2, '0')}:${m
       .toString()

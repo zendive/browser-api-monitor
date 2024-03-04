@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { TClearTimerMetrics } from '@/api/wrappers';
+  import type { TTimerHistory } from '@/api/wrappers';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
 
   export let caption: string = '';
-  export let metrics: TClearTimerMetrics[] = [];
+  export let metrics: TTimerHistory[] = [];
 </script>
 
 <table>

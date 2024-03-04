@@ -57,10 +57,7 @@
 
     <Media bind:metrics={m.mediaMetrics} />
 
-    <Timers
-      bind:invocations={m.timersInvocations}
-      bind:usages={m.timeMetrics}
-    />
+    <Timers bind:callCounter={m.callCounter} bind:metrics={m.timeMetrics} />
   </main>
 {/if}
 
