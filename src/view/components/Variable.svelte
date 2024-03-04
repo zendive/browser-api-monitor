@@ -1,16 +1,25 @@
 <script lang="ts">
-  import { Timer } from '@/api/time';
+  import { Timer, Stopper } from '@/api/time';
 
   export let value: unknown;
+
   let isAnimated = false;
+  const stopper = new Stopper().start();
+
   $: isEven = typeof value === 'number' ? 0 === value % 2 : false;
 
   function animateChange(node: HTMLElement, value: unknown) {
-    const timer = new Timer(() => (isAnimated = false), 100);
+    const timer = new Timer(() => {
+      isAnimated = false;
+    }, 100);
+
     return {
       update(value: unknown) {
-        isAnimated = true;
-        timer.start();
+        if (stopper.elapsed() > 2e3) {
+          isAnimated = true;
+          timer.start();
+          stopper.start();
+        }
       },
 
       destroy() {
