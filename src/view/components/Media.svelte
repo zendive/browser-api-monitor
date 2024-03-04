@@ -14,7 +14,7 @@
     Videos: <Variable bind:value={videos.length} />
   </div>
   <div class="list">
-    {#each videos as videoMetrics}
+    {#each videos as videoMetrics (videoMetrics.mediaId)}
       <MediaMetrics caption="Video" bind:metrics={videoMetrics} />
     {/each}
   </div>
@@ -25,7 +25,7 @@
     Audios: <Variable bind:value={audios.length} />
   </div>
   <div class="list">
-    {#each audios as audioMetrics}
+    {#each audios as audioMetrics (audioMetrics.mediaId)}
       <MediaMetrics caption="Audio" bind:metrics={audioMetrics} />
     {/each}
   </div>

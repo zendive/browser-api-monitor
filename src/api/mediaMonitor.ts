@@ -10,6 +10,7 @@ export enum TMediaType {
   AUDIO = 1,
 }
 export type TMediaMetrics = {
+  mediaId: string;
   type: TMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
@@ -40,7 +41,7 @@ export function meetMedia(els: NodeListOf<HTMLMediaElement>) {
     if (!els[i].dataset?.apiMon) {
       const id = crypto.randomUUID();
       els[i].dataset.apiMon = id;
-      mediaCollection.push(startMonitorMedia(els[i]));
+      mediaCollection.push(startMonitorMedia(id, els[i]));
     }
   }
 }
@@ -83,12 +84,13 @@ function stopMonitorMedia(entry: TMediaModel) {
   }
 }
 
-function startMonitorMedia(el: HTMLMediaElement): TMediaModel {
+function startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
   const events: TMediaMetrics['events'] = {};
   const props: TMediaMetrics['props'] = {};
   const rv = {
     el,
     metrics: {
+      mediaId,
       type:
         el instanceof HTMLVideoElement ? TMediaType.VIDEO : TMediaType.AUDIO,
       events,

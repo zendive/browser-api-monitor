@@ -120,7 +120,7 @@ export class Wrapper {
 
   updateHistory(history: TTimerHistory[], handler: number, stubError: Error) {
     const trace = createCallstack(stubError);
-    const traceId = trace.map((v) => `${v.name}${v.link}`).join('');
+    const traceId = trace.map((v) => v.link).join('');
     let handlerDelay;
     const existing = history.find((v) => v.traceId === traceId);
     const onlineTimer = this.onlineTimers.find(
@@ -151,7 +151,7 @@ export class Wrapper {
 
   updateEvalHistory(code: string, returnedValue: any, error: Error) {
     const trace = createCallstack(error);
-    const traceId = trace.map((v) => `${v.name}${v.link}`).join('');
+    const traceId = trace.map((v) => v.link).join('');
     const existing = this.evalHistory.find((v) => v.traceId === traceId);
 
     if (existing) {
@@ -166,6 +166,23 @@ export class Wrapper {
         trace,
         traceId,
       });
+    }
+  }
+
+  cleanHistory(what?: string[]) {
+    if (!what || !what.length) {
+      // clean all
+      this.setTimeoutHistory.splice(0);
+      this.clearTimeoutHistory.splice(0);
+      this.setIntervalHistory.splice(0);
+      this.clearIntervalHistory.splice(0);
+      this.evalHistory.splice(0);
+      this.callCounter.setTimeout =
+        this.callCounter.clearTimeout =
+        this.callCounter.setInterval =
+        this.callCounter.clearInterval =
+        this.callCounter.eval =
+          0;
     }
   }
 

@@ -12,7 +12,7 @@
     <td class="events">
       <table>
         <caption class="bc-invert ta-l">Events</caption>
-        {#each Object.entries(metrics.events) as [label, value]}
+        {#each Object.entries(metrics.events) as [label, value] (label)}
           <tr class:isPassive={0 === value} class:isActive={0 !== value}>
             <td class="item-label">{label}</td>
             <td class="item-value"><Variable bind:value /></td>
@@ -23,7 +23,7 @@
     <td class="props">
       <table>
         <caption class="bc-invert ta-l">Properties</caption>
-        {#each Object.entries(metrics.props) as [label, value]}
+        {#each Object.entries(metrics.props) as [label, value] (label)}
           <tr class:isPassive={null === value} class:isActive={true === value}>
             <td class="item-label">{label}</td>
             <td class="item-value">
@@ -50,7 +50,7 @@
   }
   .events,
   .props {
-    margin-top: 0;
+    vertical-align: top;
   }
   .isPassive {
     color: gray;
@@ -65,6 +65,5 @@
   .item-value {
     text-align: left;
     margin-left: 1rem;
-    word-break: break-all;
   }
 </style>

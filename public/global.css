@@ -11,7 +11,7 @@
 .dark {
   --bg: rgb(10% 10% 10%);
   --bg-invert: rgb(255 255 255 / 70%);
-  --bg-table-even: rgb(70% 70% 70% / 10%);
+  --bg-table-even: rgb(100% 100% 100% / 20%);
   --bg-error: rgb(153 25 25 / 77%);
   --text: rgb(100% 100% 100%);
   --text-invert: rgb(26 26 26 / 70%);
@@ -45,50 +45,12 @@ a:hover {
   text-decoration: underline;
 }
 
-a:visited {
-  color: rgb(0, 80, 160);
+table,
+tr,
+td,
+th {
+  border-collapse: collapse;
 }
-
-label {
-  display: block;
-}
-
-input,
-button,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
-  -webkit-padding: 0.4em 0;
-  padding: 0.4em;
-  margin: 0 0 0.5em 0;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-}
-
-input:disabled {
-  color: #ccc;
-}
-
-button {
-  color: #333;
-  background-color: #f4f4f4;
-  outline: none;
-}
-
-button:disabled {
-  color: #999;
-}
-
-button:not(:disabled):active {
-  background-color: #ddd;
-}
-
-button:focus {
-  border-color: #666;
-}
-
 table caption {
   font-weight: bold;
 }
@@ -107,7 +69,9 @@ th,
 .ta-r {
   text-align: right;
 }
-.bc-error,
-table tr.bc-error[class*='svelte-'] {
+.t-zebra:where(:nth-child(even)) {
+  background-color: var(--bg-table-even);
+}
+.bc-error {
   background-color: var(--bg-error);
 }

@@ -5,7 +5,7 @@
 
   export let metrics: TMetrics['evalMetrics'] = {
     totalInvocations: 0,
-    usages: [],
+    evalHistory: [],
   };
 
   function dynamicValue(value: unknown): string {
@@ -29,8 +29,8 @@
     ><th>Callstack</th><th>Calls</th><th>Recent Code</th><th>Recent Return</th
     ></tr
   >
-  {#each metrics.usages as metric}
-    <tr>
+  {#each metrics.evalHistory as metric (metric.traceId)}
+    <tr class="t-zebra">
       <td><Callstack bind:trace={metric.trace} /></td>
       <td class="ta-c">
         <Variable bind:value={metric.individualInvocations} />
@@ -46,10 +46,6 @@
 </table>
 
 <style lang="scss">
-  tr:nth-child(even) {
-    background-color: var(--bg-table-even);
-  }
-
   .limit-width {
     max-width: 12rem;
   }

@@ -5,7 +5,7 @@
   export let trace: TCallstack[] = [];
 </script>
 
-{#each trace as stack, index}
-  {#if index > 0}&nbsp;∈{/if}
+{#each trace as stack, index (index)}
+  {#if index > 0}&nbsp;•{/if}
   <CallstackLink bind:href={stack.link} bind:name={stack.name} />
 {/each}

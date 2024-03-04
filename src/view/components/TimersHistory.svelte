@@ -12,8 +12,9 @@
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
   <tr><th>Callstack</th><th>Calls</th><th>Handler</th><th>Delay</th></tr>
-  {#each metrics as metric}
+  {#each metrics as metric (metric.traceId)}
     <tr
+      class="t-zebra"
       class:bc-error={typeof metric.recentHandler !== 'number' ||
         metric.recentHandler < 1}
     >
@@ -21,14 +22,11 @@
       <td class="ta-c"
         ><Variable bind:value={metric.individualInvocations} /></td
       >
-      <td class="ta-c"><Variable bind:value={metric.recentHandler} /></td>
+      <td class="ta-c">{metric.recentHandler}</td>
       <td class="ta-r">{metric.handlerDelay}</td>
     </tr>
   {/each}
 </table>
 
 <style lang="scss">
-  tr:nth-child(even) {
-    background-color: var(--bg-table-even);
-  }
 </style>

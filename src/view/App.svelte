@@ -2,13 +2,13 @@
   import {
     runtimeListen,
     portPost,
-    EVENT_METRICS,
-    EVENT_SETUP,
+    EVENT_TELEMETRY,
+    EVENT_CS_COMMAND,
     EVENT_PANEL_HIDDEN,
     EVENT_PANEL_SHOWN,
     EVENT_CONTENT_SCRIPT_LOADED,
   } from '@/api/communication';
-  import { IS_DEV } from '@/api/const';
+  import { IS_DEV, type TCaCommandEventOptions } from '@/api/const';
   import { Fps } from '@/api/time';
   import type { TMetrics } from '@/cs-main';
   import Variable from './components/Variable.svelte';
@@ -19,15 +19,14 @@
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
   let paused = false;
-  let m: TMetrics;
+  let msg: TMetrics;
 
   runtimeListen(EVENT_CONTENT_SCRIPT_LOADED, () => {
     paused = false;
     portPost(EVENT_PANEL_SHOWN);
   });
-  portPost(EVENT_SETUP, {});
-  runtimeListen(EVENT_METRICS, (metrics: TMetrics) => {
-    m = metrics;
+  runtimeListen(EVENT_TELEMETRY, (metrics: TMetrics) => {
+    msg = metrics;
     fps.tick();
   });
 
@@ -39,9 +38,15 @@
       portPost(EVENT_PANEL_SHOWN);
     }
   }
+
+  function onResetHistory() {
+    portPost(EVENT_CS_COMMAND, <TCaCommandEventOptions>{
+      operators: ['reset-wrapper-history'],
+    });
+  }
 </script>
 
-{#if m}
+{#if msg}
   <main>
     <div>
       {#if IS_DEV}<button on:click={() => location.reload()} title="Reload"
@@ -50,14 +55,38 @@
       <button on:click={onTogglePause} title="Toggle pause"
         >{#if paused}🔴{:else}🟢{/if}</button
       >
-      <span><Variable bind:value={fpsValue} />fps [{m.tickTook}]</span>
+      <button on:click={onResetHistory} title="Reset history">❌</button>
+      <span><Variable bind:value={fpsValue} />fps [{msg.tickTook}]</span>
     </div>
 
-    <EvalMetrics bind:metrics={m.evalMetrics} />
+    <div>
+      <span
+        ><strong>setTimeout</strong>: <Variable
+          bind:value={msg.callCounter.setTimeout}
+        /></span
+      >
+      <span
+        ><strong>clearTimeout</strong>: <Variable
+          bind:value={msg.callCounter.clearTimeout}
+        /></span
+      >
+      <span
+        ><strong>setInterval</strong>: <Variable
+          bind:value={msg.callCounter.setInterval}
+        /></span
+      >
+      <span
+        ><strong>clearInterval</strong>: <Variable
+          bind:value={msg.callCounter.clearInterval}
+        /></span
+      >
+    </div>
 
-    <Media bind:metrics={m.mediaMetrics} />
+    <EvalMetrics bind:metrics={msg.evalMetrics} />
 
-    <Timers bind:callCounter={m.callCounter} bind:metrics={m.timeMetrics} />
+    <Media bind:metrics={msg.mediaMetrics} />
+
+    <Timers bind:metrics={msg.timeMetrics} />
   </main>
 {/if}
 

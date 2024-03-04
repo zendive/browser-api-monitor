@@ -10,6 +10,9 @@ install:
 dev:
 	npx rollup -c -w
 
+lint:
+	npx svelte-check
+
 prod:
 	npx svelte-check
 	time npx rollup -c
@@ -22,5 +25,5 @@ all:
 	make prod
 	make zip_chrome
 
-.PHONY: clean install dev prod zip_chrome all
+.PHONY: clean install dev lint prod zip_chrome all
 .DEFAULT_GOAL := dev
