@@ -1,19 +1,19 @@
-🚧 work in progress - things may broke 🚧
+🚧 work in progress - things may break 🚧
 
 # <img src="./public/img/icon.svg" width="26"/> Browser API Monitor
 
-Wherether you developing SPA or curious how something works, this tool adds advanced functionality to chrome browser devtools to track time delayed invocations, show media elements state and events ([documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement), [example](https://www.w3.org/2010/05/video/mediaevents.html)), detect and track usages of `eval`.
+Whether you're developing a Single Page Application (SPA) and want to assess implementation correctness or are curious about how something works, this tool adds additional functionality to the Chrome browser DevTools to reveal active or passed timouts, intervals, and `eval` usages while mapping their invocation call stacks to a source code location. If the page has mounted `video` or `audio` media element's, their events and property state changes can be observed as they happen ([documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement), [example](https://www.w3.org/2010/05/video/mediaevents.html)).
 
 ### Motivation
 
 To expedite issues discovery, here are some examples from experience:
 
-- ~10ms delay interval eating ~10% of CPU comming from a 3rd party library
-- bundled dependency library that uses `eval` function
-- huge chunk of hidden video elements in the DOM that were shortening suddenly limited resources of 100 medias per domain
-- an unatended interval that was unintentionally left running and attributed to a slowly growing memory
+- ~10ms delay interval constantly consuming ~10% of CPU from a 3rd party library, only to check if page was resized.
+- Bundled dependency library that uses the `eval` function.
+- A substantial number of hidden video elements in the DOM that were unexpectedly consuming resources, limited to 100 medias per domain.
+- An unattended interval that was unintentionally left running and contributed to a slowly growing memory.
 
-To explore complex systems and to continue to push boundaries of imagination
+To explore the internals of a complex systems
 
 ### Build requirements
 
