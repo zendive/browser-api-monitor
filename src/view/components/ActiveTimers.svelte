@@ -6,6 +6,8 @@
 
   export let caption: string = '';
   export let metrics: TActiveTimerMetrics[] = [];
+
+  $: metrics.sort((a, b) => b.delay - a.delay); // sort by delay descending
 </script>
 
 <table>

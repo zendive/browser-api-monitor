@@ -56,6 +56,8 @@ const eachSecond = new Timer(
   () => {
     reportedTickExecutionTime = Stopper.toString(meanExecutionTime.mean);
     meanExecutionTime.reset();
+
+    meetMedia(document.querySelectorAll('video,audio'));
   },
   1e3,
   { interval: true }
@@ -63,8 +65,6 @@ const eachSecond = new Timer(
 const tick = new Timer(
   () => {
     meanExecutionTime.add(tick.executionTime);
-
-    meetMedia(document.querySelectorAll('video,audio'));
 
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(),

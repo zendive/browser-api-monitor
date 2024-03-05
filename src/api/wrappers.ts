@@ -113,9 +113,12 @@ export class Wrapper {
   }
 
   timerOffline(handler?: number) {
-    this.onlineTimers = this.onlineTimers.filter(
-      ([, timerMetric]) => timerMetric.handler !== handler
+    const index = this.onlineTimers.findLastIndex(
+      ([, timerMetric]) => timerMetric.handler === handler
     );
+    if (index >= 0) {
+      this.onlineTimers.splice(index, 1);
+    }
   }
 
   updateHistory(
@@ -125,7 +128,7 @@ export class Wrapper {
   ) {
     const traceId = trace.map((v) => v.link).join('');
     let handlerDelay;
-    const existing = history.find((v) => v.traceId === traceId);
+    const existing = history.findLast((v) => v.traceId === traceId);
     const onlineTimer = this.onlineTimers.find(
       ([, t]) => t.handler === handler
     );
@@ -202,8 +205,8 @@ export class Wrapper {
     }
 
     return {
-      onlineTimeouts: timeouts.sort((a, b) => b.delay - a.delay), // sort by delay descending
-      onlineIntervals: intervals.sort((a, b) => b.delay - a.delay),
+      onlineTimeouts: timeouts,
+      onlineIntervals: intervals,
       setTimeoutHistory: this.setTimeoutHistory,
       clearTimeoutHistory: this.clearTimeoutHistory,
       setIntervalHistory: this.setIntervalHistory,
