@@ -99,14 +99,14 @@ export class Wrapper {
     isInterval: boolean,
     handler: number,
     delay: number | undefined = 0,
-    stubError: Error
+    trace: TCallstack[]
   ) {
     this.onlineTimers.push([
       isInterval,
       {
         handler,
         delay,
-        trace: createCallstack(stubError),
+        trace,
         //rawTrace: stubError.stack, // uncomment to debug errors in trace
       },
     ]);
@@ -118,8 +118,11 @@ export class Wrapper {
     );
   }
 
-  updateHistory(history: TTimerHistory[], handler: number, stubError: Error) {
-    const trace = createCallstack(stubError);
+  updateHistory(
+    history: TTimerHistory[],
+    handler: number,
+    trace: TCallstack[]
+  ) {
     const traceId = trace.map((v) => v.link).join('');
     let handlerDelay;
     const existing = history.find((v) => v.traceId === traceId);
@@ -223,10 +226,13 @@ export class Wrapper {
 
   wrapEval() {
     const self = this;
+
     window.eval = function WrappedLessEval(code: string) {
-      self.callCounter.eval++;
       const rv = self.native.eval(code);
+
+      self.callCounter.eval++;
       void self.updateEvalHistory(code, rv, new Error(TRACE_ERROR_MESSAGE));
+
       return rv;
     };
   }
@@ -235,8 +241,6 @@ export class Wrapper {
     const self = this;
 
     window.setTimeout = function setTimeout(code, delay, ...args) {
-      self.callCounter.setTimeout++;
-
       const handler = self.native.setTimeout(
         (...params: any[]) => {
           self.timerOffline(handler);
@@ -250,35 +254,30 @@ export class Wrapper {
         delay,
         ...args
       );
+      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
-      self.timerOnline(false, handler, delay, new Error(TRACE_ERROR_MESSAGE));
-      self.updateHistory(
-        self.setTimeoutHistory,
-        handler,
-        new Error(TRACE_ERROR_MESSAGE)
-      );
+      self.callCounter.setTimeout++;
+      self.timerOnline(false, handler, delay, trace);
+      self.updateHistory(self.setTimeoutHistory, handler, trace);
 
       return handler;
     };
 
     window.clearTimeout = function clearTimeout(handler: number | undefined) {
-      self.callCounter.clearTimeout++;
-
       if (handler !== undefined) {
         self.updateHistory(
           self.clearTimeoutHistory,
           handler,
-          new Error(TRACE_ERROR_MESSAGE)
+          createCallstack(new Error(TRACE_ERROR_MESSAGE))
         );
         self.timerOffline(handler);
       }
 
+      self.callCounter.clearTimeout++;
       self.native.clearTimeout(handler);
     };
 
     window.setInterval = function setInterval(code, delay, ...args) {
-      self.callCounter.setInterval++;
-
       const handler = self.native.setInterval(
         (...params: any[]) => {
           if (typeof code === 'string') {
@@ -291,29 +290,26 @@ export class Wrapper {
         delay,
         ...args
       );
+      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
-      self.timerOnline(true, handler, delay, new Error(TRACE_ERROR_MESSAGE));
-      self.updateHistory(
-        self.setIntervalHistory,
-        handler,
-        new Error(TRACE_ERROR_MESSAGE)
-      );
+      self.callCounter.setInterval++;
+      self.timerOnline(true, handler, delay, trace);
+      self.updateHistory(self.setIntervalHistory, handler, trace);
 
       return handler;
     };
 
     window.clearInterval = function clearInterval(handler: number | undefined) {
-      self.callCounter.clearInterval++;
-
       if (handler !== undefined) {
         self.updateHistory(
           self.clearIntervalHistory,
           handler,
-          new Error(TRACE_ERROR_MESSAGE)
+          createCallstack(new Error(TRACE_ERROR_MESSAGE))
         );
         self.timerOffline(handler);
       }
 
+      self.callCounter.clearInterval++;
       self.native.clearInterval(handler);
     };
   }
