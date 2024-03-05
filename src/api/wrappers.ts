@@ -15,7 +15,12 @@ export type TCallstack = {
   name: string;
   link: string;
 };
-export type TActiveTimerMetrics = {
+enum ETimeType {
+  TIMEOUT,
+  INTERVAL,
+}
+export type TOnlineTimerMetrics = {
+  type: ETimeType;
   delay: number;
   handler: number;
   trace: TCallstack[];
@@ -36,7 +41,7 @@ export type TEvalMetrics = {
   code: any;
 };
 
-type TOnlineTimer = [isInterval: boolean, metrics: TActiveTimerMetrics];
+type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
 
 let selfCallLink = '';
 function createCallstack(e: Error): TCallstack[] {
@@ -72,7 +77,7 @@ function createCallstack(e: Error): TCallstack[] {
 const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
 
 export class Wrapper {
-  onlineTimers: TOnlineTimer[] = [];
+  onlineTimers: TOnlineTimers = new Map();
   setTimeoutHistory: TTimerHistory[] = [];
   clearTimeoutHistory: TTimerHistory[] = [];
   setIntervalHistory: TTimerHistory[] = [];
@@ -96,29 +101,22 @@ export class Wrapper {
   constructor() {}
 
   timerOnline(
-    isInterval: boolean,
+    type: ETimeType,
     handler: number,
     delay: number | undefined = 0,
     trace: TCallstack[]
   ) {
-    this.onlineTimers.push([
-      isInterval,
-      {
-        handler,
-        delay,
-        trace,
-        //rawTrace: stubError.stack, // uncomment to debug errors in trace
-      },
-    ]);
+    this.onlineTimers.set(handler, {
+      type,
+      handler,
+      delay,
+      trace,
+      //rawTrace: stubError.stack, // uncomment to debug errors in trace
+    });
   }
 
-  timerOffline(handler?: number) {
-    const index = this.onlineTimers.findLastIndex(
-      ([, timerMetric]) => timerMetric.handler === handler
-    );
-    if (index >= 0) {
-      this.onlineTimers.splice(index, 1);
-    }
+  timerOffline(handler: number) {
+    this.onlineTimers.delete(handler);
   }
 
   updateHistory(
@@ -129,12 +127,10 @@ export class Wrapper {
     const traceId = trace.map((v) => v.link).join('');
     let handlerDelay;
     const existing = history.findLast((v) => v.traceId === traceId);
-    const onlineTimer = this.onlineTimers.find(
-      ([, t]) => t.handler === handler
-    );
+    const onlineTimer = this.onlineTimers.get(handler);
 
     if (onlineTimer) {
-      handlerDelay = onlineTimer[1].delay;
+      handlerDelay = onlineTimer.delay;
     } else if (existing) {
       handlerDelay = existing.handlerDelay;
     }
@@ -193,14 +189,14 @@ export class Wrapper {
   }
 
   collectTimersMetrics() {
-    const timeouts: TActiveTimerMetrics[] = [];
-    const intervals: TActiveTimerMetrics[] = [];
+    const timeouts: TOnlineTimerMetrics[] = [];
+    const intervals: TOnlineTimerMetrics[] = [];
 
-    for (const usage of this.onlineTimers) {
-      if (usage[0]) {
-        intervals.push(usage[1]);
+    for (const [, timer] of this.onlineTimers) {
+      if (timer.type === ETimeType.INTERVAL) {
+        intervals.push(timer);
       } else {
-        timeouts.push(usage[1]);
+        timeouts.push(timer);
       }
     }
 
@@ -260,7 +256,7 @@ export class Wrapper {
       const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       self.callCounter.setTimeout++;
-      self.timerOnline(false, handler, delay, trace);
+      self.timerOnline(ETimeType.TIMEOUT, handler, delay, trace);
       self.updateHistory(self.setTimeoutHistory, handler, trace);
 
       return handler;
@@ -296,7 +292,7 @@ export class Wrapper {
       const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       self.callCounter.setInterval++;
-      self.timerOnline(true, handler, delay, trace);
+      self.timerOnline(ETimeType.INTERVAL, handler, delay, trace);
       self.updateHistory(self.setIntervalHistory, handler, trace);
 
       return handler;

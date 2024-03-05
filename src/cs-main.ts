@@ -19,7 +19,7 @@ import {
 } from './api/mediaMonitor';
 import {
   Wrapper,
-  type TActiveTimerMetrics,
+  type TOnlineTimerMetrics,
   type TTimerHistory,
   type TEvalMetrics as TEvalHistory,
 } from './api/wrappers';
@@ -27,8 +27,8 @@ import {
 export interface TMetrics {
   mediaMetrics: TMediaMetrics[];
   timeMetrics: {
-    onlineTimeouts: TActiveTimerMetrics[];
-    onlineIntervals: TActiveTimerMetrics[];
+    onlineTimeouts: TOnlineTimerMetrics[];
+    onlineIntervals: TOnlineTimerMetrics[];
     setTimeoutHistory: TTimerHistory[];
     clearTimeoutHistory: TTimerHistory[];
     setIntervalHistory: TTimerHistory[];

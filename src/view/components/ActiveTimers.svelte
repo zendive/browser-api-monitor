@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { TActiveTimerMetrics } from '@/api/wrappers';
+  import type { TOnlineTimerMetrics } from '@/api/wrappers';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
   import { IS_DEV } from '@/api/const';
 
   export let caption: string = '';
-  export let metrics: TActiveTimerMetrics[] = [];
+  export let metrics: TOnlineTimerMetrics[] = [];
 
   $: metrics.sort((a, b) => b.delay - a.delay); // sort by delay descending
 </script>
