@@ -8,12 +8,12 @@ Whether you're developing a Single Page Application (SPA) and want to assess imp
 
 To expedite issues discovery, here are some examples from experience:
 
-- ~10ms delay interval constantly consuming ~10% of CPU from a 3rd party library, only to check if page was resized.
-- Bundled dependency library that uses the `eval` function.
+- A ~10ms delay interval constantly consuming approximately 10% of CPU from a third-party library, solely to check if the page was resized.
+- A bundled dependency library that utilizes the eval function, thereby preventing the removal of `unsafe-eval` from the Content Security Policy (CSP) header.
 - A substantial number of hidden video elements in the DOM that were unexpectedly consuming resources, limited to 100 medias per domain.
 - An unattended interval that was unintentionally left running and contributed to a slowly growing memory.
 
-To explore the internals of a complex systems
+To explore the internals of a complex systems.
 
 ### Build requirements
 
