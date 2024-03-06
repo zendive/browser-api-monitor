@@ -15,7 +15,7 @@ const production = !process.env.ROLLUP_WATCH;
  */
 const extensionFileOptions = {
   output: {
-    sourcemap: production ? false : 'inline',
+    sourcemap: false,
     format: 'iife',
     dir: 'public/build',
   },
@@ -28,8 +28,8 @@ const extensionFileOptions = {
     }),
     commonjs(),
     typescript({
-      sourceMap: !production,
-      inlineSources: !production,
+      sourceMap: false,
+      inlineSources: false,
     }),
     production && terser(),
   ],
@@ -42,7 +42,7 @@ const extensionFileOptions = {
  */
 const svelteViewOptions = {
   output: {
-    sourcemap: production ? false : 'inline',
+    sourcemap: false,
     format: 'module',
     dir: 'public/build',
   },
@@ -76,8 +76,8 @@ const svelteViewOptions = {
     }),
     commonjs(),
     typescript({
-      sourceMap: !production,
-      inlineSources: !production,
+      sourceMap: false,
+      inlineSources: false,
     }),
     production && terser(),
   ],
