@@ -2,7 +2,7 @@
   import type { TCallstack } from '@/api/wrappers';
   import CallstackLink from './CallstackLink.svelte';
 
-  export let trace: TCallstack[] = [];
+  export let trace: TCallstack = [];
 </script>
 
 {#each trace as stack, index (index)}

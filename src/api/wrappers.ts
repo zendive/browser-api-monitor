@@ -3,6 +3,7 @@ import {
   clearTimeout,
   setInterval,
   clearInterval,
+  lessEval,
   REGEX_STACKTRACE_NAME,
   REGEX_STACKTRACE_LINK,
   TRACE_ERROR_MESSAGE,
@@ -12,9 +13,11 @@ import {
 import { cloneObjectSafely } from './clone';
 
 export type TCallstack = {
+  /** function name */
   name: string;
+  /** link to source */
   link: string;
-};
+}[];
 enum ETimeType {
   TIMEOUT,
   INTERVAL,
@@ -23,7 +26,8 @@ export type TOnlineTimerMetrics = {
   type: ETimeType;
   delay: number;
   handler: number;
-  trace: TCallstack[];
+  trace: TCallstack;
+  isEval: boolean;
   rawTrace?: string; // for debugging
 };
 export type TTimerHistory = {
@@ -31,11 +35,12 @@ export type TTimerHistory = {
   individualInvocations: number;
   recentHandler: number;
   handlerDelay: number | undefined;
-  trace: TCallstack[];
+  trace: TCallstack;
+  isEval: boolean | undefined;
 };
 export type TEvalMetrics = {
   traceId: string;
-  trace: TCallstack[];
+  trace: TCallstack;
   individualInvocations: number;
   returnedValue: any;
   code: any;
@@ -44,37 +49,42 @@ export type TEvalMetrics = {
 type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
 
 let selfCallLink = '';
-function createCallstack(e: Error): TCallstack[] {
+function createCallstack(e: Error): TCallstack {
+  const rv: TCallstack = [];
   const arr = e.stack?.split('\n') || [];
 
   if (!selfCallLink) {
-    selfCallLink = arr[1]
+    const link = arr[1]
       .replace(REGEX_STACKTRACE_LINK, '$1')
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+    if (link) {
+      selfCallLink = link;
+    }
   }
 
-  arr.splice(0, 2); // remove error message and first self call
-
-  const trace: TCallstack[] = [];
-  for (let v of arr) {
+  // start from second row
+  for (let i = 1, I = arr.length; i < I; i++) {
+    let v = arr[i];
     v = v.replace(REGEX_STACKTRACE_PREFIX, '');
     const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
-    // skip self references, that some times happen
+    // skip self references at the beginning, and some times at the end
     if (link.indexOf(selfCallLink) >= 0) {
       continue;
     }
 
-    trace.push({
+    rv.push({
       name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
       link,
     });
   }
 
-  return trace;
-}
+  if (!rv.length) {
+    rv.push({ name: `N/A`, link: crypto.randomUUID() });
+  }
 
-const lessEval = eval; // https://rollupjs.org/troubleshooting/#avoiding-eval
+  return rv;
+}
 
 export class Wrapper {
   onlineTimers: TOnlineTimers = new Map();
@@ -104,13 +114,15 @@ export class Wrapper {
     type: ETimeType,
     handler: number,
     delay: number | undefined = 0,
-    trace: TCallstack[]
+    trace: TCallstack,
+    isEval: boolean
   ) {
     this.onlineTimers.set(handler, {
       type,
       handler,
       delay,
       trace,
+      isEval,
       //rawTrace: stubError.stack, // uncomment to debug errors in trace
     });
   }
@@ -122,12 +134,22 @@ export class Wrapper {
   updateHistory(
     history: TTimerHistory[],
     handler: number,
-    trace: TCallstack[]
+    trace: TCallstack,
+    isEval: boolean | undefined
   ) {
     const traceId = trace.map((v) => v.link).join('');
     let handlerDelay;
+    let handlerIsEval = isEval;
     const existing = history.findLast((v) => v.traceId === traceId);
     const onlineTimer = this.onlineTimers.get(handler);
+
+    if (isEval === undefined) {
+      if (onlineTimer) {
+        handlerIsEval = onlineTimer.isEval;
+      } else if (existing) {
+        handlerIsEval = existing.isEval;
+      }
+    }
 
     if (onlineTimer) {
       handlerDelay = onlineTimer.delay;
@@ -139,6 +161,7 @@ export class Wrapper {
       existing.recentHandler = handler;
       existing.handlerDelay = handlerDelay;
       existing.individualInvocations++;
+      existing.isEval = handlerIsEval;
     } else {
       history.push({
         traceId,
@@ -146,13 +169,13 @@ export class Wrapper {
         individualInvocations: 1,
         handlerDelay,
         trace,
+        isEval: handlerIsEval,
       });
       history.sort((a, b) => (b.handlerDelay || 0) - (a.handlerDelay || 0));
     }
   }
 
-  updateEvalHistory(code: string, returnedValue: any, error: Error) {
-    const trace = createCallstack(error);
+  updateEvalHistory(code: string, returnedValue: any, trace: TCallstack) {
     const traceId = trace.map((v) => v.link).join('');
     const existing = this.evalHistory.find((v) => v.traceId === traceId);
 
@@ -224,28 +247,31 @@ export class Wrapper {
   }
 
   wrapEval() {
-    const self = this;
+    window.eval = function WrappedLessEval(this: Wrapper, code: string) {
+      const rv = this.native.eval(code);
 
-    window.eval = function WrappedLessEval(code: string) {
-      const rv = self.native.eval(code);
-
-      self.callCounter.eval++;
-      void self.updateEvalHistory(code, rv, new Error(TRACE_ERROR_MESSAGE));
+      this.callCounter.eval++;
+      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      this.updateEvalHistory(code, rv, trace);
 
       return rv;
-    };
+    }.bind(this);
   }
 
   wrapTimers() {
-    const self = this;
-
-    window.setTimeout = function setTimeout(code, delay, ...args) {
-      const handler = self.native.setTimeout(
+    window.setTimeout = function setTimeout(
+      this: Wrapper,
+      code: TimerHandler,
+      delay: number | undefined,
+      ...args: any[]
+    ) {
+      const isEval = typeof code === 'string';
+      const handler = this.native.setTimeout(
         (...params: any[]) => {
-          self.timerOffline(handler);
-          if (typeof code === 'string') {
+          this.timerOffline(handler);
+          if (isEval) {
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
-            lessEval(code);
+            this.native.eval(code);
           } else {
             code(...params);
           }
@@ -255,33 +281,46 @@ export class Wrapper {
       );
       const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
-      self.callCounter.setTimeout++;
-      self.timerOnline(ETimeType.TIMEOUT, handler, delay, trace);
-      self.updateHistory(self.setTimeoutHistory, handler, trace);
-
-      return handler;
-    };
-
-    window.clearTimeout = function clearTimeout(handler: number | undefined) {
-      if (handler !== undefined) {
-        self.updateHistory(
-          self.clearTimeoutHistory,
-          handler,
-          createCallstack(new Error(TRACE_ERROR_MESSAGE))
-        );
-        self.timerOffline(handler);
+      this.callCounter.setTimeout++;
+      this.timerOnline(ETimeType.TIMEOUT, handler, delay, trace, isEval);
+      this.updateHistory(this.setTimeoutHistory, handler, trace, isEval);
+      if (isEval) {
+        this.updateEvalHistory(code, '(N/A - via setTimeout)', trace);
       }
 
-      self.callCounter.clearTimeout++;
-      self.native.clearTimeout(handler);
-    };
+      return handler;
+    }.bind(this);
 
-    window.setInterval = function setInterval(code, delay, ...args) {
-      const handler = self.native.setInterval(
+    window.clearTimeout = function clearTimeout(
+      this: Wrapper,
+      handler: number | undefined
+    ) {
+      if (handler !== undefined) {
+        this.updateHistory(
+          this.clearTimeoutHistory,
+          handler,
+          createCallstack(new Error(TRACE_ERROR_MESSAGE)),
+          undefined
+        );
+        this.timerOffline(handler);
+      }
+
+      this.callCounter.clearTimeout++;
+      this.native.clearTimeout(handler);
+    }.bind(this);
+
+    window.setInterval = function setInterval(
+      this: Wrapper,
+      code: TimerHandler,
+      delay: number | undefined,
+      ...args: any[]
+    ) {
+      const isEval = typeof code === 'string';
+      const handler = this.native.setInterval(
         (...params: any[]) => {
-          if (typeof code === 'string') {
+          if (isEval) {
             // see https://developer.mozilla.org/docs/Web/API/setInterval
-            lessEval(code);
+            this.native.eval(code);
           } else {
             code(...params);
           }
@@ -291,25 +330,32 @@ export class Wrapper {
       );
       const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
-      self.callCounter.setInterval++;
-      self.timerOnline(ETimeType.INTERVAL, handler, delay, trace);
-      self.updateHistory(self.setIntervalHistory, handler, trace);
-
-      return handler;
-    };
-
-    window.clearInterval = function clearInterval(handler: number | undefined) {
-      if (handler !== undefined) {
-        self.updateHistory(
-          self.clearIntervalHistory,
-          handler,
-          createCallstack(new Error(TRACE_ERROR_MESSAGE))
-        );
-        self.timerOffline(handler);
+      this.callCounter.setInterval++;
+      this.timerOnline(ETimeType.INTERVAL, handler, delay, trace, isEval);
+      this.updateHistory(this.setIntervalHistory, handler, trace, isEval);
+      if (isEval) {
+        this.updateEvalHistory(code, '(N/A - via setInterval)', trace);
       }
 
-      self.callCounter.clearInterval++;
-      self.native.clearInterval(handler);
-    };
+      return handler;
+    }.bind(this);
+
+    window.clearInterval = function clearInterval(
+      this: Wrapper,
+      handler: number | undefined
+    ) {
+      if (handler !== undefined) {
+        this.updateHistory(
+          this.clearIntervalHistory,
+          handler,
+          createCallstack(new Error(TRACE_ERROR_MESSAGE)),
+          undefined
+        );
+        this.timerOffline(handler);
+      }
+
+      this.callCounter.clearInterval++;
+      this.native.clearInterval(handler);
+    }.bind(this);
   }
 }

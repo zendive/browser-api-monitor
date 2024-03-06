@@ -56,7 +56,9 @@
         >{#if paused}🔴{:else}🟢{/if}</button
       >
       <button on:click={onResetHistory} title="Reset history">❌</button>
-      <span><Variable bind:value={fpsValue} />fps [{msg.tickTook}]</span>
+      {#if !paused}
+        <span><Variable bind:value={fpsValue} />fps [{msg.tickTook}]</span>
+      {/if}
     </div>
 
     <div>

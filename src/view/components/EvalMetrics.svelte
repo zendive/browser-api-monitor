@@ -31,7 +31,7 @@
   >
   {#each metrics.evalHistory as metric (metric.traceId)}
     <tr class="t-zebra">
-      <td><Callstack bind:trace={metric.trace} /></td>
+      <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
       <td class="ta-c">
         <Variable bind:value={metric.individualInvocations} />
       </td>

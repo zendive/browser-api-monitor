@@ -10,6 +10,8 @@ export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);
 export const setInterval = window.setInterval.bind(window);
 export const clearInterval = window.clearInterval.bind(window);
+// https://rollupjs.org/troubleshooting/#avoiding-eval
+export const lessEval = eval;
 
 export const MEDIA_ELEMENT_EVENTS = [
   'loadstart',

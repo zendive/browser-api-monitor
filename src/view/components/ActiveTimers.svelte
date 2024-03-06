@@ -18,12 +18,9 @@
   {#each metrics as metric (metric.handler)}
     <tr class="t-zebra">
       <td class="ta-r">{metric.delay}</td>
-      <td class="ta-c">
-        {metric.handler}
-      </td>
-      <td>
+      <td class="ta-c">{metric.handler}</td>
+      <td class="wb-all">
         <Callstack bind:trace={metric.trace} />
-
         {#if IS_DEV && metric.rawTrace}
           <pre>{metric.rawTrace}</pre>
         {/if}

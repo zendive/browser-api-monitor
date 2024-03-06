@@ -18,7 +18,7 @@
       class:bc-error={typeof metric.recentHandler !== 'number' ||
         metric.recentHandler < 1}
     >
-      <td><Callstack bind:trace={metric.trace} /></td>
+      <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
       <td class="ta-c"
         ><Variable bind:value={metric.individualInvocations} /></td
       >
