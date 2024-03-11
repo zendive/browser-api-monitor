@@ -2,3 +2,4 @@
 /public/build/
 *.zip
 .DS_Store
+*.log
