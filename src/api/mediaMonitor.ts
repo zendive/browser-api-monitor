@@ -46,7 +46,7 @@ export function meetMedia(els: NodeListOf<HTMLMediaElement>) {
   }
 }
 
-export function collectMediaUsages(): TMediaMetrics[] {
+export function collectMediaMetrics(): TMediaMetrics[] {
   return mediaCollection.map((v) => {
     // refresh props metrics
     for (const prop of MEDIA_ELEMENT_PROPS) {

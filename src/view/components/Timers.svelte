@@ -3,7 +3,7 @@
   import ActiveTimers from './ActiveTimers.svelte';
   import TimersHistory from './TimersHistory.svelte';
 
-  export let metrics: TMetrics['timeMetrics'];
+  export let metrics: TMetrics['wrapperMetrics'];
 </script>
 
 <section>

@@ -5,15 +5,12 @@ import {
   EVENT_CS_COMMAND,
   windowListen,
   windowPost,
+  type TCsCommandEventOptions,
 } from './api/communication';
-import {
-  IS_DEV,
-  UI_UPDATE_FREQUENCY,
-  type TCaCommandEventOptions,
-} from './api/const';
+import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
 import { MeanAggregator, Stopper, Timer } from './api/time';
 import {
-  collectMediaUsages as collectMediaMetrics,
+  collectMediaMetrics,
   meetMedia,
   type TMediaMetrics,
 } from './api/mediaMonitor';
@@ -21,28 +18,27 @@ import {
   Wrapper,
   type TOnlineTimerMetrics,
   type TTimerHistory,
-  type TEvalMetrics as TEvalHistory,
+  type TEvalHistory,
+  ETimeType,
 } from './api/wrappers';
 
 export interface TMetrics {
   mediaMetrics: TMediaMetrics[];
-  timeMetrics: {
+  wrapperMetrics: {
     onlineTimeouts: TOnlineTimerMetrics[];
     onlineIntervals: TOnlineTimerMetrics[];
     setTimeoutHistory: TTimerHistory[];
     clearTimeoutHistory: TTimerHistory[];
     setIntervalHistory: TTimerHistory[];
     clearIntervalHistory: TTimerHistory[];
+    evalHistory: TEvalHistory[];
   };
   callCounter: {
     setTimeout: number;
     clearTimeout: number;
     setInterval: number;
     clearInterval: number;
-  };
-  evalMetrics: {
-    totalInvocations: number;
-    evalHistory: TEvalHistory[];
+    eval: number;
   };
   tickTook: string;
 }
@@ -68,17 +64,8 @@ const tick = new Timer(
 
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(),
-      timeMetrics: wrapper.collectTimersMetrics(),
-      callCounter: {
-        setTimeout: wrapper.callCounter.setTimeout,
-        clearTimeout: wrapper.callCounter.clearTimeout,
-        setInterval: wrapper.callCounter.setInterval,
-        clearInterval: wrapper.callCounter.clearInterval,
-      },
-      evalMetrics: {
-        totalInvocations: wrapper.callCounter.eval,
-        evalHistory: wrapper.evalHistory,
-      },
+      wrapperMetrics: wrapper.collectWrapperMetrics(),
+      callCounter: wrapper.callCounter,
       tickTook: reportedTickExecutionTime,
     };
 
@@ -99,10 +86,14 @@ function stopObserve() {
   eachSecond.stop();
 }
 
-windowListen(EVENT_CS_COMMAND, (o: TCaCommandEventOptions) => {
-  for (const operator of o.operators) {
-    if ('reset-wrapper-history' === operator) {
-      wrapper.cleanHistory();
+windowListen(EVENT_CS_COMMAND, (o: TCsCommandEventOptions) => {
+  if ('reset-wrapper-history' === o.operator) {
+    wrapper.cleanHistory();
+  } else if ('clear-timer-handler' === o.operator) {
+    if (o.type === ETimeType.TIMEOUT) {
+      window.clearTimeout(o.handler);
+    } else {
+      window.clearInterval(o.handler);
     }
   }
 });

@@ -3,6 +3,7 @@
     REGEX_STACKTRACE_CLEAN_URL,
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
+    TAG_INVALID_CALLSTACK,
   } from '@/api/const';
 
   export let href: string = '';
@@ -17,7 +18,10 @@
     href.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
     10
   );
-  $: isSourceLess = !isFinite(lineNumber) || href.startsWith('<anonymous>');
+  $: isSourceLess =
+    !isFinite(lineNumber) ||
+    href.startsWith('<anonymous>') ||
+    TAG_INVALID_CALLSTACK === href;
 
   function showStackTraceResource(e: MouseEvent) {
     e.preventDefault();

@@ -1,12 +1,10 @@
 <script lang="ts">
-  import type { TMetrics } from '@/cs-main';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
+  import type { TEvalHistory } from '@/api/wrappers';
 
-  export let metrics: TMetrics['evalMetrics'] = {
-    totalInvocations: 0,
-    evalHistory: [],
-  };
+  export let callCount: number = 0;
+  export let metrics: TEvalHistory[] = [];
 
   function dynamicValue(value: unknown): string {
     if (value === '⟪undefined⟫') {
@@ -23,13 +21,13 @@
 
 <table>
   <caption class="bc-invert ta-l"
-    >Eval Usages <Variable bind:value={metrics.totalInvocations} /></caption
+    >Eval Usages <Variable bind:value={callCount} /></caption
   >
   <tr
     ><th>Callstack</th><th>Calls</th><th>Recent Code</th><th>Recent Return</th
     ></tr
   >
-  {#each metrics.evalHistory as metric (metric.traceId)}
+  {#each metrics as metric (metric.traceId)}
     <tr class="t-zebra">
       <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
       <td class="ta-c">

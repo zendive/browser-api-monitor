@@ -9,6 +9,7 @@ import {
   TRACE_ERROR_MESSAGE,
   REGEX_STACKTRACE_PREFIX,
   REGEX_STACKTRACE_CLEAN_URL,
+  TAG_INVALID_CALLSTACK,
 } from '@/api/const';
 import { cloneObjectSafely } from './clone';
 
@@ -18,7 +19,7 @@ export type TCallstack = {
   /** link to source */
   link: string;
 }[];
-enum ETimeType {
+export enum ETimeType {
   TIMEOUT,
   INTERVAL,
 }
@@ -38,7 +39,7 @@ export type TTimerHistory = {
   trace: TCallstack;
   isEval: boolean | undefined;
 };
-export type TEvalMetrics = {
+export type TEvalHistory = {
   traceId: string;
   trace: TCallstack;
   individualInvocations: number;
@@ -80,7 +81,10 @@ function createCallstack(e: Error): TCallstack {
   }
 
   if (!rv.length) {
-    rv.push({ name: `N/A`, link: crypto.randomUUID() });
+    rv.push({
+      name: TAG_INVALID_CALLSTACK,
+      link: `(id: ${crypto.randomUUID()})`,
+    });
   }
 
   return rv;
@@ -92,7 +96,7 @@ export class Wrapper {
   clearTimeoutHistory: TTimerHistory[] = [];
   setIntervalHistory: TTimerHistory[] = [];
   clearIntervalHistory: TTimerHistory[] = [];
-  evalHistory: TEvalMetrics[] = [];
+  evalHistory: TEvalHistory[] = [];
   callCounter = {
     setTimeout: 0,
     clearTimeout: 0,
@@ -211,7 +215,7 @@ export class Wrapper {
     }
   }
 
-  collectTimersMetrics() {
+  collectWrapperMetrics() {
     const timeouts: TOnlineTimerMetrics[] = [];
     const intervals: TOnlineTimerMetrics[] = [];
 
@@ -230,6 +234,7 @@ export class Wrapper {
       clearTimeoutHistory: this.clearTimeoutHistory,
       setIntervalHistory: this.setIntervalHistory,
       clearIntervalHistory: this.clearIntervalHistory,
+      evalHistory: this.evalHistory,
     };
   }
 
@@ -285,6 +290,7 @@ export class Wrapper {
       this.timerOnline(ETimeType.TIMEOUT, handler, delay, trace, isEval);
       this.updateHistory(this.setTimeoutHistory, handler, trace, isEval);
       if (isEval) {
+        this.callCounter.eval++;
         this.updateEvalHistory(code, '(N/A - via setTimeout)', trace);
       }
 
@@ -334,6 +340,7 @@ export class Wrapper {
       this.timerOnline(ETimeType.INTERVAL, handler, delay, trace, isEval);
       this.updateHistory(this.setIntervalHistory, handler, trace, isEval);
       if (isEval) {
+        this.callCounter.eval++;
         this.updateEvalHistory(code, '(N/A - via setInterval)', trace);
       }
 

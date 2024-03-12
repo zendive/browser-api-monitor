@@ -11,6 +11,7 @@
  */
 
 import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
+import type { ETimeType } from './wrappers';
 
 export function portPost(appEvent: string, payload?: any) {
   const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
@@ -115,3 +116,13 @@ export const EVENT_OBSERVE_STOP = 'EVENT_OBSERVE_STOP';
 export const EVENT_CS_COMMAND = 'EVENT_CS_COMMAND';
 export const EVENT_TELEMETRY = 'EVENT_TELEMETRY';
 export const EVENT_CONTENT_SCRIPT_LOADED = 'EVENT_CONTENT_SCRIPT_LOADED';
+
+export interface TCsResetHistory {
+  operator: 'reset-wrapper-history';
+}
+export interface TCsClearHandler {
+  operator: 'clear-timer-handler';
+  type: ETimeType;
+  handler: number;
+}
+export type TCsCommandEventOptions = TCsResetHistory | TCsClearHandler;

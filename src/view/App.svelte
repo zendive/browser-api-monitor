@@ -7,8 +7,9 @@
     EVENT_PANEL_HIDDEN,
     EVENT_PANEL_SHOWN,
     EVENT_CONTENT_SCRIPT_LOADED,
+    type TCsResetHistory,
   } from '@/api/communication';
-  import { IS_DEV, type TCaCommandEventOptions } from '@/api/const';
+  import { IS_DEV } from '@/api/const';
   import { Fps } from '@/api/time';
   import type { TMetrics } from '@/cs-main';
   import Variable from './components/Variable.svelte';
@@ -40,8 +41,8 @@
   }
 
   function onResetHistory() {
-    portPost(EVENT_CS_COMMAND, <TCaCommandEventOptions>{
-      operators: ['reset-wrapper-history'],
+    portPost(EVENT_CS_COMMAND, <TCsResetHistory>{
+      operator: 'reset-wrapper-history',
     });
   }
 </script>
@@ -49,19 +50,28 @@
 {#if msg}
   <main>
     <div>
-      {#if IS_DEV}<button on:click={() => location.reload()} title="Reload"
-          >♻️</button
-        >{/if}
-      <button on:click={onTogglePause} title="Toggle pause"
-        >{#if paused}🔴{:else}🟢{/if}</button
-      >
-      <button on:click={onResetHistory} title="Reset history">❌</button>
+      {#if IS_DEV}
+        <button on:click={() => location.reload()} title="Reload">
+          <span class="icon -refresh"></span>
+        </button>
+      {/if}
+      <button on:click={onTogglePause} title="Toggle pause">
+        {#if paused}🔴{:else}🟢{/if}
+      </button>
+      <button on:click={onResetHistory} title="Reset history">
+        <span class="icon -clear"></span>
+      </button>
       {#if !paused}
         <span><Variable bind:value={fpsValue} />fps [{msg.tickTook}]</span>
       {/if}
     </div>
 
     <div>
+      <span
+        ><strong>eval</strong>:<Variable
+          bind:value={msg.callCounter.eval}
+        /></span
+      >
       <span
         ><strong>setTimeout</strong>: <Variable
           bind:value={msg.callCounter.setTimeout}
@@ -84,11 +94,14 @@
       >
     </div>
 
-    <EvalMetrics bind:metrics={msg.evalMetrics} />
+    <EvalMetrics
+      bind:callCount={msg.callCounter.eval}
+      bind:metrics={msg.wrapperMetrics.evalHistory}
+    />
 
     <Media bind:metrics={msg.mediaMetrics} />
 
-    <Timers bind:metrics={msg.timeMetrics} />
+    <Timers bind:metrics={msg.wrapperMetrics} />
   </main>
 {/if}
 

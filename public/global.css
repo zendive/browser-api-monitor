@@ -3,6 +3,7 @@
   --bg-invert: rgb(10% 10% 10% / 70%);
   --bg-table-even: rgb(30% 30% 30% / 10%);
   --bg-error: rgb(255 240 2 / 78%);
+  --border: rgb(0 0 0 /50%);
   --text: rgb(26 26 26);
   --text-invert: rgb(100% 100% 100% / 70%);
   --link: rgb(0 140 255);
@@ -13,6 +14,7 @@
   --bg-invert: rgb(255 255 255 / 70%);
   --bg-table-even: rgb(100% 100% 100% / 20%);
   --bg-error: rgb(153 25 25 / 77%);
+  --border: rgb(100% 100% 100% /50%);
   --text: rgb(100% 100% 100%);
   --text-invert: rgb(26 26 26 / 70%);
   --link: rgb(11% 74% 100%);
@@ -40,11 +42,17 @@ a {
   color: rgb(0, 100, 200);
   text-decoration: none;
 }
-
 a:hover {
   text-decoration: underline;
 }
-
+button {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
 table,
 tr,
 td,
@@ -77,4 +85,35 @@ th,
 }
 .wb-all {
   word-break: break-all;
+}
+
+.icon {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--text);
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.icon.-refresh {
+  -webkit-mask-image: url(img/refresh.svg);
+  mask-image: url(img/refresh.svg);
+}
+.icon.-icon {
+  -webkit-mask-image: url(img/icon.svg);
+  mask-image: url(img/icon.svg);
+}
+.icon.-clear {
+  -webkit-mask-image: url(img/clear.svg);
+  mask-image: url(img/clear.svg);
+}
+.icon.-remove {
+  -webkit-mask-image: url(img/remove.svg);
+  mask-image: url(img/remove.svg);
+}
+.icon.-remove.-small {
+  width: 11px;
+  height: 11px;
 }
