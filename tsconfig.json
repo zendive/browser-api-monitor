@@ -1,16 +1,18 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
-
   "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "types": ["chrome"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
     },
     "lib": ["ESNext", "DOM"],
-    "target": "ESNext"
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
   },
 
   "include": ["src/**/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
+  "exclude": ["node_modules/*", "public/*"],
 }
