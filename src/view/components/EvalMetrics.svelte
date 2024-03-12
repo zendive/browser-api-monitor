@@ -24,12 +24,25 @@
     >Eval Usages <Variable bind:value={callCount} /></caption
   >
   <tr
-    ><th>Callstack</th><th>Calls</th><th>Recent Code</th><th>Recent Return</th
+    ><th>Callstack</th><th>Risk</th><th>Called</th><th>Code</th><th>Returns</th
     ></tr
   >
   {#each metrics as metric (metric.traceId)}
     <tr class="t-zebra">
       <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
+      <td>
+        {#if metric.usesLocalScope}
+          <span
+            title="Has access to parent scope AND tried to use local scope context variable (which was prevented)"
+            >HIGH</span
+          >
+        {:else}
+          <span
+            title="Has access to parent scope, didn't tried to access local scope variable"
+            >NORMAL</span
+          >
+        {/if}
+      </td>
       <td class="ta-c">
         <Variable bind:value={metric.individualInvocations} />
       </td>

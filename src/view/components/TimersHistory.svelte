@@ -11,7 +11,7 @@
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
-  <tr><th>Callstack</th><th>Calls</th><th>Handler</th><th>Delay</th></tr>
+  <tr><th>Callstack</th><th>Called</th><th>Handler</th><th>Delay</th></tr>
   {#each metrics as metric (metric.traceId)}
     <tr
       class="t-zebra"

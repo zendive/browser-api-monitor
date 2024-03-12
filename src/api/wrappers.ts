@@ -45,6 +45,7 @@ export type TEvalHistory = {
   individualInvocations: number;
   returnedValue: any;
   code: any;
+  usesLocalScope: boolean;
 };
 
 type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
@@ -179,7 +180,12 @@ export class Wrapper {
     }
   }
 
-  updateEvalHistory(code: string, returnedValue: any, trace: TCallstack) {
+  updateEvalHistory(
+    code: string,
+    returnedValue: any,
+    trace: TCallstack,
+    usesLocalScope: boolean
+  ) {
     const traceId = trace.map((v) => v.link).join('');
     const existing = this.evalHistory.find((v) => v.traceId === traceId);
 
@@ -187,6 +193,7 @@ export class Wrapper {
       existing.code = cloneObjectSafely(code);
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.individualInvocations++;
+      existing.usesLocalScope = usesLocalScope;
     } else {
       this.evalHistory.push({
         individualInvocations: 1,
@@ -194,6 +201,7 @@ export class Wrapper {
         returnedValue: cloneObjectSafely(returnedValue),
         trace,
         traceId,
+        usesLocalScope,
       });
     }
   }
@@ -253,11 +261,30 @@ export class Wrapper {
 
   wrapEval() {
     window.eval = function WrappedLessEval(this: Wrapper, code: string) {
-      const rv = this.native.eval(code);
-
       this.callCounter.eval++;
+      let rv: unknown;
+      let throwError = null;
+      let usesLocalScope = false;
+
+      try {
+        rv = this.native.eval(code);
+      } catch (error) {
+        if ('ReferenceError' === error.name) {
+          // most likely a side effect of `eval` reassigning
+          // when reference to local scope variable resulting
+          // in "ReferenceError: {something} is not defined"
+          usesLocalScope = true;
+        } else {
+          throwError = error;
+        }
+      }
+
       const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
-      this.updateEvalHistory(code, rv, trace);
+      this.updateEvalHistory(code, rv, trace, usesLocalScope);
+
+      if (throwError) {
+        throw throwError;
+      }
 
       return rv;
     }.bind(this);
@@ -291,7 +318,7 @@ export class Wrapper {
       this.updateHistory(this.setTimeoutHistory, handler, trace, isEval);
       if (isEval) {
         this.callCounter.eval++;
-        this.updateEvalHistory(code, '(N/A - via setTimeout)', trace);
+        this.updateEvalHistory(code, '(N/A - via setTimeout)', trace, false);
       }
 
       return handler;
@@ -341,7 +368,7 @@ export class Wrapper {
       this.updateHistory(this.setIntervalHistory, handler, trace, isEval);
       if (isEval) {
         this.callCounter.eval++;
-        this.updateEvalHistory(code, '(N/A - via setInterval)', trace);
+        this.updateEvalHistory(code, '(N/A - via setInterval)', trace, false);
       }
 
       return handler;

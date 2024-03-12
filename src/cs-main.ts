@@ -72,7 +72,7 @@ const tick = new Timer(
     windowPost(EVENT_TELEMETRY, metrics);
   },
   UI_UPDATE_FREQUENCY,
-  { interval: true, animation: true, measurable: true /*TODO: IS_DEV?*/ }
+  { interval: true, animation: true, measurable: true }
 );
 
 function startObserve() {
