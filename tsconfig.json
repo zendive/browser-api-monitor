@@ -2,17 +2,18 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "noImplicitAny": true,
     "types": ["chrome"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["src/*"]
     },
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Bundler"
   },
 
   "include": ["src/**/*"],
-  "exclude": ["node_modules/*", "public/*"],
+  "exclude": ["node_modules/*", "public/*"]
 }

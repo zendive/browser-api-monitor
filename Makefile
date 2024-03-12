@@ -13,13 +13,12 @@ dev:
 		npx webpack --progress --watch --mode=development
 
 lint:
-  # npx prettier . --write
+	npx prettier . --write
 	npx svelte-check
 
 prod:
-	# npx prettier . --write
+	make lint
 	rm -rf ./public/build
-	npx svelte-check
 	NODE_OPTIONS="--loader=ts-node/esm --no-warnings=ExperimentalWarning" \
 		NODE_ENV="production" \
 		time npx webpack --mode=production
