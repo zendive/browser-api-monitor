@@ -3,11 +3,7 @@
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
   import { IS_DEV } from '@/api/const';
-  import {
-    EVENT_CS_COMMAND,
-    portPost,
-    type TCsClearHandler,
-  } from '@/api/communication';
+  import { portPost } from '@/api/communication';
 
   export let caption: string = '';
   export let metrics: TOnlineTimerMetrics[] = [];
@@ -15,8 +11,8 @@
   $: metrics.sort((a, b) => b.delay - a.delay); // sort by delay descending
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
-    portPost(EVENT_CS_COMMAND, <TCsClearHandler>{
-      operator: 'clear-timer-handler',
+    portPost({
+      msg: 'clear-timer-handler',
       type: metric.type,
       handler: metric.handler,
     });

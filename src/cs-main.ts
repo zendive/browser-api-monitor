@@ -1,13 +1,5 @@
-import {
-  EVENT_TELEMETRY,
-  EVENT_OBSERVE_START,
-  EVENT_OBSERVE_STOP,
-  EVENT_CS_COMMAND,
-  windowListen,
-  windowPost,
-  type TCsCommandEventOptions,
-} from './api/communication';
-import { IS_DEV, UI_UPDATE_FREQUENCY } from './api/const';
+import { windowListen, windowPost } from './api/communication';
+import { IS_DEV, UI_UPDATE_FREQUENCY_LOW } from './api/const';
 import { MeanAggregator, Stopper, Timer } from './api/time';
 import {
   collectMediaMetrics,
@@ -61,6 +53,8 @@ const eachSecond = new Timer(
 const tick = new Timer(
   () => {
     meanExecutionTime.add(tick.executionTime);
+    // adaptive update-frequency
+    tick.options.animation = tick.executionTime < 3;
 
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(),
@@ -69,9 +63,9 @@ const tick = new Timer(
       tickTook: reportedTickExecutionTime,
     };
 
-    windowPost(EVENT_TELEMETRY, metrics);
+    windowPost({ msg: 'telemetry', metrics });
   },
-  UI_UPDATE_FREQUENCY,
+  UI_UPDATE_FREQUENCY_LOW,
   { interval: true, animation: true, measurable: true }
 );
 
@@ -86,18 +80,21 @@ function stopObserve() {
   eachSecond.stop();
 }
 
-windowListen(EVENT_CS_COMMAND, (o: TCsCommandEventOptions) => {
-  if ('reset-wrapper-history' === o.operator) {
+windowListen((o) => {
+  if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
-  } else if ('clear-timer-handler' === o.operator) {
+    tick.trigger();
+  } else if (o.msg === 'clear-timer-handler') {
     if (o.type === ETimeType.TIMEOUT) {
       window.clearTimeout(o.handler);
     } else {
       window.clearInterval(o.handler);
     }
+  } else if (o.msg === 'start-observe') {
+    startObserve();
+  } else if (o.msg === 'stop-observe') {
+    stopObserve();
   }
 });
-windowListen(EVENT_OBSERVE_START, startObserve);
-windowListen(EVENT_OBSERVE_STOP, stopObserve);
 
 IS_DEV && console.debug('cs-main.ts');

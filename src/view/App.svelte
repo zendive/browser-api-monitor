@@ -1,14 +1,5 @@
 <script lang="ts">
-  import {
-    runtimeListen,
-    portPost,
-    EVENT_TELEMETRY,
-    EVENT_CS_COMMAND,
-    EVENT_PANEL_HIDDEN,
-    EVENT_PANEL_SHOWN,
-    EVENT_CONTENT_SCRIPT_LOADED,
-    type TCsResetHistory,
-  } from '@/api/communication';
+  import { runtimeListen, portPost } from '@/api/communication';
   import { IS_DEV } from '@/api/const';
   import { Fps } from '@/api/time';
   import type { TMetrics } from '@/cs-main';
@@ -16,97 +7,145 @@
   import Timers from './components/Timers.svelte';
   import Media from './components/Media.svelte';
   import EvalMetrics from './components/EvalMetrics.svelte';
+  import { onMount } from 'svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
   let paused = false;
   let msg: TMetrics;
 
-  runtimeListen(EVENT_CONTENT_SCRIPT_LOADED, () => {
-    paused = false;
-    portPost(EVENT_PANEL_SHOWN);
+  runtimeListen((o) => {
+    if (o.msg === 'content-script-loaded' && !paused) {
+      portPost({ msg: 'start-observe' });
+    } else if (o.msg === 'telemetry') {
+      msg = o.metrics;
+      fps.tick();
+    }
   });
-  runtimeListen(EVENT_TELEMETRY, (metrics: TMetrics) => {
-    msg = metrics;
-    fps.tick();
+
+  onMount(() => {
+    portPost({ msg: 'start-observe' });
+    window.addEventListener('beforeunload', () => {
+      portPost({ msg: 'stop-observe' });
+    });
   });
 
   function onTogglePause() {
     paused = !paused;
     if (paused) {
-      portPost(EVENT_PANEL_HIDDEN);
+      portPost({ msg: 'stop-observe' });
     } else {
-      portPost(EVENT_PANEL_SHOWN);
+      portPost({ msg: 'start-observe' });
     }
   }
 
   function onResetHistory() {
-    portPost(EVENT_CS_COMMAND, <TCsResetHistory>{
-      operator: 'reset-wrapper-history',
-    });
+    portPost({ msg: 'reset-wrapper-history' });
   }
 </script>
 
-{#if msg}
-  <main>
-    <div>
-      {#if IS_DEV}
-        <button on:click={() => location.reload()} title="Reload">
-          <span class="icon -refresh"></span>
-        </button>
-      {/if}
-      <button on:click={onTogglePause} title="Toggle pause">
-        {#if paused}🔴{:else}🟢{/if}
+<section class="root">
+  <header>
+    {#if IS_DEV}
+      <button on:click={() => location.reload()} title="Reload">
+        <span class="icon -refresh" />
       </button>
-      <button on:click={onResetHistory} title="Reset history">
-        <span class="icon -clear"></span>
-      </button>
-      {#if !paused}
-        <span><Variable bind:value={fpsValue} />fps [{msg.tickTook}]</span>
-      {/if}
-    </div>
+    {/if}
+    <button on:click={onTogglePause} title="Toggle pause">
+      {#if paused}<span class="icon -play" />{:else}<span
+          class="icon -pause"
+        />{/if}
+    </button>
+    <button on:click={onResetHistory} title="Reset history">
+      <span class="icon -clear" />
+    </button>
 
-    <div>
-      <span
-        ><strong>eval</strong>:<Variable
-          bind:value={msg.callCounter.eval}
-        /></span
-      >
-      <span
-        ><strong>setTimeout</strong>: <Variable
-          bind:value={msg.callCounter.setTimeout}
-        /></span
-      >
-      <span
-        ><strong>clearTimeout</strong>: <Variable
-          bind:value={msg.callCounter.clearTimeout}
-        /></span
-      >
-      <span
-        ><strong>setInterval</strong>: <Variable
-          bind:value={msg.callCounter.setInterval}
-        /></span
-      >
-      <span
-        ><strong>clearInterval</strong>: <Variable
-          bind:value={msg.callCounter.clearInterval}
-        /></span
-      >
-    </div>
+    {#if msg}
+      <div class="infobar">
+        <div class="divider" />
+        <div>
+          <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
+        </div>
+        <div class="divider" />
+        <div>
+          <strong>setTimeout</strong>: <Variable
+            bind:value={msg.callCounter.setTimeout}
+          />
+        </div>
+        <div class="divider" />
+        <div>
+          <strong>clearTimeout</strong>: <Variable
+            bind:value={msg.callCounter.clearTimeout}
+          />
+        </div>
+        <div class="divider" />
+        <div>
+          <strong>setInterval</strong>: <Variable
+            bind:value={msg.callCounter.setInterval}
+          />
+        </div>
+        <div class="divider" />
+        <div>
+          <strong>clearInterval</strong>: <Variable
+            bind:value={msg.callCounter.clearInterval}
+          />
+        </div>
+        <div class="divider" />
+      </div>
+    {/if}
 
-    <EvalMetrics
-      bind:callCount={msg.callCounter.eval}
-      bind:metrics={msg.wrapperMetrics.evalHistory}
-    />
+    {#if msg && !paused}
+      <div class="divider" />
+      <div>
+        {#if msg.tickTook}{msg.tickTook} /{/if}
+        <Variable bind:value={fpsValue} /> fps
+      </div>
+    {/if}
+  </header>
 
-    <Media bind:metrics={msg.mediaMetrics} />
+  {#if msg}
+    <main>
+      <EvalMetrics
+        bind:callCount={msg.callCounter.eval}
+        bind:metrics={msg.wrapperMetrics.evalHistory}
+      />
 
-    <Timers bind:metrics={msg.wrapperMetrics} />
-  </main>
-{/if}
+      <Media bind:metrics={msg.mediaMetrics} />
 
-<style>
-  main {
-    padding: 1rem;
+      <Timers bind:metrics={msg.wrapperMetrics} />
+    </main>
+  {/if}
+</section>
+
+<style lang="scss">
+  .root {
+    --header-height: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .divider {
+      width: 1px;
+      height: var(--header-height);
+      background-color: var(--border);
+      margin: 0 0.4rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+
+      .infobar {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+      }
+    }
+    main {
+      overflow-y: scroll;
+    }
   }
 </style>

@@ -20,7 +20,7 @@
 </script>
 
 <table>
-  <caption class="bc-invert ta-l"
+  <caption class="bc-error ta-l"
     >Eval Usages <Variable bind:value={callCount} /></caption
   >
   <tr

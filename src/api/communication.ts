@@ -10,86 +10,68 @@
  *      panel: runtimeListen
  */
 
+import { TMetrics } from '@/cs-main';
 import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
 import type { ETimeType } from './wrappers';
 
-export function portPost(appEvent: string, payload?: any) {
+export function portPost(payload: TMsgOptions) {
   const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
     name: APPLICATION_NAME,
   });
 
-  // console.debug('portPost', appEvent);
-  port.postMessage({ appEvent, payload });
+  port.postMessage(payload);
 }
 
-export function portListen(appEvent: string, callback: (payload: any) => void) {
-  // console.debug('portListen -> connected');
+export function portListen(callback: (payload: TMsgOptions) => void) {
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name === APPLICATION_NAME) {
       port.onMessage.addListener((e) => {
-        if (e.appEvent === appEvent) {
-          // console.debug('portListen', appEvent);
-          callback(e.payload);
-        }
+        callback(e);
       });
     }
   });
 }
 
-export function windowPost(appEvent: string, payload?: any) {
-  // console.debug('windowPost', appEvent);
+export function windowPost(payload: TMsgOptions) {
   window.postMessage(
     {
       application: APPLICATION_NAME,
-      appEvent,
       payload,
     },
     '*'
   );
 }
 
-export function windowListen(
-  appEvent: string,
-  callback: (payload: any) => void
-) {
+export function windowListen(callback: (payload: TMsgOptions) => void) {
   window.addEventListener('message', (e: MessageEvent) => {
     if (
       e.source === window &&
       typeof e.data === 'object' &&
       e.data !== null &&
-      e.data.application === APPLICATION_NAME &&
-      e.data.appEvent === appEvent
+      e.data.application === APPLICATION_NAME
     ) {
-      // console.debug('windowListen', e.data.appEvent);
       callback(e.data.payload);
     }
   });
 }
 
-export function runtimePost(appEvent: string, payload?: any) {
-  // console.debug('runtimePost', appEvent);
+export function runtimePost(payload: TMsgOptions) {
   chrome.runtime.sendMessage(
     {
       application: APPLICATION_NAME,
-      appEvent,
       payload,
     },
-    handleRuntimeMessageResponse.bind(null, appEvent)
+    handleRuntimeMessageResponse
   );
 }
 
-export function runtimeListen(
-  appEvent: string,
-  callback: (payload: any) => void
-) {
+export function runtimeListen(callback: (payload: TMsgOptions) => void) {
   chrome.runtime.onMessage.addListener(
     (e, sender: chrome.runtime.MessageSender, sendResponse) => {
       if (
         sender.tab?.id === chrome.devtools.inspectedWindow.tabId &&
-        e.application === APPLICATION_NAME &&
-        e.appEvent === appEvent
+        e.application === APPLICATION_NAME
       ) {
-        // console.debug('runtimeListen', e.appEvent);
         callback(e.payload);
         sendResponse();
       }
@@ -97,7 +79,7 @@ export function runtimeListen(
   );
 }
 
-function handleRuntimeMessageResponse(appEvent: string): void {
+function handleRuntimeMessageResponse(): void {
   const error = chrome.runtime.lastError;
 
   if (
@@ -105,24 +87,35 @@ function handleRuntimeMessageResponse(appEvent: string): void {
     typeof error.message === 'string' &&
     !ERRORS_IGNORED.includes(error.message)
   ) {
-    console.error(appEvent, error.message);
+    console.error(error.message);
   }
 }
 
-export const EVENT_PANEL_SHOWN = 'EVENT_PANEL_SHOWN';
-export const EVENT_PANEL_HIDDEN = 'EVENT_PANEL_HIDDEN';
-export const EVENT_OBSERVE_START = 'EVENT_OBSERVE_START';
-export const EVENT_OBSERVE_STOP = 'EVENT_OBSERVE_STOP';
-export const EVENT_CS_COMMAND = 'EVENT_CS_COMMAND';
-export const EVENT_TELEMETRY = 'EVENT_TELEMETRY';
-export const EVENT_CONTENT_SCRIPT_LOADED = 'EVENT_CONTENT_SCRIPT_LOADED';
-
-export interface TCsResetHistory {
-  operator: 'reset-wrapper-history';
+export interface TMsgStartObserve {
+  msg: 'start-observe';
 }
-export interface TCsClearHandler {
-  operator: 'clear-timer-handler';
+export interface TMsgStopObserve {
+  msg: 'stop-observe';
+}
+export interface TMsgResetHistory {
+  msg: 'reset-wrapper-history';
+}
+export interface TMsgClearHandler {
+  msg: 'clear-timer-handler';
   type: ETimeType;
   handler: number;
 }
-export type TCsCommandEventOptions = TCsResetHistory | TCsClearHandler;
+export interface TMsgLoaded {
+  msg: 'content-script-loaded';
+}
+export interface TMsgTelemetry {
+  msg: 'telemetry';
+  metrics: TMetrics;
+}
+export type TMsgOptions =
+  | TMsgTelemetry
+  | TMsgStartObserve
+  | TMsgStopObserve
+  | TMsgLoaded
+  | TMsgResetHistory
+  | TMsgClearHandler;

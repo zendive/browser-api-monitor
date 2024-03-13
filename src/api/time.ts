@@ -69,6 +69,7 @@ interface TimerOptions {
 export class Timer {
   delay: number;
   readonly options: TimerOptions;
+  /** (ms) */
   executionTime: number = -1;
 
   #fn: Function;

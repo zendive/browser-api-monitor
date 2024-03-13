@@ -4,7 +4,7 @@ export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const UI_UPDATE_FREQUENCY = 16; // ms
+export const UI_UPDATE_FREQUENCY_LOW = 200; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);

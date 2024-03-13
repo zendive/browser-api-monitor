@@ -23,16 +23,16 @@
 
 html,
 body {
-  position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   margin: 0;
-  padding: 8px;
+  padding: 0;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
@@ -47,7 +47,10 @@ a:hover {
 }
 button {
   background-color: transparent;
-  border: 1px solid var(--border);
+  border-top: none;
+  border-right: 1px solid var(--border);
+  border-bottom: none;
+  border-left: none;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -116,4 +119,12 @@ th,
 .icon.-remove.-small {
   width: 11px;
   height: 11px;
+}
+.icon.-pause {
+  -webkit-mask-image: url(img/pause.svg);
+  mask-image: url(img/pause.svg);
+}
+.icon.-play {
+  -webkit-mask-image: url(img/play.svg);
+  mask-image: url(img/play.svg);
 }
