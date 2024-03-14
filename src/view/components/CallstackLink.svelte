@@ -39,7 +39,7 @@
 </script>
 
 {#if isSourceLess}
-  <span>{`${name} ${href === name ? '' : href}`}</span>
+  <span class="no-link">{`${name} ${href === name ? '' : href}`}</span>
 {:else}
   <a
     {href}
@@ -50,12 +50,21 @@
 {/if}
 
 <style lang="scss">
+  .no-link,
   a {
-    word-break: break-all;
     color: var(--link);
+  }
+  a {
+    display: inline-block;
+    word-break: break-all;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 25rem;
 
     &.beenClicked {
-      background-color: var(--link-bg-visited);
+      color: var(--link-visited-text);
+      background-color: var(--link-visited-bg);
     }
   }
 </style>

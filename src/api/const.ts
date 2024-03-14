@@ -1,5 +1,7 @@
-export const APPLICATION_NAME = 'ApiMonitor';
 export const IS_DEV = __development__;
+export const APPLICATION_VERSION = __app_version__;
+export const APPLICATION_NAME = `${__app_name__}@${__app_version__}`;
+export const APPLICATION_HOME_PAGE = __home_page__;
 export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',

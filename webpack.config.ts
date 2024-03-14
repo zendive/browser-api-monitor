@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import { EsbuildPlugin } from 'esbuild-loader';
 import sveltePreprocess from 'svelte-preprocess';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import manifest from './manifest.json' with { type: 'json' };
+import packageJson from './package.json' with { type: 'json' };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +55,9 @@ export default function (
           }),
       new webpack.DefinePlugin({
         __development__: !isProd,
+        __app_name__: `"${packageJson.name}"`,
+        __app_version__: `"${manifest.version}"`,
+        __home_page__: `"${manifest.homepage_url}"`,
       }),
       new MiniCssExtractPlugin({ filename: 'bundle.css' }),
     ],

@@ -36,7 +36,7 @@ export class Stopper {
       return `${Math.trunc(msTime * 1e3)}μs`;
     } else if (msTime < 3) {
       const ms = Math.trunc(msTime);
-      return `${ms}.${Math.trunc((msTime - ms) * 1e3)}ms`;
+      return `${ms}.${Math.trunc((msTime - ms) * 1e2)}ms`;
     } else if (msTime < 1e3) {
       return `${Math.trunc(msTime)}ms`;
     } else if (msTime < 60e3) {

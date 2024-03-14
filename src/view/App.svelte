@@ -7,6 +7,7 @@
   import Timers from './components/Timers.svelte';
   import Media from './components/Media.svelte';
   import EvalMetrics from './components/EvalMetrics.svelte';
+  import Version from './components/Version.svelte';
   import { onMount } from 'svelte';
 
   let fpsValue = 0;
@@ -60,9 +61,9 @@
       <span class="icon -clear" />
     </button>
 
-    {#if msg}
-      <div class="infobar">
-        <div class="divider" />
+    <div class="infobar">
+      {#if msg}
+        <div class="divider -anchor-left" />
         <div>
           <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
         </div>
@@ -91,16 +92,26 @@
           />
         </div>
         <div class="divider" />
-      </div>
-    {/if}
+      {/if}
+    </div>
 
     {#if msg && !paused}
       <div class="divider" />
       <div>
-        {#if msg.tickTook}{msg.tickTook} /{/if}
-        <Variable bind:value={fpsValue} /> fps
+        {#if msg.tickTook}
+          <span title="Time took to collect telemetry data for a single update">
+            {msg.tickTook}
+          </span> /
+        {/if}
+        <span title="Telemetry updates per second">
+          {fpsValue} fps
+        </span>
       </div>
     {/if}
+
+    <div class="divider" />
+    <Version />
+    <div class="divider -anchor-right" />
   </header>
 
   {#if msg}
@@ -129,6 +140,15 @@
       height: var(--header-height);
       background-color: var(--border);
       margin: 0 0.4rem;
+
+      &.-anchor-left {
+        background-color: transparent;
+        margin-left: 0;
+      }
+      &.-anchor-right {
+        background-color: transparent;
+        margin-right: 0;
+      }
     }
 
     header {

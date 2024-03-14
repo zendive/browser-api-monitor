@@ -20,26 +20,26 @@
 </script>
 
 <table>
-  <caption class="bc-error ta-l"
+  <caption class="ta-l bc-invert"
     >Eval Usages <Variable bind:value={callCount} /></caption
   >
   <tr
-    ><th>Callstack</th><th>Risk</th><th>Called</th><th>Code</th><th>Returns</th
+    ><th>Callstack</th><th>Scope</th><th>Called</th><th>Code</th><th>Returns</th
     ></tr
   >
   {#each metrics as metric (metric.traceId)}
-    <tr class="t-zebra">
+    <tr class="t-zebra bc-error">
       <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
       <td>
         {#if metric.usesLocalScope}
           <span
-            title="Has access to parent scope AND tried to use local scope context variable (which was prevented)"
-            >HIGH</span
+            title="Throwed an error while trying to get local scope variables, return value is unreliable"
+            >LOCAL & GLOBAL</span
           >
         {:else}
           <span
-            title="Has access to parent scope, didn't tried to access local scope variable"
-            >NORMAL</span
+            title="Had access to global scope (local scope usage has not been detected)"
+            >GLOBAL</span
           >
         {/if}
       </td>

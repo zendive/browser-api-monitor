@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Timer, Stopper } from '@/api/time';
 
+  export let title: string = null;
   export let value: unknown;
 
   let isAnimated = false;
@@ -33,6 +34,7 @@
   class="number"
   class:even={isEven}
   class:animated={isAnimated}
+  {title}
   use:animateChange={value}>{value}</span
 >
 

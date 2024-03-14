@@ -2,23 +2,26 @@
   --bg: rgb(255 255 255);
   --bg-invert: rgb(10% 10% 10% / 70%);
   --bg-table-even: rgb(30% 30% 30% / 10%);
-  --bg-error: rgb(255 240 2 / 78%);
-  --border: rgb(0 0 0 /50%);
+  --bg-error: rgb(255 2 2 / 30%);
+  --bg-error-odd: rgb(255 39 2 / 50%);
+  --border: rgb(0 0 0 / 35%);
   --text: rgb(26 26 26);
   --text-invert: rgb(100% 100% 100% / 70%);
-  --link: rgb(0 140 255);
-  --link-bg-visited: rgb(79 189 36 / 0.24);
+  --link: rgb(121 121 122);
+  --link-visited-bg: rgb(79 189 36 / 0.24);
 }
 .dark {
   --bg: rgb(10% 10% 10%);
   --bg-invert: rgb(255 255 255 / 70%);
-  --bg-table-even: rgb(100% 100% 100% / 20%);
-  --bg-error: rgb(153 25 25 / 77%);
-  --border: rgb(100% 100% 100% /50%);
+  --bg-table-even: rgb(255 255 255 / 8%);
+  --bg-error: rgb(255 0 0 / 55%);
+  --bg-error-odd: rgb(153 25 25 / 77%);
+  --border: rgb(100% 100% 100% / 35%);
   --text: rgb(100% 100% 100%);
   --text-invert: rgb(26 26 26 / 70%);
-  --link: rgb(11% 74% 100%);
-  --link-bg-visited: rgb(55 0 255 / 49%);
+  --link: rgb(182 182 182);
+  --link-visited-text: rgb(0 0 0);
+  --link-visited-bg: rgb(132 130 131);
 }
 
 html,
@@ -39,7 +42,7 @@ body {
 }
 
 a {
-  color: rgb(0, 100, 200);
+  color: var(--link);
   text-decoration: none;
 }
 a:hover {
@@ -85,6 +88,9 @@ th,
 }
 .bc-error {
   background-color: var(--bg-error);
+}
+.bc-error:where(:nth-child(odd)) {
+  background-color: var(--bg-error-odd);
 }
 .wb-all {
   word-break: break-all;
