@@ -10,7 +10,7 @@
   <caption class="bc-invert ta-l">{caption}</caption>
   <tr>
     <td class="events">
-      <table>
+      <table class="w-full">
         <caption class="bc-invert ta-l">Events</caption>
         {#each Object.entries(metrics.events) as [label, value] (label)}
           <tr class:isPassive={0 === value} class:isActive={0 !== value}>
@@ -21,7 +21,7 @@
       </table>
     </td>
     <td class="props">
-      <table>
+      <table class="w-full">
         <caption class="bc-invert ta-l">Properties</caption>
         {#each Object.entries(metrics.props) as [label, value] (label)}
           <tr class:isPassive={null === value} class:isActive={true === value}>

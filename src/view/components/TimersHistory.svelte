@@ -7,7 +7,7 @@
   export let metrics: TTimerHistory[] = [];
 </script>
 
-<table>
+<table class="w-full">
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >

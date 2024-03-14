@@ -8,6 +8,7 @@
   --text: rgb(26 26 26);
   --text-invert: rgb(100% 100% 100% / 70%);
   --link: rgb(121 121 122);
+  --link-visited-text: rgb(0 0 0);
   --link-visited-bg: rgb(79 189 36 / 0.24);
 }
 .dark {
@@ -94,6 +95,9 @@ th,
 }
 .wb-all {
   word-break: break-all;
+}
+.w-full {
+  width: 100%;
 }
 
 .icon {

@@ -19,7 +19,7 @@
   }
 </script>
 
-<table>
+<table class="w-full">
   <caption class="ta-l bc-invert"
     >Eval Usages <Variable bind:value={callCount} /></caption
   >

@@ -52,10 +52,11 @@
 <style lang="scss">
   .no-link,
   a {
+    display: inline-block;
+    vertical-align: text-bottom;
     color: var(--link);
   }
   a {
-    display: inline-block;
     word-break: break-all;
     overflow: hidden;
     white-space: nowrap;
