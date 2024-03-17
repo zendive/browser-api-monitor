@@ -82,6 +82,21 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
   'poster',
 ];
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
+export const NETWORK_STATE = [
+  'NETWORK_EMPTY',
+  'NETWORK_IDLE',
+  'NETWORK_LOADING',
+  'NETWORK_NO_SOURCE',
+];
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+export const READY_STATE = [
+  'HAVE_NOTHING',
+  'HAVE_METADATA',
+  'HAVE_CURRENT_DATA',
+  'HAVE_FUTURE_DATA',
+  'HAVE_ENOUGH_DATA',
+];
 
 export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
 export const REGEX_STACKTRACE_PREFIX = /^.*at /;

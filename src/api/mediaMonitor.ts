@@ -1,4 +1,9 @@
-import { MEDIA_ELEMENT_EVENTS, MEDIA_ELEMENT_PROPS } from './const';
+import {
+  MEDIA_ELEMENT_EVENTS,
+  MEDIA_ELEMENT_PROPS,
+  NETWORK_STATE,
+  READY_STATE,
+} from './const';
 
 type TMediaModel = {
   el: HTMLMediaElement;
@@ -51,6 +56,7 @@ export function collectMediaMetrics(): TMediaMetrics[] {
     // refresh props metrics
     for (const prop of MEDIA_ELEMENT_PROPS) {
       v.metrics.props[prop] = formatPropValue(
+        prop,
         v.el[prop as keyof HTMLMediaElement]
       );
     }
@@ -58,10 +64,14 @@ export function collectMediaMetrics(): TMediaMetrics[] {
   });
 }
 
-function formatPropValue(value: unknown): any {
+function formatPropValue(prop: string, value: unknown): any {
   let rv: any = value;
 
-  if (value instanceof TimeRanges) {
+  if ('networkState' === prop) {
+    rv = `${value} - ${NETWORK_STATE[value as number]}`;
+  } else if ('readyState' === prop) {
+    rv = `${value} - ${READY_STATE[value as number]}`;
+  } else if (value instanceof TimeRanges) {
     rv = [];
 
     for (let n = 0, N = value.length; n < N; n++) {
