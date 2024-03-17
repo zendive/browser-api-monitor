@@ -19,13 +19,13 @@
   }
 </script>
 
-<table class="w-full">
+<table>
   <caption class="ta-l bc-invert"
     >Eval Usages <Variable bind:value={callCount} /></caption
   >
   <tr
-    ><th>Callstack</th><th>Scope</th><th>Called</th><th>Code</th><th>Returns</th
-    ></tr
+    ><th class="w-full">Callstack</th><th>Scope</th><th>Called</th><th>Code</th
+    ><th>Returns</th></tr
   >
   {#each metrics as metric (metric.traceId)}
     <tr class="t-zebra bc-error">

@@ -7,6 +7,7 @@
   --border: rgb(0 0 0 / 35%);
   --text: rgb(26 26 26);
   --text-invert: rgb(100% 100% 100% / 70%);
+  --text-zebra: rgb(26 26 26);
   --link: rgb(121 121 122);
   --link-visited-text: rgb(0 0 0);
   --link-visited-bg: rgb(79 189 36 / 0.24);
@@ -20,6 +21,7 @@
   --border: rgb(100% 100% 100% / 35%);
   --text: rgb(100% 100% 100%);
   --text-invert: rgb(26 26 26 / 70%);
+  --text-zebra: rgb(229 229 229);
   --link: rgb(182 182 182);
   --link-visited-text: rgb(0 0 0);
   --link-visited-bg: rgb(132 130 131);
@@ -86,6 +88,9 @@ th,
 }
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
+}
+.t-zebra:nth-child(even) a {
+  color: var(--text-zebra);
 }
 .bc-error {
   background-color: var(--bg-error);

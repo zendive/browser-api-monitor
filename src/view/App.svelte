@@ -92,6 +92,11 @@
           />
         </div>
         <div class="divider" />
+        <div>
+          <strong>Media</strong>:
+          <Variable bind:value={msg.mediaMetrics.length} />
+        </div>
+        <div class="divider" />
       {/if}
     </div>
 
@@ -166,6 +171,7 @@
     }
     main {
       overflow-y: scroll;
+      flex-grow: 1;
     }
   }
 </style>

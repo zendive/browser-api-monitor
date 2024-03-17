@@ -19,11 +19,11 @@
   }
 </script>
 
-<table class="w-full">
+<table>
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
-  <tr><th>Delay</th><th>Handler</th><th>Callstack</th></tr>
+  <tr><th>Delay</th><th>Handler</th><th class="w-full">Callstack</th></tr>
   {#each metrics as metric (metric.handler)}
     <tr class="t-zebra">
       <td class="ta-r">{metric.delay}</td>
@@ -38,7 +38,7 @@
           on:click={() => onRemoveHandler(metric)}
         />
       </td>
-      <td class="wb-all">
+      <td class="wb-all w-full">
         <Callstack bind:trace={metric.trace} />
         {#if IS_DEV && metric.rawTrace}
           <pre>{metric.rawTrace}</pre>

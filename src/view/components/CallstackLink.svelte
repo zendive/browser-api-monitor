@@ -39,7 +39,7 @@
 </script>
 
 {#if isSourceLess}
-  <span class="no-link">{`${name} ${href === name ? '' : href}`}</span>
+  <i class="no-link">{`${name} ${href === name ? '' : href}`}</i>
 {:else}
   <a
     {href}
@@ -56,6 +56,7 @@
     vertical-align: text-bottom;
     color: var(--link);
   }
+
   a {
     word-break: break-all;
     overflow: hidden;
