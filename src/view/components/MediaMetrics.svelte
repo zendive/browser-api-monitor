@@ -45,7 +45,7 @@
     max-width: 28rem;
 
     &:not(:first-child) {
-      border-left: 1px solid silver;
+      border-left: 1px solid var(--border);
     }
   }
   .events,
@@ -53,7 +53,7 @@
     vertical-align: top;
   }
   .isPassive {
-    color: gray;
+    color: var(--text-passive);
     font-weight: normal;
   }
   .isActive {

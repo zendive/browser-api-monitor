@@ -9,6 +9,7 @@
   import EvalMetrics from './components/EvalMetrics.svelte';
   import Version from './components/Version.svelte';
   import { onMount } from 'svelte';
+  import TogglePanels from './components/TogglePanels.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -52,6 +53,7 @@
         <span class="icon -refresh" />
       </button>
     {/if}
+    <TogglePanels />
     <button on:click={onTogglePause} title="Toggle pause">
       {#if paused}<span class="icon -play" />{:else}<span
           class="icon -pause"

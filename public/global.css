@@ -7,6 +7,7 @@
   --border: rgb(0 0 0 / 35%);
   --text: rgb(26 26 26);
   --text-invert: rgb(100% 100% 100% / 70%);
+  --text-passive: rgb(120 120 120);
   --text-zebra: rgb(26 26 26);
   --link: rgb(121 121 122);
   --link-visited-text: rgb(0 0 0);
@@ -21,6 +22,7 @@
   --border: rgb(100% 100% 100% / 35%);
   --text: rgb(100% 100% 100%);
   --text-invert: rgb(26 26 26 / 70%);
+  --text-passive: rgb(120 120 120);
   --text-zebra: rgb(229 229 229);
   --link: rgb(182 182 182);
   --link-visited-text: rgb(0 0 0);
@@ -142,4 +144,8 @@ th,
 .icon.-play {
   -webkit-mask-image: url(img/play.svg);
   mask-image: url(img/play.svg);
+}
+.icon.-toggle-menu {
+  -webkit-mask-image: url(img/toggle-menu.svg);
+  mask-image: url(img/toggle-menu.svg);
 }

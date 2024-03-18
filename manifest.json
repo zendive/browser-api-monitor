@@ -6,6 +6,7 @@
   "minimum_chrome_version": "122.0",
   "homepage_url": "https://github.com/zendive/browser-api-monitor",
   "author": "calexblock@gmail.com",
+  "permissions": ["storage"],
   "host_permissions": ["*://*/*"],
   "devtools_page": "public/devtools.html",
   "icons": {
