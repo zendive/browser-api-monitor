@@ -44,12 +44,17 @@
   function onResetHistory() {
     portPost({ msg: 'reset-wrapper-history' });
   }
+
+  function onDevReload() {
+    location.reload();
+    chrome.storage.local.clear();
+  }
 </script>
 
 <section class="root">
   <header>
     {#if IS_DEV}
-      <button on:click={() => location.reload()} title="Reload">
+      <button on:click={onDevReload} title="Reload">
         <span class="icon -refresh" />
       </button>
     {/if}
@@ -96,7 +101,7 @@
         <div class="divider" />
         <div>
           <strong>Media</strong>:
-          <Variable bind:value={msg.mediaMetrics.length} />
+          <Variable bind:value={msg.mediaMetrics.total} />
         </div>
         <div class="divider" />
       {/if}

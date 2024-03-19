@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg width="100%" height="100%" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="10" cy="3.411" rx="1.644" ry="1.644"/>
-  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="10" cy="9.858" rx="1.644" ry="1.644"/>
-  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="10" cy="16.304" rx="1.644" ry="1.644"/>
+  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="9.959" cy="4.355" rx="1.155" ry="1.21"/>
+  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="9.973" cy="9.946" rx="1.169" ry="1.142"/>
+  <ellipse style="stroke: rgb(0, 0, 0); paint-order: fill;" cx="10" cy="15.549" rx="1.196" ry="1.223"/>
 </svg>

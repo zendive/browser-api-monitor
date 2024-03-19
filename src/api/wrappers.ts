@@ -12,6 +12,7 @@ import {
   TAG_INVALID_CALLSTACK,
 } from '@/api/const';
 import { cloneObjectSafely } from './clone';
+import { TPanelVisibilityMap } from './settings';
 
 export type TCallstack = {
   /** function name */
@@ -223,27 +224,36 @@ export class Wrapper {
     }
   }
 
-  collectWrapperMetrics() {
+  collectWrapperMetrics(panels: TPanelVisibilityMap) {
     const timeouts: TOnlineTimerMetrics[] = [];
     const intervals: TOnlineTimerMetrics[] = [];
+    const rv = {
+      onlineTimeouts: timeouts,
+      onlineIntervals: intervals,
+      setTimeoutHistory: panels.setTimeoutHistory ? this.setTimeoutHistory : [],
+      clearTimeoutHistory: panels.clearTimeoutHistory
+        ? this.clearTimeoutHistory
+        : [],
+      setIntervalHistory: panels.setIntervalHistory
+        ? this.setIntervalHistory
+        : [],
+      clearIntervalHistory: panels.clearIntervalHistory
+        ? this.clearIntervalHistory
+        : [],
+      evalHistory: panels.eval ? this.evalHistory : [],
+    };
 
-    for (const [, timer] of this.onlineTimers) {
-      if (timer.type === ETimeType.INTERVAL) {
-        intervals.push(timer);
-      } else {
-        timeouts.push(timer);
+    if (panels.activeTimers) {
+      for (const [, timer] of this.onlineTimers) {
+        if (timer.type === ETimeType.INTERVAL) {
+          intervals.push(timer);
+        } else {
+          timeouts.push(timer);
+        }
       }
     }
 
-    return {
-      onlineTimeouts: timeouts,
-      onlineIntervals: intervals,
-      setTimeoutHistory: this.setTimeoutHistory,
-      clearTimeoutHistory: this.clearTimeoutHistory,
-      setIntervalHistory: this.setIntervalHistory,
-      clearIntervalHistory: this.clearIntervalHistory,
-      evalHistory: this.evalHistory,
-    };
+    return rv;
   }
 
   unwrapApis() {

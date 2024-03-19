@@ -13,6 +13,7 @@
 import { TMetrics } from '@/cs-main';
 import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
 import type { ETimeType } from './wrappers';
+import { TSettingsProperty } from './settings';
 
 export function portPost(payload: TMsgOptions) {
   const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
@@ -112,10 +113,15 @@ export interface TMsgTelemetry {
   msg: 'telemetry';
   metrics: TMetrics;
 }
+export interface TMsgSettings {
+  msg: 'settings';
+  settings: TSettingsProperty;
+}
 export type TMsgOptions =
   | TMsgTelemetry
   | TMsgStartObserve
   | TMsgStopObserve
   | TMsgLoaded
   | TMsgResetHistory
-  | TMsgClearHandler;
+  | TMsgClearHandler
+  | TMsgSettings;

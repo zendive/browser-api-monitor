@@ -1,29 +1,32 @@
 <script lang="ts">
-  import { TSettingsPanel, getSettings, setSettings } from '@/api/settings';
+  import {
+    getSettings,
+    setSettings,
+    type TSettingsPanel,
+  } from '@/api/settings';
 
   let panels: TSettingsPanel[] = [];
-  $: getSettings().then((state) => {
-    panels = state.visiblePanels;
-  });
 
-  function onChangeVisibility(panel: TSettingsPanel) {
-    panel.visible = !panel.visible;
-    void setSettings({ visiblePanels: panels });
-  }
+  getSettings().then((state) => {
+    panels = state.panels;
+  });
 </script>
 
 <div class="dropdown">
   <button title="Visible panels"><span class="icon -toggle-menu" /></button>
   <ul class="dropdown-content" role="menu" aria-label="Visible panels">
-    {#each panels as panel (panel.name)}
+    {#each panels as panel (panel.key)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <li
         role="menuitem"
         class="menu-item"
-        class:non-visible={!panel.visible}
-        on:click={() => onChangeVisibility(panel)}
+        class:hidden={!panel.visible}
+        on:click={() => {
+          panel.visible = !panel.visible;
+          setSettings({ panels });
+        }}
       >
-        {panel.name}
+        {panel.label}
       </li>
     {/each}
   </ul>
@@ -39,12 +42,14 @@
       display: none;
       min-width: 8rem;
       background-color: var(--bg);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      border-left: 1px solid var(--border);
       list-style: none;
-      padding: 6px;
+      padding: 0px 6px;
       margin: 0;
-      // border: 1px solid var(--border);
-      box-shadow: 0px 4px 4px 0px var(--border);
       z-index: 1;
+      user-select: none;
 
       .menu-item {
         cursor: pointer;
@@ -53,7 +58,7 @@
         &:hover {
           font-weight: bold;
         }
-        &.non-visible {
+        &.hidden {
           color: var(--text-passive);
         }
       }

@@ -20,6 +20,10 @@ export type TMediaMetrics = {
   events: { [key: string]: number };
   props: { [key: string]: unknown };
 };
+export type TMediaTelemetry = {
+  total: number;
+  collection: TMediaMetrics[];
+};
 
 let mediaCollection: TMediaModel[] = [];
 
@@ -51,17 +55,28 @@ export function meetMedia(els: NodeListOf<HTMLMediaElement>) {
   }
 }
 
-export function collectMediaMetrics(): TMediaMetrics[] {
-  return mediaCollection.map((v) => {
-    // refresh props metrics
-    for (const prop of MEDIA_ELEMENT_PROPS) {
-      v.metrics.props[prop] = formatPropValue(
-        prop,
-        v.el[prop as keyof HTMLMediaElement]
-      );
-    }
-    return v.metrics;
-  });
+export function collectMediaMetrics(
+  includeCollection: boolean
+): TMediaTelemetry {
+  const rv: TMediaTelemetry = {
+    total: mediaCollection.length,
+    collection: [],
+  };
+
+  if (includeCollection) {
+    rv.collection = mediaCollection.map((v) => {
+      // refresh props metrics
+      for (const prop of MEDIA_ELEMENT_PROPS) {
+        v.metrics.props[prop] = formatPropValue(
+          prop,
+          v.el[prop as keyof HTMLMediaElement]
+        );
+      }
+      return v.metrics;
+    });
+  }
+
+  return rv;
 }
 
 function formatPropValue(prop: string, value: unknown): any {

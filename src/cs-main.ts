@@ -4,7 +4,7 @@ import { MeanAggregator, Stopper, Timer } from './api/time';
 import {
   collectMediaMetrics,
   meetMedia,
-  type TMediaMetrics,
+  type TMediaTelemetry,
 } from './api/mediaMonitor';
 import {
   Wrapper,
@@ -13,9 +13,10 @@ import {
   type TEvalHistory,
   ETimeType,
 } from './api/wrappers';
+import { DEFAULT_SETTINGS, panelsArrayToVisibilityMap } from './api/settings';
 
 export interface TMetrics {
-  mediaMetrics: TMediaMetrics[];
+  mediaMetrics: TMediaTelemetry;
   wrapperMetrics: {
     onlineTimeouts: TOnlineTimerMetrics[];
     onlineIntervals: TOnlineTimerMetrics[];
@@ -38,6 +39,7 @@ export interface TMetrics {
 const wrapper = new Wrapper();
 wrapper.wrapApis();
 
+let panels = panelsArrayToVisibilityMap(DEFAULT_SETTINGS.panels);
 let reportedTickExecutionTime = '';
 const meanExecutionTime = new MeanAggregator();
 const eachSecond = new Timer(
@@ -57,8 +59,8 @@ const tick = new Timer(
     tick.options.animation = tick.executionTime < 3;
 
     const metrics: TMetrics = {
-      mediaMetrics: collectMediaMetrics(),
-      wrapperMetrics: wrapper.collectWrapperMetrics(),
+      mediaMetrics: collectMediaMetrics(panels.media),
+      wrapperMetrics: wrapper.collectWrapperMetrics(panels),
       callCounter: wrapper.callCounter,
       tickTook: reportedTickExecutionTime,
     };
@@ -81,7 +83,17 @@ function stopObserve() {
 }
 
 windowListen((o) => {
-  if (o.msg === 'reset-wrapper-history') {
+  if (o.msg === 'start-observe') {
+    startObserve();
+  } else if (o.msg === 'stop-observe') {
+    stopObserve();
+  } else if (
+    o.msg === 'settings' &&
+    o.settings &&
+    typeof o.settings === 'object'
+  ) {
+    panels = panelsArrayToVisibilityMap(o.settings.panels);
+  } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();
   } else if (o.msg === 'clear-timer-handler') {
@@ -90,10 +102,6 @@ windowListen((o) => {
     } else {
       window.clearInterval(o.handler);
     }
-  } else if (o.msg === 'start-observe') {
-    startObserve();
-  } else if (o.msg === 'stop-observe') {
-    stopObserve();
   }
 });
 
