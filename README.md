@@ -9,8 +9,8 @@ Whether you're developing a Single Page Application (SPA) and want to assess imp
 To expedite issues discovery, here are some examples from experience:
 
 - A ~10ms delay interval constantly consuming approximately 10% of CPU from a third-party library, solely to check if the page was resized.
-- A bundled dependency library that utilizes the eval function, thereby preventing the removal of `unsafe-eval` from the Content Security Policy (CSP) header.
-- A substantial number of hidden video elements in the DOM that were unexpectedly consuming resources, limited to 100 medias per domain.
+- A bundled dependency library that utilizes the eval function, thereby preventing the removal of `unsafe-eval` from the Content Security Policy (CSP) header. It can be arguably intentional, but also may reveal a configuration issue when the package was bundled with webpack config's [devtool: 'eval'](https://webpack.js.org/configuration/devtool/) in production mode.
+- A substantial number of hidden video elements in the DOM that were consuming resources, unexpectedly limited to 100 medias per domain.
 - An unattended interval that was unintentionally left running and contributed to a slowly growing memory.
 
 To explore the internals of a complex systems.
