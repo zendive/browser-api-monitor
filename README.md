@@ -13,6 +13,13 @@ To expedite issues discovery, here are some examples from experience:
 
 To explore the internals of a complex systems.
 
+<details>
+  <summary> <strong>Example</strong> </summary>
+
+![screenshot](./doc/screenshot-01.png)
+
+</details>
+
 ### Build requirements
 
 - OS: Linux
