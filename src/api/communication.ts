@@ -10,7 +10,7 @@
  *      panel: runtimeListen
  */
 
-import { TMetrics } from '@/cs-main';
+import { TMetrics } from '@/api-monitor-cs-main';
 import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
 import type { ETimeType } from './wrappers';
 import { TSettingsProperty } from './settings';

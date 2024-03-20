@@ -2,7 +2,7 @@
   import { runtimeListen, portPost } from '@/api/communication';
   import { IS_DEV } from '@/api/const';
   import { Fps } from '@/api/time';
-  import type { TMetrics } from '@/cs-main';
+  import type { TMetrics } from '@/api-monitor-cs-main';
   import Variable from './components/Variable.svelte';
   import Timers from './components/Timers.svelte';
   import Media from './components/Media.svelte';

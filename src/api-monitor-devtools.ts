@@ -5,7 +5,7 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
   chrome.devtools.panels.create(
     'API 🔎',
     '/public/img/panel-icon28.png',
-    '/public/devtools.view.html',
+    '/public/api-monitor-devtools-panel.html',
     (panel) => {
       panel.onShown.addListener(() => {
         portPost({ msg: 'start-observe' });

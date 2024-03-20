@@ -8,7 +8,7 @@
   "author": "calexblock@gmail.com",
   "permissions": ["storage"],
   "host_permissions": ["*://*/*"],
-  "devtools_page": "public/devtools.html",
+  "devtools_page": "public/api-monitor-devtools.html",
   "icons": {
     "28": "public/img/panel-icon28.png",
     "64": "public/img/panel-icon64.png",
@@ -17,14 +17,14 @@
   "content_scripts": [
     {
       "world": "MAIN",
-      "js": ["public/build/cs-main.js"],
+      "js": ["public/build/api-monitor-cs-main.js"],
       "matches": ["<all_urls>"],
       "match_origin_as_fallback": true,
       "all_frames": false,
       "run_at": "document_start"
     },
     {
-      "js": ["public/build/cs-isolated.js"],
+      "js": ["public/build/api-monitor-cs-isolated.js"],
       "matches": ["<all_urls>"],
       "match_origin_as_fallback": true,
       "all_frames": false,

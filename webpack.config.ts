@@ -25,10 +25,10 @@ export default function (
     mode: op.mode,
 
     entry: {
-      devtools: './src/devtools.ts',
-      'cs-main': './src/cs-main.ts',
-      'cs-isolated': './src/cs-isolated.ts',
-      'dt-view': './src/dt-view.ts',
+      'api-monitor-devtools': './src/api-monitor-devtools.ts',
+      'api-monitor-cs-main': './src/api-monitor-cs-main.ts',
+      'api-monitor-cs-isolated': './src/api-monitor-cs-isolated.ts',
+      'api-monitor-devtools-panel': './src/api-monitor-devtools-panel.ts',
     },
 
     output: {
