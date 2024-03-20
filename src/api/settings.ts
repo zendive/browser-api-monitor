@@ -10,17 +10,31 @@ type TPanelKey =
   | 'setIntervalHistory'
   | 'clearIntervalHistory';
 
+export enum ETimerHistoryField {
+  traceId = 'traceId',
+  individualInvocations = 'individualInvocations',
+  recentHandler = 'recentHandler',
+  handlerDelay = 'handlerDelay',
+}
+
+export enum ESortOrder {
+  ASCENDING,
+  DESCENDING,
+}
+
 export type TPanelVisibilityMap = {
   [K in TPanelKey]: boolean;
 };
+
 export type TSettingsPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
 };
+
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
-const panels: TSettingsPanel[] = [
+const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true },
   { key: 'setTimeoutHistory', label: 'setTimeout History', visible: true },
@@ -33,9 +47,15 @@ const panels: TSettingsPanel[] = [
   },
   { key: 'media', label: 'Media', visible: true },
 ];
+
+export const DEFAULT_SORT = {
+  timersHistoryField: ETimerHistoryField.handlerDelay,
+  timersHistoryOrder: ESortOrder.DESCENDING,
+};
+
 export const DEFAULT_SETTINGS = {
-  panels,
-  sortOrder: {},
+  panels: DEFAULT_PANELS,
+  sort: DEFAULT_SORT,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {

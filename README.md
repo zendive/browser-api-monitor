@@ -1,5 +1,3 @@
-🚧 work in progress - things may break 🚧
-
 # <img src="./public/img/icon.svg" width="26"/> Browser API Monitor
 
 Whether you're developing a Single Page Application (SPA) and want to assess implementation correctness or are curious about how something works, this tool adds additional functionality to the Chrome browser DevTools to reveal active or passed timouts, intervals, and `eval` usages while mapping their invocation call stacks to a source code location. If the page has mounted `video` or `audio` media element's, their events and property state changes can be observed as they happen ([documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement), [example](https://www.w3.org/2010/05/video/mediaevents.html)).

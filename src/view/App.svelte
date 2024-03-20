@@ -46,8 +46,9 @@
   }
 
   function onDevReload() {
-    location.reload();
+    console.clear();
     chrome.storage.local.clear();
+    location.reload();
   }
 </script>
 

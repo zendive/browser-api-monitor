@@ -9,7 +9,7 @@
   --text-invert: rgb(100% 100% 100% / 70%);
   --text-passive: rgb(120 120 120);
   --text-zebra: rgb(26 26 26);
-  --link: rgb(121 121 122);
+  --link: rgb(91 91 91);
   --link-visited-text: rgb(0 0 0);
   --link-visited-bg: rgb(79 189 36 / 0.24);
 }
@@ -117,6 +117,10 @@ th,
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
+.icon.-small {
+  width: 11px;
+  height: 11px;
+}
 .icon.-refresh {
   -webkit-mask-image: url(img/refresh.svg);
   mask-image: url(img/refresh.svg);
@@ -133,10 +137,6 @@ th,
   -webkit-mask-image: url(img/remove.svg);
   mask-image: url(img/remove.svg);
 }
-.icon.-remove.-small {
-  width: 11px;
-  height: 11px;
-}
 .icon.-pause {
   -webkit-mask-image: url(img/pause.svg);
   mask-image: url(img/pause.svg);
@@ -148,4 +148,12 @@ th,
 .icon.-toggle-menu {
   -webkit-mask-image: url(img/toggle-menu.svg);
   mask-image: url(img/toggle-menu.svg);
+}
+.icon.-down {
+  -webkit-mask-image: url(img/down.svg);
+  mask-image: url(img/down.svg);
+}
+.icon.-up {
+  -webkit-mask-image: url(img/up.svg);
+  mask-image: url(img/up.svg);
 }
