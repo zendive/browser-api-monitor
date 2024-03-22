@@ -29,7 +29,6 @@ To explore the internals of a complex systems.
 
 ```bash
 make install  # install dependencies
-make dev      # build for development and recompile the changes
-make prod     # build in production mode
-make all      # make all in production mode and extension.zip for publishing
+make dev      # build in development mode and watch for changes
+make prod     # build in production mode and make extension.chrome.zip
 ```

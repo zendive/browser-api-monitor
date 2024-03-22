@@ -1,7 +1,7 @@
 ZIP_CHROME_FILE="extension.chrome.zip"
 
 clean:
-	rm -rf ./node_modules ./public/build
+	rm -rf ./node_modules ./public/build $(ZIP_CHROME_FILE)
 
 install:
 	npm i -g pnpm
@@ -17,19 +17,13 @@ lint:
 	npx svelte-check
 
 prod:
-	make lint
 	rm -rf ./public/build
+	make lint
 	NODE_OPTIONS="--loader=ts-node/esm --no-warnings=ExperimentalWarning" \
 		NODE_ENV="production" \
 		time npx webpack --mode=production
-
-zip_chrome:
 	rm -rf $(ZIP_CHROME_FILE)
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
 
-all:
-	make prod
-	make zip_chrome
-
-.PHONY: clean install dev lint prod zip_chrome all
+.PHONY: clean install dev lint prod
 .DEFAULT_GOAL := dev
