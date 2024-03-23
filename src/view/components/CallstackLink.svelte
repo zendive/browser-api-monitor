@@ -4,7 +4,7 @@
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
     TAG_INVALID_CALLSTACK,
-  } from '@/api/const';
+  } from '@/api/const.ts';
 
   export let href: string = '';
   export let name: string = '';

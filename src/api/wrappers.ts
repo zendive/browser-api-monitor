@@ -10,9 +10,9 @@ import {
   REGEX_STACKTRACE_PREFIX,
   REGEX_STACKTRACE_CLEAN_URL,
   TAG_INVALID_CALLSTACK,
-} from '@/api/const';
-import { cloneObjectSafely } from './clone';
-import { TPanelVisibilityMap } from './settings';
+} from '@/api/const.ts';
+import { cloneObjectSafely } from './clone.ts';
+import { TPanelVisibilityMap } from './settings.ts';
 
 export type TCallstack = {
   /** function name */
@@ -278,8 +278,8 @@ export class Wrapper {
 
       try {
         rv = this.native.eval(code);
-      } catch (error) {
-        if ('ReferenceError' === error.name) {
+      } catch (error: unknown) {
+        if (error instanceof Error && 'ReferenceError' === error.name) {
           // most likely a side effect of `eval` reassigning
           // when reference to local scope variable resulting
           // in "ReferenceError: {something} is not defined"

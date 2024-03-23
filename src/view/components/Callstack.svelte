@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TCallstack } from '@/api/wrappers';
+  import type { TCallstack } from '@/api/wrappers.ts';
   import CallstackLink from './CallstackLink.svelte';
 
   export let trace: TCallstack = [];

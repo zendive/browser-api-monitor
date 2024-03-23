@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TTimerHistory } from '@/api/wrappers';
+  import type { TTimerHistory } from '@/api/wrappers.ts';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
   import {
@@ -8,7 +8,7 @@
     ESortOrder,
     ETimerHistoryField,
     setSettings,
-  } from '@/api/settings';
+  } from '@/api/settings.ts';
   import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
 
   export let caption: string = '';

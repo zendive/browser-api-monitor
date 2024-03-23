@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Timer, Stopper } from '@/api/time';
+  import { Timer, Stopper } from '@/api/time.ts';
 
-  export let title: string = null;
+  export let title: string | null = null;
   export let value: unknown;
 
   let isAnimated = false;

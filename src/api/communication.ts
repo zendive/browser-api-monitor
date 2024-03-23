@@ -10,10 +10,10 @@
  *      panel: runtimeListen
  */
 
-import { TMetrics } from '@/api-monitor-cs-main';
-import { APPLICATION_NAME, ERRORS_IGNORED } from './const';
-import type { ETimeType } from './wrappers';
-import { TSettingsProperty } from './settings';
+import { TMetrics } from '@/api-monitor-cs-main.ts';
+import { APPLICATION_NAME, ERRORS_IGNORED } from './const.ts';
+import type { ETimeType } from './wrappers.ts';
+import { DEFAULT_SETTINGS } from './settings.ts';
 
 export function portPost(payload: TMsgOptions) {
   const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
@@ -115,7 +115,7 @@ export interface TMsgTelemetry {
 }
 export interface TMsgSettings {
   msg: 'settings';
-  settings: TSettingsProperty;
+  settings: typeof DEFAULT_SETTINGS;
 }
 export type TMsgOptions =
   | TMsgTelemetry

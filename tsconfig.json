@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
     "noImplicitAny": true,
+    "strict": true,
+    "strictNullChecks": true,
     "types": ["chrome"],
     "baseUrl": ".",
     "paths": {
@@ -11,9 +11,11 @@
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
 
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "webpack.config.ts"],
   "exclude": ["node_modules/*", "public/*"]
 }

@@ -1,4 +1,4 @@
-import { onColourSchemeChange } from './api/ui-theme';
+import { onColourSchemeChange } from './api/ui-theme.ts';
 import App from './view/App.svelte';
 
 onColourSchemeChange((theme) => {

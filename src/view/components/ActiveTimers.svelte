@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '@/api/wrappers';
+  import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
-  import { IS_DEV } from '@/api/const';
-  import { portPost } from '@/api/communication';
+  import { IS_DEV } from '@/api/const.ts';
+  import { portPost } from '@/api/communication.ts';
 
   export let caption: string = '';
   export let metrics: TOnlineTimerMetrics[] = [];

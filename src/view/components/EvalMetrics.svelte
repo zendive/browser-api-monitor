@@ -1,7 +1,7 @@
 <script lang="ts">
   import Variable from './Variable.svelte';
   import Callstack from './Callstack.svelte';
-  import type { TEvalHistory } from '@/api/wrappers';
+  import type { TEvalHistory } from '@/api/wrappers.ts';
 
   export let callCount: number = 0;
   export let metrics: TEvalHistory[] = [];

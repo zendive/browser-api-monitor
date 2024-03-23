@@ -3,7 +3,7 @@
     getSettings,
     setSettings,
     type TSettingsPanel,
-  } from '@/api/settings';
+  } from '@/api/settings.ts';
 
   let panels: TSettingsPanel[] = [];
 

@@ -1,4 +1,4 @@
-import { setTimeout, clearTimeout } from './const';
+import { setTimeout, clearTimeout } from './const.ts';
 
 /**
  * Measure time between start/stop calls

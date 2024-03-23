@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TMediaType, type TMediaTelemetry } from '@/api/mediaMonitor';
+  import { TMediaType, type TMediaTelemetry } from '@/api/mediaMonitor.ts';
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from './Variable.svelte';
 

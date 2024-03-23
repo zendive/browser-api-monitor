@@ -1,5 +1,5 @@
-import { cloneObjectSafely } from './clone';
-import { APPLICATION_VERSION } from './const';
+import { cloneObjectSafely } from './clone.ts';
+import { APPLICATION_VERSION } from './const.ts';
 
 type TPanelKey =
   | 'eval'

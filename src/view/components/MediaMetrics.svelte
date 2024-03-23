@@ -1,6 +1,6 @@
 <script lang="ts">
   import Variable from './Variable.svelte';
-  import type { TMediaMetrics } from '@/api/mediaMonitor';
+  import type { TMediaMetrics } from '@/api/mediaMonitor.ts';
 
   export let caption: string;
   export let metrics: TMediaMetrics;

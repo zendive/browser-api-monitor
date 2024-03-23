@@ -3,8 +3,8 @@ import {
   windowPost,
   windowListen,
   portListen,
-} from './api/communication';
-import { getSettings, onSettingsChange } from '@/api/settings';
+} from './api/communication.ts';
+import { getSettings, onSettingsChange } from '@/api/settings.ts';
 
 portListen(windowPost);
 windowListen(runtimePost);

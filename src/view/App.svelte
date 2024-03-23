@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { runtimeListen, portPost } from '@/api/communication';
-  import { IS_DEV } from '@/api/const';
-  import { Fps } from '@/api/time';
-  import type { TMetrics } from '@/api-monitor-cs-main';
+  import { runtimeListen, portPost } from '@/api/communication.ts';
+  import { IS_DEV } from '@/api/const.ts';
+  import { Fps } from '@/api/time.ts';
+  import type { TMetrics } from '@/api-monitor-cs-main.ts';
   import Variable from './components/Variable.svelte';
   import Timers from './components/Timers.svelte';
   import Media from './components/Media.svelte';

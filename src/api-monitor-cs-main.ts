@@ -1,19 +1,22 @@
-import { windowListen, windowPost } from './api/communication';
-import { IS_DEV, UI_UPDATE_FREQUENCY_LOW } from './api/const';
-import { MeanAggregator, Stopper, Timer } from './api/time';
+import { windowListen, windowPost } from './api/communication.ts';
+import { IS_DEV, UI_UPDATE_FREQUENCY_LOW } from './api/const.ts';
+import { MeanAggregator, Stopper, Timer } from './api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
   type TMediaTelemetry,
-} from './api/mediaMonitor';
+} from './api/mediaMonitor.ts';
 import {
   Wrapper,
   type TOnlineTimerMetrics,
   type TTimerHistory,
   type TEvalHistory,
   ETimeType,
-} from './api/wrappers';
-import { DEFAULT_SETTINGS, panelsArrayToVisibilityMap } from './api/settings';
+} from './api/wrappers.ts';
+import {
+  DEFAULT_SETTINGS,
+  panelsArrayToVisibilityMap,
+} from './api/settings.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;

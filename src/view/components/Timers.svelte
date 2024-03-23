@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main';
+  import type { TMetrics } from '@/api-monitor-cs-main.ts';
   import ActiveTimers from './ActiveTimers.svelte';
   import TimersHistory from './TimersHistory.svelte';
 

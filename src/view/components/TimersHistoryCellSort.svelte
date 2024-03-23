@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DEFAULT_SETTINGS, ESortOrder } from '@/api/settings';
+  import { DEFAULT_SETTINGS, ESortOrder } from '@/api/settings.ts';
   import { createEventDispatcher } from 'svelte';
 
   export let field = DEFAULT_SETTINGS.sort.timersHistoryField;

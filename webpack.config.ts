@@ -1,25 +1,15 @@
-import path from 'path';
 import webpack from 'webpack';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { fileURLToPath } from 'url';
 import { EsbuildPlugin } from 'esbuild-loader';
 import sveltePreprocess from 'svelte-preprocess';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import manifest from './manifest.json' with { type: 'json' };
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 export default function (
   env: string,
   op: { mode: webpack.Configuration['mode'] }
 ): webpack.Configuration {
-  const isProd = op.mode === 'production';
-
   console.log('⌥', env, op.mode);
-  if (!isProd) {
-    console.log('Bundle anayser available at:', 'http://127.0.0.1:8888');
-  }
+  const isProd = op.mode === 'production';
 
   return {
     mode: op.mode,
@@ -33,25 +23,18 @@ export default function (
 
     output: {
       filename: '[name].js',
-      path: path.resolve(__dirname, 'public/build'),
+      path: new URL('public/build', import.meta.url).pathname,
     },
 
     resolve: {
       extensions: ['.ts', '.js', '.svelte'],
-      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+      modules: ['src', 'node_modules'],
       alias: {
-        '@': path.resolve(__dirname, 'src'),
+        '@': '/src',
       },
     },
 
     plugins: [
-      isProd
-        ? () => {}
-        : new BundleAnalyzerPlugin({
-            // http://127.0.0.1:8888
-            openAnalyzer: false,
-            logLevel: 'silent',
-          }),
       new webpack.DefinePlugin({
         __development__: !isProd,
         __app_name__: `"browser-api-monitor"`,
@@ -83,7 +66,7 @@ export default function (
           loader: 'esbuild-loader',
           options: {
             loader: 'ts',
-            target: 'es2022',
+            target: 'esnext',
           },
         },
         {
