@@ -9,7 +9,7 @@ install:
 
 dev:
 	rm -rf ./public/build
-	NODE_OPTIONS="--loader=ts-node/esm" \
+	NODE_OPTIONS="--import=tsx" \
 		npx webpack --progress --watch --mode=development
 
 lint:
@@ -19,8 +19,7 @@ lint:
 prod:
 	rm -rf ./public/build
 	make lint
-	NODE_OPTIONS="--loader=ts-node/esm --no-warnings=ExperimentalWarning" \
-		NODE_ENV="production" \
+	NODE_OPTIONS="--import=tsx" \
 		time npx webpack --mode=production
 	rm -rf $(ZIP_CHROME_FILE)
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
