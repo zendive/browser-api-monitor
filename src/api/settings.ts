@@ -1,5 +1,4 @@
 import { cloneObjectSafely } from './clone.ts';
-import { APPLICATION_VERSION } from './const.ts';
 
 type TPanelKey =
   | 'eval'
@@ -34,6 +33,7 @@ export type TSettingsPanel = {
 
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
+const SETTINGS_VERSION = '1.0.0';
 const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true },
@@ -66,22 +66,22 @@ export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
 }
 
 export async function getSettings(): Promise<typeof DEFAULT_SETTINGS> {
-  const store = await chrome.storage.local.get([APPLICATION_VERSION]);
+  const store = await chrome.storage.local.get([SETTINGS_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
   if (isEmpty) {
-    store[APPLICATION_VERSION] = cloneObjectSafely(DEFAULT_SETTINGS);
+    store[SETTINGS_VERSION] = cloneObjectSafely(DEFAULT_SETTINGS);
     await chrome.storage.local.clear(); // rid off previous version settings
     await chrome.storage.local.set(store);
   }
 
-  return store[APPLICATION_VERSION];
+  return store[SETTINGS_VERSION];
 }
 
 export async function setSettings(value: TSettingsProperty) {
-  let store = await chrome.storage.local.get([APPLICATION_VERSION]);
+  let store = await chrome.storage.local.get([SETTINGS_VERSION]);
 
-  Object.assign(store[APPLICATION_VERSION], value);
+  Object.assign(store[SETTINGS_VERSION], value);
 
   return await chrome.storage.local.set(store);
 }
@@ -90,6 +90,6 @@ export function onSettingsChange(
   callback: (change: chrome.storage.StorageChange) => void
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
-    callback(change[APPLICATION_VERSION]);
+    callback(change[SETTINGS_VERSION]);
   });
 }

@@ -40,7 +40,6 @@
 
 <style lang="scss">
   .number {
-    // font-size: 1rem;
     font-weight: bold;
 
     &.even {

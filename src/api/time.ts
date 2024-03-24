@@ -74,7 +74,6 @@ export class Timer {
 
   #fn: Function;
   #handler: number = 0;
-  #pending: boolean = false;
   readonly #stopper?: Stopper;
 
   constructor(
@@ -92,16 +91,14 @@ export class Timer {
   }
 
   start(...args: any[]) {
-    if (this.#pending) {
+    if (this.#handler) {
       this.stop();
     }
-
-    this.#pending = true;
 
     if (this.options.animation) {
       this.#handler = requestAnimationFrame(() => {
         this.trigger(...args);
-        this.#pending = false;
+        this.#handler = 0;
 
         if (this.options.interval) {
           this.start(...args);
@@ -110,7 +107,7 @@ export class Timer {
     } else {
       this.#handler = setTimeout(() => {
         this.trigger(...args);
-        this.#pending = false;
+        this.#handler = 0;
 
         if (this.options.interval) {
           this.start(...args);
@@ -132,20 +129,22 @@ export class Timer {
   }
 
   stop() {
-    if (this.options.animation) {
-      cancelAnimationFrame(this.#handler);
-    } else {
-      clearTimeout(this.#handler);
-    }
+    if (this.#handler) {
+      if (this.options.animation) {
+        cancelAnimationFrame(this.#handler);
+      } else {
+        clearTimeout(this.#handler);
+      }
 
-    this.#pending = false;
+      this.#handler = 0;
+    }
 
     return this;
   }
 
   /** Timer status: true | false => Pending | unstarted/finished/stopped */
   isPending() {
-    return this.#pending;
+    return this.#handler !== 0;
   }
 }
 

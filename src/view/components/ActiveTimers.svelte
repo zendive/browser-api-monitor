@@ -8,7 +8,12 @@
   export let caption: string = '';
   export let metrics: TOnlineTimerMetrics[] = [];
 
-  $: metrics.sort((a, b) => b.delay - a.delay); // sort by delay descending
+  // sort by delay descending
+  $: metrics.sort((a, b) => {
+    const aDelay = a.delay || 0;
+    const bDelay = b.delay || 0;
+    return bDelay > aDelay ? 1 : bDelay < aDelay ? -1 : 0;
+  });
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({

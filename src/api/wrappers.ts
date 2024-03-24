@@ -15,9 +15,7 @@ import { cloneObjectSafely } from './clone.ts';
 import { TPanelVisibilityMap } from './settings.ts';
 
 export type TCallstack = {
-  /** function name */
   name: string;
-  /** link to source */
   link: string;
 }[];
 export enum ETimeType {
@@ -26,7 +24,7 @@ export enum ETimeType {
 }
 export type TOnlineTimerMetrics = {
   type: ETimeType;
-  delay: number;
+  delay: number | undefined;
   handler: number;
   trace: TCallstack;
   isEval: boolean;
@@ -35,10 +33,11 @@ export type TOnlineTimerMetrics = {
 export type TTimerHistory = {
   traceId: string;
   individualInvocations: number;
-  recentHandler: number;
-  handlerDelay: number | undefined;
+  recentHandler: number | string;
+  handlerDelay: number | undefined | string;
   trace: TCallstack;
   isEval: boolean | undefined;
+  hasError: boolean;
 };
 export type TEvalHistory = {
   traceId: string;
@@ -65,13 +64,11 @@ function createCallstack(e: Error): TCallstack {
     }
   }
 
-  // start from second row
   for (let i = 1, I = arr.length; i < I; i++) {
     let v = arr[i];
     v = v.replace(REGEX_STACKTRACE_PREFIX, '');
     const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
-    // skip self references at the beginning, and some times at the end
     if (link.indexOf(selfCallLink) >= 0) {
       continue;
     }
@@ -90,6 +87,12 @@ function createCallstack(e: Error): TCallstack {
   }
 
   return rv;
+}
+function createTraceId(trace: TCallstack) {
+  return trace
+    .reverse()
+    .map((v) => v.link)
+    .join('');
 }
 
 export class Wrapper {
@@ -119,7 +122,7 @@ export class Wrapper {
   timerOnline(
     type: ETimeType,
     handler: number,
-    delay: number | undefined = 0,
+    delay: number | undefined,
     trace: TCallstack,
     isEval: boolean
   ) {
@@ -129,7 +132,7 @@ export class Wrapper {
       delay,
       trace,
       isEval,
-      //rawTrace: stubError.stack, // uncomment to debug errors in trace
+      //rawTrace
     });
   }
 
@@ -137,37 +140,42 @@ export class Wrapper {
     this.onlineTimers.delete(handler);
   }
 
-  updateHistory(
+  #badTimerHandler(handler: unknown) {
+    const rv = !Number.isFinite(handler) || <number>handler < 1;
+
+    return rv;
+  }
+
+  #badTimerDelay(delay: unknown) {
+    const rv =
+      (delay !== undefined && !Number.isFinite(delay)) ||
+      (Number.isFinite(delay) && <number>delay < 0);
+
+    return rv;
+  }
+
+  updateSetTimersHistory(
     history: TTimerHistory[],
     handler: number,
+    delay: number | undefined,
     trace: TCallstack,
-    isEval: boolean | undefined
+    isEval: boolean
   ) {
-    const traceId = trace.map((v) => v.link).join('');
-    let handlerDelay;
-    let handlerIsEval = isEval;
+    const traceId = createTraceId(trace);
     const existing = history.findLast((v) => v.traceId === traceId);
-    const onlineTimer = this.onlineTimers.get(handler);
+    const hasError = this.#badTimerDelay(delay);
+    let handlerDelay: string | number | undefined = delay;
 
-    if (isEval === undefined) {
-      if (onlineTimer) {
-        handlerIsEval = onlineTimer.isEval;
-      } else if (existing) {
-        handlerIsEval = existing.isEval;
-      }
-    }
-
-    if (onlineTimer) {
-      handlerDelay = onlineTimer.delay;
-    } else if (existing) {
-      handlerDelay = existing.handlerDelay;
+    if (hasError) {
+      handlerDelay = `⁉️ ⟪${handlerDelay}⟫`;
     }
 
     if (existing) {
       existing.recentHandler = handler;
       existing.handlerDelay = handlerDelay;
       existing.individualInvocations++;
-      existing.isEval = handlerIsEval;
+      existing.isEval = isEval;
+      existing.hasError = hasError;
     } else {
       history.push({
         traceId,
@@ -175,9 +183,60 @@ export class Wrapper {
         individualInvocations: 1,
         handlerDelay,
         trace,
-        isEval: handlerIsEval,
+        isEval,
+        hasError,
       });
-      history.sort((a, b) => (b.handlerDelay || 0) - (a.handlerDelay || 0));
+      history.sort((a, b) =>
+        (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
+      );
+    }
+  }
+
+  updateClearTimersHistory(
+    history: TTimerHistory[],
+    handler: unknown,
+    trace: TCallstack
+  ) {
+    const traceId = createTraceId(trace);
+    const existing = history.findLast((v) => v.traceId === traceId);
+    const hasError = this.#badTimerHandler(handler);
+    const onlineTimer = !hasError
+      ? this.onlineTimers.get(<number>handler)
+      : null;
+    let handlerDelay: string | number | undefined = 'N/A';
+    let handlerIsEval = undefined;
+
+    if (onlineTimer) {
+      handlerDelay = onlineTimer.delay;
+      handlerIsEval = onlineTimer.isEval;
+    } else if (existing) {
+      handlerDelay = existing.handlerDelay;
+      handlerIsEval = existing.isEval;
+    }
+
+    if (hasError) {
+      handler = `⁉️ ⟪${handler}⟫`;
+    }
+
+    if (existing) {
+      existing.recentHandler = <number | string>handler;
+      existing.handlerDelay = handlerDelay;
+      existing.individualInvocations++;
+      existing.isEval = handlerIsEval;
+      existing.hasError = hasError;
+    } else {
+      history.push({
+        traceId,
+        recentHandler: <number | string>handler,
+        individualInvocations: 1,
+        handlerDelay,
+        trace,
+        isEval: handlerIsEval,
+        hasError,
+      });
+      history.sort((a, b) =>
+        (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
+      );
     }
   }
 
@@ -187,7 +246,7 @@ export class Wrapper {
     trace: TCallstack,
     usesLocalScope: boolean
   ) {
-    const traceId = trace.map((v) => v.link).join('');
+    const traceId = createTraceId(trace);
     const existing = this.evalHistory.find((v) => v.traceId === traceId);
 
     if (existing) {
@@ -209,7 +268,6 @@ export class Wrapper {
 
   cleanHistory(what?: string[]) {
     if (!what || !what.length) {
-      // clean all
       this.setTimeoutHistory.splice(0);
       this.clearTimeoutHistory.splice(0);
       this.setIntervalHistory.splice(0);
@@ -325,7 +383,13 @@ export class Wrapper {
 
       this.callCounter.setTimeout++;
       this.timerOnline(ETimeType.TIMEOUT, handler, delay, trace, isEval);
-      this.updateHistory(this.setTimeoutHistory, handler, trace, isEval);
+      this.updateSetTimersHistory(
+        this.setTimeoutHistory,
+        handler,
+        delay,
+        trace,
+        isEval
+      );
       if (isEval) {
         this.callCounter.eval++;
         this.updateEvalHistory(code, '(N/A - via setTimeout)', trace, false);
@@ -338,13 +402,12 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
+      this.updateClearTimersHistory(
+        this.clearTimeoutHistory,
+        handler,
+        createCallstack(new Error(TRACE_ERROR_MESSAGE))
+      );
       if (handler !== undefined) {
-        this.updateHistory(
-          this.clearTimeoutHistory,
-          handler,
-          createCallstack(new Error(TRACE_ERROR_MESSAGE)),
-          undefined
-        );
         this.timerOffline(handler);
       }
 
@@ -375,7 +438,13 @@ export class Wrapper {
 
       this.callCounter.setInterval++;
       this.timerOnline(ETimeType.INTERVAL, handler, delay, trace, isEval);
-      this.updateHistory(this.setIntervalHistory, handler, trace, isEval);
+      this.updateSetTimersHistory(
+        this.setIntervalHistory,
+        handler,
+        delay,
+        trace,
+        isEval
+      );
       if (isEval) {
         this.callCounter.eval++;
         this.updateEvalHistory(code, '(N/A - via setInterval)', trace, false);
@@ -388,13 +457,12 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
+      this.updateClearTimersHistory(
+        this.clearIntervalHistory,
+        handler,
+        createCallstack(new Error(TRACE_ERROR_MESSAGE))
+      );
       if (handler !== undefined) {
-        this.updateHistory(
-          this.clearIntervalHistory,
-          handler,
-          createCallstack(new Error(TRACE_ERROR_MESSAGE)),
-          undefined
-        );
         this.timerOffline(handler);
       }
 

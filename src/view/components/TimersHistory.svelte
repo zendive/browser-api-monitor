@@ -17,17 +17,34 @@
   let field: ETimerHistoryField = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrder = DEFAULT_SORT.timersHistoryOrder;
 
-  $: sortedMetrics = metrics.sort((a, b) => {
-    const first = a[field] || 0;
-    const second = b[field] || 0;
+  $: sortedMetrics = metrics.sort((first, second) => {
+    const a = first[field];
+    const b = second[field];
 
-    return order === ESortOrder.DESCENDING
-      ? second > first
-        ? 1
-        : -1
-      : first > second
-        ? 1
-        : -1;
+    if (a === undefined) {
+      return ESortOrder.DESCENDING ? -1 : 1;
+    } else if (b === undefined) {
+      return ESortOrder.DESCENDING ? 1 : -1;
+    }
+
+    if (
+      (typeof a === 'number' && typeof b === 'number') ||
+      (typeof a === 'string' && typeof b === 'string')
+    ) {
+      return order === ESortOrder.DESCENDING
+        ? b > a
+          ? 1
+          : b < a
+            ? -1
+            : 0
+        : a > b
+          ? 1
+          : a < b
+            ? -1
+            : 0;
+    } else {
+      return typeof (ESortOrder.DESCENDING ? b : a) === 'number' ? -1 : 1;
+    }
   });
 
   getSettings().then((settings) => {
@@ -91,11 +108,7 @@
   </tr>
 
   {#each sortedMetrics as metric (metric.traceId)}
-    <tr
-      class="t-zebra"
-      class:bc-error={typeof metric.recentHandler !== 'number' ||
-        metric.recentHandler < 1}
-    >
+    <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td class="wb-all">
         <Callstack bind:trace={metric.trace} />
       </td>

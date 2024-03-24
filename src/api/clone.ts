@@ -103,7 +103,6 @@ function recursiveClone(catalog: ObjectsCatalog, value: unknown): unknown {
   } else if (isNumericSpecials(value)) {
     rv = TAG_NUMERIC(value);
   } else if (value === undefined) {
-    // JsonDiffPatch has problem identifying undefined value - storing a string instead
     rv = TAG_UNDEFINED;
   }
 
