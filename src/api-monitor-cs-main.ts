@@ -10,13 +10,7 @@ import {
   meetMedia,
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
-import {
-  Wrapper,
-  type TOnlineTimerMetrics,
-  type TTimerHistory,
-  type TEvalHistory,
-  ETimeType,
-} from './api/wrappers.ts';
+import { Wrapper, ETimeType, type TWrapperMetrics } from './api/wrappers.ts';
 import {
   DEFAULT_SETTINGS,
   panelsArrayToVisibilityMap,
@@ -24,15 +18,7 @@ import {
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
-  wrapperMetrics: {
-    onlineTimeouts: TOnlineTimerMetrics[];
-    onlineIntervals: TOnlineTimerMetrics[];
-    setTimeoutHistory: TTimerHistory[];
-    clearTimeoutHistory: TTimerHistory[];
-    setIntervalHistory: TTimerHistory[];
-    clearIntervalHistory: TTimerHistory[];
-    evalHistory: TEvalHistory[];
-  };
+  wrapperMetrics: TWrapperMetrics;
   callCounter: {
     setTimeout: number;
     clearTimeout: number;

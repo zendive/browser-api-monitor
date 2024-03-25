@@ -10,6 +10,7 @@
   import Version from './components/Version.svelte';
   import { onMount } from 'svelte';
   import TogglePanels from './components/TogglePanels.svelte';
+  import InfoBar from './components/InfoBar.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -69,44 +70,7 @@
       <span class="icon -clear" />
     </button>
 
-    <div class="infobar">
-      {#if msg}
-        <div class="divider -anchor-left" />
-        <div>
-          <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
-        </div>
-        <div class="divider" />
-        <div>
-          <strong>setTimeout</strong>: <Variable
-            bind:value={msg.callCounter.setTimeout}
-          />
-        </div>
-        <div class="divider" />
-        <div>
-          <strong>clearTimeout</strong>: <Variable
-            bind:value={msg.callCounter.clearTimeout}
-          />
-        </div>
-        <div class="divider" />
-        <div>
-          <strong>setInterval</strong>: <Variable
-            bind:value={msg.callCounter.setInterval}
-          />
-        </div>
-        <div class="divider" />
-        <div>
-          <strong>clearInterval</strong>: <Variable
-            bind:value={msg.callCounter.clearInterval}
-          />
-        </div>
-        <div class="divider" />
-        <div>
-          <strong>Media</strong>:
-          <Variable bind:value={msg.mediaMetrics.total} />
-        </div>
-        <div class="divider" />
-      {/if}
-    </div>
+    <InfoBar bind:msg />
 
     {#if msg && !paused}
       <div class="divider" />
@@ -143,26 +107,9 @@
 
 <style lang="scss">
   .root {
-    --header-height: 20px;
     display: flex;
     flex-direction: column;
     height: 100%;
-
-    .divider {
-      width: 1px;
-      height: var(--header-height);
-      background-color: var(--border);
-      margin: 0 0.4rem;
-
-      &.-anchor-left {
-        background-color: transparent;
-        margin-left: 0;
-      }
-      &.-anchor-right {
-        background-color: transparent;
-        margin-right: 0;
-      }
-    }
 
     header {
       display: flex;
@@ -170,12 +117,6 @@
       height: var(--header-height);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-
-      .infobar {
-        display: flex;
-        align-items: center;
-        flex-grow: 1;
-      }
     }
     main {
       overflow-y: scroll;

@@ -1,4 +1,6 @@
 :root {
+  --header-height: 20px;
+
   --bg: rgb(255 255 255);
   --bg-invert: rgb(10% 10% 10% / 70%);
   --bg-table-even: rgb(30% 30% 30% / 10%);
@@ -105,6 +107,21 @@ th,
 }
 .w-full {
   width: 100%;
+}
+
+.divider {
+  width: 1px;
+  height: var(--header-height);
+  background-color: var(--border);
+  margin: 0 0.4rem;
+}
+.divider.-anchor-left {
+  background-color: transparent;
+  margin-left: 0;
+}
+.divider.-anchor-right {
+  background-color: transparent;
+  margin-right: 0;
 }
 
 .icon {

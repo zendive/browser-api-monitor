@@ -31,6 +31,7 @@ export type TSettingsPanel = {
   visible: boolean;
 };
 
+export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
 const SETTINGS_VERSION = '1.0.0';
@@ -87,9 +88,12 @@ export async function setSettings(value: TSettingsProperty) {
 }
 
 export function onSettingsChange(
-  callback: (change: chrome.storage.StorageChange) => void
+  callback: (newValue: TSettings, oldValue: TSettings) => void
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
-    callback(change[SETTINGS_VERSION]);
+    callback(
+      change[SETTINGS_VERSION].newValue,
+      change[SETTINGS_VERSION].oldValue
+    );
   });
 }

@@ -47,6 +47,16 @@ export type TEvalHistory = {
   code: any;
   usesLocalScope: boolean;
 };
+export type TWrapperMetrics = {
+  onlineTimers: number;
+  onlineTimeouts: TOnlineTimerMetrics[];
+  onlineIntervals: TOnlineTimerMetrics[];
+  setTimeoutHistory: TTimerHistory[];
+  clearTimeoutHistory: TTimerHistory[];
+  setIntervalHistory: TTimerHistory[];
+  clearIntervalHistory: TTimerHistory[];
+  evalHistory: TEvalHistory[];
+};
 
 type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
 
@@ -282,10 +292,11 @@ export class Wrapper {
     }
   }
 
-  collectWrapperMetrics(panels: TPanelVisibilityMap) {
+  collectWrapperMetrics(panels: TPanelVisibilityMap): TWrapperMetrics {
     const timeouts: TOnlineTimerMetrics[] = [];
     const intervals: TOnlineTimerMetrics[] = [];
     const rv = {
+      onlineTimers: this.onlineTimers.size,
       onlineTimeouts: timeouts,
       onlineIntervals: intervals,
       setTimeoutHistory: panels.setTimeoutHistory ? this.setTimeoutHistory : [],

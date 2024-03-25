@@ -14,7 +14,7 @@ runtimePost({ msg: 'content-script-loaded' });
 getSettings().then((settings) => {
   windowPost({ msg: 'settings', settings: settings });
 
-  onSettingsChange((change) => {
-    windowPost({ msg: 'settings', settings: change.newValue });
+  onSettingsChange((newValue) => {
+    windowPost({ msg: 'settings', settings: newValue });
   });
 });
