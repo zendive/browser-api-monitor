@@ -7,6 +7,7 @@ export const ERRORS_IGNORED = [
   'The message port closed before a response was received.',
 ];
 export const UI_UPDATE_FREQUENCY_LOW = 200; // ms
+export const UI_UPDATE_FREQUENCY_VERYLOW = 1000; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);

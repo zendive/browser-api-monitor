@@ -1,5 +1,9 @@
 import { windowListen, windowPost } from './api/communication.ts';
-import { IS_DEV, UI_UPDATE_FREQUENCY_LOW } from './api/const.ts';
+import {
+  IS_DEV,
+  UI_UPDATE_FREQUENCY_LOW,
+  UI_UPDATE_FREQUENCY_VERYLOW,
+} from './api/const.ts';
 import { MeanAggregator, Stopper, Timer } from './api/time.ts';
 import {
   collectMediaMetrics,
@@ -59,7 +63,15 @@ const tick = new Timer(
   () => {
     meanExecutionTime.add(tick.executionTime);
     // adaptive update-frequency
-    tick.options.animation = tick.executionTime < 3;
+    if (tick.executionTime < 3) {
+      tick.options.animation = true;
+    } else {
+      tick.options.animation = false;
+      tick.delay =
+        tick.executionTime < 6
+          ? UI_UPDATE_FREQUENCY_LOW
+          : UI_UPDATE_FREQUENCY_VERYLOW;
+    }
 
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(panels.media),
