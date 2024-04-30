@@ -49,8 +49,9 @@ export const MEDIA_ELEMENT_EVENTS = [
 ];
 
 export const MEDIA_ELEMENT_PROPS = [
-  'src',
+  'poster',
   'currentSrc',
+  'src',
   'srcObject',
   'error',
   'preload',
@@ -66,14 +67,13 @@ export const MEDIA_ELEMENT_PROPS = [
   'ended',
   'autoplay',
   'loop',
+  'defaultMuted',
   'muted',
   'volume',
-  'preservesPitch',
-  'defaultMuted',
   'crossOrigin',
   'defaultPlaybackRate',
   'playbackRate',
-  'mediaGroup',
+  'preservesPitch',
   'controls',
   'audioTracks',
   'videoTracks',
@@ -84,7 +84,6 @@ export const MEDIA_ELEMENT_PROPS = [
   'height',
   'videoWidth',
   'videoHeight',
-  'poster',
 ];
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [

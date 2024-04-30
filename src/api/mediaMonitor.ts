@@ -67,10 +67,12 @@ export function collectMediaMetrics(
     rv.collection = mediaCollection.map((v) => {
       // refresh props metrics
       for (const prop of MEDIA_ELEMENT_PROPS) {
-        v.metrics.props[prop] = formatPropValue(
-          prop,
-          v.el[prop as keyof HTMLMediaElement]
-        );
+        if (prop in v.el) {
+          v.metrics.props[prop] = formatPropValue(
+            prop,
+            v.el[prop as keyof HTMLMediaElement]
+          );
+        }
       }
       return v.metrics;
     });
@@ -86,6 +88,8 @@ function formatPropValue(prop: string, value: unknown): any {
     rv = `${value} - ${NETWORK_STATE[value as number]}`;
   } else if ('readyState' === prop) {
     rv = `${value} - ${READY_STATE[value as number]}`;
+  } else if ('srcObject' === prop) {
+    rv = value ? `${value}` : value;
   } else if (value instanceof TimeRanges) {
     rv = [];
 
@@ -95,7 +99,7 @@ function formatPropValue(prop: string, value: unknown): any {
 
     rv = rv.join('');
   } else if (value instanceof TextTrackList) {
-    rv = `[${value.length}]`;
+    rv = value.length;
   } else if (value instanceof MediaError) {
     rv = `${value.code}/${value.message}`;
   }

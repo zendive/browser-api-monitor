@@ -24,7 +24,13 @@
       <table class="w-full">
         <caption class="bc-invert ta-l">Properties</caption>
         {#each Object.entries(metrics.props) as [label, value] (label)}
-          <tr class:isPassive={null === value} class:isActive={true === value}>
+          <tr
+            class:isPassive={null === value ||
+              false === value ||
+              '' === value ||
+              0 === value}
+            class:isActive={true === value}
+          >
             <td class="item-label">{label}</td>
             <td class="item-value">
               {#if ['networkState', 'readyState'].includes(label)}
