@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
-  import Variable from './Variable.svelte';
-  import Callstack from './Callstack.svelte';
+  import Variable from '@/view/components/Variable.svelte';
+  import Callstack from '@/view/components/Callstack.svelte';
   import { IS_DEV } from '@/api/const.ts';
   import { portPost } from '@/api/communication.ts';
 

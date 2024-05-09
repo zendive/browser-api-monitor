@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TTimerHistory } from '@/api/wrappers.ts';
-  import Variable from './Variable.svelte';
-  import Callstack from './Callstack.svelte';
+  import Variable from '@/view/components/Variable.svelte';
+  import Callstack from '@/view/components/Callstack.svelte';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -9,7 +9,7 @@
     ETimerHistoryField,
     setSettings,
   } from '@/api/settings.ts';
-  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
+  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
 
   export let caption: string = '';
   export let metrics: TTimerHistory[] = [];

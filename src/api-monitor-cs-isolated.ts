@@ -3,7 +3,7 @@ import {
   windowPost,
   windowListen,
   portListen,
-} from './api/communication.ts';
+} from '@/api/communication.ts';
 import { getSettings, onSettingsChange } from '@/api/settings.ts';
 
 portListen(windowPost);

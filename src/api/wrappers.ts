@@ -11,8 +11,8 @@ import {
   REGEX_STACKTRACE_CLEAN_URL,
   TAG_INVALID_CALLSTACK,
 } from '@/api/const.ts';
-import { cloneObjectSafely } from './clone.ts';
-import { TPanelVisibilityMap } from './settings.ts';
+import { cloneObjectSafely } from '@/api/clone.ts';
+import type { TPanelVisibilityMap } from '@/api/settings.ts';
 
 export type TCallstack = {
   name: string;

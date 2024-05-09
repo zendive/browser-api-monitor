@@ -1,5 +1,5 @@
-import { onColourSchemeChange } from './api/ui-theme.ts';
-import App from './view/App.svelte';
+import { onColourSchemeChange } from '@/api/ui-theme.ts';
+import App from '@/view/App.svelte';
 
 onColourSchemeChange((theme) => {
   document.body.setAttribute('class', theme);

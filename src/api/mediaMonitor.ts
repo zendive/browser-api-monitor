@@ -3,7 +3,7 @@ import {
   MEDIA_ELEMENT_PROPS,
   NETWORK_STATE,
   READY_STATE,
-} from './const.ts';
+} from '@/api/const.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;

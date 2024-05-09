@@ -3,14 +3,13 @@
   import { IS_DEV } from '@/api/const.ts';
   import { Fps } from '@/api/time.ts';
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import Variable from './components/Variable.svelte';
-  import Timers from './components/Timers.svelte';
-  import Media from './components/Media.svelte';
-  import EvalMetrics from './components/EvalMetrics.svelte';
-  import Version from './components/Version.svelte';
+  import Timers from '@/view/components/Timers.svelte';
+  import Media from '@/view/components/Media.svelte';
+  import EvalMetrics from '@/view/components/EvalMetrics.svelte';
+  import Version from '@/view/components/Version.svelte';
   import { onMount } from 'svelte';
-  import TogglePanels from './components/TogglePanels.svelte';
-  import InfoBar from './components/InfoBar.svelte';
+  import TogglePanels from '@/view/components/TogglePanels.svelte';
+  import InfoBar from '@/view/components/InfoBar.svelte';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();

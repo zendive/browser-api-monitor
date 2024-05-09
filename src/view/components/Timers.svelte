@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import ActiveTimers from './ActiveTimers.svelte';
-  import TimersHistory from './TimersHistory.svelte';
+  import ActiveTimers from '@/view/components/ActiveTimers.svelte';
+  import TimersHistory from '@/view/components/TimersHistory.svelte';
 
   export let metrics: TMetrics['wrapperMetrics'];
 </script>
