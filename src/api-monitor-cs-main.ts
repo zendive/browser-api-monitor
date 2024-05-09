@@ -1,6 +1,6 @@
 import { windowListen, windowPost } from '@/api/communication.ts';
+import { IS_DEV } from './api/env.ts';
 import {
-  IS_DEV,
   UI_UPDATE_FREQUENCY_LOW,
   UI_UPDATE_FREQUENCY_VERYLOW,
 } from '@/api/const.ts';

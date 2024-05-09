@@ -1,6 +1,6 @@
 <script lang="ts">
   import { runtimeListen, portPost } from '@/api/communication.ts';
-  import { IS_DEV } from '@/api/const.ts';
+  import { IS_DEV } from '@/api/env.ts';
   import { Fps } from '@/api/time.ts';
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
   import Timers from '@/view/components/Timers.svelte';
