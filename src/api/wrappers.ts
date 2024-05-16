@@ -11,7 +11,7 @@ import {
   REGEX_STACKTRACE_CLEAN_URL,
   TAG_INVALID_CALLSTACK,
 } from '@/api/const.ts';
-import { cloneObjectSafely } from '@/api/clone.ts';
+import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
 
 export type TCallstack = {
@@ -177,7 +177,7 @@ export class Wrapper {
     let handlerDelay: string | number | undefined = delay;
 
     if (hasError) {
-      handlerDelay = `⁉️ ⟪${handlerDelay}⟫`;
+      handlerDelay = TAG_EXCEPTION(`${handlerDelay}`);
     }
 
     if (existing) {
@@ -225,7 +225,7 @@ export class Wrapper {
     }
 
     if (hasError) {
-      handler = `⁉️ ⟪${handler}⟫`;
+      handler = TAG_EXCEPTION(`${handler}`);
     }
 
     if (existing) {

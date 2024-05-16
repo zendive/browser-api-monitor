@@ -10,19 +10,20 @@ install:
 dev:
 	rm -rf ./public/build
 	NODE_OPTIONS="--import=tsx" \
-		npx webpack --progress --watch --mode=development
+		pnpm exec webpack --progress --watch --mode=development
 
 lint:
-	npx prettier . --write
-	npx svelte-check
+	pnpm exec prettier . --write
+	pnpm exec svelte-check
 
-prod:
-	rm -rf ./public/build
-	make lint
+test:
+	pnpm exec jest --config jest/jest.config.js
+
+prod: lint test
+	rm -rf ./public/build $(ZIP_CHROME_FILE)
 	NODE_OPTIONS="--import=tsx" \
-		time npx webpack --mode=production
-	rm -rf $(ZIP_CHROME_FILE)
+		time pnpm exec webpack --mode=production
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
 
-.PHONY: clean install dev lint prod
+.PHONY: clean install dev lint prod test
 .DEFAULT_GOAL := dev
