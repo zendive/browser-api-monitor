@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Variable from './Variable.svelte';
+  import Variable from '@/view/components/Variable.svelte';
   import type { TMediaMetrics } from '@/api/mediaMonitor.ts';
 
   export let caption: string;

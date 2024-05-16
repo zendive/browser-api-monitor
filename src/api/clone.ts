@@ -1,9 +1,9 @@
 const TAG_EXCEPTION_FALLBACK = '⁉️ ⟪exception⟫';
-const TAG_EXCEPTION = (str: string) => `⁉️ ⟪${str}⟫`;
+export const TAG_EXCEPTION = (str: string) => `⁉️ ⟪${str}⟫`;
 const TAG_FUNCTION = (name: string) => `ƒ${name ? ` ${name}` : ''}⟪function⟫`;
 const TAG_NUMERIC = (value: bigint | number) =>
   typeof value === 'bigint' ? `BigInt⟪${value}⟫` : `Number⟪${value}⟫`;
-const TAG_UNDEFINED = '⟪undefined⟫';
+export const TAG_UNDEFINED = '⟪undefined⟫';
 const TAG_NATIVE_FUNCTION = 'ƒ⟪native⟫';
 const TAG_RECURRING_ARRAY = (id: string) => `0x${id}: [♻️]`;
 const TAG_RECURRING_OBJECT = (id: string) => `0x${id}: {♻️}`;

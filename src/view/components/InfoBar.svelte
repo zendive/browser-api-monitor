@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type TMetrics } from '@/api-monitor-cs-main.ts';
-  import Variable from './Variable.svelte';
+  import type { TMetrics } from '@/api-monitor-cs-main.ts';
+  import Variable from '@/view/components/Variable.svelte';
   import {
     getSettings,
     onSettingsChange,

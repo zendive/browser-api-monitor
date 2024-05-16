@@ -1,4 +1,4 @@
-import { cloneObjectSafely } from './clone.ts';
+import { cloneObjectSafely } from '@/api/clone.ts';
 
 type TPanelKey =
   | 'eval'

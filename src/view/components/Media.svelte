@@ -1,7 +1,7 @@
 <script lang="ts">
   import { TMediaType, type TMediaTelemetry } from '@/api/mediaMonitor.ts';
-  import MediaMetrics from './MediaMetrics.svelte';
-  import Variable from './Variable.svelte';
+  import MediaMetrics from '@/view/components/MediaMetrics.svelte';
+  import Variable from '@/view/components/Variable.svelte';
 
   export let metrics: TMediaTelemetry = { total: 0, collection: [] };
 
