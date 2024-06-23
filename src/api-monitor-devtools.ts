@@ -1,4 +1,5 @@
 import { portPost } from '@/api/communication.ts';
+import { getSettings } from '@/api/settings.ts';
 
 // tabId may be null if user opened the devtools of the devtools
 if (chrome.devtools.inspectedWindow.tabId !== null) {
@@ -7,8 +8,11 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
     '/public/img/panel-icon28.png',
     '/public/api-monitor-devtools-panel.html',
     (panel) => {
-      panel.onShown.addListener(() => {
-        portPost({ msg: 'start-observe' });
+      panel.onShown.addListener(async () => {
+        const settings = await getSettings();
+        if (!settings.paused) {
+          portPost({ msg: 'start-observe' });
+        }
       });
       panel.onHidden.addListener(() => {
         portPost({ msg: 'stop-observe' });

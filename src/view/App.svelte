@@ -10,6 +10,7 @@
   import { onMount } from 'svelte';
   import TogglePanels from '@/view/components/TogglePanels.svelte';
   import InfoBar from '@/view/components/InfoBar.svelte';
+  import { getSettings, setSettings } from '@/api/settings.ts';
 
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
@@ -26,7 +27,14 @@
   });
 
   onMount(() => {
-    portPost({ msg: 'start-observe' });
+    getSettings().then((state) => {
+      paused = state.paused;
+
+      if (!paused) {
+        portPost({ msg: 'start-observe' });
+      }
+    });
+
     window.addEventListener('beforeunload', () => {
       portPost({ msg: 'stop-observe' });
     });
@@ -34,6 +42,8 @@
 
   function onTogglePause() {
     paused = !paused;
+    setSettings({ paused });
+
     if (paused) {
       portPost({ msg: 'stop-observe' });
     } else {

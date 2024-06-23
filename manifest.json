@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "API Monitor",
   "manifest_version": 3,
   "description": "Monitor browser API usage",
