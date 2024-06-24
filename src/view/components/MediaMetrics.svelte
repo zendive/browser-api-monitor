@@ -1,13 +1,15 @@
 <script lang="ts">
   import Variable from '@/view/components/Variable.svelte';
   import type { TMediaMetrics } from '@/api/mediaMonitor.ts';
+  import MediaCommands from './MediaCommands.svelte';
 
-  export let caption: string;
   export let metrics: TMediaMetrics;
 </script>
 
 <table class="group">
-  <caption class="bc-invert ta-l">{caption}</caption>
+  <caption class="bc-invert ta-l">
+    <MediaCommands bind:mediaId={metrics.mediaId} />
+  </caption>
   <tr>
     <td class="events">
       <table class="w-full">
@@ -46,9 +48,9 @@
   </tr>
 </table>
 
-<style>
+<style lang="scss">
   .group {
-    max-width: 28rem;
+    max-width: 37rem;
 
     &:not(:first-child) {
       border-left: 1px solid var(--border);
@@ -67,6 +69,9 @@
   }
   .item-label {
     text-align: right;
+  }
+  .props .item-value {
+    word-break: break-all;
   }
   .item-value {
     text-align: left;

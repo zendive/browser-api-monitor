@@ -104,3 +104,4 @@ export const REGEX_STACKTRACE_LINK = /.*\((.*)\).*/;
 export const REGEX_STACKTRACE_CLEAN_URL = /(.*):\d+:\d+$/;
 export const REGEX_STACKTRACE_LINE_NUMBER = /.*:(\d+):\d+$/;
 export const REGEX_STACKTRACE_COLUMN_NUMBER = /.*:\d+:(\d+)$/;
+export const FRAME_1of60 = 1 / 60;

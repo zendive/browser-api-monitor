@@ -8,6 +8,7 @@ import { MeanAggregator, Stopper, Timer } from '@/api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
+  doMediaCommand,
   type TMediaTelemetry,
 } from '@/api/mediaMonitor.ts';
 import { Wrapper, ETimeType, type TWrapperMetrics } from '@/api/wrappers.ts';
@@ -103,6 +104,8 @@ windowListen((o) => {
     } else {
       window.clearInterval(o.handler);
     }
+  } else if (o.msg === 'media-command') {
+    doMediaCommand(o.mediaId, o.cmd);
   }
 });
 

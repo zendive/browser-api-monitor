@@ -92,7 +92,11 @@ export function onSettingsChange(
   callback: (newValue: TSettings, oldValue: TSettings) => void
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
-    if (change && change[SETTINGS_VERSION]) {
+    if (
+      change &&
+      change[SETTINGS_VERSION] &&
+      change[SETTINGS_VERSION].newValue
+    ) {
       callback(
         change[SETTINGS_VERSION].newValue,
         change[SETTINGS_VERSION].oldValue

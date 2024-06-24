@@ -1,9 +1,11 @@
 import {
+  FRAME_1of60,
   MEDIA_ELEMENT_EVENTS,
   MEDIA_ELEMENT_PROPS,
   NETWORK_STATE,
   READY_STATE,
 } from '@/api/const.ts';
+import type { TMsgMediaCommand } from '@/api/communication.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;
@@ -79,6 +81,36 @@ export function collectMediaMetrics(
   }
 
   return rv;
+}
+
+export function doMediaCommand(mediaId: string, cmd: TMsgMediaCommand['cmd']) {
+  const mediaModel = mediaCollection.find(
+    (model) => model.metrics.mediaId === mediaId
+  );
+
+  if (!mediaModel || !mediaModel.el || !document.contains(mediaModel.el)) {
+    return;
+  }
+
+  if (cmd === 'log') {
+    console.log(mediaModel.el);
+  } else if (cmd === 'locate') {
+    mediaModel.el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center',
+    });
+  } else if (cmd === 'load') {
+    mediaModel.el.load();
+  } else if (cmd === 'pause') {
+    mediaModel.el.pause();
+  } else if (cmd === 'play') {
+    mediaModel.el.play();
+  } else if (cmd === 'frame-backward') {
+    mediaModel.el.currentTime -= FRAME_1of60;
+  } else if (cmd === 'frame-forward') {
+    mediaModel.el.currentTime += FRAME_1of60;
+  }
 }
 
 function formatPropValue(prop: string, value: unknown): any {
