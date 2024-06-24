@@ -148,5 +148,9 @@ describe('MeanAggregator', () => {
 
     const sumMean = sum / SAMPLES.length;
     expect(mean.mean).toBe(sumMean);
+    expect(mean.numberOfSamples).toBe(SAMPLES.length);
+    expect(mean.minimum).toBe(SAMPLES[0]);
+    expect(mean.maximum).toBe(SAMPLES[SAMPLES.length - 1]);
+    expect(mean.standardDeviation).toBe(34.52052529534663);
   });
 });
