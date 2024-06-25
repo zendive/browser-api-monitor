@@ -62,6 +62,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'paused',
   'ended',
   'autoplay',
+  'playsInline',
   'loop',
   'defaultMuted',
   'muted',
