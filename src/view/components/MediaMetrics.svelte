@@ -2,8 +2,27 @@
   import Variable from '@/view/components/Variable.svelte';
   import type { TMediaMetrics } from '@/api/mediaMonitor.ts';
   import MediaCommands from './MediaCommands.svelte';
+  import { portPost } from '@/api/communication.ts';
+  import { MEDIA_ELEMENT_TOGGABLE_PROPS } from '@/api/const.ts';
 
   export let metrics: TMediaMetrics;
+
+  function isToggable(property: string) {
+    return MEDIA_ELEMENT_TOGGABLE_PROPS.has(property);
+  }
+
+  function onToggleBoolean(property: string) {
+    if (!isToggable(property)) {
+      return;
+    }
+
+    portPost({
+      msg: 'media-command',
+      mediaId: metrics.mediaId,
+      cmd: 'toggle-boolean',
+      property: property as keyof HTMLMediaElement,
+    });
+  }
 </script>
 
 <table class="group">
@@ -35,7 +54,19 @@
           >
             <td class="item-label">{label}</td>
             <td class="item-value">
-              {#if ['networkState', 'readyState'].includes(label)}
+              {#if isToggable(label)}
+                <i
+                  class="isToggable"
+                  role="button"
+                  tabindex="0"
+                  on:keydown={(e) => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return;
+                    e.preventDefault();
+                    onToggleBoolean(label);
+                  }}
+                  on:click={() => void onToggleBoolean(label)}>{value}</i
+                >
+              {:else if ['networkState', 'readyState'].includes(label)}
                 <Variable bind:value />
               {:else}
                 {value}
@@ -63,6 +94,9 @@
   .isPassive {
     color: var(--text-passive);
     font-weight: normal;
+  }
+  .isToggable {
+    cursor: pointer;
   }
   .isActive {
     font-weight: bold;

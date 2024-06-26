@@ -128,7 +128,9 @@ export interface TMsgMediaCommand {
     | 'pause'
     | 'play'
     | 'load'
-    | 'locate';
+    | 'locate'
+    | 'toggle-boolean';
+  property?: keyof HTMLMediaElement;
 }
 export type TMsgOptions =
   | TMsgTelemetry

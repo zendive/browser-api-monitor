@@ -2,6 +2,7 @@ import {
   FRAME_1of60,
   MEDIA_ELEMENT_EVENTS,
   MEDIA_ELEMENT_PROPS,
+  MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
 } from '@/api/const.ts';
@@ -83,7 +84,11 @@ export function collectMediaMetrics(
   return rv;
 }
 
-export function doMediaCommand(mediaId: string, cmd: TMsgMediaCommand['cmd']) {
+export function doMediaCommand(
+  mediaId: string,
+  cmd: TMsgMediaCommand['cmd'],
+  property: keyof HTMLMediaElement | undefined
+) {
   const mediaModel = mediaCollection.find(
     (model) => model.metrics.mediaId === mediaId
   );
@@ -110,6 +115,11 @@ export function doMediaCommand(mediaId: string, cmd: TMsgMediaCommand['cmd']) {
     mediaModel.el.currentTime -= FRAME_1of60;
   } else if (cmd === 'frame-forward') {
     mediaModel.el.currentTime += FRAME_1of60;
+  } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
+    if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
+      // @ts-expect-error
+      mediaModel.el[property] = !mediaModel.el[property];
+    }
   }
 }
 

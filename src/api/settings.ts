@@ -37,6 +37,7 @@ export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 const SETTINGS_VERSION = '1.0.3';
 const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
+  { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true },
   { key: 'setTimeoutHistory', label: 'setTimeout History', visible: true },
   { key: 'clearTimeoutHistory', label: 'clearTimeout History', visible: true },
@@ -46,7 +47,6 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
     label: 'clearInterval History',
     visible: true,
   },
-  { key: 'media', label: 'Media', visible: true },
 ];
 
 export const DEFAULT_SORT = {

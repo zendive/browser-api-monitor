@@ -56,6 +56,15 @@
     <div class="divider" />
     <a
       href="void(0)"
+      class:panel-enabled={panels.media && msg.mediaMetrics.total}
+      on:click={(e) => void scrollTo(e, 'Video|Audio')}
+    >
+      <strong>Media</strong>:
+      <Variable bind:value={msg.mediaMetrics.total} />
+    </a>
+    <div class="divider" />
+    <a
+      href="void(0)"
       class:panel-enabled={panels.activeTimers &&
         msg.wrapperMetrics.onlineTimers}
       on:click={(e) => void scrollTo(e, 'Active')}
@@ -107,15 +116,6 @@
       <strong>clearInterval</strong>: <Variable
         bind:value={msg.callCounter.clearInterval}
       />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.media && msg.mediaMetrics.total}
-      on:click={(e) => void scrollTo(e, 'Video|Audio')}
-    >
-      <strong>Media</strong>:
-      <Variable bind:value={msg.mediaMetrics.total} />
     </a>
     <div class="divider" />
   {/if}

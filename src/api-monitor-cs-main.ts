@@ -105,7 +105,7 @@ windowListen((o) => {
       window.clearInterval(o.handler);
     }
   } else if (o.msg === 'media-command') {
-    doMediaCommand(o.mediaId, o.cmd);
+    doMediaCommand(o.mediaId, o.cmd, o.property);
   }
 });
 
