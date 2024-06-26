@@ -30,11 +30,23 @@
   <button on:click={() => void onMediaCommand('pause')} title="media.pause()">
     <span class="icon -pause" />
   </button>
-  <button on:click={() => void onMediaCommand('frame-backward')} title="-16ms">
+  <button
+    on:click={() => void onMediaCommand('frame-backward')}
+    title="Seek -16ms"
+  >
     <span class="icon -frame-backward" />
   </button>
-  <button on:click={() => void onMediaCommand('frame-forward')} title="+16ms">
+  <button
+    on:click={() => void onMediaCommand('frame-forward')}
+    title="Seek +16ms"
+  >
     <span class="icon -frame-forward" />
+  </button>
+  <button on:click={() => void onMediaCommand('slower')} title="Speed -10%">
+    <span class="icon -slower" />
+  </button>
+  <button on:click={() => void onMediaCommand('faster')} title="Speed +10%">
+    <span class="icon -faster" />
   </button>
 </span>
 

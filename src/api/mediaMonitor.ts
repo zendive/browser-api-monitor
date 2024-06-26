@@ -120,6 +120,10 @@ export function doMediaCommand(
       // @ts-expect-error
       mediaModel.el[property] = !mediaModel.el[property];
     }
+  } else if (cmd === 'slower') {
+    mediaModel.el.playbackRate -= 0.1;
+  } else if (cmd === 'faster') {
+    mediaModel.el.playbackRate += 0.1;
   }
 }
 

@@ -129,7 +129,9 @@ export interface TMsgMediaCommand {
     | 'play'
     | 'load'
     | 'locate'
-    | 'toggle-boolean';
+    | 'toggle-boolean'
+    | 'slower'
+    | 'faster';
   property?: keyof HTMLMediaElement;
 }
 export type TMsgOptions =
