@@ -1,4 +1,4 @@
-# <img src="./public/img/icon.svg" width="26"/> Browser API Monitor
+# <img src="./public/img/icon.svg" width="32"/> Browser API Monitor
 
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
@@ -19,6 +19,8 @@ To explore the internals of a complex systems.
   <summary> <strong>Example</strong> </summary>
 
 ![screenshot](./doc/screenshot-01.png)
+![screenshot](./doc/screenshot-02.png)
+![screenshot](./doc/screenshot-03.png)
 
 </details>
 

@@ -2,7 +2,7 @@
   "version": "1.0.3",
   "name": "API Monitor",
   "manifest_version": 3,
-  "description": "Monitor browser API usage",
+  "description": "Reveal active or passed timouts, intervals, and eval invocation call stacks. Observe events and properties of video/audio elements",
   "minimum_chrome_version": "122.0",
   "homepage_url": "https://github.com/zendive/browser-api-monitor",
   "author": "calexblock@gmail.com",

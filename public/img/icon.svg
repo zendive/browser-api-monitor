@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="72.075 77.976 255.806 254.782" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
-  <rect x="73.712" y="79.041" width="252.22" height="252.22" style="stroke-width: 5px; stroke: rgb(0, 0, 0); paint-order: fill; fill: rgb(8, 0, 255);"/>
-  <ellipse style="stroke: rgb(0, 0, 0); stroke-width: 5px; fill: rgba(40, 198, 255, 0.86);" cx="199.987" cy="205.083" rx="126.032" ry="126.033"/>
-  <path d="M 199.695 81.655 L 306.292 267.615 L 93.097 267.615 L 199.695 81.655 Z" style="stroke: rgb(0, 0, 0); stroke-width: 5px; paint-order: fill; fill-rule: nonzero; fill: rgb(255, 255, 255);" bx:shape="triangle 93.097 81.655 213.195 185.96 0.5 0 1@601eaeda"/>
-  <text style="fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 77px; white-space: pre;" x="134.8" y="248.072" dx="-2.417" dy="0.346">API</text>
+<svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path style="stroke: rgb(0, 0, 0); stroke-width: 3px; stroke-linecap: round;" d="M 2.135 8.693 L 6.929 6.175 L 17.866 7.484"/>
+  <path style="stroke: rgb(0, 0, 0); stroke-width: 2px; stroke-linejoin: round;" d="M 2.92 12.471 C 8.013 15.329 17.097 13.184 17.18 10.445"/>
+  <ellipse style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);" cx="8.075" cy="9.278" rx="2.336" ry="1.188"/>
 </svg>
