@@ -140,7 +140,7 @@ function formatPropValue(prop: string, value: unknown): any {
     rv = [];
 
     for (let n = 0, N = value.length; n < N; n++) {
-      rv.push(`[${value.start(n).toFixed(3)}:${value.end(n).toFixed(3)}]`);
+      rv.push(`<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`);
     }
 
     rv = rv.join('');

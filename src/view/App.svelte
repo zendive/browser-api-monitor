@@ -123,7 +123,6 @@
     header {
       display: flex;
       align-items: center;
-      height: var(--header-height);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
