@@ -62,6 +62,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'paused',
   'ended',
   'autoplay',
+  'playsInline',
   'loop',
   'defaultMuted',
   'muted',
@@ -81,6 +82,18 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoWidth',
   'videoHeight',
 ];
+
+export const MEDIA_ELEMENT_TOGGABLE_PROPS = new Set([
+  'autoplay',
+  'playsInline',
+  'loop',
+  'defaultMuted',
+  'muted',
+  'preservesPitch',
+  'controls',
+  'disablePictureInPicture',
+]);
+
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [
   'NETWORK_EMPTY',
@@ -104,3 +117,4 @@ export const REGEX_STACKTRACE_LINK = /.*\((.*)\).*/;
 export const REGEX_STACKTRACE_CLEAN_URL = /(.*):\d+:\d+$/;
 export const REGEX_STACKTRACE_LINE_NUMBER = /.*:(\d+):\d+$/;
 export const REGEX_STACKTRACE_COLUMN_NUMBER = /.*:\d+:(\d+)$/;
+export const FRAME_1of60 = 1 / 60;

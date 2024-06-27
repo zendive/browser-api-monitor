@@ -174,3 +174,27 @@ th,
   -webkit-mask-image: url(img/up.svg);
   mask-image: url(img/up.svg);
 }
+.icon.-console {
+  -webkit-mask-image: url(img/console.svg);
+  mask-image: url(img/console.svg);
+}
+.icon.-frame-backward {
+  -webkit-mask-image: url(img/frame-backward.svg);
+  mask-image: url(img/frame-backward.svg);
+}
+.icon.-frame-forward {
+  -webkit-mask-image: url(img/frame-forward.svg);
+  mask-image: url(img/frame-forward.svg);
+}
+.icon.-locate {
+  -webkit-mask-image: url(img/locate.svg);
+  mask-image: url(img/locate.svg);
+}
+.icon.-slower {
+  -webkit-mask-image: url(img/slower.svg);
+  mask-image: url(img/slower.svg);
+}
+.icon.-faster {
+  -webkit-mask-image: url(img/faster.svg);
+  mask-image: url(img/faster.svg);
+}

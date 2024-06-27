@@ -40,7 +40,7 @@
           role="button"
           tabindex="-1"
           title="Cancel"
-          on:click={() => onRemoveHandler(metric)}
+          on:click={() => void onRemoveHandler(metric)}
         />
       </td>
       <td class="wb-all w-full">

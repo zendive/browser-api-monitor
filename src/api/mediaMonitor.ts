@@ -1,9 +1,12 @@
 import {
+  FRAME_1of60,
   MEDIA_ELEMENT_EVENTS,
   MEDIA_ELEMENT_PROPS,
+  MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
 } from '@/api/const.ts';
+import type { TMsgMediaCommand } from '@/api/communication.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;
@@ -81,6 +84,49 @@ export function collectMediaMetrics(
   return rv;
 }
 
+export function doMediaCommand(
+  mediaId: string,
+  cmd: TMsgMediaCommand['cmd'],
+  property: keyof HTMLMediaElement | undefined
+) {
+  const mediaModel = mediaCollection.find(
+    (model) => model.metrics.mediaId === mediaId
+  );
+
+  if (!mediaModel || !mediaModel.el || !document.contains(mediaModel.el)) {
+    return;
+  }
+
+  if (cmd === 'log') {
+    console.log(mediaModel.el);
+  } else if (cmd === 'locate') {
+    mediaModel.el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center',
+    });
+  } else if (cmd === 'load') {
+    mediaModel.el.load();
+  } else if (cmd === 'pause') {
+    mediaModel.el.pause();
+  } else if (cmd === 'play') {
+    mediaModel.el.play();
+  } else if (cmd === 'frame-backward') {
+    mediaModel.el.currentTime -= FRAME_1of60;
+  } else if (cmd === 'frame-forward') {
+    mediaModel.el.currentTime += FRAME_1of60;
+  } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
+    if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
+      // @ts-expect-error
+      mediaModel.el[property] = !mediaModel.el[property];
+    }
+  } else if (cmd === 'slower') {
+    mediaModel.el.playbackRate -= 0.1;
+  } else if (cmd === 'faster') {
+    mediaModel.el.playbackRate += 0.1;
+  }
+}
+
 function formatPropValue(prop: string, value: unknown): any {
   let rv: any = value;
 
@@ -94,7 +140,7 @@ function formatPropValue(prop: string, value: unknown): any {
     rv = [];
 
     for (let n = 0, N = value.length; n < N; n++) {
-      rv.push(`[${value.start(n).toFixed(3)}:${value.end(n).toFixed(3)}]`);
+      rv.push(`<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`);
     }
 
     rv = rv.join('');

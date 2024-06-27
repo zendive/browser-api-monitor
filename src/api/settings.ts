@@ -34,9 +34,10 @@ export type TSettingsPanel = {
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
-const SETTINGS_VERSION = '1.0.0';
+const SETTINGS_VERSION = '1.0.3';
 const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
+  { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true },
   { key: 'setTimeoutHistory', label: 'setTimeout History', visible: true },
   { key: 'clearTimeoutHistory', label: 'clearTimeout History', visible: true },
@@ -46,7 +47,6 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
     label: 'clearInterval History',
     visible: true,
   },
-  { key: 'media', label: 'Media', visible: true },
 ];
 
 export const DEFAULT_SORT = {
@@ -57,6 +57,7 @@ export const DEFAULT_SORT = {
 export const DEFAULT_SETTINGS = {
   panels: DEFAULT_PANELS,
   sort: DEFAULT_SORT,
+  paused: false,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
@@ -91,9 +92,15 @@ export function onSettingsChange(
   callback: (newValue: TSettings, oldValue: TSettings) => void
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
-    callback(
-      change[SETTINGS_VERSION].newValue,
-      change[SETTINGS_VERSION].oldValue
-    );
+    if (
+      change &&
+      change[SETTINGS_VERSION] &&
+      change[SETTINGS_VERSION].newValue
+    ) {
+      callback(
+        change[SETTINGS_VERSION].newValue,
+        change[SETTINGS_VERSION].oldValue
+      );
+    }
   });
 }

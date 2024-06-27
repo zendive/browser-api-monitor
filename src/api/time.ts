@@ -191,20 +191,16 @@ export class Fps {
 export class MeanAggregator {
   numberOfSamples = 0;
   mean = 0;
-  variance = 0;
-  standardDeviation = 0;
-  minimum = 0;
-  maximum = 0;
+  minimum = Infinity;
+  maximum = -Infinity;
 
   #M2 = 0;
 
   reset() {
     this.numberOfSamples = 0;
     this.mean = 0;
-    this.variance = 0;
-    this.standardDeviation = 0;
-    this.minimum = 0;
-    this.maximum = 0;
+    this.minimum = Infinity;
+    this.maximum = -Infinity;
     this.#M2 = 0;
 
     return this;
@@ -213,20 +209,17 @@ export class MeanAggregator {
   add(value: number) {
     ++this.numberOfSamples;
 
-    if (1 === this.numberOfSamples) {
-      this.minimum = value;
-      this.maximum = value;
-    } else {
-      this.minimum = Math.min(this.minimum, value);
-      this.maximum = Math.max(this.maximum, value);
-    }
+    this.minimum = Math.min(this.minimum, value);
+    this.maximum = Math.max(this.maximum, value);
 
     const delta = value - this.mean;
     this.mean += delta / this.numberOfSamples;
     this.#M2 += delta * (value - this.mean);
-    this.variance = this.#M2 / this.numberOfSamples;
-    this.standardDeviation = Math.sqrt(this.variance);
 
     return this;
+  }
+
+  get standardDeviation() {
+    return Math.sqrt(this.#M2 / this.numberOfSamples);
   }
 }

@@ -118,6 +118,22 @@ export interface TMsgSettings {
   msg: 'settings';
   settings: TSettings;
 }
+export interface TMsgMediaCommand {
+  msg: 'media-command';
+  mediaId: string;
+  cmd:
+    | 'log'
+    | 'frame-backward'
+    | 'frame-forward'
+    | 'pause'
+    | 'play'
+    | 'load'
+    | 'locate'
+    | 'toggle-boolean'
+    | 'slower'
+    | 'faster';
+  property?: keyof HTMLMediaElement;
+}
 export type TMsgOptions =
   | TMsgTelemetry
   | TMsgStartObserve
@@ -125,4 +141,5 @@ export type TMsgOptions =
   | TMsgLoaded
   | TMsgResetHistory
   | TMsgClearHandler
-  | TMsgSettings;
+  | TMsgSettings
+  | TMsgMediaCommand;
