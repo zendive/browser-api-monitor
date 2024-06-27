@@ -21,6 +21,7 @@ To explore the internals of a complex systems.
 ![screenshot](./doc/screenshot-01.png)
 ![screenshot](./doc/screenshot-02.png)
 ![screenshot](./doc/screenshot-03.png)
+![screenshot](./doc/screenshot-04.png)
 
 </details>
 
