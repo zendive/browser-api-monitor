@@ -11,7 +11,7 @@
 
 {#if metrics.collection.length}
   {#if videos.length}
-    <section>
+    <section data-navigation-tag="Videos">
       <div class="label bc-invert">
         Videos: <Variable bind:value={videos.length} />
       </div>
@@ -24,7 +24,7 @@
   {/if}
 
   {#if audios.length}
-    <section>
+    <section data-navigation-tag="Audios">
       <div class="label bc-invert">
         Audios: <Variable bind:value={audios.length} />
       </div>
