@@ -67,7 +67,7 @@
   }
 </script>
 
-<table>
+<table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
     <Variable bind:value={metrics.length} />
