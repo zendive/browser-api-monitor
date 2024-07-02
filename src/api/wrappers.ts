@@ -13,6 +13,7 @@ import {
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
+import { sha256 } from 'js-sha256';
 
 export type TCallstack = {
   name: string;
@@ -74,8 +75,9 @@ function createCallstack(e: Error): TCallstack {
     }
   }
 
-  for (let i = 1, I = arr.length; i < I; i++) {
-    let v = arr[i];
+  // loop from the end, excluding error name and self trace
+  for (let n = arr.length - 1; n > 1; n--) {
+    let v = arr[n];
     v = v.replace(REGEX_STACKTRACE_PREFIX, '');
     const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
@@ -98,11 +100,15 @@ function createCallstack(e: Error): TCallstack {
 
   return rv;
 }
+
 function createTraceId(trace: TCallstack) {
-  return trace
-    .reverse()
-    .map((v) => v.link)
-    .join('');
+  const joinedLinks = trace.map((v) => v.link).join('');
+
+  if (joinedLinks.length > 64) {
+    return sha256(joinedLinks);
+  }
+
+  return joinedLinks;
 }
 
 export class Wrapper {

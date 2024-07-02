@@ -47,7 +47,7 @@ const eachSecond = new Timer(
   { interval: true }
 );
 const tick = new Timer(
-  () => {
+  function apiMonitorPostMetric() {
     meanExecutionTime.add(tick.executionTime);
     // adaptive update-frequency
     if (tick.executionTime < 3) {
