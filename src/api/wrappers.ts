@@ -16,7 +16,7 @@ import type { TPanelVisibilityMap } from '@/api/settings.ts';
 import { sha256 } from 'js-sha256';
 
 export type TCallstack = {
-  name: string;
+  name: string | 0;
   link: string;
 }[];
 export enum ETimeType {
@@ -78,17 +78,25 @@ function createCallstack(e: Error): TCallstack {
   // loop from the end, excluding error name and self trace
   for (let n = arr.length - 1; n > 1; n--) {
     let v = arr[n];
-    v = v.replace(REGEX_STACKTRACE_PREFIX, '');
-    const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
-    if (link.indexOf(selfCallLink) >= 0) {
+    if (v.indexOf(selfCallLink) >= 0) {
       continue;
     }
 
-    rv.push({
-      name: v.replace(REGEX_STACKTRACE_NAME, '$1').trim(),
-      link,
-    });
+    v = v.replace(REGEX_STACKTRACE_PREFIX, '');
+    const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
+
+    if (link.startsWith('<anonymous>')) {
+      continue;
+    }
+
+    let name: string | 0 = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
+
+    if (name === link) {
+      name = 0;
+    }
+
+    rv.push({ name, link });
   }
 
   if (!rv.length) {

@@ -7,8 +7,8 @@
   } from '@/api/const.ts';
 
   export let href: string = '';
-  export let name: string = '';
-  let beenClicked = false;
+  export let name: string | 0 = 0;
+  let isSeen = false;
 
   $: lineNumber = parseInt(
     href?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
@@ -18,10 +18,7 @@
     href.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
     10
   );
-  $: isSourceLess =
-    !isFinite(lineNumber) ||
-    href.startsWith('<anonymous>') ||
-    TAG_INVALID_CALLSTACK === href;
+  $: isSourceLess = !isFinite(lineNumber) || TAG_INVALID_CALLSTACK === href;
 
   function showStackTraceResource(e: MouseEvent) {
     e.preventDefault();
@@ -34,18 +31,18 @@
       columnNumber - 1
     );
 
-    beenClicked = true;
+    isSeen = true;
   }
 </script>
 
 {#if isSourceLess}
-  <i class="no-link">{`${name} ${href === name ? '' : href}`}</i>
+  <i class="no-link">{`${name ? name : ''} ${href}`}</i>
 {:else}
   <a
     {href}
     title={`${lineNumber}:${columnNumber}`}
-    class:beenClicked
-    on:click={showStackTraceResource}>{name}</a
+    class:isSeen
+    on:click={showStackTraceResource}>{name || href}</a
   >
 {/if}
 
@@ -64,7 +61,7 @@
     text-overflow: ellipsis;
     max-width: 25rem;
 
-    &.beenClicked {
+    &.isSeen {
       color: var(--link-visited-text);
       background-color: var(--link-visited-bg);
     }

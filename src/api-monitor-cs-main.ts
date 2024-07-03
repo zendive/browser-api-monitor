@@ -50,7 +50,7 @@ const tick = new Timer(
   function apiMonitorPostMetric() {
     meanExecutionTime.add(tick.executionTime);
     // adaptive update-frequency
-    if (tick.executionTime < 3) {
+    if (0 < tick.executionTime && tick.executionTime < 3) {
       tick.options.animation = true;
     } else {
       tick.options.animation = false;
