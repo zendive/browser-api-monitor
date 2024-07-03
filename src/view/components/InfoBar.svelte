@@ -20,13 +20,13 @@
     });
   });
 
-  function scrollTo(e: MouseEvent, tableCaption: string) {
-    e.preventDefault();
+  function scrollTo(tableCaption: string) {
+    const condition = tableCaption
+      .split('|')
+      .map((caption) => `contains(@data-navigation-tag,'${caption}')`)
+      .join(' or ');
     const el = document.evaluate(
-      `//caption[${tableCaption
-        .split('|')
-        .map((caption) => `contains(.,'${caption}')`)
-        .join(' or ')}]`,
+      `//node()[${condition}]`,
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
@@ -49,7 +49,7 @@
     <a
       href="void(0)"
       class:panel-enabled={panels.eval && msg.callCounter.eval}
-      on:click={(e) => void scrollTo(e, 'Eval Usages')}
+      on:click|preventDefault={() => void scrollTo('Eval Usages')}
     >
       <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
     </a>
@@ -57,7 +57,7 @@
     <a
       href="void(0)"
       class:panel-enabled={panels.media && msg.mediaMetrics.total}
-      on:click={(e) => void scrollTo(e, 'Video|Audio')}
+      on:click|preventDefault={() => void scrollTo('Videos|Audios')}
     >
       <strong>Media</strong>:
       <Variable bind:value={msg.mediaMetrics.total} />
@@ -67,7 +67,7 @@
       href="void(0)"
       class:panel-enabled={panels.activeTimers &&
         msg.wrapperMetrics.onlineTimers}
-      on:click={(e) => void scrollTo(e, 'Active')}
+      on:click|preventDefault={() => void scrollTo('Active')}
     >
       <strong>Active Timers</strong>: <Variable
         bind:value={msg.wrapperMetrics.onlineTimers}
@@ -78,7 +78,7 @@
       href="void(0)"
       class:panel-enabled={panels.setTimeoutHistory &&
         msg.callCounter.setTimeout}
-      on:click={(e) => void scrollTo(e, 'setTimeout History')}
+      on:click|preventDefault={() => void scrollTo('setTimeout History')}
     >
       <strong>setTimeout</strong>: <Variable
         bind:value={msg.callCounter.setTimeout}
@@ -89,7 +89,7 @@
       href="void(0)"
       class:panel-enabled={panels.clearTimeoutHistory &&
         msg.callCounter.clearTimeout}
-      on:click={(e) => void scrollTo(e, 'clearTimeout History')}
+      on:click|preventDefault={() => void scrollTo('clearTimeout History')}
     >
       <strong>clearTimeout</strong>: <Variable
         bind:value={msg.callCounter.clearTimeout}
@@ -100,7 +100,7 @@
       href="void(0)"
       class:panel-enabled={panels.setIntervalHistory &&
         msg.callCounter.setInterval}
-      on:click={(e) => void scrollTo(e, 'setInterval History')}
+      on:click|preventDefault={() => void scrollTo('setInterval History')}
     >
       <strong>setInterval</strong>: <Variable
         bind:value={msg.callCounter.setInterval}
@@ -111,7 +111,7 @@
       href="void(0)"
       class:panel-enabled={panels.clearIntervalHistory &&
         msg.callCounter.clearInterval}
-      on:click={(e) => void scrollTo(e, 'clearInterval History')}
+      on:click|preventDefault={() => void scrollTo('clearInterval History')}
     >
       <strong>clearInterval</strong>: <Variable
         bind:value={msg.callCounter.clearInterval}

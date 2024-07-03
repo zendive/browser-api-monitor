@@ -20,7 +20,7 @@
 </script>
 
 {#if metrics.length}
-  <table>
+  <table data-navigation-tag="Eval Usages">
     <caption class="ta-l bc-invert"
       >Eval Usages <Variable bind:value={callCount} /></caption
     >
