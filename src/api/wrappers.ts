@@ -15,34 +15,39 @@ import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
 import { sha256 } from 'js-sha256';
 
-export type TCallstack = {
+export type TTrace = {
   name: string | 0;
   link: string;
-}[];
+};
+type TCallstack = {
+  traceId: string;
+  trace: TTrace[];
+};
 export enum ETimeType {
   TIMEOUT,
   INTERVAL,
 }
 export type TOnlineTimerMetrics = {
+  traceId: string;
+  trace: TTrace[];
   type: ETimeType;
   delay: number | undefined;
   handler: number;
-  trace: TCallstack;
   isEval: boolean;
   rawTrace?: string; // for debugging
 };
 export type TTimerHistory = {
   traceId: string;
+  trace: TTrace[];
   individualInvocations: number;
   recentHandler: number | string;
   handlerDelay: number | undefined | string;
-  trace: TCallstack;
   isEval: boolean | undefined;
   hasError: boolean;
 };
 export type TEvalHistory = {
   traceId: string;
-  trace: TCallstack;
+  trace: TTrace[];
   individualInvocations: number;
   returnedValue: any;
   code: any;
@@ -60,64 +65,6 @@ export type TWrapperMetrics = {
 };
 
 type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
-
-let selfCallLink = '';
-function createCallstack(e: Error): TCallstack {
-  const rv: TCallstack = [];
-  const arr = e.stack?.split('\n') || [];
-
-  if (!selfCallLink) {
-    const link = arr[1]
-      .replace(REGEX_STACKTRACE_LINK, '$1')
-      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
-    if (link) {
-      selfCallLink = link;
-    }
-  }
-
-  // loop from the end, excluding error name and self trace
-  for (let n = arr.length - 1; n > 1; n--) {
-    let v = arr[n];
-
-    if (v.indexOf(selfCallLink) >= 0) {
-      continue;
-    }
-
-    v = v.replace(REGEX_STACKTRACE_PREFIX, '');
-    const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
-
-    if (link.startsWith('<anonymous>')) {
-      continue;
-    }
-
-    let name: string | 0 = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
-
-    if (name === link) {
-      name = 0;
-    }
-
-    rv.push({ name, link });
-  }
-
-  if (!rv.length) {
-    rv.push({
-      name: TAG_INVALID_CALLSTACK,
-      link: `(id: ${crypto.randomUUID()})`,
-    });
-  }
-
-  return rv;
-}
-
-function createTraceId(trace: TCallstack) {
-  const joinedLinks = trace.map((v) => v.link).join('');
-
-  if (joinedLinks.length > 64) {
-    return sha256(joinedLinks);
-  }
-
-  return joinedLinks;
-}
 
 export class Wrapper {
   onlineTimers: TOnlineTimers = new Map();
@@ -140,6 +87,7 @@ export class Wrapper {
     clearInterval: clearInterval,
     eval: lessEval,
   };
+  static selfCallLink = '';
 
   constructor() {}
 
@@ -147,15 +95,16 @@ export class Wrapper {
     type: ETimeType,
     handler: number,
     delay: number | undefined,
-    trace: TCallstack,
+    callstack: TCallstack,
     isEval: boolean
   ) {
     this.onlineTimers.set(handler, {
       type,
       handler,
       delay,
-      trace,
       isEval,
+      traceId: callstack.traceId,
+      trace: callstack.trace,
       //rawTrace
     });
   }
@@ -182,11 +131,10 @@ export class Wrapper {
     history: TTimerHistory[],
     handler: number,
     delay: number | undefined,
-    trace: TCallstack,
+    callstack: TCallstack,
     isEval: boolean
   ) {
-    const traceId = createTraceId(trace);
-    const existing = history.findLast((v) => v.traceId === traceId);
+    const existing = history.findLast((v) => v.traceId === callstack.traceId);
     const hasError = this.#badTimerDelay(delay);
     let handlerDelay: string | number | undefined = delay;
 
@@ -202,13 +150,13 @@ export class Wrapper {
       existing.hasError = hasError;
     } else {
       history.push({
-        traceId,
         recentHandler: handler,
         individualInvocations: 1,
         handlerDelay,
-        trace,
         isEval,
         hasError,
+        traceId: callstack.traceId,
+        trace: callstack.trace,
       });
       history.sort((a, b) =>
         (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
@@ -219,10 +167,9 @@ export class Wrapper {
   updateClearTimersHistory(
     history: TTimerHistory[],
     handler: unknown,
-    trace: TCallstack
+    callstack: TCallstack
   ) {
-    const traceId = createTraceId(trace);
-    const existing = history.findLast((v) => v.traceId === traceId);
+    const existing = history.findLast((v) => v.traceId === callstack.traceId);
     const hasError = this.#badTimerHandler(handler);
     const onlineTimer = !hasError
       ? this.onlineTimers.get(<number>handler)
@@ -250,13 +197,13 @@ export class Wrapper {
       existing.hasError = hasError;
     } else {
       history.push({
-        traceId,
         recentHandler: <number | string>handler,
         individualInvocations: 1,
         handlerDelay,
-        trace,
         isEval: handlerIsEval,
         hasError,
+        traceId: callstack.traceId,
+        trace: callstack.trace,
       });
       history.sort((a, b) =>
         (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
@@ -267,11 +214,12 @@ export class Wrapper {
   updateEvalHistory(
     code: string,
     returnedValue: any,
-    trace: TCallstack,
+    callstack: TCallstack,
     usesLocalScope: boolean
   ) {
-    const traceId = createTraceId(trace);
-    const existing = this.evalHistory.find((v) => v.traceId === traceId);
+    const existing = this.evalHistory.find(
+      (v) => v.traceId === callstack.traceId
+    );
 
     if (existing) {
       existing.code = cloneObjectSafely(code);
@@ -283,9 +231,9 @@ export class Wrapper {
         individualInvocations: 1,
         code: cloneObjectSafely(code),
         returnedValue: cloneObjectSafely(returnedValue),
-        trace,
-        traceId,
         usesLocalScope,
+        traceId: callstack.traceId,
+        trace: callstack.trace,
       });
     }
   }
@@ -372,8 +320,12 @@ export class Wrapper {
         }
       }
 
-      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
-      this.updateEvalHistory(code, rv, trace, usesLocalScope);
+      this.updateEvalHistory(
+        code,
+        rv,
+        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE)),
+        usesLocalScope
+      );
 
       if (throwError) {
         throw throwError;
@@ -404,20 +356,25 @@ export class Wrapper {
         delay,
         ...args
       );
-      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       this.callCounter.setTimeout++;
-      this.timerOnline(ETimeType.TIMEOUT, handler, delay, trace, isEval);
+      this.timerOnline(ETimeType.TIMEOUT, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setTimeoutHistory,
         handler,
         delay,
-        trace,
+        callstack,
         isEval
       );
       if (isEval) {
         this.callCounter.eval++;
-        this.updateEvalHistory(code, '(N/A - via setTimeout)', trace, false);
+        this.updateEvalHistory(
+          code,
+          '(N/A - via setTimeout)',
+          callstack,
+          false
+        );
       }
 
       return handler;
@@ -430,7 +387,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
-        createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE))
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -459,20 +416,25 @@ export class Wrapper {
         delay,
         ...args
       );
-      const trace = createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       this.callCounter.setInterval++;
-      this.timerOnline(ETimeType.INTERVAL, handler, delay, trace, isEval);
+      this.timerOnline(ETimeType.INTERVAL, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setIntervalHistory,
         handler,
         delay,
-        trace,
+        callstack,
         isEval
       );
       if (isEval) {
         this.callCounter.eval++;
-        this.updateEvalHistory(code, '(N/A - via setInterval)', trace, false);
+        this.updateEvalHistory(
+          code,
+          '(N/A - via setInterval)',
+          callstack,
+          false
+        );
       }
 
       return handler;
@@ -485,7 +447,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
-        createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE))
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -494,5 +456,62 @@ export class Wrapper {
       this.callCounter.clearInterval++;
       this.native.clearInterval(handler);
     }.bind(this);
+  }
+
+  static createCallstack(e: Error): TCallstack {
+    const trace: TTrace[] = [];
+    const stack = e.stack?.split('\n') || [];
+    let links = '';
+
+    if (!Wrapper.selfCallLink) {
+      const link = stack[1]
+        .replace(REGEX_STACKTRACE_LINK, '$1')
+        .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+      if (link) {
+        Wrapper.selfCallLink = link;
+      }
+    }
+
+    // loop from the end, excluding error name and self trace
+    for (let n = stack.length - 1; n > 1; n--) {
+      let v = stack[n];
+
+      if (v.indexOf(Wrapper.selfCallLink) >= 0) {
+        continue;
+      }
+
+      v = v.replace(REGEX_STACKTRACE_PREFIX, '');
+      const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
+
+      if (link.startsWith('<anonymous>')) {
+        continue;
+      }
+
+      let name: string | 0 = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
+
+      if (name === link) {
+        name = 0;
+      }
+
+      trace.push({ name, link });
+      links += link;
+    }
+
+    if (!trace.length) {
+      const link = `(id: ${crypto.randomUUID()})`;
+      trace.push({
+        name: TAG_INVALID_CALLSTACK,
+        link,
+      });
+      links += link;
+    }
+
+    let traceId = links;
+
+    if (traceId.length > 64) {
+      traceId = sha256(traceId);
+    }
+
+    return { traceId, trace };
   }
 }

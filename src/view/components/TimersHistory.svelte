@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TTimerHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
-  import Callstack from '@/view/components/Callstack.svelte';
+  import Trace from '@/view/components/Trace.svelte';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -110,7 +110,7 @@
   {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td class="wb-all">
-        <Callstack bind:trace={metric.trace} />
+        <Trace bind:trace={metric.trace} />
       </td>
       <td class="ta-c">
         <Variable bind:value={metric.individualInvocations} />

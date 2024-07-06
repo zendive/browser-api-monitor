@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
-  import Callstack from '@/view/components/Callstack.svelte';
+  import Trace from '@/view/components/Trace.svelte';
   import { IS_DEV } from '@/api/env.ts';
   import { portPost } from '@/api/communication.ts';
 
@@ -44,7 +44,7 @@
         />
       </td>
       <td class="wb-all w-full">
-        <Callstack bind:trace={metric.trace} />
+        <Trace bind:trace={metric.trace} />
         {#if IS_DEV && metric.rawTrace}
           <pre>{metric.rawTrace}</pre>
         {/if}

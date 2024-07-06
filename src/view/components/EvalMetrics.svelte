@@ -1,6 +1,6 @@
 <script lang="ts">
   import Variable from '@/view/components/Variable.svelte';
-  import Callstack from '@/view/components/Callstack.svelte';
+  import Trace from '@/view/components/Trace.svelte';
   import type { TEvalHistory } from '@/api/wrappers.ts';
 
   export let callCount: number = 0;
@@ -31,7 +31,7 @@
     >
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra bc-error">
-        <td class="wb-all"><Callstack bind:trace={metric.trace} /></td>
+        <td class="wb-all"><Trace bind:trace={metric.trace} /></td>
         <td>
           {#if metric.usesLocalScope}
             <span

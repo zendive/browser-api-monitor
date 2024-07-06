@@ -111,7 +111,7 @@ export const READY_STATE = [
 ];
 
 export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
-export const REGEX_STACKTRACE_PREFIX = /^.*at /;
+export const REGEX_STACKTRACE_PREFIX = /^\s*at /;
 export const REGEX_STACKTRACE_NAME = /^(.+)\(.*/;
 export const REGEX_STACKTRACE_LINK = /.*\((.*)\).*/;
 export const REGEX_STACKTRACE_CLEAN_URL = /(.*):\d+:\d+$/;
