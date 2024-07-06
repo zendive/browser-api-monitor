@@ -49,7 +49,7 @@
     <a
       href="void(0)"
       class:panel-enabled={panels.eval && msg.callCounter.eval}
-      on:click|preventDefault={() => void scrollTo('Eval Usages')}
+      on:click|preventDefault={() => void scrollTo('Eval History')}
     >
       <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
     </a>

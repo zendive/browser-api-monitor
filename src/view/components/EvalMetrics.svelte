@@ -3,7 +3,6 @@
   import Trace from '@/view/components/Trace.svelte';
   import type { TEvalHistory } from '@/api/wrappers.ts';
 
-  export let callCount: number = 0;
   export let metrics: TEvalHistory[] = [];
 
   function dynamicValue(value: unknown): string {
@@ -20,9 +19,9 @@
 </script>
 
 {#if metrics.length}
-  <table data-navigation-tag="Eval Usages">
+  <table data-navigation-tag="Eval History">
     <caption class="ta-l bc-invert"
-      >Eval Usages <Variable bind:value={callCount} /></caption
+      >Eval History <Variable bind:value={metrics.length} /></caption
     >
     <tr
       ><th class="w-full">Callstack</th><th>Scope</th><th>Called</th><th

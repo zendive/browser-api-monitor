@@ -102,10 +102,7 @@
 
   {#if msg}
     <main>
-      <EvalMetrics
-        bind:callCount={msg.callCounter.eval}
-        bind:metrics={msg.wrapperMetrics.evalHistory}
-      />
+      <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
 
       <Media bind:metrics={msg.mediaMetrics} />
 
