@@ -32,22 +32,22 @@ describe('wrappers', () => {
   });
 
   test('setTimeoutHistory & clearTimeoutHistory - recorded', () => {
-    expect(wrapper.setTimeoutHistory.length).toBe(0);
-    expect(wrapper.clearTimeoutHistory.length).toBe(0);
+    expect(wrapper.setTimeoutHistory.size).toBe(0);
+    expect(wrapper.clearTimeoutHistory.size).toBe(0);
 
     const handler = setTimeout(() => {}, 123);
     expect(wrapper.onlineTimers.size).toBe(1);
     clearTimeout(handler);
 
     expect(wrapper.onlineTimers.size).toBe(0);
-    expect(wrapper.clearTimeoutHistory.length).toBe(1);
-    expect(wrapper.setTimeoutHistory.length).toBe(1);
+    expect(wrapper.clearTimeoutHistory.size).toBe(1);
+    expect(wrapper.setTimeoutHistory.size).toBe(1);
   });
 
   test('setTimeoutHistory - valid delay', () => {
     const DELAY = 123;
     const handler = setTimeout(() => {}, DELAY);
-    const rec = wrapper.setTimeoutHistory[0];
+    const rec = [...wrapper.setTimeoutHistory.values()][0];
 
     expect(rec.individualInvocations).toBe(1);
     expect(rec.handlerDelay).toBe(DELAY);
@@ -61,7 +61,7 @@ describe('wrappers', () => {
 
   test('setTimeoutHistory - invalid delay', () => {
     setTimeout(() => {}, -1);
-    const rec = wrapper.setTimeoutHistory[0];
+    const rec = [...wrapper.setTimeoutHistory.values()][0];
 
     expect(rec.individualInvocations).toBe(1);
     expect(rec.handlerDelay).toBe(TAG_EXCEPTION('-1'));
@@ -72,13 +72,13 @@ describe('wrappers', () => {
   test('clearTimeoutHistory - valid handler', () => {
     const handler = setTimeout(() => {}, 1e3);
     clearTimeout(handler);
-    const rec = wrapper.clearTimeoutHistory[0];
+    const rec = [...wrapper.clearTimeoutHistory.values()][0];
     expect(rec.handlerDelay).toBe(1e3);
   });
 
   test('clearTimeoutHistory - non existent handler', () => {
     clearTimeout(1000);
-    const rec = wrapper.clearTimeoutHistory[0];
+    const rec = [...wrapper.clearTimeoutHistory.values()][0];
 
     expect(rec.handlerDelay).toBe('N/A');
     expect(rec.hasError).toBe(false);
@@ -87,29 +87,29 @@ describe('wrappers', () => {
   test('clearTimeoutHistory - invalid handler', () => {
     clearTimeout(0);
 
-    const rec = wrapper.clearTimeoutHistory[0];
+    const rec = [...wrapper.clearTimeoutHistory.values()][0];
 
     expect(rec.handlerDelay).toBe('N/A');
     expect(rec.hasError).toBe(true);
   });
 
   test('setIntervalHistory & clearIntervalHistory - recorded', () => {
-    expect(wrapper.setIntervalHistory.length).toBe(0);
-    expect(wrapper.clearIntervalHistory.length).toBe(0);
+    expect(wrapper.setIntervalHistory.size).toBe(0);
+    expect(wrapper.clearIntervalHistory.size).toBe(0);
 
     const handler = setInterval(() => {}, 123);
     expect(wrapper.onlineTimers.size).toBe(1);
     clearInterval(handler);
 
     expect(wrapper.onlineTimers.size).toBe(0);
-    expect(wrapper.clearIntervalHistory.length).toBe(1);
-    expect(wrapper.setIntervalHistory.length).toBe(1);
+    expect(wrapper.clearIntervalHistory.size).toBe(1);
+    expect(wrapper.setIntervalHistory.size).toBe(1);
   });
 
   test('setIntervalHistory - valid delay', () => {
     const DELAY = 123;
     const handler = setInterval(() => {}, DELAY);
-    const rec = wrapper.setIntervalHistory[0];
+    const rec = [...wrapper.setIntervalHistory.values()][0];
 
     expect(rec.individualInvocations).toBe(1);
     expect(rec.handlerDelay).toBe(DELAY);
@@ -123,7 +123,7 @@ describe('wrappers', () => {
 
   test('setIntervalHistory - invalid delay', () => {
     const handler = setInterval(() => {}, -1);
-    const rec = wrapper.setIntervalHistory[0];
+    const rec = [...wrapper.setIntervalHistory.values()][0];
 
     expect(rec.individualInvocations).toBe(1);
     expect(rec.handlerDelay).toBe(TAG_EXCEPTION('-1'));
@@ -136,7 +136,7 @@ describe('wrappers', () => {
   test('clearIntervalHistory - valid handler', () => {
     const handler = setInterval(() => {}, 1e3);
     clearInterval(handler);
-    const rec = wrapper.clearIntervalHistory[0];
+    const rec = [...wrapper.clearIntervalHistory.values()][0];
 
     expect(rec.handlerDelay).toBe(1e3);
   });
@@ -144,7 +144,7 @@ describe('wrappers', () => {
   test('clearIntervalHistory - non existent handler', () => {
     clearInterval(1000);
 
-    const rec = wrapper.clearIntervalHistory[0];
+    const rec = [...wrapper.clearIntervalHistory.values()][0];
     expect(rec.handlerDelay).toBe('N/A');
     expect(rec.hasError).toBe(false);
   });
@@ -152,7 +152,7 @@ describe('wrappers', () => {
   test('clearIntervalHistory - invalid handler', () => {
     clearInterval(0);
 
-    const rec = wrapper.clearIntervalHistory[0];
+    const rec = [...wrapper.clearIntervalHistory.values()][0];
     expect(rec.handlerDelay).toBe('N/A');
     expect(rec.hasError).toBe(true);
   });
@@ -165,9 +165,9 @@ describe('wrappers', () => {
     for (let i = 0, I = NUMBER_OF_INVOCATIONS; i < I; i++) {
       window.eval(CODE);
     }
-    expect(wrapper.evalHistory.length).toBe(1);
+    expect(wrapper.evalHistory.size).toBe(1);
 
-    const rec = wrapper.evalHistory[0];
+    const rec = [...wrapper.evalHistory.values()][0];
     expect(rec.individualInvocations).toBe(NUMBER_OF_INVOCATIONS);
     expect(rec.usesLocalScope).toBe(false);
     expect(rec.code).toBe(CODE);
@@ -180,7 +180,7 @@ describe('wrappers', () => {
     const local_variable = 0;
     window.eval('(local_variable++)');
 
-    const rec = wrapper.evalHistory[0];
+    const rec = [...wrapper.evalHistory.values()][0];
     expect(rec.individualInvocations).toBe(1);
     expect(local_variable).toBe(0);
     expect(rec.usesLocalScope).toBe(true);
