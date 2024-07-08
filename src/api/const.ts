@@ -111,10 +111,10 @@ export const READY_STATE = [
 ];
 
 export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
-export const REGEX_STACKTRACE_PREFIX = /^\s*at /;
-export const REGEX_STACKTRACE_NAME = /^(.+)\(.*/;
-export const REGEX_STACKTRACE_LINK = /.*\((.*)\).*/;
-export const REGEX_STACKTRACE_CLEAN_URL = /(.*):\d+:\d+$/;
-export const REGEX_STACKTRACE_LINE_NUMBER = /.*:(\d+):\d+$/;
-export const REGEX_STACKTRACE_COLUMN_NUMBER = /.*:\d+:(\d+)$/;
+export const REGEX_STACKTRACE_SPLIT = new RegExp(/\n\s+at\s/);
+export const REGEX_STACKTRACE_NAME = new RegExp(/^(.+)\(.*/);
+export const REGEX_STACKTRACE_LINK = new RegExp(/.*\((.*)\)$/);
+export const REGEX_STACKTRACE_CLEAN_URL = new RegExp(/(.*):\d+:\d+$/);
+export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
+export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
 export const FRAME_1of60 = 1 / 60;

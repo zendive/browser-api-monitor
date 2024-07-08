@@ -45,9 +45,6 @@
       </td>
       <td class="wb-all w-full">
         <Trace bind:trace={metric.trace} />
-        {#if IS_DEV && metric.rawTrace}
-          <pre>{metric.rawTrace}</pre>
-        {/if}
       </td>
     </tr>
   {/each}

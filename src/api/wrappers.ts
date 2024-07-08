@@ -7,7 +7,7 @@ import {
   REGEX_STACKTRACE_NAME,
   REGEX_STACKTRACE_LINK,
   TRACE_ERROR_MESSAGE,
-  REGEX_STACKTRACE_PREFIX,
+  REGEX_STACKTRACE_SPLIT,
   REGEX_STACKTRACE_CLEAN_URL,
   TAG_INVALID_CALLSTACK,
 } from '@/api/const.ts';
@@ -31,10 +31,9 @@ export type TOnlineTimerMetrics = {
   traceId: string;
   trace: TTrace[];
   type: ETimeType;
-  delay: number | undefined;
+  delay: number | undefined | string;
   handler: number;
   isEval: boolean;
-  rawTrace?: string; // for debugging
 };
 export type TTimerHistory = {
   traceId: string;
@@ -64,15 +63,13 @@ export type TWrapperMetrics = {
   evalHistory: TEvalHistory[];
 };
 
-type TOnlineTimers = Map<number, TOnlineTimerMetrics>;
-
 export class Wrapper {
-  onlineTimers: TOnlineTimers = new Map();
-  setTimeoutHistory: TTimerHistory[] = [];
-  clearTimeoutHistory: TTimerHistory[] = [];
-  setIntervalHistory: TTimerHistory[] = [];
-  clearIntervalHistory: TTimerHistory[] = [];
-  evalHistory: TEvalHistory[] = [];
+  onlineTimers: Map<number, TOnlineTimerMetrics> = new Map();
+  setTimeoutHistory: Map<string, TTimerHistory> = new Map();
+  clearTimeoutHistory: Map<string, TTimerHistory> = new Map();
+  setIntervalHistory: Map<string, TTimerHistory> = new Map();
+  clearIntervalHistory: Map<string, TTimerHistory> = new Map();
+  evalHistory: Map<string, TEvalHistory> = new Map();
   callCounter = {
     setTimeout: 0,
     clearTimeout: 0,
@@ -87,17 +84,18 @@ export class Wrapper {
     clearInterval: clearInterval,
     eval: lessEval,
   };
-  static selfCallLink = '';
-
-  constructor() {}
+  selfTraceLink = '';
 
   timerOnline(
     type: ETimeType,
     handler: number,
-    delay: number | undefined,
+    delay: number | undefined | string,
     callstack: TCallstack,
     isEval: boolean
   ) {
+    if (this.#badTimerDelay(delay)) {
+      delay = TAG_EXCEPTION(`${delay}`);
+    }
     this.onlineTimers.set(handler, {
       type,
       handler,
@@ -105,7 +103,6 @@ export class Wrapper {
       isEval,
       traceId: callstack.traceId,
       trace: callstack.trace,
-      //rawTrace
     });
   }
 
@@ -114,27 +111,24 @@ export class Wrapper {
   }
 
   #badTimerHandler(handler: unknown) {
-    const rv = !Number.isFinite(handler) || <number>handler < 1;
-
-    return rv;
+    return !Number.isFinite(handler) || <number>handler < 1;
   }
 
   #badTimerDelay(delay: unknown) {
-    const rv =
+    return (
       (delay !== undefined && !Number.isFinite(delay)) ||
-      (Number.isFinite(delay) && <number>delay < 0);
-
-    return rv;
+      (Number.isFinite(delay) && <number>delay < 0)
+    );
   }
 
   updateSetTimersHistory(
-    history: TTimerHistory[],
+    history: Map<string, TTimerHistory>,
     handler: number,
     delay: number | undefined,
     callstack: TCallstack,
     isEval: boolean
   ) {
-    const existing = history.findLast((v) => v.traceId === callstack.traceId);
+    const existing = history.get(callstack.traceId);
     const hasError = this.#badTimerDelay(delay);
     let handlerDelay: string | number | undefined = delay;
 
@@ -149,7 +143,7 @@ export class Wrapper {
       existing.isEval = isEval;
       existing.hasError = hasError;
     } else {
-      history.push({
+      history.set(callstack.traceId, {
         recentHandler: handler,
         individualInvocations: 1,
         handlerDelay,
@@ -158,22 +152,19 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
       });
-      history.sort((a, b) =>
-        (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
-      );
     }
   }
 
   updateClearTimersHistory(
-    history: TTimerHistory[],
+    history: Map<string, TTimerHistory>,
     handler: unknown,
     callstack: TCallstack
   ) {
-    const existing = history.findLast((v) => v.traceId === callstack.traceId);
+    const existing = history.get(callstack.traceId);
     const hasError = this.#badTimerHandler(handler);
-    const onlineTimer = !hasError
-      ? this.onlineTimers.get(<number>handler)
-      : null;
+    const onlineTimer = hasError
+      ? null
+      : this.onlineTimers.get(<number>handler);
     let handlerDelay: string | number | undefined = 'N/A';
     let handlerIsEval = undefined;
 
@@ -196,7 +187,7 @@ export class Wrapper {
       existing.isEval = handlerIsEval;
       existing.hasError = hasError;
     } else {
-      history.push({
+      history.set(callstack.traceId, {
         recentHandler: <number | string>handler,
         individualInvocations: 1,
         handlerDelay,
@@ -205,9 +196,6 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
       });
-      history.sort((a, b) =>
-        (b.handlerDelay || 0) > (a.handlerDelay || 0) ? 1 : -1
-      );
     }
   }
 
@@ -217,9 +205,7 @@ export class Wrapper {
     callstack: TCallstack,
     usesLocalScope: boolean
   ) {
-    const existing = this.evalHistory.find(
-      (v) => v.traceId === callstack.traceId
-    );
+    const existing = this.evalHistory.get(callstack.traceId);
 
     if (existing) {
       existing.code = cloneObjectSafely(code);
@@ -227,7 +213,7 @@ export class Wrapper {
       existing.individualInvocations++;
       existing.usesLocalScope = usesLocalScope;
     } else {
-      this.evalHistory.push({
+      this.evalHistory.set(callstack.traceId, {
         individualInvocations: 1,
         code: cloneObjectSafely(code),
         returnedValue: cloneObjectSafely(returnedValue),
@@ -238,20 +224,18 @@ export class Wrapper {
     }
   }
 
-  cleanHistory(what?: string[]) {
-    if (!what || !what.length) {
-      this.setTimeoutHistory.splice(0);
-      this.clearTimeoutHistory.splice(0);
-      this.setIntervalHistory.splice(0);
-      this.clearIntervalHistory.splice(0);
-      this.evalHistory.splice(0);
-      this.callCounter.setTimeout =
-        this.callCounter.clearTimeout =
-        this.callCounter.setInterval =
-        this.callCounter.clearInterval =
-        this.callCounter.eval =
-          0;
-    }
+  cleanHistory() {
+    this.setTimeoutHistory.clear();
+    this.clearTimeoutHistory.clear();
+    this.setIntervalHistory.clear();
+    this.clearIntervalHistory.clear();
+    this.evalHistory.clear();
+    this.callCounter.setTimeout =
+      this.callCounter.clearTimeout =
+      this.callCounter.setInterval =
+      this.callCounter.clearInterval =
+      this.callCounter.eval =
+        0;
   }
 
   collectWrapperMetrics(panels: TPanelVisibilityMap): TWrapperMetrics {
@@ -261,21 +245,23 @@ export class Wrapper {
       onlineTimers: this.onlineTimers.size,
       onlineTimeouts: timeouts,
       onlineIntervals: intervals,
-      setTimeoutHistory: panels.setTimeoutHistory ? this.setTimeoutHistory : [],
+      setTimeoutHistory: panels.setTimeoutHistory
+        ? [...this.setTimeoutHistory.values()]
+        : [],
       clearTimeoutHistory: panels.clearTimeoutHistory
-        ? this.clearTimeoutHistory
+        ? [...this.clearTimeoutHistory.values()]
         : [],
       setIntervalHistory: panels.setIntervalHistory
-        ? this.setIntervalHistory
+        ? [...this.setIntervalHistory.values()]
         : [],
       clearIntervalHistory: panels.clearIntervalHistory
-        ? this.clearIntervalHistory
+        ? [...this.clearIntervalHistory.values()]
         : [],
-      evalHistory: panels.eval ? this.evalHistory : [],
+      evalHistory: panels.eval ? [...this.evalHistory.values()] : [],
     };
 
     if (panels.activeTimers) {
-      for (const [, timer] of this.onlineTimers) {
+      for (const timer of this.onlineTimers.values()) {
         if (timer.type === ETimeType.INTERVAL) {
           intervals.push(timer);
         } else {
@@ -323,7 +309,7 @@ export class Wrapper {
       this.updateEvalHistory(
         code,
         rv,
-        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE)),
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE)),
         usesLocalScope
       );
 
@@ -356,7 +342,7 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = this.createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       this.callCounter.setTimeout++;
       this.timerOnline(ETimeType.TIMEOUT, handler, delay, callstack, isEval);
@@ -387,7 +373,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
-        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE))
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -416,7 +402,7 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = this.createCallstack(new Error(TRACE_ERROR_MESSAGE));
 
       this.callCounter.setInterval++;
       this.timerOnline(ETimeType.INTERVAL, handler, delay, callstack, isEval);
@@ -447,7 +433,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
-        Wrapper.createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE))
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -458,17 +444,17 @@ export class Wrapper {
     }.bind(this);
   }
 
-  static createCallstack(e: Error): TCallstack {
+  createCallstack(e: Error): TCallstack {
     const trace: TTrace[] = [];
-    const stack = e.stack?.split('\n') || [];
+    const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
     let links = '';
 
-    if (!Wrapper.selfCallLink) {
+    if (!this.selfTraceLink) {
       const link = stack[1]
         .replace(REGEX_STACKTRACE_LINK, '$1')
         .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
       if (link) {
-        Wrapper.selfCallLink = link;
+        this.selfTraceLink = link;
       }
     }
 
@@ -476,11 +462,10 @@ export class Wrapper {
     for (let n = stack.length - 1; n > 1; n--) {
       let v = stack[n];
 
-      if (v.indexOf(Wrapper.selfCallLink) >= 0) {
+      if (v.indexOf(this.selfTraceLink) >= 0) {
         continue;
       }
 
-      v = v.replace(REGEX_STACKTRACE_PREFIX, '');
       const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
 
       if (link.startsWith('<anonymous>')) {
