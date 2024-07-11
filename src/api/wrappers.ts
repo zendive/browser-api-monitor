@@ -9,7 +9,7 @@ import {
   TRACE_ERROR_MESSAGE,
   REGEX_STACKTRACE_SPLIT,
   REGEX_STACKTRACE_CLEAN_URL,
-  TAG_INVALID_CALLSTACK,
+  TAG_INVALID_CALLSTACK_LINK,
   SHA256_HEX_STRING_LENGTH,
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
@@ -355,7 +355,10 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = this.createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = this.createCallstack(
+        new Error(TRACE_ERROR_MESSAGE),
+        code
+      );
 
       this.callCounter.setTimeout++;
       this.timerOnline(ETimeType.TIMEOUT, handler, delay, callstack, isEval);
@@ -415,7 +418,10 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = this.createCallstack(new Error(TRACE_ERROR_MESSAGE));
+      const callstack = this.createCallstack(
+        new Error(TRACE_ERROR_MESSAGE),
+        code
+      );
 
       this.callCounter.setInterval++;
       this.timerOnline(ETimeType.INTERVAL, handler, delay, callstack, isEval);
@@ -457,7 +463,7 @@ export class Wrapper {
     }.bind(this);
   }
 
-  createCallstack(e: Error, fn: () => void): TCallstack {
+  createCallstack(e: Error, fn?: unknown): TCallstack {
     const trace: TTrace[] = [];
     const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
     let traceId = '';
@@ -483,12 +489,24 @@ export class Wrapper {
     }
 
     if (!trace.length) {
-      const link = `(id: ${crypto.randomUUID()})`;
+      let name: TTrace['name'];
+      if (typeof fn === 'function' && fn.name) {
+        name = fn.name;
+        traceId = name;
+      } else {
+        name = 0;
+
+        if (typeof crypto.randomUUID === 'function') {
+          traceId = crypto.randomUUID();
+        } else {
+          traceId = Math.random().toString(36);
+        }
+      }
+
       trace.push({
-        name: TAG_INVALID_CALLSTACK,
-        link,
+        name,
+        link: TAG_INVALID_CALLSTACK_LINK,
       });
-      traceId = link;
     }
 
     if (traceId.length > SHA256_HEX_STRING_LENGTH) {

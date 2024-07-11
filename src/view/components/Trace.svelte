@@ -7,5 +7,5 @@
 
 {#each trace as stack, index (index)}
   {#if index > 0}&nbsp;•{/if}
-  <TraceLink bind:href={stack.link} bind:name={stack.name} />
+  <TraceLink bind:link={stack.link} bind:name={stack.name} />
 {/each}

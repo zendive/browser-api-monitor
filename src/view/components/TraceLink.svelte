@@ -3,27 +3,26 @@
     REGEX_STACKTRACE_CLEAN_URL,
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
-    TAG_INVALID_CALLSTACK,
+    TAG_INVALID_CALLSTACK_LINK,
   } from '@/api/const.ts';
 
-  export let href: string = '';
-  export let name: string | 0 = 0;
+  export let link: string = '';
+  export let name;
   let isSeen = false;
 
   $: lineNumber = parseInt(
-    href?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
+    link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
     10
   );
   $: columnNumber = parseInt(
-    href.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
+    link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
     10
   );
-  $: isSourceLess = !isFinite(lineNumber) || TAG_INVALID_CALLSTACK === href;
+  $: isSourceLess =
+    !isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link;
 
-  function showStackTraceResource(e: MouseEvent) {
-    e.preventDefault();
-
-    const cleanUrl = href.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+  function showStackTraceResource() {
+    const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
 
     chrome.devtools.panels.openResource(
       cleanUrl,
@@ -36,13 +35,15 @@
 </script>
 
 {#if isSourceLess}
-  <i class="no-link">{`${name ? name : ''} ${href}`}</i>
+  <i class="no-link">
+    {name ? `${name} ${link}` : link}
+  </i>
 {:else}
   <a
-    {href}
+    href={link}
     title={`${lineNumber}:${columnNumber}`}
     class:isSeen
-    on:click={showStackTraceResource}>{name || href}</a
+    on:click|preventDefault={showStackTraceResource}>{name || link}</a
   >
 {/if}
 

@@ -11,7 +11,7 @@ export const setInterval = window.setInterval.bind(window);
 export const clearInterval = window.clearInterval.bind(window);
 // https://rollupjs.org/troubleshooting/#avoiding-eval
 export const lessEval = window.eval.bind(window);
-export const TAG_INVALID_CALLSTACK = 'N/A';
+export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
 export const MEDIA_ELEMENT_EVENTS = [
   'abort',
