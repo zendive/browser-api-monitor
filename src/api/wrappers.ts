@@ -10,6 +10,7 @@ import {
   REGEX_STACKTRACE_SPLIT,
   REGEX_STACKTRACE_CLEAN_URL,
   TAG_INVALID_CALLSTACK,
+  SHA256_HEX_STRING_LENGTH,
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
@@ -86,6 +87,29 @@ export class Wrapper {
   };
   selfTraceLink = '';
 
+  constructor() {
+    this.#initSelfTrace();
+  }
+
+  #initSelfTrace() {
+    const error = new Error(TRACE_ERROR_MESSAGE);
+    this.selfTraceLink = (error?.stack || '')
+      .split(REGEX_STACKTRACE_SPLIT)[1]
+      .replace(REGEX_STACKTRACE_LINK, '$1')
+      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+  }
+
+  #badTimerHandler(handler: unknown) {
+    return !Number.isFinite(handler) || <number>handler < 1;
+  }
+
+  #badTimerDelay(delay: unknown) {
+    return (
+      (delay !== undefined && !Number.isFinite(delay)) ||
+      (Number.isFinite(delay) && <number>delay < 0)
+    );
+  }
+
   timerOnline(
     type: ETimeType,
     handler: number,
@@ -108,17 +132,6 @@ export class Wrapper {
 
   timerOffline(handler: number) {
     this.onlineTimers.delete(handler);
-  }
-
-  #badTimerHandler(handler: unknown) {
-    return !Number.isFinite(handler) || <number>handler < 1;
-  }
-
-  #badTimerDelay(delay: unknown) {
-    return (
-      (delay !== undefined && !Number.isFinite(delay)) ||
-      (Number.isFinite(delay) && <number>delay < 0)
-    );
   }
 
   updateSetTimersHistory(
@@ -444,19 +457,10 @@ export class Wrapper {
     }.bind(this);
   }
 
-  createCallstack(e: Error): TCallstack {
+  createCallstack(e: Error, fn: () => void): TCallstack {
     const trace: TTrace[] = [];
     const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
-    let links = '';
-
-    if (!this.selfTraceLink) {
-      const link = stack[1]
-        .replace(REGEX_STACKTRACE_LINK, '$1')
-        .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
-      if (link) {
-        this.selfTraceLink = link;
-      }
-    }
+    let traceId = '';
 
     // loop from the end, excluding error name and self trace
     for (let n = stack.length - 1; n > 1; n--) {
@@ -472,14 +476,10 @@ export class Wrapper {
         continue;
       }
 
-      let name: string | 0 = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
+      let name = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
 
-      if (name === link) {
-        name = 0;
-      }
-
-      trace.push({ name, link });
-      links += link;
+      trace.push({ name: name === link ? 0 : name, link });
+      traceId += link;
     }
 
     if (!trace.length) {
@@ -488,12 +488,10 @@ export class Wrapper {
         name: TAG_INVALID_CALLSTACK,
         link,
       });
-      links += link;
+      traceId = link;
     }
 
-    let traceId = links;
-
-    if (traceId.length > 64) {
+    if (traceId.length > SHA256_HEX_STRING_LENGTH) {
       traceId = sha256(traceId);
     }
 

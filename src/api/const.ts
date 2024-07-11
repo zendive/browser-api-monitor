@@ -118,3 +118,4 @@ export const REGEX_STACKTRACE_CLEAN_URL = new RegExp(/(.*):\d+:\d+$/);
 export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
 export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
 export const FRAME_1of60 = 1 / 60;
+export const SHA256_HEX_STRING_LENGTH = 64;
