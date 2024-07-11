@@ -110,7 +110,7 @@ export function doMediaCommand(
   } else if (cmd === 'pause') {
     mediaModel.el.pause();
   } else if (cmd === 'play') {
-    mediaModel.el.play();
+    mediaModel.el.play().catch(() => {});
   } else if (cmd === 'frame-backward') {
     mediaModel.el.currentTime -= FRAME_1of60;
   } else if (cmd === 'frame-forward') {
