@@ -44,7 +44,10 @@
         />
       </td>
       <td class="wb-all w-full">
-        <Trace bind:trace={metric.trace} />
+        <Trace
+          bind:trace={metric.trace}
+          bind:traceDomain={metric.traceDomain}
+        />
       </td>
     </tr>
   {/each}

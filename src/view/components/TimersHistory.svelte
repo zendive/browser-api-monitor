@@ -110,7 +110,10 @@
   {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td class="wb-all">
-        <Trace bind:trace={metric.trace} />
+        <Trace
+          bind:trace={metric.trace}
+          bind:traceDomain={metric.traceDomain}
+        />
       </td>
       <td class="ta-c">
         <Variable bind:value={metric.individualInvocations} />

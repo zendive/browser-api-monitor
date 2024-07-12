@@ -9,6 +9,7 @@ import {
   TRACE_ERROR_MESSAGE,
   REGEX_STACKTRACE_SPLIT,
   REGEX_STACKTRACE_CLEAN_URL,
+  REGEX_STACKTRACE_LINK_PROTOCOL,
   TAG_INVALID_CALLSTACK_LINK,
   SHA256_HEX_STRING_LENGTH,
 } from '@/api/const.ts';
@@ -25,12 +26,18 @@ type TCallstack = {
   trace: TTrace[];
 };
 export enum ETimeType {
-  TIMEOUT,
-  INTERVAL,
+  TIMEOUT = 0,
+  INTERVAL = 1,
+}
+export enum ETraceDomain {
+  LOCAL = 0,
+  EXTERNAL = 1,
+  UNKNOWN = 2,
 }
 export type TOnlineTimerMetrics = {
   traceId: string;
   trace: TTrace[];
+  traceDomain: ETraceDomain;
   type: ETimeType;
   delay: number | undefined | string;
   handler: number;
@@ -39,6 +46,7 @@ export type TOnlineTimerMetrics = {
 export type TTimerHistory = {
   traceId: string;
   trace: TTrace[];
+  traceDomain: ETraceDomain;
   individualInvocations: number;
   recentHandler: number | string;
   handlerDelay: number | undefined | string;
@@ -48,6 +56,7 @@ export type TTimerHistory = {
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
+  traceDomain: ETraceDomain;
   individualInvocations: number;
   returnedValue: any;
   code: any;
@@ -110,6 +119,16 @@ export class Wrapper {
     );
   }
 
+  #getTraceDomain(trace: TTrace) {
+    if (trace.link.startsWith(location.origin)) {
+      return ETraceDomain.LOCAL;
+    } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
+      return ETraceDomain.EXTERNAL;
+    }
+
+    return ETraceDomain.UNKNOWN;
+  }
+
   timerOnline(
     type: ETimeType,
     handler: number,
@@ -127,6 +146,7 @@ export class Wrapper {
       isEval,
       traceId: callstack.traceId,
       trace: callstack.trace,
+      traceDomain: this.#getTraceDomain(callstack.trace[0]),
     });
   }
 
@@ -164,6 +184,7 @@ export class Wrapper {
         hasError,
         traceId: callstack.traceId,
         trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
       });
     }
   }
@@ -208,6 +229,7 @@ export class Wrapper {
         hasError,
         traceId: callstack.traceId,
         trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
       });
     }
   }
@@ -233,6 +255,7 @@ export class Wrapper {
         usesLocalScope,
         traceId: callstack.traceId,
         trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
       });
     }
   }

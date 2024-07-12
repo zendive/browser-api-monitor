@@ -30,7 +30,12 @@
     >
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra bc-error">
-        <td class="wb-all"><Trace bind:trace={metric.trace} /></td>
+        <td class="wb-all">
+          <Trace
+            bind:traceDomain={metric.traceDomain}
+            bind:trace={metric.trace}
+          />
+        </td>
         <td>
           {#if metric.usesLocalScope}
             <span
