@@ -7,14 +7,14 @@
 </script>
 
 {#if traceDomain === ETraceDomain.LOCAL}
-  <span title="Local domain">🏡</span>
+  <span class="icon -small -trace-local" title="Local domain" />
 {:else if traceDomain === ETraceDomain.EXTERNAL}
-  <span title="External domain">🌍</span>
+  <span class="icon -small -trace-external" title="External domain" />
 {:else if traceDomain === ETraceDomain.UNKNOWN}
   <span title="Unknown domain">❓</span>
 {/if}
 
 {#each trace as stack, index (index)}
-  {#if index > 0}&nbsp;•{/if}
+  {#if index !== 0}&nbsp;•{/if}
   <TraceLink bind:link={stack.link} bind:name={stack.name} />
 {/each}
