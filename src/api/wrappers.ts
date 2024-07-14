@@ -345,7 +345,7 @@ export class Wrapper {
       this.updateEvalHistory(
         code,
         rv,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE)),
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), code),
         usesLocalScope
       );
 
@@ -412,7 +412,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -475,7 +475,7 @@ export class Wrapper {
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE))
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
       );
       if (handler !== undefined) {
         this.timerOffline(handler);
@@ -486,7 +486,7 @@ export class Wrapper {
     }.bind(this);
   }
 
-  createCallstack(e: Error, fn?: unknown): TCallstack {
+  createCallstack(e: Error, uniqueTrait: unknown): TCallstack {
     const trace: TTrace[] = [];
     const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
     let traceId = '';
@@ -512,18 +512,13 @@ export class Wrapper {
     }
 
     if (!trace.length) {
-      let name: TTrace['name'];
-      if (typeof fn === 'function' && fn.name) {
-        name = fn.name;
-        traceId = name;
-      } else {
-        name = 0;
+      let name: TTrace['name'] = 0;
 
-        if (typeof crypto.randomUUID === 'function') {
-          traceId = crypto.randomUUID();
-        } else {
-          traceId = Math.random().toString(36);
-        }
+      if (typeof uniqueTrait === 'function') {
+        name = uniqueTrait.name ?? 0;
+        traceId = sha256(String(uniqueTrait));
+      } else {
+        traceId = String(uniqueTrait);
       }
 
       trace.push({

@@ -54,7 +54,7 @@ describe('wrappers', () => {
     expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
-    expect(rec.traceId).toBeTruthy();
+    expect(rec.traceId.length).toBeGreaterThan(0);
 
     clearTimeout(handler);
   });
@@ -116,7 +116,7 @@ describe('wrappers', () => {
     expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
-    expect(rec.traceId).toBeTruthy();
+    expect(rec.traceId.length).toBeGreaterThan(0);
 
     clearInterval(handler);
   });
@@ -173,7 +173,7 @@ describe('wrappers', () => {
     expect(rec.code).toBe(CODE);
     expect(rec.returnedValue).toBe(RESULT);
     expect(rec.trace.length).toBeGreaterThan(1);
-    expect(rec.traceId).toBeTruthy();
+    expect(rec.traceId.length).toBeGreaterThan(0);
   });
 
   test('evalHistory - detects local scope usage', () => {
