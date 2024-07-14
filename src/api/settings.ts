@@ -10,7 +10,6 @@ type TPanelKey =
   | 'clearIntervalHistory';
 
 export enum ETimerHistoryField {
-  traceId = 'traceId',
   individualInvocations = 'individualInvocations',
   recentHandler = 'recentHandler',
   handlerDelay = 'handlerDelay',
@@ -34,7 +33,7 @@ export type TSettingsPanel = {
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
-const SETTINGS_VERSION = '1.0.3';
+const SETTINGS_VERSION = '1.0.5';
 const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
   { key: 'media', label: 'Media', visible: true },

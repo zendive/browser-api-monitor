@@ -28,21 +28,21 @@
   role="cell"
   tabindex="-1"
   on:click={changeSort}
-  title="Sort by ..."
+  title="Sort by&mldr;"
 >
   <slot />
   {#if field === currentField}
     <span
       class="icon -small"
       class:-up={currentFieldOrder === ESortOrder.ASCENDING}
-      class:-down={currentFieldOrder !== ESortOrder.ASCENDING}
+      class:-down={currentFieldOrder === ESortOrder.DESCENDING}
     />
   {/if}
 </a>
 
 <style lang="scss">
   a {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     text-wrap: nowrap;
     color: var(--text-invert);

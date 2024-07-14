@@ -73,14 +73,7 @@
     <Variable bind:value={metrics.length} />
   </caption>
   <tr>
-    <th class="w-full">
-      <TimersHistoryCellSort
-        field={ETimerHistoryField.traceId}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Callstack</TimersHistoryCellSort
-      >
-    </th>
+    <th class="w-full"> Callstack </th>
     <th>
       <TimersHistoryCellSort
         field={ETimerHistoryField.individualInvocations}
