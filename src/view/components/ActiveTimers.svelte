@@ -2,18 +2,10 @@
   import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
-  import { IS_DEV } from '@/api/env.ts';
   import { portPost } from '@/api/communication.ts';
 
   export let caption: string = '';
   export let metrics: TOnlineTimerMetrics[] = [];
-
-  // sort by delay descending
-  $: metrics.sort((a, b) => {
-    const aDelay = a.delay || 0;
-    const bDelay = b.delay || 0;
-    return bDelay > aDelay ? 1 : bDelay < aDelay ? -1 : 0;
-  });
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({

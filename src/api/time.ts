@@ -1,4 +1,9 @@
-import { setTimeout, clearTimeout } from '@/api/const.ts';
+import {
+  setTimeout,
+  clearTimeout,
+  requestAnimationFrame,
+  cancelAnimationFrame,
+} from '@/api/const.ts';
 
 /**
  * Measure time between start/stop calls

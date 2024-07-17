@@ -1,24 +1,26 @@
 <script lang="ts">
-  import type { TTimerHistory } from '@/api/wrappers.ts';
+  import type { TAnimationHistory } from '@/api/wrappers';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
+  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import {
     DEFAULT_SORT,
-    getSettings,
     ESortOrder,
     ETimerHistoryField,
+    getSettings,
     setSettings,
   } from '@/api/settings.ts';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
   export let caption: string = '';
-  export let metrics: TTimerHistory[] = [];
+  export let metrics: TAnimationHistory[] = [];
 
-  let field: ETimerHistoryField = DEFAULT_SORT.timersHistoryField;
-  let order: ESortOrder = DEFAULT_SORT.timersHistoryOrder;
+  let field = DEFAULT_SORT.timersHistoryField;
+  let order = DEFAULT_SORT.timersHistoryOrder;
 
-  $: metrics.sort(compareByFieldOrder(field, order));
+  $: sortedMetrics = metrics.sort(
+    compareByFieldOrder(<keyof TAnimationHistory>field, order)
+  );
 
   getSettings().then((settings) => {
     field = settings.sort.timersHistoryField;
@@ -62,17 +64,9 @@
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
       >
     </th>
-    <th class="ta-r">
-      <TimersHistoryCellSort
-        field={ETimerHistoryField.handlerDelay}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
-      >
-    </th>
   </tr>
 
-  {#each metrics as metric (metric.traceId)}
+  {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td class="wb-all">
         <Trace
@@ -80,11 +74,8 @@
           bind:traceDomain={metric.traceDomain}
         />
       </td>
-      <td class="ta-c">
-        <Variable bind:value={metric.individualInvocations} />
-      </td>
+      <td class="ta-c">{metric.individualInvocations}</td>
       <td class="ta-c">{metric.recentHandler}</td>
-      <td class="ta-r">{metric.handlerDelay}</td>
     </tr>
   {/each}
 </table>

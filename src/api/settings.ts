@@ -7,7 +7,9 @@ type TPanelKey =
   | 'setTimeoutHistory'
   | 'clearTimeoutHistory'
   | 'setIntervalHistory'
-  | 'clearIntervalHistory';
+  | 'clearIntervalHistory'
+  | 'requestAnimationFrame'
+  | 'cancelAnimationFrame';
 
 export enum ETimerHistoryField {
   individualInvocations = 'individualInvocations',
@@ -46,6 +48,8 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
     label: 'clearInterval History',
     visible: true,
   },
+  { key: 'requestAnimationFrame', label: 'RAF', visible: true },
+  { key: 'cancelAnimationFrame', label: 'CAF', visible: true },
 ];
 
 export const DEFAULT_SORT = {

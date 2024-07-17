@@ -49,7 +49,6 @@
       padding: 0px 6px;
       margin: 0;
       z-index: 1;
-      user-select: none;
 
       .menu-item {
         cursor: pointer;

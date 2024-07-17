@@ -11,6 +11,7 @@
   export let msg: TMetrics;
 
   let panels: TPanelVisibilityMap;
+  $: onlineTimersSize = msg?.wrapperMetrics.onlineTimers?.length ?? 0;
 
   getSettings().then((settings) => {
     panels = panelsArrayToVisibilityMap(settings.panels);
@@ -45,7 +46,6 @@
 
 <div class="infobar">
   {#if msg}
-    <div class="divider -anchor-left" />
     <a
       href="void(0)"
       class:panel-enabled={panels.eval && msg.callCounter.eval}
@@ -53,7 +53,7 @@
     >
       <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
       class:panel-enabled={panels.media && msg.mediaMetrics.total}
@@ -62,18 +62,15 @@
       <strong>Media</strong>:
       <Variable bind:value={msg.mediaMetrics.total} />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
-      class:panel-enabled={panels.activeTimers &&
-        msg.wrapperMetrics.onlineTimers}
+      class:panel-enabled={panels.activeTimers && onlineTimersSize}
       on:click|preventDefault={() => void scrollTo('Active')}
     >
-      <strong>Active Timers</strong>: <Variable
-        bind:value={msg.wrapperMetrics.onlineTimers}
-      />
+      <strong>Active Timers</strong>: <Variable bind:value={onlineTimersSize} />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
       class:panel-enabled={panels.setTimeoutHistory &&
@@ -84,7 +81,7 @@
         bind:value={msg.callCounter.setTimeout}
       />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
       class:panel-enabled={panels.clearTimeoutHistory &&
@@ -95,7 +92,7 @@
         bind:value={msg.callCounter.clearTimeout}
       />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
       class:panel-enabled={panels.setIntervalHistory &&
@@ -106,7 +103,7 @@
         bind:value={msg.callCounter.setInterval}
       />
     </a>
-    <div class="divider" />
+
     <a
       href="void(0)"
       class:panel-enabled={panels.clearIntervalHistory &&
@@ -117,19 +114,43 @@
         bind:value={msg.callCounter.clearInterval}
       />
     </a>
-    <div class="divider" />
+
+    <a
+      href="void(0)"
+      class:panel-enabled={panels.requestAnimationFrame &&
+        msg.callCounter.requestAnimationFrame}
+      on:click|preventDefault={() =>
+        void scrollTo('requestAnimationFrame History')}
+    >
+      <strong title="requestAnimationFrame">RAF</strong>:
+      {msg.callCounter.requestAnimationFrame}
+    </a>
+
+    <a
+      href="void(0)"
+      class:panel-enabled={panels.cancelAnimationFrame &&
+        msg.callCounter.cancelAnimationFrame}
+      on:click|preventDefault={() =>
+        void scrollTo('cancelAnimationFrame History')}
+    >
+      <strong title="cancelAnimationFrame">CAF</strong>:
+      {msg.callCounter.cancelAnimationFrame}
+    </a>
   {/if}
 </div>
 
 <style lang="scss">
   .infobar {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     flex-grow: 1;
+    align-items: center;
   }
 
   a {
     pointer-events: none;
+    padding: 0 0.4rem;
+    border-right: 1px solid var(--border);
 
     &.panel-enabled {
       pointer-events: all;

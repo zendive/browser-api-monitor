@@ -18,50 +18,47 @@
   }
 </script>
 
-{#if metrics.length}
-  <table data-navigation-tag="Eval History">
-    <caption class="ta-l bc-invert"
-      >Eval History <Variable bind:value={metrics.length} /></caption
-    >
-    <tr
-      ><th class="w-full">Callstack</th><th>Scope</th><th>Called</th><th
-        >Code</th
-      ><th>Returns</th></tr
-    >
-    {#each metrics as metric (metric.traceId)}
-      <tr class="t-zebra bc-error">
-        <td class="wb-all">
-          <Trace
-            bind:traceDomain={metric.traceDomain}
-            bind:trace={metric.trace}
-          />
-        </td>
-        <td>
-          {#if metric.usesLocalScope}
-            <span
-              title="Throwed an error while trying to get local scope variables, return value is unreliable"
-              >LOCAL & GLOBAL</span
-            >
-          {:else}
-            <span
-              title="Had access to global scope (local scope usage has not been detected)"
-              >GLOBAL</span
-            >
-          {/if}
-        </td>
-        <td class="ta-c">
-          <Variable bind:value={metric.individualInvocations} />
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.code)}</div>
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.returnedValue)}</div>
-        </td>
-      </tr>
-    {/each}
-  </table>
-{/if}
+<table data-navigation-tag="Eval History">
+  <caption class="ta-l bc-invert"
+    >Eval History <Variable bind:value={metrics.length} /></caption
+  >
+  <tr
+    ><th class="w-full">Callstack</th><th>Scope</th><th>Called</th><th>Code</th
+    ><th>Returns</th></tr
+  >
+  {#each metrics as metric (metric.traceId)}
+    <tr class="t-zebra bc-error">
+      <td class="wb-all">
+        <Trace
+          bind:traceDomain={metric.traceDomain}
+          bind:trace={metric.trace}
+        />
+      </td>
+      <td>
+        {#if metric.usesLocalScope}
+          <span
+            title="Throwed an error while trying to get local scope variables, return value is unreliable"
+            >LOCAL & GLOBAL</span
+          >
+        {:else}
+          <span
+            title="Had access to global scope (local scope usage has not been detected)"
+            >GLOBAL</span
+          >
+        {/if}
+      </td>
+      <td class="ta-c">
+        <Variable bind:value={metric.individualInvocations} />
+      </td>
+      <td class="limit-width">
+        <div class="code">{dynamicValue(metric.code)}</div>
+      </td>
+      <td class="limit-width">
+        <div class="code">{dynamicValue(metric.returnedValue)}</div>
+      </td>
+    </tr>
+  {/each}
+</table>
 
 <style lang="scss">
   .limit-width {

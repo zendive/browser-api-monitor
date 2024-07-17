@@ -6,6 +6,7 @@
   import Timers from '@/view/components/Timers.svelte';
   import Media from '@/view/components/Media.svelte';
   import EvalMetrics from '@/view/components/EvalMetrics.svelte';
+  import AnimationMetrics from '@/view/components/AnimationMetrics.svelte';
   import Version from '@/view/components/Version.svelte';
   import { onMount } from 'svelte';
   import TogglePanels from '@/view/components/TogglePanels.svelte';
@@ -85,13 +86,12 @@
       <div class="divider" />
       <div>
         {#if msg.tickTook}
-          <span title="Time took to collect telemetry data for a single update">
-            {msg.tickTook}
-          </span> /
+          <span title="Time took to collect telemetry data for a single update"
+            >{msg.tickTook}</span
+          >
+          /
         {/if}
-        <span title="Telemetry updates per second">
-          {fpsValue} fps
-        </span>
+        <span title="Telemetry updates per second">{fpsValue}fps</span>
       </div>
     {/if}
 
@@ -102,11 +102,12 @@
 
   {#if msg}
     <main>
-      <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
-
+      {#if msg.wrapperMetrics.evalHistory?.length}
+        <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
+      {/if}
       <Media bind:metrics={msg.mediaMetrics} />
-
       <Timers bind:metrics={msg.wrapperMetrics} />
+      <AnimationMetrics bind:metrics={msg.wrapperMetrics} />
     </main>
   {/if}
 </section>
@@ -122,6 +123,7 @@
       align-items: center;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      user-select: none;
     }
     main {
       overflow-y: scroll;

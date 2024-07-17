@@ -4,6 +4,8 @@ import {
   setInterval,
   clearInterval,
   lessEval,
+  requestAnimationFrame,
+  cancelAnimationFrame,
   REGEX_STACKTRACE_NAME,
   REGEX_STACKTRACE_LINK,
   TRACE_ERROR_MESSAGE,
@@ -16,6 +18,7 @@ import {
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
 import { sha256 } from 'js-sha256';
+import type { TMediaMetrics } from './mediaMonitor';
 
 export type TTrace = {
   name: string | 0;
@@ -25,7 +28,7 @@ type TCallstack = {
   traceId: string;
   trace: TTrace[];
 };
-export enum ETimeType {
+export enum ETimerType {
   TIMEOUT = 0,
   INTERVAL = 1,
 }
@@ -38,7 +41,7 @@ export type TOnlineTimerMetrics = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
-  type: ETimeType;
+  type: ETimerType;
   delay: number | undefined | string;
   handler: number;
   isEval: boolean;
@@ -62,15 +65,23 @@ export type TEvalHistory = {
   code: any;
   usesLocalScope: boolean;
 };
+export type TAnimationHistory = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomain;
+  individualInvocations: number;
+  recentHandler: number | undefined | string;
+  hasError?: boolean;
+};
 export type TWrapperMetrics = {
-  onlineTimers: number;
-  onlineTimeouts: TOnlineTimerMetrics[];
-  onlineIntervals: TOnlineTimerMetrics[];
-  setTimeoutHistory: TTimerHistory[];
-  clearTimeoutHistory: TTimerHistory[];
-  setIntervalHistory: TTimerHistory[];
-  clearIntervalHistory: TTimerHistory[];
-  evalHistory: TEvalHistory[];
+  onlineTimers: TOnlineTimerMetrics[] | null;
+  setTimeoutHistory: TTimerHistory[] | null;
+  clearTimeoutHistory: TTimerHistory[] | null;
+  setIntervalHistory: TTimerHistory[] | null;
+  clearIntervalHistory: TTimerHistory[] | null;
+  evalHistory: TEvalHistory[] | null;
+  rafHistory: TAnimationHistory[] | null;
+  cafHistory: TAnimationHistory[] | null;
 };
 
 export class Wrapper {
@@ -80,12 +91,16 @@ export class Wrapper {
   setIntervalHistory: Map<string, TTimerHistory> = new Map();
   clearIntervalHistory: Map<string, TTimerHistory> = new Map();
   evalHistory: Map<string, TEvalHistory> = new Map();
+  rafHistory: Map<string, TAnimationHistory> = new Map();
+  cafHistory: Map<string, TAnimationHistory> = new Map();
   callCounter = {
     setTimeout: 0,
     clearTimeout: 0,
     setInterval: 0,
     clearInterval: 0,
     eval: 0,
+    requestAnimationFrame: 0,
+    cancelAnimationFrame: 0,
   };
   native = {
     setTimeout: setTimeout,
@@ -93,6 +108,8 @@ export class Wrapper {
     setInterval: setInterval,
     clearInterval: clearInterval,
     eval: lessEval,
+    requestAnimationFrame: requestAnimationFrame,
+    cancelAnimationFrame: cancelAnimationFrame,
   };
   selfTraceLink = '';
 
@@ -130,14 +147,14 @@ export class Wrapper {
   }
 
   timerOnline(
-    type: ETimeType,
+    type: ETimerType,
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack,
     isEval: boolean
   ) {
     if (this.#badTimerDelay(delay)) {
-      delay = TAG_EXCEPTION(`${delay}`);
+      delay = TAG_EXCEPTION(delay);
     }
     this.onlineTimers.set(handler, {
       type,
@@ -166,7 +183,7 @@ export class Wrapper {
     let handlerDelay: string | number | undefined = delay;
 
     if (hasError) {
-      handlerDelay = TAG_EXCEPTION(`${handlerDelay}`);
+      handlerDelay = TAG_EXCEPTION(handlerDelay);
     }
 
     if (existing) {
@@ -211,7 +228,7 @@ export class Wrapper {
     }
 
     if (hasError) {
-      handler = TAG_EXCEPTION(`${handler}`);
+      handler = TAG_EXCEPTION(handler);
     }
 
     if (existing) {
@@ -260,6 +277,47 @@ export class Wrapper {
     }
   }
 
+  updateRafHistory(handler: number, callstack: TCallstack) {
+    const existing = this.rafHistory.get(callstack.traceId);
+
+    if (existing) {
+      existing.individualInvocations++;
+      existing.recentHandler = handler;
+    } else {
+      this.rafHistory.set(callstack.traceId, {
+        traceId: callstack.traceId,
+        trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        individualInvocations: 1,
+        recentHandler: handler,
+      });
+    }
+  }
+
+  updateCafHistory(handler: number | string, callstack: TCallstack) {
+    const existing = this.cafHistory.get(callstack.traceId);
+    const hasError = this.#badTimerHandler(handler);
+
+    if (hasError) {
+      handler = TAG_EXCEPTION(handler);
+    }
+
+    if (existing) {
+      existing.individualInvocations++;
+      existing.recentHandler = handler;
+      existing.hasError = hasError;
+    } else {
+      this.cafHistory.set(callstack.traceId, {
+        traceId: callstack.traceId,
+        trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        individualInvocations: 1,
+        recentHandler: handler,
+        hasError,
+      });
+    }
+  }
+
   cleanHistory() {
     this.setTimeoutHistory.clear();
     this.clearTimeoutHistory.clear();
@@ -271,42 +329,36 @@ export class Wrapper {
       this.callCounter.setInterval =
       this.callCounter.clearInterval =
       this.callCounter.eval =
+      this.callCounter.requestAnimationFrame =
+      this.callCounter.cancelAnimationFrame =
         0;
   }
 
   collectWrapperMetrics(panels: TPanelVisibilityMap): TWrapperMetrics {
-    const timeouts: TOnlineTimerMetrics[] = [];
-    const intervals: TOnlineTimerMetrics[] = [];
-    const rv = {
-      onlineTimers: this.onlineTimers.size,
-      onlineTimeouts: timeouts,
-      onlineIntervals: intervals,
+    return {
+      onlineTimers: panels.activeTimers
+        ? Array.from(this.onlineTimers.values())
+        : null,
       setTimeoutHistory: panels.setTimeoutHistory
-        ? [...this.setTimeoutHistory.values()]
-        : [],
+        ? Array.from(this.setTimeoutHistory.values())
+        : null,
       clearTimeoutHistory: panels.clearTimeoutHistory
-        ? [...this.clearTimeoutHistory.values()]
-        : [],
+        ? Array.from(this.clearTimeoutHistory.values())
+        : null,
       setIntervalHistory: panels.setIntervalHistory
-        ? [...this.setIntervalHistory.values()]
-        : [],
+        ? Array.from(this.setIntervalHistory.values())
+        : null,
       clearIntervalHistory: panels.clearIntervalHistory
-        ? [...this.clearIntervalHistory.values()]
-        : [],
-      evalHistory: panels.eval ? [...this.evalHistory.values()] : [],
+        ? Array.from(this.clearIntervalHistory.values())
+        : null,
+      evalHistory: panels.eval ? Array.from(this.evalHistory.values()) : null,
+      rafHistory: panels.requestAnimationFrame
+        ? Array.from(this.rafHistory.values())
+        : null,
+      cafHistory: panels.cancelAnimationFrame
+        ? Array.from(this.cafHistory.values())
+        : null,
     };
-
-    if (panels.activeTimers) {
-      for (const timer of this.onlineTimers.values()) {
-        if (timer.type === ETimeType.INTERVAL) {
-          intervals.push(timer);
-        } else {
-          timeouts.push(timer);
-        }
-      }
-    }
-
-    return rv;
   }
 
   unwrapApis() {
@@ -315,11 +367,46 @@ export class Wrapper {
     window.setInterval = this.native.setInterval;
     window.clearInterval = this.native.clearInterval;
     window.eval = this.native.eval;
+    window.requestAnimationFrame = this.native.requestAnimationFrame;
+    window.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
   wrapApis() {
     this.wrapTimers();
     this.wrapEval();
+    this.wrapAnimation();
+  }
+
+  wrapAnimation() {
+    window.requestAnimationFrame = function requestAnimationFrame(
+      this: Wrapper,
+      fn: FrameRequestCallback
+    ) {
+      this.callCounter.requestAnimationFrame++;
+      const handler = this.native.requestAnimationFrame(
+        (time: DOMHighResTimeStamp) => {
+          fn(time);
+        }
+      );
+      this.updateRafHistory(
+        handler,
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), fn)
+      );
+
+      return handler;
+    }.bind(this);
+
+    window.cancelAnimationFrame = function cancelAnimationFrame(
+      this: Wrapper,
+      handler: number
+    ) {
+      this.updateCafHistory(
+        handler,
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
+      );
+      this.callCounter.cancelAnimationFrame++;
+      this.native.cancelAnimationFrame(handler);
+    }.bind(this);
   }
 
   wrapEval() {
@@ -384,7 +471,7 @@ export class Wrapper {
       );
 
       this.callCounter.setTimeout++;
-      this.timerOnline(ETimeType.TIMEOUT, handler, delay, callstack, isEval);
+      this.timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setTimeoutHistory,
         handler,
@@ -447,7 +534,7 @@ export class Wrapper {
       );
 
       this.callCounter.setInterval++;
-      this.timerOnline(ETimeType.INTERVAL, handler, delay, callstack, isEval);
+      this.timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setIntervalHistory,
         handler,
