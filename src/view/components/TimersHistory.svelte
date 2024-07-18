@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TTimerHistory } from '@/api/wrappers.ts';
+  import type { TSetTimerHistory, TClearTimerHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
   import {
@@ -13,7 +13,7 @@
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
   export let caption: string = '';
-  export let metrics: TTimerHistory[] = [];
+  export let metrics: TSetTimerHistory[] | TClearTimerHistory[] = [];
 
   let field: ETimerHistoryField = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrder = DEFAULT_SORT.timersHistoryOrder;
@@ -87,7 +87,7 @@
       <td class="ta-c">{metric.handler}</td>
       <td class="ta-r">{metric.delay}</td>
       <td
-        >{#if metric.isOnline}⏰{/if}</td
+        >{#if metric.isOnline}⏰{:else if metric.canceledByTraceId}☠️{/if}</td
       >
     </tr>
   {/each}

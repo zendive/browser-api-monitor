@@ -6,8 +6,8 @@
   export let traceDomain: ETraceDomain;
 </script>
 
-{#if traceDomain === ETraceDomain.LOCAL}
-  <span class="icon -small -trace-local" title="Local domain" />
+{#if traceDomain === ETraceDomain.SAME}
+  <span class="icon -small -trace-local" title="Same domain" />
 {:else if traceDomain === ETraceDomain.EXTERNAL}
   <span class="icon -small -trace-external" title="External domain" />
 {:else if traceDomain === ETraceDomain.UNKNOWN}

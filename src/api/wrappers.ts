@@ -34,7 +34,7 @@ export enum ETimerType {
   INTERVAL = 1,
 }
 export enum ETraceDomain {
-  LOCAL = 0,
+  SAME = 0,
   EXTERNAL = 1,
   UNKNOWN = 2,
 }
@@ -47,7 +47,7 @@ export type TOnlineTimerMetrics = {
   handler: number;
   isEval: boolean;
 };
-export type TTimerHistory = {
+export type TSetTimerHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
@@ -57,7 +57,18 @@ export type TTimerHistory = {
   isEval: boolean | undefined;
   hasError: boolean;
   isOnline: boolean;
+  canceledByTraceId: string | null;
 };
+export type TClearTimerHistory = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomain;
+  calls: number;
+  handler: number | string;
+  delay: number | undefined | string;
+  hasError: boolean;
+};
+
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
@@ -77,10 +88,10 @@ export type TAnimationHistory = {
 };
 export type TWrapperMetrics = {
   onlineTimers: TOnlineTimerMetrics[] | null;
-  setTimeoutHistory: TTimerHistory[] | null;
-  clearTimeoutHistory: TTimerHistory[] | null;
-  setIntervalHistory: TTimerHistory[] | null;
-  clearIntervalHistory: TTimerHistory[] | null;
+  setTimeoutHistory: TSetTimerHistory[] | null;
+  clearTimeoutHistory: TClearTimerHistory[] | null;
+  setIntervalHistory: TSetTimerHistory[] | null;
+  clearIntervalHistory: TClearTimerHistory[] | null;
   evalHistory: TEvalHistory[] | null;
   rafHistory: TAnimationHistory[] | null;
   cafHistory: TAnimationHistory[] | null;
@@ -88,10 +99,10 @@ export type TWrapperMetrics = {
 
 export class Wrapper {
   onlineTimers: Map<number, TOnlineTimerMetrics> = new Map();
-  setTimeoutHistory: Map<string, TTimerHistory> = new Map();
-  clearTimeoutHistory: Map<string, TTimerHistory> = new Map();
-  setIntervalHistory: Map<string, TTimerHistory> = new Map();
-  clearIntervalHistory: Map<string, TTimerHistory> = new Map();
+  setTimeoutHistory: Map<string, TSetTimerHistory> = new Map();
+  clearTimeoutHistory: Map<string, TClearTimerHistory> = new Map();
+  setIntervalHistory: Map<string, TSetTimerHistory> = new Map();
+  clearIntervalHistory: Map<string, TClearTimerHistory> = new Map();
   evalHistory: Map<string, TEvalHistory> = new Map();
   rafHistory: Map<string, TAnimationHistory> = new Map();
   cafHistory: Map<string, TAnimationHistory> = new Map();
@@ -140,7 +151,7 @@ export class Wrapper {
 
   #getTraceDomain(trace: TTrace) {
     if (trace.link.startsWith(location.origin)) {
-      return ETraceDomain.LOCAL;
+      return ETraceDomain.SAME;
     } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
       return ETraceDomain.EXTERNAL;
     }
@@ -169,9 +180,10 @@ export class Wrapper {
     });
   }
 
-  timerOffline(handler: number) {
+  timerOffline(handler: number, canceledByTraceId: string | null) {
     const timer = this.onlineTimers.get(handler);
     if (!timer) {
+      // already offline
       return;
     }
 
@@ -182,13 +194,14 @@ export class Wrapper {
 
     if (record) {
       record.isOnline = false;
+      record.canceledByTraceId = canceledByTraceId;
     }
 
     this.onlineTimers.delete(handler);
   }
 
   updateSetTimersHistory(
-    history: Map<string, TTimerHistory>,
+    history: Map<string, TSetTimerHistory>,
     handler: number,
     delay: number | undefined,
     callstack: TCallstack,
@@ -220,12 +233,13 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        canceledByTraceId: null,
       });
     }
   }
 
   updateClearTimersHistory(
-    history: Map<string, TTimerHistory>,
+    history: Map<string, TClearTimerHistory>,
     handler: unknown,
     callstack: TCallstack
   ) {
@@ -235,14 +249,11 @@ export class Wrapper {
       ? null
       : this.onlineTimers.get(<number>handler);
     let handlerDelay: string | number | undefined = 'N/A';
-    let handlerIsEval = undefined;
 
     if (onlineTimer) {
       handlerDelay = onlineTimer.delay;
-      handlerIsEval = onlineTimer.isEval;
     } else if (existing) {
       handlerDelay = existing.delay;
-      handlerIsEval = existing.isEval;
     }
 
     if (hasError) {
@@ -253,17 +264,13 @@ export class Wrapper {
       existing.handler = <number | string>handler;
       existing.delay = handlerDelay;
       existing.calls++;
-      existing.isEval = handlerIsEval;
       existing.hasError = hasError;
-      existing.isOnline = false;
     } else {
       history.set(callstack.traceId, {
         handler: <number | string>handler,
         calls: 1,
         delay: handlerDelay,
-        isEval: handlerIsEval,
         hasError,
-        isOnline: false,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
@@ -470,7 +477,7 @@ export class Wrapper {
       const isEval = typeof code === 'string';
       const handler = this.native.setTimeout(
         (...params: any[]) => {
-          this.timerOffline(handler);
+          this.timerOffline(handler, null);
           if (isEval) {
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
             this.native.eval(code);
@@ -512,13 +519,17 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
+      const callstack = this.createCallstack(
+        new Error(TRACE_ERROR_MESSAGE),
+        false
+      );
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
+        callstack
       );
       if (handler !== undefined) {
-        this.timerOffline(handler);
+        this.timerOffline(handler, callstack.traceId);
       }
 
       this.callCounter.clearTimeout++;
@@ -575,13 +586,17 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
+      const callstack = this.createCallstack(
+        new Error(TRACE_ERROR_MESSAGE),
+        false
+      );
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
+        callstack
       );
       if (handler !== undefined) {
-        this.timerOffline(handler);
+        this.timerOffline(handler, callstack.traceId);
       }
 
       this.callCounter.clearInterval++;
