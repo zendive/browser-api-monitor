@@ -20,7 +20,6 @@ import {
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
 import { sha256 } from 'js-sha256';
-import type { TMediaMetrics } from './mediaMonitor';
 
 export type TTrace = {
   name: string | 0;

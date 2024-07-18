@@ -92,7 +92,7 @@ export default function (
       splitChunks: false,
       usedExports: true,
       minimize: isProd,
-      minimizer: [new EsbuildPlugin()],
+      // minimizer: [new EsbuildPlugin()],
     },
 
     devtool: false,
