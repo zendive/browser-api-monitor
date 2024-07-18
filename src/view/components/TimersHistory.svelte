@@ -48,7 +48,7 @@
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.individualInvocations}
+        field={ETimerHistoryField.calls}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
@@ -56,7 +56,7 @@
     </th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.recentHandler}
+        field={ETimerHistoryField.handler}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
@@ -64,7 +64,7 @@
     </th>
     <th class="ta-r">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.handlerDelay}
+        field={ETimerHistoryField.delay}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
@@ -81,10 +81,11 @@
         />
       </td>
       <td class="ta-c">
-        <Variable bind:value={metric.individualInvocations} />
+        <Variable bind:value={metric.calls} />
       </td>
-      <td class="ta-c">{metric.recentHandler}</td>
-      <td class="ta-r">{metric.handlerDelay}</td>
+      <td class="ta-c">{metric.handler}</td>
+      <td class="ta-r">{metric.delay}</td>
     </tr>
   {/each}
 </table>
+callscalls

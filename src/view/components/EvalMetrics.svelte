@@ -48,7 +48,7 @@
         {/if}
       </td>
       <td class="ta-c">
-        <Variable bind:value={metric.individualInvocations} />
+        <Variable bind:value={metric.calls} />
       </td>
       <td class="limit-width">
         <div class="code">{dynamicValue(metric.code)}</div>

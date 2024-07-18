@@ -50,7 +50,7 @@
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.individualInvocations}
+        field={ETimerHistoryField.calls}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
@@ -58,7 +58,7 @@
     </th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.recentHandler}
+        field={ETimerHistoryField.handler}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
@@ -74,8 +74,8 @@
           bind:traceDomain={metric.traceDomain}
         />
       </td>
-      <td class="ta-c">{metric.individualInvocations}</td>
-      <td class="ta-c">{metric.recentHandler}</td>
+      <td class="ta-c">{metric.calls}</td>
+      <td class="ta-c">{metric.handler}</td>
     </tr>
   {/each}
 </table>

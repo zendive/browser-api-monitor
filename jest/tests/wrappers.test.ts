@@ -49,8 +49,8 @@ describe('wrappers', () => {
     const handler = setTimeout(() => {}, DELAY);
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(1);
-    expect(rec.handlerDelay).toBe(DELAY);
+    expect(rec.calls).toBe(1);
+    expect(rec.delay).toBe(DELAY);
     expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
@@ -64,8 +64,8 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(1);
-    expect(rec.handlerDelay).toBe(TAG_EXCEPTION('-1'));
+    expect(rec.calls).toBe(1);
+    expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
     expect(rec.hasError).toBe(true);
     expect(rec.isEval).toBe(false);
   });
@@ -76,7 +76,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe(1e3);
+    expect(rec.delay).toBe(1e3);
   });
 
   test('clearTimeoutHistory - non existent handler', () => {
@@ -84,7 +84,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe('N/A');
+    expect(rec.delay).toBe('N/A');
     expect(rec.hasError).toBe(false);
   });
 
@@ -93,8 +93,8 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe('N/A');
-    expect(rec.recentHandler).toBe(TAG_EXCEPTION(0));
+    expect(rec.delay).toBe('N/A');
+    expect(rec.handler).toBe(TAG_EXCEPTION(0));
     expect(rec.hasError).toBe(true);
   });
 
@@ -116,8 +116,8 @@ describe('wrappers', () => {
     const handler = setInterval(() => {}, DELAY);
     const rec = Array.from(wrapper.setIntervalHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(1);
-    expect(rec.handlerDelay).toBe(DELAY);
+    expect(rec.calls).toBe(1);
+    expect(rec.delay).toBe(DELAY);
     expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
@@ -130,8 +130,8 @@ describe('wrappers', () => {
     const handler = setInterval(() => {}, -1);
     const rec = Array.from(wrapper.setIntervalHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(1);
-    expect(rec.handlerDelay).toBe(TAG_EXCEPTION('-1'));
+    expect(rec.calls).toBe(1);
+    expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
     expect(rec.hasError).toBe(true);
     expect(rec.isEval).toBe(false);
 
@@ -144,7 +144,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe(1e3);
+    expect(rec.delay).toBe(1e3);
   });
 
   test('clearIntervalHistory - non existent handler', () => {
@@ -152,7 +152,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe('N/A');
+    expect(rec.delay).toBe('N/A');
     expect(rec.hasError).toBe(false);
   });
 
@@ -161,7 +161,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
-    expect(rec.handlerDelay).toBe('N/A');
+    expect(rec.delay).toBe('N/A');
     expect(rec.hasError).toBe(true);
   });
 
@@ -177,7 +177,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.evalHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(NUMBER_OF_INVOCATIONS);
+    expect(rec.calls).toBe(NUMBER_OF_INVOCATIONS);
     expect(rec.usesLocalScope).toBe(false);
     expect(rec.code).toBe(CODE);
     expect(rec.returnedValue).toBe(RESULT);
@@ -191,7 +191,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.evalHistory.values())[0];
 
-    expect(rec.individualInvocations).toBe(1);
+    expect(rec.calls).toBe(1);
     expect(local_variable).toBe(0);
     expect(rec.usesLocalScope).toBe(true);
     expect(rec.returnedValue).toBe(TAG_UNDEFINED);
@@ -209,8 +209,8 @@ describe('wrappers', () => {
 
     expect(typeOfArgument).toBe('number');
     expect(wrapper.rafHistory.size).toBe(1);
-    expect(rec.recentHandler).toBe(handler);
-    expect(rec.individualInvocations).toBe(1);
+    expect(rec.handler).toBe(handler);
+    expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
     expect(wrapper.callCounter.requestAnimationFrame).toBe(1);
@@ -230,8 +230,8 @@ describe('wrappers', () => {
     expect(changeable).toBe(unchanged);
     expect(wrapper.rafHistory.size).toBe(1);
     expect(wrapper.cafHistory.size).toBe(1);
-    expect(rec.recentHandler).toBe(handler);
-    expect(rec.individualInvocations).toBe(1);
+    expect(rec.handler).toBe(handler);
+    expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
     expect(wrapper.callCounter.cancelAnimationFrame).toBe(1);
@@ -242,6 +242,6 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.cafHistory?.values())[0];
 
-    expect(rec.recentHandler).toBe(TAG_EXCEPTION(0));
+    expect(rec.handler).toBe(TAG_EXCEPTION(0));
   });
 });

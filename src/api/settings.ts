@@ -12,9 +12,9 @@ type TPanelKey =
   | 'cancelAnimationFrame';
 
 export enum ETimerHistoryField {
-  individualInvocations = 'individualInvocations',
-  recentHandler = 'recentHandler',
-  handlerDelay = 'handlerDelay',
+  calls = 'calls',
+  handler = 'handler',
+  delay = 'delay',
 }
 
 export enum ESortOrder {
@@ -53,7 +53,7 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
 ];
 
 export const DEFAULT_SORT = {
-  timersHistoryField: ETimerHistoryField.handlerDelay,
+  timersHistoryField: ETimerHistoryField.delay,
   timersHistoryOrder: ESortOrder.DESCENDING,
 };
 

@@ -50,9 +50,9 @@ export type TTimerHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
-  individualInvocations: number;
-  recentHandler: number | string;
-  handlerDelay: number | undefined | string;
+  calls: number;
+  handler: number | string;
+  delay: number | undefined | string;
   isEval: boolean | undefined;
   hasError: boolean;
 };
@@ -60,7 +60,7 @@ export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
-  individualInvocations: number;
+  calls: number;
   returnedValue: any;
   code: any;
   usesLocalScope: boolean;
@@ -69,8 +69,8 @@ export type TAnimationHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
-  individualInvocations: number;
-  recentHandler: number | undefined | string;
+  calls: number;
+  handler: number | undefined | string;
   hasError?: boolean;
 };
 export type TWrapperMetrics = {
@@ -187,16 +187,16 @@ export class Wrapper {
     }
 
     if (existing) {
-      existing.recentHandler = handler;
-      existing.handlerDelay = handlerDelay;
-      existing.individualInvocations++;
+      existing.handler = handler;
+      existing.delay = handlerDelay;
+      existing.calls++;
       existing.isEval = isEval;
       existing.hasError = hasError;
     } else {
       history.set(callstack.traceId, {
-        recentHandler: handler,
-        individualInvocations: 1,
-        handlerDelay,
+        handler,
+        calls: 1,
+        delay: handlerDelay,
         isEval,
         hasError,
         traceId: callstack.traceId,
@@ -223,7 +223,7 @@ export class Wrapper {
       handlerDelay = onlineTimer.delay;
       handlerIsEval = onlineTimer.isEval;
     } else if (existing) {
-      handlerDelay = existing.handlerDelay;
+      handlerDelay = existing.delay;
       handlerIsEval = existing.isEval;
     }
 
@@ -232,16 +232,16 @@ export class Wrapper {
     }
 
     if (existing) {
-      existing.recentHandler = <number | string>handler;
-      existing.handlerDelay = handlerDelay;
-      existing.individualInvocations++;
+      existing.handler = <number | string>handler;
+      existing.delay = handlerDelay;
+      existing.calls++;
       existing.isEval = handlerIsEval;
       existing.hasError = hasError;
     } else {
       history.set(callstack.traceId, {
-        recentHandler: <number | string>handler,
-        individualInvocations: 1,
-        handlerDelay,
+        handler: <number | string>handler,
+        calls: 1,
+        delay: handlerDelay,
         isEval: handlerIsEval,
         hasError,
         traceId: callstack.traceId,
@@ -262,11 +262,11 @@ export class Wrapper {
     if (existing) {
       existing.code = cloneObjectSafely(code);
       existing.returnedValue = cloneObjectSafely(returnedValue);
-      existing.individualInvocations++;
+      existing.calls++;
       existing.usesLocalScope = usesLocalScope;
     } else {
       this.evalHistory.set(callstack.traceId, {
-        individualInvocations: 1,
+        calls: 1,
         code: cloneObjectSafely(code),
         returnedValue: cloneObjectSafely(returnedValue),
         usesLocalScope,
@@ -281,15 +281,15 @@ export class Wrapper {
     const existing = this.rafHistory.get(callstack.traceId);
 
     if (existing) {
-      existing.individualInvocations++;
-      existing.recentHandler = handler;
+      existing.calls++;
+      existing.handler = handler;
     } else {
       this.rafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
-        individualInvocations: 1,
-        recentHandler: handler,
+        calls: 1,
+        handler,
       });
     }
   }
@@ -303,16 +303,16 @@ export class Wrapper {
     }
 
     if (existing) {
-      existing.individualInvocations++;
-      existing.recentHandler = handler;
+      existing.calls++;
+      existing.handler = handler;
       existing.hasError = hasError;
     } else {
       this.cafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
-        individualInvocations: 1,
-        recentHandler: handler,
+        calls: 1,
+        handler,
         hasError,
       });
     }
@@ -383,11 +383,7 @@ export class Wrapper {
       fn: FrameRequestCallback
     ) {
       this.callCounter.requestAnimationFrame++;
-      const handler = this.native.requestAnimationFrame(
-        (time: DOMHighResTimeStamp) => {
-          fn(time);
-        }
-      );
+      const handler = this.native.requestAnimationFrame(fn);
       this.updateRafHistory(
         handler,
         this.createCallstack(new Error(TRACE_ERROR_MESSAGE), fn)
@@ -602,7 +598,7 @@ export class Wrapper {
       let name: TTrace['name'] = 0;
 
       if (typeof uniqueTrait === 'function') {
-        name = uniqueTrait.name ?? 0;
+        name = uniqueTrait.name || 0;
         traceId = sha256(String(uniqueTrait));
       } else {
         traceId = String(uniqueTrait);
