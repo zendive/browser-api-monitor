@@ -14,6 +14,8 @@ import {
   REGEX_STACKTRACE_LINK_PROTOCOL,
   TAG_INVALID_CALLSTACK_LINK,
   SHA256_HEX_STRING_LENGTH,
+  TAG_EVAL_RETURN_SET_TIMEOUT,
+  TAG_EVAL_RETURN_SET_INTERVAL,
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
@@ -498,7 +500,7 @@ export class Wrapper {
         this.callCounter.eval++;
         this.updateEvalHistory(
           code,
-          '(N/A - via setTimeout)',
+          TAG_EVAL_RETURN_SET_TIMEOUT,
           callstack,
           false
         );
@@ -561,7 +563,7 @@ export class Wrapper {
         this.callCounter.eval++;
         this.updateEvalHistory(
           code,
-          '(N/A - via setInterval)',
+          TAG_EVAL_RETURN_SET_INTERVAL,
           callstack,
           false
         );

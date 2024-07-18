@@ -2,9 +2,9 @@ import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
 import { Wrapper } from '../../src/api/wrappers.ts';
 import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
 import {
-  DEFAULT_SETTINGS,
-  panelsArrayToVisibilityMap,
-} from '../../src/api/settings.ts';
+  TAG_EVAL_RETURN_SET_TIMEOUT,
+  TAG_EVAL_RETURN_SET_INTERVAL,
+} from '../../src/api/const.ts';
 
 describe('wrappers', () => {
   let wrapper: Wrapper;
@@ -227,6 +227,30 @@ describe('wrappers', () => {
     expect(local_variable).toBe(0);
     expect(rec.usesLocalScope).toBe(true);
     expect(rec.returnedValue).toBe(TAG_UNDEFINED);
+  });
+
+  test('setTimeoutHistory - isEval recorded', () => {
+    const CODE = '(1+2)';
+    const handler = setTimeout(CODE);
+    const timerRec = Array.from(wrapper.setTimeoutHistory.values())[0];
+    const evalRec = Array.from(wrapper.evalHistory.values())[0];
+
+    expect(timerRec.isEval).toBe(true);
+    expect(evalRec.code).toBe(CODE);
+    expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_TIMEOUT);
+  });
+
+  test('setIntervalHistory - isEval recorded', () => {
+    const CODE = '(1+2)';
+    const handler = setInterval(CODE, 123);
+    const timerRec = Array.from(wrapper.setIntervalHistory.values())[0];
+    const evalRec = Array.from(wrapper.evalHistory.values())[0];
+
+    expect(timerRec.isEval).toBe(true);
+    expect(evalRec.code).toBe(CODE);
+    expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_INTERVAL);
+
+    clearInterval(handler);
   });
 
   test('rafHistory - recorded', async () => {
