@@ -22,8 +22,8 @@ describe('wrappers', () => {
     const DELAY = 5;
     const handler = setTimeout(() => {}, DELAY);
 
-    // typecasting handler to number since here its having NodeJS.Timeout type
     expect(wrapper.onlineTimers.size).toBe(1);
+    // typecasting handler to number since here its having NodeJS.Timeout type
     expect(wrapper.onlineTimers.has(Number(handler))).toBe(true);
 
     await new Promise((resolve) => setTimeout(resolve, 2 * DELAY));
@@ -42,6 +42,28 @@ describe('wrappers', () => {
     expect(wrapper.onlineTimers.size).toBe(0);
     expect(wrapper.clearTimeoutHistory.size).toBe(1);
     expect(wrapper.setTimeoutHistory.size).toBe(1);
+  });
+
+  test('setTimeoutHistory - isOnline becomes false after timer fired', async () => {
+    const DELAY = 5;
+    setTimeout(() => {}, DELAY);
+
+    const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
+    expect(rec.isOnline).toBe(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 2 * DELAY));
+
+    expect(rec.isOnline).toBe(false);
+  });
+
+  test('setTimeoutHistory - isOnline becomes false after timer canceled', () => {
+    const DELAY = 123;
+    const handler = setTimeout(() => {}, DELAY);
+    const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
+
+    expect(rec.isOnline).toBe(true);
+    clearTimeout(handler);
+    expect(rec.isOnline).toBe(false);
   });
 
   test('setTimeoutHistory - valid delay', () => {
@@ -109,6 +131,16 @@ describe('wrappers', () => {
     expect(wrapper.onlineTimers.size).toBe(0);
     expect(wrapper.clearIntervalHistory.size).toBe(1);
     expect(wrapper.setIntervalHistory.size).toBe(1);
+  });
+
+  test('setIntervalHistory - isOnline becomes false after interval canceled', () => {
+    const DELAY = 123;
+    const handler = setInterval(() => {}, DELAY);
+    const rec = Array.from(wrapper.setIntervalHistory.values())[0];
+
+    expect(rec.isOnline).toBe(true);
+    clearInterval(handler);
+    expect(rec.isOnline).toBe(false);
   });
 
   test('setIntervalHistory - valid delay', () => {

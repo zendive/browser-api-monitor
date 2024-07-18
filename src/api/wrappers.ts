@@ -55,6 +55,7 @@ export type TTimerHistory = {
   delay: number | undefined | string;
   isEval: boolean | undefined;
   hasError: boolean;
+  isOnline: boolean;
 };
 export type TEvalHistory = {
   traceId: string;
@@ -168,6 +169,20 @@ export class Wrapper {
   }
 
   timerOffline(handler: number) {
+    const timer = this.onlineTimers.get(handler);
+    if (!timer) {
+      return;
+    }
+
+    const record =
+      timer.type === ETimerType.TIMEOUT
+        ? this.setTimeoutHistory.get(timer.traceId)
+        : this.setIntervalHistory.get(timer.traceId);
+
+    if (record) {
+      record.isOnline = false;
+    }
+
     this.onlineTimers.delete(handler);
   }
 
@@ -192,6 +207,7 @@ export class Wrapper {
       existing.calls++;
       existing.isEval = isEval;
       existing.hasError = hasError;
+      existing.isOnline = true;
     } else {
       history.set(callstack.traceId, {
         handler,
@@ -199,6 +215,7 @@ export class Wrapper {
         delay: handlerDelay,
         isEval,
         hasError,
+        isOnline: true,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
@@ -237,6 +254,7 @@ export class Wrapper {
       existing.calls++;
       existing.isEval = handlerIsEval;
       existing.hasError = hasError;
+      existing.isOnline = false;
     } else {
       history.set(callstack.traceId, {
         handler: <number | string>handler,
@@ -244,6 +262,7 @@ export class Wrapper {
         delay: handlerDelay,
         isEval: handlerIsEval,
         hasError,
+        isOnline: false,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),

@@ -70,6 +70,7 @@
         on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
       >
     </th>
+    <th></th>
   </tr>
 
   {#each metrics as metric (metric.traceId)}
@@ -85,7 +86,9 @@
       </td>
       <td class="ta-c">{metric.handler}</td>
       <td class="ta-r">{metric.delay}</td>
+      <td
+        >{#if metric.isOnline}⏰{/if}</td
+      >
     </tr>
   {/each}
 </table>
-callscalls
