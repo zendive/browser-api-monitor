@@ -231,7 +231,7 @@ describe('wrappers', () => {
 
   test('setTimeoutHistory - isEval recorded', () => {
     const CODE = '(1+2)';
-    const handler = setTimeout(CODE);
+    setTimeout(CODE);
     const timerRec = Array.from(wrapper.setTimeoutHistory.values())[0];
     const evalRec = Array.from(wrapper.evalHistory.values())[0];
 

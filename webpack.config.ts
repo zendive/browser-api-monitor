@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import { EsbuildPlugin } from 'esbuild-loader';
+// import { EsbuildPlugin } from 'esbuild-loader';
 import { sveltePreprocess } from 'svelte-preprocess';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import manifest from './manifest.json' with { type: 'json' };

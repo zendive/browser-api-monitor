@@ -4,6 +4,7 @@
     "strict": true,
     "strictNullChecks": true,
     "verbatimModuleSyntax": true,
+    "noUnusedLocals": true,
     "types": ["chrome"],
     "baseUrl": ".",
     "paths": {
