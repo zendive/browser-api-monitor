@@ -222,6 +222,7 @@ export class Wrapper {
       existing.isEval = isEval;
       existing.hasError = hasError;
       existing.isOnline = true;
+      existing.canceledByTraceId = null;
     } else {
       history.set(callstack.traceId, {
         handler,

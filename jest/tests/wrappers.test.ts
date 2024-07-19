@@ -44,26 +44,30 @@ describe('wrappers', () => {
     expect(wrapper.setTimeoutHistory.size).toBe(1);
   });
 
-  test('setTimeoutHistory - isOnline becomes false after timer fired', async () => {
+  test('setTimeoutHistory - isOnline/canceledByTraceId handled after timer fired', async () => {
     const DELAY = 5;
     setTimeout(() => {}, DELAY);
 
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
     expect(rec.isOnline).toBe(true);
+    expect(rec.canceledByTraceId).toBe(null);
 
     await new Promise((resolve) => setTimeout(resolve, 2 * DELAY));
 
     expect(rec.isOnline).toBe(false);
+    expect(rec.canceledByTraceId).toBe(null);
   });
 
-  test('setTimeoutHistory - isOnline becomes false after timer canceled', () => {
+  test('setTimeoutHistory - isOnline/canceledByTraceId handled after timer canceled', () => {
     const DELAY = 123;
     const handler = setTimeout(() => {}, DELAY);
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
     expect(rec.isOnline).toBe(true);
+    expect(rec.canceledByTraceId).toBe(null);
     clearTimeout(handler);
     expect(rec.isOnline).toBe(false);
+    expect(rec.canceledByTraceId?.length).toBeGreaterThan(1);
   });
 
   test('setTimeoutHistory - valid delay', () => {
