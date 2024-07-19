@@ -5,7 +5,7 @@
   import { portPost } from '@/api/communication.ts';
 
   export let caption: string = '';
-  export let metrics: TOnlineTimerMetrics[] = [];
+  export let metrics: TOnlineTimerMetrics[];
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({

@@ -13,7 +13,7 @@
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
   export let caption: string = '';
-  export let metrics: TAnimationHistory[] = [];
+  export let metrics: TAnimationHistory[];
 
   let field = DEFAULT_SORT.timersHistoryField;
   let order = DEFAULT_SORT.timersHistoryOrder;

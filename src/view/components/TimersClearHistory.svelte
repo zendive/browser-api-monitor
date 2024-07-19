@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { TSetTimerHistory, TClearTimerHistory } from '@/api/wrappers.ts';
+  import type { TClearTimerHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -11,9 +10,10 @@
   } from '@/api/settings.ts';
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import { compareByFieldOrder } from '@/api/comparator.ts';
+  import TimersClearHistoryMetric from '@/view/components/TimersClearHistoryMetric.svelte';
 
   export let caption: string = '';
-  export let metrics: TSetTimerHistory[] | TClearTimerHistory[] = [];
+  export let metrics: TClearTimerHistory[];
 
   let field: ETimerHistoryField = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrder = DEFAULT_SORT.timersHistoryOrder;
@@ -70,25 +70,9 @@
         on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
       >
     </th>
-    <th></th>
   </tr>
 
   {#each metrics as metric (metric.traceId)}
-    <tr class="t-zebra" class:bc-error={metric.hasError}>
-      <td class="wb-all">
-        <Trace
-          bind:trace={metric.trace}
-          bind:traceDomain={metric.traceDomain}
-        />
-      </td>
-      <td class="ta-c">
-        <Variable bind:value={metric.calls} />
-      </td>
-      <td class="ta-c">{metric.handler}</td>
-      <td class="ta-r">{metric.delay}</td>
-      <td
-        >{#if metric.isOnline}⏰{:else if metric.canceledByTraceId}☠️{/if}</td
-      >
-    </tr>
+    <TimersClearHistoryMetric bind:metric />
   {/each}
 </table>

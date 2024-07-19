@@ -1,4 +1,5 @@
-:root {
+:root,
+.light {
   --header-height: 20px;
 
   --bg: rgb(255 255 255);

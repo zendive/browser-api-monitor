@@ -2,7 +2,7 @@
   import { type TTrace, ETraceDomain } from '@/api/wrappers.ts';
   import TraceLink from '@/view/components/TraceLink.svelte';
 
-  export let trace: TTrace[] = [];
+  export let trace: TTrace[];
   export let traceDomain: ETraceDomain;
 </script>
 
