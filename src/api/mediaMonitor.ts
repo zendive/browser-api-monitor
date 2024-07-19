@@ -28,7 +28,7 @@ export type TMediaTelemetry = {
   collection: TMediaMetrics[];
 };
 
-let mediaCollection: TMediaModel[];
+let mediaCollection: TMediaModel[] = [];
 
 export function meetMedia(els: NodeListOf<HTMLMediaElement>) {
   // farewell old
