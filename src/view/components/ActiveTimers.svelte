@@ -2,6 +2,7 @@
   import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
+  import TraceDomain from '@/view/components/TraceDomain.svelte';
   import { portPost } from '@/api/communication.ts';
 
   export let caption: string = '';
@@ -20,9 +21,16 @@
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
-  <tr><th>Delay</th><th>Handler</th><th class="w-full">Callstack</th></tr>
+  <tr>
+    <th class="shaft"></th>
+    <th>Delay</th>
+    <th>Handler</th>
+    <th class="w-full">Callstack</th>
+  </tr>
+
   {#each metrics as metric (metric.handler)}
     <tr class="t-zebra">
+      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="ta-r">{metric.delay}</td>
       <td class="ta-c handler-cell">
         <span class="handler-value">{metric.handler}</span>
@@ -36,16 +44,16 @@
         />
       </td>
       <td class="wb-all w-full">
-        <Trace
-          bind:trace={metric.trace}
-          bind:traceDomain={metric.traceDomain}
-        />
+        <Trace bind:trace={metric.trace} />
       </td>
     </tr>
   {/each}
 </table>
 
 <style lang="scss">
+  .shaft {
+    min-width: 0.7rem;
+  }
   .handler-cell {
     .icon.-remove {
       display: none;

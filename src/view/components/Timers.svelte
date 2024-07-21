@@ -4,7 +4,7 @@
   import ActiveTimers from '@/view/components/ActiveTimers.svelte';
   import TimersSetHistory from '@/view/components/TimersSetHistory.svelte';
   import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
-  import { compareByDelayHandlerDescending } from '@/api/comparator.ts';
+  import { compareByDelayThenHandlerDescending } from '@/api/comparator.ts';
 
   export let metrics: TMetrics['wrapperMetrics'];
 
@@ -16,7 +16,7 @@
     timeouts = [];
 
     if (metrics.onlineTimers?.length) {
-      metrics.onlineTimers.sort(compareByDelayHandlerDescending);
+      metrics.onlineTimers.sort(compareByDelayThenHandlerDescending);
 
       for (const timer of metrics.onlineTimers) {
         if (timer.type === ETimerType.INTERVAL) {

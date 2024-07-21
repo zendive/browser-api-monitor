@@ -207,3 +207,7 @@ th,
   -webkit-mask-image: url(img/trace-local.svg);
   mask-image: url(img/trace-local.svg);
 }
+.icon.-scheduled {
+  -webkit-mask-image: url(img/scheduled.svg);
+  mask-image: url(img/scheduled.svg);
+}

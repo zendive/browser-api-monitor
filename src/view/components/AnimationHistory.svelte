@@ -2,6 +2,7 @@
   import type { TAnimationHistory } from '@/api/wrappers';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
+  import TraceDomain from '@/view/components/TraceDomain.svelte';
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import {
     DEFAULT_SORT,
@@ -47,6 +48,7 @@
     <Variable bind:value={metrics.length} />
   </caption>
   <tr>
+    <th class="shaft"></th>
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
@@ -68,14 +70,18 @@
 
   {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
+      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
-        <Trace
-          bind:trace={metric.trace}
-          bind:traceDomain={metric.traceDomain}
-        />
+        <Trace bind:trace={metric.trace} />
       </td>
       <td class="ta-c">{metric.calls}</td>
       <td class="ta-c">{metric.handler}</td>
     </tr>
   {/each}
 </table>
+
+<style>
+  .shaft {
+    min-width: 0.7rem;
+  }
+</style>

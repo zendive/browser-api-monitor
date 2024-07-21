@@ -1,8 +1,9 @@
 import { windowListen, windowPost } from '@/api/communication.ts';
 import { IS_DEV } from './api/env.ts';
 import {
-  UI_UPDATE_FREQUENCY_LOW,
-  UI_UPDATE_FREQUENCY_VERYLOW,
+  TELEMETRY_FREQUENCY_5PS,
+  TELEMETRY_FREQUENCY_1PS,
+  TELEMETRY_FREQUENCY_60PS,
 } from '@/api/const.ts';
 import { MeanAggregator, Stopper, Timer } from '@/api/time.ts';
 import {
@@ -50,16 +51,21 @@ const eachSecond = new Timer(
 );
 const tick = new Timer(
   function apiMonitorPostMetric() {
-    meanExecutionTime.add(tick.executionTime);
-    // adaptive update-frequency
-    if (0 < tick.executionTime && tick.executionTime < 3) {
-      tick.options.animation = true;
-    } else {
-      tick.options.animation = false;
-      tick.delay =
-        tick.executionTime < 6
-          ? UI_UPDATE_FREQUENCY_LOW
-          : UI_UPDATE_FREQUENCY_VERYLOW;
+    if (0 < tick.executionTime) {
+      meanExecutionTime.add(tick.executionTime);
+
+      // adaptive update-frequency
+      if (
+        meanExecutionTime.mean < 3 &&
+        meanExecutionTime.standardDeviation < 1
+      ) {
+        tick.delay = TELEMETRY_FREQUENCY_60PS;
+      } else {
+        tick.delay =
+          meanExecutionTime.mean < 8
+            ? TELEMETRY_FREQUENCY_5PS
+            : TELEMETRY_FREQUENCY_1PS;
+      }
     }
 
     const metrics: TMetrics = {
@@ -71,8 +77,8 @@ const tick = new Timer(
 
     windowPost({ msg: 'telemetry', metrics });
   },
-  UI_UPDATE_FREQUENCY_LOW,
-  { interval: true, animation: true, measurable: true }
+  TELEMETRY_FREQUENCY_5PS,
+  { interval: true, animation: false, measurable: true }
 );
 
 function startObserve() {

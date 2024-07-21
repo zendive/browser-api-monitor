@@ -2,8 +2,9 @@ export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const UI_UPDATE_FREQUENCY_LOW = 200; // ms
-export const UI_UPDATE_FREQUENCY_VERYLOW = 1000; // ms
+export const TELEMETRY_FREQUENCY_60PS = 100 / 6; //MS
+export const TELEMETRY_FREQUENCY_5PS = 200; // ms
+export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);

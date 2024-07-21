@@ -45,6 +45,7 @@
     <Variable bind:value={metrics.length} />
   </caption>
   <tr>
+    <th class="shaft"></th>
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
@@ -76,3 +77,9 @@
     <TimersClearHistoryMetric bind:metric />
   {/each}
 </table>
+
+<style>
+  .shaft {
+    min-width: 0.7rem;
+  }
+</style>

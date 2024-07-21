@@ -1,9 +1,10 @@
 <script lang="ts">
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
+  import TraceDomain from '@/view/components/TraceDomain.svelte';
   import type { TEvalHistory } from '@/api/wrappers.ts';
 
-  export let metrics: TEvalHistory[] = [];
+  export let metrics: TEvalHistory[];
 
   function dynamicValue(value: unknown): string {
     if (value === '⟪undefined⟫') {
@@ -22,17 +23,19 @@
   <caption class="ta-l bc-invert"
     >Eval History <Variable bind:value={metrics.length} /></caption
   >
-  <tr
-    ><th class="w-full">Callstack</th><th>Scope</th><th>Called</th><th>Code</th
-    ><th>Returns</th></tr
-  >
+  <tr>
+    <th class="shaft"></th>
+    <th class="w-full">Callstack</th>
+    <th>Scope</th>
+    <th>Called</th>
+    <th>Code</th>
+    <th>Returns</th>
+  </tr>
   {#each metrics as metric (metric.traceId)}
     <tr class="t-zebra bc-error">
+      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
-        <Trace
-          bind:traceDomain={metric.traceDomain}
-          bind:trace={metric.trace}
-        />
+        <Trace bind:trace={metric.trace} />
       </td>
       <td>
         {#if metric.usesLocalScope}
@@ -61,6 +64,9 @@
 </table>
 
 <style lang="scss">
+  .shaft {
+    min-width: 0.7rem;
+  }
   .limit-width {
     max-width: 12rem;
   }

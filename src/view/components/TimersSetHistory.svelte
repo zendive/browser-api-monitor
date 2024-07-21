@@ -2,6 +2,7 @@
   import type { TClearTimerHistory, TSetTimerHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
+  import TraceDomain from '@/view/components/TraceDomain.svelte';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -81,10 +82,13 @@
   {#if timersClearHistoryMetric}
     <div class="header">
       <a
+        title="Close"
         class="close-icon"
         href="void(0)"
-        on:click|preventDefault={onHideRegressor}>✖️</a
+        on:click|preventDefault={onHideRegressor}
       >
+        <span class="icon -remove" />
+      </a>
     </div>
     <TimersClearHistory
       caption="Canceled by"
@@ -99,6 +103,7 @@
     <Variable bind:value={metrics.length} />
   </caption>
   <tr>
+    <th class="shaft"></th>
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
@@ -124,16 +129,14 @@
         on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
       >
     </th>
-    <th></th>
+    <th class="shaft"></th>
   </tr>
 
   {#each metrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
+      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
-        <Trace
-          bind:trace={metric.trace}
-          bind:traceDomain={metric.traceDomain}
-        />
+        <Trace bind:trace={metric.trace} />
       </td>
       <td class="ta-c">
         <Variable bind:value={metric.calls} />
@@ -142,14 +145,17 @@
       <td class="ta-r">{metric.delay}</td>
       <td>
         {#if metric.isOnline}
-          <span title="Scheduled">⏰</span>
+          <span title="Scheduled" class="icon -scheduled -small" />
         {:else if metric.canceledByTraceId}
           <a
-            title="Prematurely canceled"
+            role="button"
+            title="Canceled by&mldr;"
             href="void(0)"
             on:click|preventDefault={() =>
-              void onShowRegressor(metric.canceledByTraceId)}>☠️</a
+              void onShowRegressor(metric.canceledByTraceId)}
           >
+            <span class="icon -remove -small" />
+          </a>
         {/if}
       </td>
     </tr>
@@ -157,6 +163,9 @@
 </table>
 
 <style lang="scss">
+  .shaft {
+    min-width: 0.7rem;
+  }
   dialog {
     background-color: var(--bg);
     color: var(--text);
