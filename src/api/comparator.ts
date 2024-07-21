@@ -1,45 +1,48 @@
 import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
 import { ESortOrder } from '@/api/settings.ts';
 
+// descending sort by `handler` field
+function compareIfEqual<T, Key extends keyof T>(
+  field: Key,
+  first: T,
+  second: T
+) {
+  if (field === 'calls' || field === 'delay') {
+    // @ts-ignore
+    return second['handler'] > first['handler'] ? 1 : -1;
+  } else {
+    return 0;
+  }
+}
+
 export function compareByFieldOrder<T, Key extends keyof T>(
   field: Key,
   order: ESortOrder
 ) {
   return function (first: T, second: T) {
-    const a = first[field];
-    const b = second[field];
-
-    if (a === undefined) {
-      return ESortOrder.DESCENDING ? -1 : 1;
-    } else if (b === undefined) {
-      return ESortOrder.DESCENDING ? 1 : -1;
-    }
+    let a = first[field] || 0;
+    let b = second[field] || 0;
 
     if (
       (typeof a === 'number' && typeof b === 'number') ||
       (typeof a === 'string' && typeof b === 'string')
     ) {
-      return order === ESortOrder.DESCENDING
-        ? b > a
-          ? 1
-          : b < a
-            ? -1
-            : 0
-        : a > b
-          ? 1
-          : a < b
-            ? -1
-            : 0;
+      if (order === ESortOrder.DESCENDING) {
+        return b > a ? 1 : b < a ? -1 : compareIfEqual(field, first, second);
+      } else {
+        return a > b ? 1 : a < b ? -1 : compareIfEqual(field, first, second);
+      }
     } else {
-      return typeof (ESortOrder.DESCENDING ? b : a) === 'number' ? -1 : 1;
+      return typeof (order === ESortOrder.DESCENDING ? b : a) === 'number'
+        ? -1
+        : 1;
     }
   };
 }
 
-export function compareByDelayHandlerDescending<T extends TOnlineTimerMetrics>(
-  a: T,
-  b: T
-) {
+export function compareByDelayThenHandlerDescending<
+  T extends TOnlineTimerMetrics,
+>(a: T, b: T) {
   const aDelay = a.delay ?? 0;
   const bDelay = b.delay ?? 0;
   return bDelay > aDelay
