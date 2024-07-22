@@ -1,11 +1,10 @@
 import { windowListen, windowPost } from '@/api/communication.ts';
 import { IS_DEV } from './api/env.ts';
 import {
-  TELEMETRY_FREQUENCY_5PS,
   TELEMETRY_FREQUENCY_1PS,
   TELEMETRY_FREQUENCY_60PS,
 } from '@/api/const.ts';
-import { MeanAggregator, Stopper, Timer } from '@/api/time.ts';
+import { Timer } from '@/api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
@@ -30,20 +29,15 @@ export interface TMetrics {
     requestAnimationFrame: number;
     cancelAnimationFrame: number;
   };
-  tickTook: string;
+  collectingStartTime: number;
 }
 
 const wrapper = new Wrapper();
 wrapper.wrapApis();
 
 let panels = panelsArrayToVisibilityMap(DEFAULT_SETTINGS.panels);
-let reportedTickExecutionTime = '';
-const meanExecutionTime = new MeanAggregator();
 const eachSecond = new Timer(
   () => {
-    reportedTickExecutionTime = Stopper.toString(meanExecutionTime.mean);
-    meanExecutionTime.reset();
-
     meetMedia(document.querySelectorAll('video,audio'));
   },
   1e3,
@@ -51,33 +45,18 @@ const eachSecond = new Timer(
 );
 const tick = new Timer(
   function apiMonitorPostMetric() {
-    if (0 < tick.executionTime) {
-      meanExecutionTime.add(tick.executionTime);
-
-      // adaptive update-frequency
-      if (
-        meanExecutionTime.mean < 3 &&
-        meanExecutionTime.standardDeviation < 1
-      ) {
-        tick.delay = TELEMETRY_FREQUENCY_60PS;
-      } else {
-        tick.delay =
-          meanExecutionTime.mean < 8
-            ? TELEMETRY_FREQUENCY_5PS
-            : TELEMETRY_FREQUENCY_1PS;
-      }
-    }
+    const now = Date.now();
 
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(panels.media),
       wrapperMetrics: wrapper.collectWrapperMetrics(panels),
       callCounter: wrapper.callCounter,
-      tickTook: reportedTickExecutionTime,
+      collectingStartTime: now,
     };
 
     windowPost({ msg: 'telemetry', metrics });
   },
-  TELEMETRY_FREQUENCY_5PS,
+  TELEMETRY_FREQUENCY_1PS,
   { interval: true, animation: false, measurable: true }
 );
 
@@ -93,7 +72,12 @@ function stopObserve() {
 }
 
 windowListen((o) => {
-  if (o.msg === 'start-observe') {
+  if (o.msg === 'telemetry-acknowledged') {
+    // adaptive update-frequency
+    const ackTrafficDuration = Date.now() - o.timeSent;
+    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
+    tick.delay = Math.max(TELEMETRY_FREQUENCY_60PS, newDelay);
+  } else if (o.msg === 'start-observe') {
     startObserve();
   } else if (o.msg === 'stop-observe') {
     stopObserve();

@@ -114,6 +114,11 @@ export interface TMsgTelemetry {
   msg: 'telemetry';
   metrics: TMetrics;
 }
+export interface TMsgTelemetryAcknowledged {
+  msg: 'telemetry-acknowledged';
+  trafficDuration: number;
+  timeSent: number;
+}
 export interface TMsgSettings {
   msg: 'settings';
   settings: TSettings;
@@ -136,6 +141,7 @@ export interface TMsgMediaCommand {
 }
 export type TMsgOptions =
   | TMsgTelemetry
+  | TMsgTelemetryAcknowledged
   | TMsgStartObserve
   | TMsgStopObserve
   | TMsgLoaded

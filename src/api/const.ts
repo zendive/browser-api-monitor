@@ -3,7 +3,6 @@ export const ERRORS_IGNORED = [
   'The message port closed before a response was received.',
 ];
 export const TELEMETRY_FREQUENCY_60PS = 100 / 6; //MS
-export const TELEMETRY_FREQUENCY_5PS = 200; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);

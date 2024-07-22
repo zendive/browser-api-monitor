@@ -13,16 +13,32 @@
   import InfoBar from '@/view/components/InfoBar.svelte';
   import { getSettings, setSettings } from '@/api/settings.ts';
 
+  const SPINNER_FRAMES = '⣷⣯⣟⡿⢿⣻⣽⣾';
+  let spinnerIndex = 0;
+  let spinnerBadge = SPINNER_FRAMES[spinnerIndex];
   let fpsValue = 0;
   const fps = new Fps((value) => (fpsValue = value)).start();
   let paused = false;
   let msg: TMetrics;
+  let trafficDuration = 0;
 
   runtimeListen((o) => {
     if (o.msg === 'content-script-loaded' && !paused) {
       portPost({ msg: 'start-observe' });
     } else if (o.msg === 'telemetry') {
       msg = o.metrics;
+
+      const now = Date.now();
+      trafficDuration = now - o.metrics.collectingStartTime;
+      spinnerIndex = ++spinnerIndex % SPINNER_FRAMES.length;
+      spinnerBadge = SPINNER_FRAMES[spinnerIndex];
+
+      portPost({
+        msg: 'telemetry-acknowledged',
+        trafficDuration,
+        timeSent: now,
+      });
+
       fps.tick();
     }
   });
@@ -85,13 +101,13 @@
     {#if msg && !paused}
       <div class="divider" />
       <div>
-        {#if msg.tickTook}
-          <span title="Time took to collect telemetry data for a single update"
-            >{msg.tickTook}</span
-          >
-          /
+        {#if IS_DEV}
+          <span title="Time took to collect and send single telemetry data"
+            >{trafficDuration} /
+          </span>
         {/if}
         <span title="Telemetry updates per second">{fpsValue}fps</span>
+        <span>{spinnerBadge}</span>
       </div>
     {/if}
 
