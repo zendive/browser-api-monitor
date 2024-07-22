@@ -1,6 +1,7 @@
 :root,
 .light {
   --header-height: 20px;
+  --small-icon-size: 0.6875rem;
 
   --bg: rgb(255 255 255);
   --bg-invert: rgb(10% 10% 10% / 70%);
@@ -136,8 +137,8 @@ th,
   mask-repeat: no-repeat;
 }
 .icon.-small {
-  width: 11px;
-  height: 11px;
+  width: var(--small-icon-size);
+  height: var(--small-icon-size);
 }
 .icon.-refresh {
   -webkit-mask-image: url(img/refresh.svg);

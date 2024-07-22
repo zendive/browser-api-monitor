@@ -80,6 +80,6 @@
 
 <style>
   .shaft {
-    min-width: 0.7rem;
+    min-width: var(--small-icon-size);
   }
 </style>

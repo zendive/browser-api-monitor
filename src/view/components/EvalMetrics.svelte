@@ -65,7 +65,7 @@
 
 <style lang="scss">
   .shaft {
-    min-width: 0.7rem;
+    min-width: var(--small-icon-size);
   }
   .limit-width {
     max-width: 12rem;
