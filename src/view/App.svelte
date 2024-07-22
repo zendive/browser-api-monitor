@@ -1,7 +1,6 @@
 <script lang="ts">
   import { runtimeListen, portPost } from '@/api/communication.ts';
   import { IS_DEV } from '@/api/env.ts';
-  import { Fps } from '@/api/time.ts';
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
   import Timers from '@/view/components/Timers.svelte';
   import Media from '@/view/components/Media.svelte';
@@ -12,12 +11,9 @@
   import TogglePanels from '@/view/components/TogglePanels.svelte';
   import InfoBar from '@/view/components/InfoBar.svelte';
   import { getSettings, setSettings } from '@/api/settings.ts';
+  import TickSpinner from '@/view/components/TickSpinner.svelte';
 
-  const SPINNER_FRAMES = '⣷⣯⣟⡿⢿⣻⣽⣾';
-  let spinnerIndex = 0;
-  let spinnerBadge = SPINNER_FRAMES[spinnerIndex];
-  let fpsValue = 0;
-  const fps = new Fps((value) => (fpsValue = value)).start();
+  let spinner: TickSpinner;
   let paused = false;
   let msg: TMetrics;
   let trafficDuration = 0;
@@ -30,8 +26,6 @@
 
       const now = Date.now();
       trafficDuration = now - o.metrics.collectingStartTime;
-      spinnerIndex = ++spinnerIndex % SPINNER_FRAMES.length;
-      spinnerBadge = SPINNER_FRAMES[spinnerIndex];
 
       portPost({
         msg: 'telemetry-acknowledged',
@@ -39,7 +33,7 @@
         timeSent: now,
       });
 
-      fps.tick();
+      spinner.tick();
     }
   });
 
@@ -106,8 +100,7 @@
             >{trafficDuration} /
           </span>
         {/if}
-        <span title="Telemetry updates per second">{fpsValue}fps</span>
-        <span>{spinnerBadge}</span>
+        <TickSpinner bind:this={spinner} />
       </div>
     {/if}
 
