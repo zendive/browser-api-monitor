@@ -59,19 +59,28 @@
 
   let timersClearHistoryMetric: TClearTimerHistory[] | null;
 
-  function onShowRegressor(regressorId: string | null) {
+  function onShowRegressors(regressors: string[] | null) {
     timersClearHistoryMetric = null;
-    if (!dialog || !regressorId) {
+    if (!dialog || !regressors?.length) {
       return;
     }
 
-    let record = clearTimeoutHistory?.find((r) => r.traceId === regressorId);
-    record ??= clearIntervalHistory?.find((r) => r.traceId === regressorId);
-    if (!record) {
+    const records = [];
+
+    for (let n = regressors.length - 1; n >= 0; n--) {
+      const traceId = regressors[n];
+      let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
+      record ??= clearIntervalHistory?.find((r) => r.traceId === traceId);
+      if (record) {
+        records.push(record);
+      }
+    }
+
+    if (!records.length) {
       return;
     }
 
-    timersClearHistoryMetric = [record];
+    timersClearHistoryMetric = records;
 
     dialog.showModal();
     document.addEventListener('keydown', onKeyboardEvent);
@@ -146,13 +155,13 @@
       <td>
         {#if metric.isOnline}
           <span title="Scheduled" class="icon -scheduled -small" />
-        {:else if metric.canceledByTraceId}
+        {:else if metric.canceledByTraceIds?.length}
           <a
             role="button"
-            title="Canceled by&mldr;"
+            title={`Canceled by ${metric.canceledByTraceIds?.length}`}
             href="void(0)"
             on:click|preventDefault={() =>
-              void onShowRegressor(metric.canceledByTraceId)}
+              void onShowRegressors(metric.canceledByTraceIds)}
           >
             <span class="icon -remove -small" />
           </a>

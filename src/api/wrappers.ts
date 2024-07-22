@@ -57,7 +57,7 @@ export type TSetTimerHistory = {
   isEval: boolean | undefined;
   hasError: boolean;
   isOnline: boolean;
-  canceledByTraceId: string | null;
+  canceledByTraceIds: string[] | null;
 };
 export type TClearTimerHistory = {
   traceId: string;
@@ -187,17 +187,28 @@ export class Wrapper {
       return;
     }
 
+    this.onlineTimers.delete(handler);
+
     const record =
       timer.type === ETimerType.TIMEOUT
         ? this.setTimeoutHistory.get(timer.traceId)
         : this.setIntervalHistory.get(timer.traceId);
 
-    if (record) {
-      record.isOnline = false;
-      record.canceledByTraceId = canceledByTraceId;
+    if (!record) {
+      return;
     }
 
-    this.onlineTimers.delete(handler);
+    record.isOnline = false;
+
+    if (canceledByTraceId === null) {
+      return;
+    }
+
+    if (record.canceledByTraceIds === null) {
+      record.canceledByTraceIds = [canceledByTraceId];
+    } else if (!record.canceledByTraceIds.includes(canceledByTraceId)) {
+      record.canceledByTraceIds.push(canceledByTraceId);
+    }
   }
 
   updateSetTimersHistory(
@@ -222,7 +233,6 @@ export class Wrapper {
       existing.isEval = isEval;
       existing.hasError = hasError;
       existing.isOnline = true;
-      existing.canceledByTraceId = null;
     } else {
       history.set(callstack.traceId, {
         handler,
@@ -234,7 +244,7 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
-        canceledByTraceId: null,
+        canceledByTraceIds: null,
       });
     }
   }

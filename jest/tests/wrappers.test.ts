@@ -50,24 +50,47 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
     expect(rec.isOnline).toBe(true);
-    expect(rec.canceledByTraceId).toBe(null);
+    expect(rec.canceledByTraceIds).toBe(null);
 
     await new Promise((resolve) => setTimeout(resolve, 2 * DELAY));
 
     expect(rec.isOnline).toBe(false);
-    expect(rec.canceledByTraceId).toBe(null);
+    expect(rec.canceledByTraceIds).toBe(null);
   });
 
   test('setTimeoutHistory - isOnline/canceledByTraceId handled after timer canceled', () => {
-    const DELAY = 123;
-    const handler = setTimeout(() => {}, DELAY);
+    function setTimeout_function(delay: number) {
+      return Number(setTimeout(() => {}, delay));
+    }
+    function cancelTimeout_first_function(handler: number) {
+      clearTimeout(handler);
+    }
+    function cancelTimeout_second_function(handler: number) {
+      clearTimeout(handler);
+    }
+    const DELAY = 5;
+
+    [cancelTimeout_first_function, cancelTimeout_second_function].forEach(
+      (cancelTimeout_function) => {
+        const handler = setTimeout_function(DELAY); // <- same trace
+        cancelTimeout_function(handler); // <- different traces
+      }
+    );
+
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
-    expect(rec.isOnline).toBe(true);
-    expect(rec.canceledByTraceId).toBe(null);
-    clearTimeout(handler);
     expect(rec.isOnline).toBe(false);
-    expect(rec.canceledByTraceId?.length).toBeGreaterThan(1);
+    if (rec.canceledByTraceIds) {
+      expect(rec.canceledByTraceIds.length).toBe(2);
+
+      const clearHistory = Array.from(wrapper.clearTimeoutHistory.values());
+      rec.canceledByTraceIds.forEach((traceId) => {
+        const found = clearHistory.find((rec) => rec.traceId === traceId);
+        expect(found).toBeTruthy();
+      });
+    } else {
+      expect(true).toBe(false);
+    }
   });
 
   test('setTimeoutHistory - valid delay', () => {
