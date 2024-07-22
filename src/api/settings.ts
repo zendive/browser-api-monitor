@@ -48,8 +48,8 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
     label: 'clearInterval History',
     visible: true,
   },
-  { key: 'requestAnimationFrame', label: 'RAF', visible: true },
-  { key: 'cancelAnimationFrame', label: 'CAF', visible: true },
+  { key: 'requestAnimationFrame', label: 'RAF', visible: false },
+  { key: 'cancelAnimationFrame', label: 'CAF', visible: false },
 ];
 
 export const DEFAULT_SORT = {
