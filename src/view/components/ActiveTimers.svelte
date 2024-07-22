@@ -22,15 +22,14 @@
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
   <tr>
-    <th class="shaft"></th>
     <th>Delay</th>
     <th>Handler</th>
+    <th class="shaft"></th>
     <th class="w-full">Callstack</th>
   </tr>
 
   {#each metrics as metric (metric.handler)}
     <tr class="t-zebra">
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="ta-r">{metric.delay}</td>
       <td class="ta-c handler-cell">
         <span class="handler-value">{metric.handler}</span>
@@ -43,6 +42,7 @@
           on:click={() => void onRemoveHandler(metric)}
         />
       </td>
+      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all w-full">
         <Trace bind:trace={metric.trace} />
       </td>
