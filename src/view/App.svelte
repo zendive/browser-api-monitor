@@ -13,7 +13,7 @@
   import { getSettings, setSettings } from '@/api/settings.ts';
   import TickSpinner from '@/view/components/TickSpinner.svelte';
 
-  let spinner: TickSpinner;
+  let spinner: TickSpinner | null = null;
   let paused = false;
   let msg: TMetrics;
   let trafficDuration = 0;
@@ -33,7 +33,7 @@
         timeSent: now,
       });
 
-      spinner.tick();
+      spinner?.tick();
     }
   });
 
