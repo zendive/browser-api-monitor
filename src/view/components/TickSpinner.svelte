@@ -15,5 +15,7 @@
   }
 </script>
 
-<span title="Telemetry updates per second">{fpsValue}fps</span>
-<span>{frame}</span>
+<div>
+  <span title="Telemetry updates per second">{fpsValue}fps</span>
+  <span>{frame}</span>
+</div>

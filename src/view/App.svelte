@@ -16,20 +16,18 @@
   let spinner: TickSpinner | null = null;
   let paused = false;
   let msg: TMetrics;
-  let trafficDuration = 0;
 
   runtimeListen((o) => {
     if (o.msg === 'content-script-loaded' && !paused) {
+      // TODO: ...
       portPost({ msg: 'start-observe' });
     } else if (o.msg === 'telemetry') {
       msg = o.metrics;
 
       const now = Date.now();
-      trafficDuration = now - o.metrics.collectingStartTime;
-
       portPost({
         msg: 'telemetry-acknowledged',
-        trafficDuration,
+        trafficDuration: now - o.metrics.collectingStartTime,
         timeSent: now,
       });
 
@@ -94,14 +92,7 @@
 
     {#if msg && !paused}
       <div class="divider" />
-      <div>
-        {#if IS_DEV}
-          <span title="Time took to collect and send single telemetry data"
-            >{trafficDuration} /
-          </span>
-        {/if}
-        <TickSpinner bind:this={spinner} />
-      </div>
+      <TickSpinner bind:this={spinner} />
     {/if}
 
     <div class="divider" />
