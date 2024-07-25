@@ -4,6 +4,7 @@ export const ERRORS_IGNORED = [
 ];
 export const TELEMETRY_FREQUENCY_30PS = 100 / 3; //MS
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
+export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);

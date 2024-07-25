@@ -12,6 +12,7 @@
   import InfoBar from '@/view/components/InfoBar.svelte';
   import { getSettings, setSettings } from '@/api/settings.ts';
   import TickSpinner from '@/view/components/TickSpinner.svelte';
+  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '@/api/const.ts';
 
   let spinner: TickSpinner | null = null;
   let paused = false;
@@ -25,11 +26,17 @@
       msg = o.metrics;
 
       const now = Date.now();
-      portPost({
-        msg: 'telemetry-acknowledged',
-        trafficDuration: now - o.metrics.collectingStartTime,
-        timeSent: now,
-      });
+      const trafficDuration = now - o.metrics.collectingStartTime;
+
+      if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
+        !paused && onTogglePause();
+      } else {
+        portPost({
+          msg: 'telemetry-acknowledged',
+          trafficDuration,
+          timeSent: now,
+        });
+      }
 
       spinner?.tick();
     }

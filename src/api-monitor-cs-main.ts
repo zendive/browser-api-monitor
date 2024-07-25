@@ -2,7 +2,7 @@ import { windowListen, windowPost } from '@/api/communication.ts';
 import { IS_DEV } from './api/env.ts';
 import {
   TELEMETRY_FREQUENCY_1PS,
-  TELEMETRY_FREQUENCY_60PS,
+  TELEMETRY_FREQUENCY_30PS,
 } from '@/api/const.ts';
 import { Timer } from '@/api/time.ts';
 import {
@@ -76,7 +76,7 @@ windowListen((o) => {
     // adaptive update-frequency
     const ackTrafficDuration = Date.now() - o.timeSent;
     const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
-    tick.delay = Math.max(TELEMETRY_FREQUENCY_60PS, newDelay);
+    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
   } else if (o.msg === 'start-observe') {
     startObserve();
   } else if (o.msg === 'stop-observe') {
