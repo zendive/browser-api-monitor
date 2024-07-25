@@ -2,7 +2,7 @@ export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const TELEMETRY_FREQUENCY_60PS = 100 / 6; //MS
+export const TELEMETRY_FREQUENCY_30PS = 100 / 3; //MS
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
@@ -117,7 +117,7 @@ export const READY_STATE = [
 export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
 export const REGEX_STACKTRACE_SPLIT = new RegExp(/\n\s+at\s/);
 export const REGEX_STACKTRACE_NAME = new RegExp(/^(.+)\(.*/);
-export const REGEX_STACKTRACE_LINK = new RegExp(/.*\((.*)\)$/);
+export const REGEX_STACKTRACE_LINK = new RegExp(/.*\((async )?(.*)\)$/);
 export const REGEX_STACKTRACE_CLEAN_URL = new RegExp(/(.*):\d+:\d+$/);
 export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
 export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);

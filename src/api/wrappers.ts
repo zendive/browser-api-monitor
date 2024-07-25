@@ -134,7 +134,7 @@ export class Wrapper {
     const error = new Error(TRACE_ERROR_MESSAGE);
     this.selfTraceLink = (error?.stack || '')
       .split(REGEX_STACKTRACE_SPLIT)[1]
-      .replace(REGEX_STACKTRACE_LINK, '$1')
+      .replace(REGEX_STACKTRACE_LINK, '$2')
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
@@ -628,7 +628,7 @@ export class Wrapper {
         continue;
       }
 
-      const link = v.replace(REGEX_STACKTRACE_LINK, '$1').trim();
+      const link = v.replace(REGEX_STACKTRACE_LINK, '$2').trim();
 
       if (link.startsWith('<anonymous>')) {
         continue;

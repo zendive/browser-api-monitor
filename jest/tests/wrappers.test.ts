@@ -4,6 +4,7 @@ import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
+  TRACE_ERROR_MESSAGE,
 } from '../../src/api/const.ts';
 
 describe('wrappers', () => {
@@ -326,5 +327,26 @@ describe('wrappers', () => {
     const rec = Array.from(wrapper.cafHistory?.values())[0];
 
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
+  });
+
+  test('createCallstack', () => {
+    const testStack = `Error: ${TRACE_ERROR_MESSAGE}
+        at <anonymous>:1:1
+        at async (<anonymous>:1:1)
+        at call2 (async https://example.com/bundle1.js:11:17811)
+        at call1 (https://example.com/bundle2.js:11:17811)`;
+    const standatd = [
+      { name: 'call1', link: 'https://example.com/bundle2.js:11:17811' },
+      { name: 'call2', link: 'https://example.com/bundle1.js:11:17811' },
+    ];
+    const { trace } = wrapper.createCallstack(
+      <Error>{ stack: testStack },
+      null
+    );
+
+    expect(trace[0].name).toBe(standatd[0].name);
+    expect(trace[0].link).toBe(standatd[0].link);
+    expect(trace[1].name).toBe(standatd[1].name);
+    expect(trace[1].link).toBe(standatd[1].link);
   });
 });
