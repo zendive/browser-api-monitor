@@ -11,17 +11,19 @@ type TPanelKey =
   | 'requestAnimationFrame'
   | 'cancelAnimationFrame';
 
-export enum ETimerHistoryField {
-  calls = 'calls',
-  handler = 'handler',
-  delay = 'delay',
-}
+export const ETimerHistoryField = {
+  calls: 'calls',
+  handler: 'handler',
+  delay: 'delay',
+} as const;
+export type ETimerHistoryFieldKeys =
+  (typeof ETimerHistoryField)[keyof typeof ETimerHistoryField];
 
-export enum ESortOrder {
-  ASCENDING,
-  DESCENDING,
-}
-
+export const ESortOrder = {
+  ASCENDING: 0,
+  DESCENDING: 1,
+} as const;
+export type ESortOrderKeys = (typeof ESortOrder)[keyof typeof ESortOrder];
 export type TPanelVisibilityMap = {
   [K in TPanelKey]: boolean;
 };
@@ -53,8 +55,8 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
 ];
 
 export const DEFAULT_SORT = {
-  timersHistoryField: ETimerHistoryField.delay,
-  timersHistoryOrder: ESortOrder.DESCENDING,
+  timersHistoryField: ETimerHistoryField.delay as ETimerHistoryFieldKeys,
+  timersHistoryOrder: ESortOrder.DESCENDING as ESortOrderKeys,
 };
 
 export const DEFAULT_SETTINGS = {

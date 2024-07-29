@@ -6,9 +6,10 @@
   import {
     DEFAULT_SORT,
     getSettings,
-    ESortOrder,
     ETimerHistoryField,
     setSettings,
+    type ETimerHistoryFieldKeys,
+    type ESortOrderKeys,
   } from '@/api/settings.ts';
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
@@ -19,8 +20,8 @@
   export let clearTimeoutHistory: TClearTimerHistory[] | null;
   export let clearIntervalHistory: TClearTimerHistory[] | null;
 
-  let field: ETimerHistoryField = DEFAULT_SORT.timersHistoryField;
-  let order: ESortOrder = DEFAULT_SORT.timersHistoryOrder;
+  let field: ETimerHistoryFieldKeys = DEFAULT_SORT.timersHistoryField;
+  let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
   let dialog: HTMLDialogElement | null = null;
 
   $: metrics.sort(compareByFieldOrder(field, order));
@@ -31,7 +32,7 @@
   });
 
   function onChangeSort(
-    e: CustomEvent<{ field: ETimerHistoryField; order: ESortOrder }>
+    e: CustomEvent<{ field: ETimerHistoryFieldKeys; order: ESortOrderKeys }>
   ) {
     field = e.detail.field;
     order = e.detail.order;

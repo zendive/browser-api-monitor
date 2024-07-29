@@ -1,15 +1,16 @@
 <script lang="ts">
-  import type { TAnimationHistory } from '@/api/wrappers';
+  import type { TAnimationHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
   import TraceDomain from '@/view/components/TraceDomain.svelte';
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import {
     DEFAULT_SORT,
-    ESortOrder,
-    ETimerHistoryField,
     getSettings,
     setSettings,
+    ETimerHistoryField,
+    type ETimerHistoryFieldKeys,
+    type ESortOrderKeys,
   } from '@/api/settings.ts';
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
@@ -29,7 +30,7 @@
   });
 
   function onChangeSort(
-    e: CustomEvent<{ field: ETimerHistoryField; order: ESortOrder }>
+    e: CustomEvent<{ field: ETimerHistoryFieldKeys; order: ESortOrderKeys }>
   ) {
     field = e.detail.field;
     order = e.detail.order;

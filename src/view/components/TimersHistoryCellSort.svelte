@@ -1,9 +1,15 @@
 <script lang="ts">
-  import { DEFAULT_SETTINGS, ESortOrder } from '@/api/settings.ts';
+  import {
+    DEFAULT_SETTINGS,
+    ESortOrder,
+    type ETimerHistoryFieldKeys,
+  } from '@/api/settings.ts';
   import { createEventDispatcher } from 'svelte';
 
-  export let field = DEFAULT_SETTINGS.sort.timersHistoryField;
-  export let currentField = DEFAULT_SETTINGS.sort.timersHistoryField;
+  export let field: ETimerHistoryFieldKeys =
+    DEFAULT_SETTINGS.sort.timersHistoryField;
+  export let currentField: ETimerHistoryFieldKeys =
+    DEFAULT_SETTINGS.sort.timersHistoryField;
   export let currentFieldOrder = DEFAULT_SETTINGS.sort.timersHistoryOrder;
 
   const dispatch = createEventDispatcher();

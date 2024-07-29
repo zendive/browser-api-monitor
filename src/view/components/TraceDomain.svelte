@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ETraceDomain } from '@/api/wrappers.ts';
+  import { ETraceDomain, type ETraceDomainKeys } from '@/api/wrappers.ts';
 
-  export let traceDomain: ETraceDomain;
+  export let traceDomain: ETraceDomainKeys;
 </script>
 
 {#if traceDomain === ETraceDomain.SAME}

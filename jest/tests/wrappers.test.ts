@@ -335,7 +335,7 @@ describe('wrappers', () => {
         at async (<anonymous>:1:1)
         at call2 (async https://example.com/bundle1.js:11:17811)
         at call1 (https://example.com/bundle2.js:11:17811)`;
-    const standatd = [
+    const standard = [
       { name: 'call1', link: 'https://example.com/bundle2.js:11:17811' },
       { name: 'call2', link: 'https://example.com/bundle1.js:11:17811' },
     ];
@@ -344,9 +344,9 @@ describe('wrappers', () => {
       null
     );
 
-    expect(trace[0].name).toBe(standatd[0].name);
-    expect(trace[0].link).toBe(standatd[0].link);
-    expect(trace[1].name).toBe(standatd[1].name);
-    expect(trace[1].link).toBe(standatd[1].link);
+    expect(trace[0].name).toBe(standard[0].name);
+    expect(trace[0].link).toBe(standard[0].link);
+    expect(trace[1].name).toBe(standard[1].name);
+    expect(trace[1].link).toBe(standard[1].link);
   });
 });

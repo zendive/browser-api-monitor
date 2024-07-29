@@ -29,20 +29,22 @@ type TCallstack = {
   traceId: string;
   trace: TTrace[];
 };
-export enum ETimerType {
-  TIMEOUT = 0,
-  INTERVAL = 1,
-}
-export enum ETraceDomain {
-  SAME = 0,
-  EXTERNAL = 1,
-  UNKNOWN = 2,
-}
+export const ETimerType = {
+  TIMEOUT: 0,
+  INTERVAL: 1,
+} as const;
+export type ETimerTypeKeys = (typeof ETimerType)[keyof typeof ETimerType];
+export const ETraceDomain = {
+  SAME: 0,
+  EXTERNAL: 1,
+  UNKNOWN: 2,
+} as const;
+export type ETraceDomainKeys = (typeof ETraceDomain)[keyof typeof ETraceDomain];
 export type TOnlineTimerMetrics = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomain;
-  type: ETimerType;
+  traceDomain: ETraceDomainKeys;
+  type: ETimerTypeKeys;
   delay: number | undefined | string;
   handler: number;
   isEval: boolean;
@@ -50,7 +52,7 @@ export type TOnlineTimerMetrics = {
 export type TSetTimerHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomain;
+  traceDomain: ETraceDomainKeys;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
@@ -62,7 +64,7 @@ export type TSetTimerHistory = {
 export type TClearTimerHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomain;
+  traceDomain: ETraceDomainKeys;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
@@ -72,7 +74,7 @@ export type TClearTimerHistory = {
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomain;
+  traceDomain: ETraceDomainKeys;
   calls: number;
   returnedValue: any;
   code: any;
@@ -81,7 +83,7 @@ export type TEvalHistory = {
 export type TAnimationHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomain;
+  traceDomain: ETraceDomainKeys;
   calls: number;
   handler: number | undefined | string;
   hasError?: boolean;
@@ -160,7 +162,7 @@ export class Wrapper {
   }
 
   timerOnline(
-    type: ETimerType,
+    type: ETimerTypeKeys,
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack,

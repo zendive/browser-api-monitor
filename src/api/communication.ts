@@ -13,7 +13,7 @@
 import { APPLICATION_NAME } from '@/api/env.ts';
 import { ERRORS_IGNORED } from '@/api/const.ts';
 import type { TMetrics } from '@/api-monitor-cs-main.ts';
-import type { ETimerType } from '@/api/wrappers.ts';
+import type { ETimerTypeKeys } from '@/api/wrappers.ts';
 import type { TSettings } from '@/api/settings.ts';
 
 export function portPost(payload: TMsgOptions) {
@@ -104,7 +104,7 @@ export interface TMsgResetHistory {
 }
 export interface TMsgClearHandler {
   msg: 'clear-timer-handler';
-  type: ETimerType;
+  type: ETimerTypeKeys;
   handler: number;
 }
 export interface TMsgLoaded {
