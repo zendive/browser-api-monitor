@@ -18,10 +18,13 @@
   let paused = false;
   let msg: TMetrics;
 
-  runtimeListen((o) => {
-    if (o.msg === 'content-script-loaded' && !paused) {
-      // TODO: ...
-      portPost({ msg: 'start-observe' });
+  runtimeListen(async (o) => {
+    if (o.msg === 'content-script-loaded') {
+      const settings = await getSettings();
+
+      if (settings.devtoolsPanelShown && !settings.paused) {
+        portPost({ msg: 'start-observe' });
+      }
     } else if (o.msg === 'telemetry') {
       msg = o.metrics;
 
@@ -43,12 +46,8 @@
   });
 
   onMount(() => {
-    getSettings().then((state) => {
-      paused = state.paused;
-
-      if (!paused) {
-        portPost({ msg: 'start-observe' });
-      }
+    getSettings().then((settings) => {
+      paused = settings.paused;
     });
 
     window.addEventListener('beforeunload', () => {

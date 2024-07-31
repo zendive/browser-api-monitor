@@ -1,5 +1,5 @@
 import { portPost } from '@/api/communication.ts';
-import { getSettings } from '@/api/settings.ts';
+import { getSettings, setSettings } from '@/api/settings.ts';
 
 // tabId may be null if user opened the devtools of the devtools
 if (chrome.devtools.inspectedWindow.tabId !== null) {
@@ -13,9 +13,11 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
         if (!settings.paused) {
           portPost({ msg: 'start-observe' });
         }
+        setSettings({ devtoolsPanelShown: true });
       });
       panel.onHidden.addListener(() => {
         portPost({ msg: 'stop-observe' });
+        setSettings({ devtoolsPanelShown: false });
       });
     }
   );
