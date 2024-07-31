@@ -91,6 +91,16 @@
 <dialog bind:this={dialog}>
   {#if timersClearHistoryMetric}
     <div class="header">
+      <div class="title">
+        <div>
+          Places from which timer with current callstack was prematurely
+          canceled:
+        </div>
+        <div class="requirement">
+          The information is actual only on time of demand. For full coverage -
+          requires both clearTimeout and clearInterval panels enabled.
+        </div>
+      </div>
       <a
         title="Close"
         class="close-icon"
@@ -183,9 +193,16 @@
 
     .header {
       display: flex;
-      flex-direction: row-reverse;
+      flex-wrap: nowrap;
       margin-bottom: 0.5rem;
 
+      .title {
+        flex-grow: 1;
+        font-size: large;
+        .requirement {
+          font-size: x-small;
+        }
+      }
       .close-icon {
         text-decoration: none;
       }

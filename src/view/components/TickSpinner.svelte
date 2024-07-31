@@ -15,7 +15,14 @@
   }
 </script>
 
-<div>
-  <span title="Telemetry updates per second">{fpsValue}fps</span>
-  <span>{frame}</span>
+<div class="spinner">
+  <div title="Pace of update">{fpsValue}fps</div>
+  <div>{frame}</div>
 </div>
+
+<style lang="scss">
+  .spinner {
+    display: flex;
+    gap: 0.125rem;
+  }
+</style>
