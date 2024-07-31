@@ -16,10 +16,14 @@ import type { TMetrics } from '@/api-monitor-cs-main.ts';
 import type { ETimerTypeKeys } from '@/api/wrappers.ts';
 import type { TSettings } from '@/api/settings.ts';
 
+let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
-  const port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
-    name: APPLICATION_NAME,
-  });
+  if (!port) {
+    port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
+      name: APPLICATION_NAME,
+    });
+    port.onDisconnect.addListener(() => void (port = null));
+  }
 
   port.postMessage(payload);
 }
@@ -27,9 +31,7 @@ export function portPost(payload: TMsgOptions) {
 export function portListen(callback: (payload: TMsgOptions) => void) {
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name === APPLICATION_NAME) {
-      port.onMessage.addListener((e) => {
-        callback(e);
-      });
+      port.onMessage.addListener(callback);
     }
   });
 }
