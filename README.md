@@ -28,7 +28,7 @@ To explore the internals of a complex systems.
 ### Build requirements
 
 - OS: Linux
-- Node: 20.15.0 (LTS)
+- Node: 20.16.0 (LTS)
 
 ### Build instructions
 
