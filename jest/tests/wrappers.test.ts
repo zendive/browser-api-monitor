@@ -6,6 +6,9 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TRACE_ERROR_MESSAGE,
 } from '../../src/api/const.ts';
+import { TextEncoder } from 'node:util';
+
+global.TextEncoder = TextEncoder;
 
 describe('wrappers', () => {
   let wrapper: Wrapper;

@@ -13,13 +13,12 @@ import {
   REGEX_STACKTRACE_CLEAN_URL,
   REGEX_STACKTRACE_LINK_PROTOCOL,
   TAG_INVALID_CALLSTACK_LINK,
-  SHA256_HEX_STRING_LENGTH,
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
-import { sha256 } from 'js-sha256';
+import { HASH_STRING_LENGTH, hashString } from '@/api//hash.ts';
 
 export type TTrace = {
   name: string | 0;
@@ -647,7 +646,7 @@ export class Wrapper {
 
       if (typeof uniqueTrait === 'function') {
         name = uniqueTrait.name || 0;
-        traceId = sha256(String(uniqueTrait));
+        traceId = hashString(String(uniqueTrait));
       } else {
         traceId = String(uniqueTrait);
       }
@@ -658,8 +657,8 @@ export class Wrapper {
       });
     }
 
-    if (traceId.length > SHA256_HEX_STRING_LENGTH) {
-      traceId = sha256(traceId);
+    if (traceId.length > HASH_STRING_LENGTH) {
+      traceId = hashString(traceId);
     }
 
     return { traceId, trace };

@@ -124,4 +124,3 @@ export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
 export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
 export const REGEX_STACKTRACE_LINK_PROTOCOL = new RegExp(/http[s]?\:\/\//);
 export const FRAME_1of60 = 1 / 60;
-export const SHA256_HEX_STRING_LENGTH = 64;
