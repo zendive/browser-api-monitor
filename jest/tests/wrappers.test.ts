@@ -1,3 +1,11 @@
+// {{ jestis
+import { TextEncoder } from 'node:util';
+global.TextEncoder = TextEncoder;
+// @ts-ignore
+global.requestIdleCallback = function noop() {};
+global.cancelIdleCallback = function noop() {};
+// }}
+
 import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
 import { Wrapper } from '../../src/api/wrappers.ts';
 import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
@@ -6,9 +14,6 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TRACE_ERROR_MESSAGE,
 } from '../../src/api/const.ts';
-import { TextEncoder } from 'node:util';
-
-global.TextEncoder = TextEncoder;
 
 describe('wrappers', () => {
   let wrapper: Wrapper;

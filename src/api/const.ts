@@ -10,10 +10,13 @@ export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);
 export const setInterval = window.setInterval.bind(window);
 export const clearInterval = window.clearInterval.bind(window);
-// https://rollupjs.org/troubleshooting/#avoiding-eval
-export const lessEval = window.eval.bind(window);
 export const requestAnimationFrame = window.requestAnimationFrame.bind(window);
 export const cancelAnimationFrame = window.cancelAnimationFrame.bind(window);
+export const requestIdleCallback = window.requestIdleCallback.bind(window);
+export const cancelIdleCallback = window.cancelIdleCallback.bind(window);
+// https://rollupjs.org/troubleshooting/#avoiding-eval
+export const lessEval = window.eval.bind(window);
+
 export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';

@@ -20,15 +20,6 @@ import {
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
   wrapperMetrics: TWrapperMetrics;
-  callCounter: {
-    setTimeout: number;
-    clearTimeout: number;
-    setInterval: number;
-    clearInterval: number;
-    eval: number;
-    requestAnimationFrame: number;
-    cancelAnimationFrame: number;
-  };
   collectingStartTime: number;
 }
 
@@ -50,7 +41,6 @@ const tick = new Timer(
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(panels.media),
       wrapperMetrics: wrapper.collectWrapperMetrics(panels),
-      callCounter: wrapper.callCounter,
       collectingStartTime: now,
     };
 

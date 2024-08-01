@@ -48,10 +48,12 @@
   {#if msg}
     <a
       href="void(0)"
-      class:panel-enabled={panels.eval && msg.callCounter.eval}
+      class:panel-enabled={panels.eval && msg.wrapperMetrics.callCounter.eval}
       on:click|preventDefault={() => void scrollTo('Eval History')}
     >
-      <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
+      <strong>eval</strong>: <Variable
+        bind:value={msg.wrapperMetrics.callCounter.eval}
+      />
     </a>
 
     <a
@@ -73,68 +75,90 @@
 
     <a
       href="void(0)"
-      class:panel-enabled={panels.setTimeoutHistory &&
-        msg.callCounter.setTimeout}
+      class:panel-enabled={panels.setTimeout &&
+        msg.wrapperMetrics.callCounter.setTimeout}
       on:click|preventDefault={() => void scrollTo('setTimeout History')}
     >
       <strong>setTimeout</strong>: <Variable
-        bind:value={msg.callCounter.setTimeout}
+        bind:value={msg.wrapperMetrics.callCounter.setTimeout}
       />
     </a>
 
     <a
       href="void(0)"
-      class:panel-enabled={panels.clearTimeoutHistory &&
-        msg.callCounter.clearTimeout}
+      class:panel-enabled={panels.clearTimeout &&
+        msg.wrapperMetrics.callCounter.clearTimeout}
       on:click|preventDefault={() => void scrollTo('clearTimeout History')}
     >
       <strong>clearTimeout</strong>: <Variable
-        bind:value={msg.callCounter.clearTimeout}
+        bind:value={msg.wrapperMetrics.callCounter.clearTimeout}
       />
     </a>
 
     <a
       href="void(0)"
-      class:panel-enabled={panels.setIntervalHistory &&
-        msg.callCounter.setInterval}
+      class:panel-enabled={panels.setInterval &&
+        msg.wrapperMetrics.callCounter.setInterval}
       on:click|preventDefault={() => void scrollTo('setInterval History')}
     >
       <strong>setInterval</strong>: <Variable
-        bind:value={msg.callCounter.setInterval}
+        bind:value={msg.wrapperMetrics.callCounter.setInterval}
       />
     </a>
 
     <a
       href="void(0)"
-      class:panel-enabled={panels.clearIntervalHistory &&
-        msg.callCounter.clearInterval}
+      class:panel-enabled={panels.clearInterval &&
+        msg.wrapperMetrics.callCounter.clearInterval}
       on:click|preventDefault={() => void scrollTo('clearInterval History')}
     >
       <strong>clearInterval</strong>: <Variable
-        bind:value={msg.callCounter.clearInterval}
+        bind:value={msg.wrapperMetrics.callCounter.clearInterval}
       />
     </a>
 
     <a
       href="void(0)"
       class:panel-enabled={panels.requestAnimationFrame &&
-        msg.callCounter.requestAnimationFrame}
+        msg.wrapperMetrics.callCounter.requestAnimationFrame}
       on:click|preventDefault={() =>
         void scrollTo('requestAnimationFrame History')}
     >
       <strong title="requestAnimationFrame">RAF</strong>:
-      {msg.callCounter.requestAnimationFrame}
+      {msg.wrapperMetrics.callCounter.requestAnimationFrame}
     </a>
 
     <a
       href="void(0)"
       class:panel-enabled={panels.cancelAnimationFrame &&
-        msg.callCounter.cancelAnimationFrame}
+        msg.wrapperMetrics.callCounter.cancelAnimationFrame}
       on:click|preventDefault={() =>
         void scrollTo('cancelAnimationFrame History')}
     >
       <strong title="cancelAnimationFrame">CAF</strong>:
-      {msg.callCounter.cancelAnimationFrame}
+      {msg.wrapperMetrics.callCounter.cancelAnimationFrame}
+    </a>
+
+    <a
+      href="void(0)"
+      class:panel-enabled={panels.requestIdleCallback &&
+        msg.wrapperMetrics.callCounter.requestIdleCallback}
+      on:click|preventDefault={() =>
+        void scrollTo('requestIdleCallback History')}
+    >
+      <strong title="requestIdleCallback">RIC</strong>:
+      {msg.wrapperMetrics.callCounter.requestIdleCallback}
+    </a>
+
+    <a
+      href="void(0)"
+      class:panel-enabled={panels.cancelIdleCallback &&
+        msg.wrapperMetrics.callCounter.cancelIdleCallback}
+      on:click|preventDefault={() =>
+        void scrollTo('cancelIdleCallback History')}
+    >
+      <strong title="cancelIdleCallback">CIC</strong>:
+      {msg.wrapperMetrics.callCounter.cancelIdleCallback}
     </a>
   {/if}
 </div>

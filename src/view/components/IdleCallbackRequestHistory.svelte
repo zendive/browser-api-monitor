@@ -1,30 +1,34 @@
 <script lang="ts">
-  import type { TClearTimerHistory, TSetTimerHistory } from '@/api/wrappers.ts';
+  import type {
+    TRequestIdleCallbackHistory,
+    TCancelIdleCallbackHistory,
+  } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
   import TraceDomain from '@/view/components/TraceDomain.svelte';
+  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import {
     DEFAULT_SORT,
     getSettings,
-    EHistorySortField,
     setSettings,
+    EHistorySortField,
     type EHistorySortFieldKeys,
     type ESortOrderKeys,
   } from '@/api/settings.ts';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
-  import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
   import { compareByFieldOrder } from '@/api/comparator.ts';
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
 
-  export let caption: string;
-  export let metrics: TSetTimerHistory[];
-  export let clearTimeoutHistory: TClearTimerHistory[] | null;
-  export let clearIntervalHistory: TClearTimerHistory[] | null;
+  export let caption: string = '';
+  export let metrics: TRequestIdleCallbackHistory[];
 
-  let field: EHistorySortFieldKeys = DEFAULT_SORT.timersHistoryField;
-  let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
+  let field = DEFAULT_SORT.timersHistoryField;
+  let order = DEFAULT_SORT.timersHistoryOrder;
   let dialog: HTMLDialogElement | null = null;
+  export let cicHistory: TCancelIdleCallbackHistory[] | null;
 
-  $: metrics.sort(compareByFieldOrder(field, order));
+  $: sortedMetrics = metrics.sort(
+    compareByFieldOrder(<keyof TRequestIdleCallbackHistory>field, order)
+  );
 
   getSettings().then((settings) => {
     field = settings.sort.timersHistoryField;
@@ -52,16 +56,16 @@
     }
   }
 
-  let clearTimerHistoryMetrics: TClearTimerHistory[] | null;
+  let cicHistoryMetrics: TCancelIdleCallbackHistory[] | null;
 
   function onHideRegressor() {
     document.removeEventListener('keydown', onKeyboardEvent);
     dialog?.close();
-    clearTimerHistoryMetrics = null;
+    cicHistoryMetrics = null;
   }
 
   function onShowRegressors(regressors: string[] | null) {
-    clearTimerHistoryMetrics = null;
+    cicHistoryMetrics = null;
     if (!dialog || !regressors?.length) {
       return;
     }
@@ -70,8 +74,7 @@
 
     for (let n = regressors.length - 1; n >= 0; n--) {
       const traceId = regressors[n];
-      let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
-      record ??= clearIntervalHistory?.find((r) => r.traceId === traceId);
+      let record = cicHistory?.find((r) => r.traceId === traceId);
       if (record) {
         records.push(record);
       }
@@ -81,7 +84,7 @@
       return;
     }
 
-    clearTimerHistoryMetrics = records;
+    cicHistoryMetrics = records;
 
     dialog.showModal();
     document.addEventListener('keydown', onKeyboardEvent);
@@ -89,7 +92,7 @@
 </script>
 
 <dialog bind:this={dialog}>
-  {#if clearTimerHistoryMetrics}
+  {#if cicHistoryMetrics}
     <div class="header">
       <div class="title">
         <div>
@@ -110,9 +113,9 @@
         <span class="icon -remove" />
       </a>
     </div>
-    <TimersClearHistory
+    <IdleCallbackCancelHistory
       caption="Canceled by"
-      bind:metrics={clearTimerHistoryMetrics}
+      bind:metrics={cicHistoryMetrics}
     />
   {/if}
 </dialog>
@@ -141,6 +144,7 @@
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
       >
     </th>
+    <th class="ta-c">didTimeout</th>
     <th class="ta-r">
       <TimersHistoryCellSort
         field={EHistorySortField.delay}
@@ -152,16 +156,19 @@
     <th class="shaft"></th>
   </tr>
 
-  {#each metrics as metric (metric.traceId)}
+  {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
         <Trace bind:trace={metric.trace} />
       </td>
-      <td class="ta-c">
-        <Variable bind:value={metric.calls} />
-      </td>
+      <td class="ta-c">{metric.calls}</td>
       <td class="ta-c">{metric.handler}</td>
+      <td class="ta-c">
+        {#if metric.didTimeout !== undefined}
+          {metric.didTimeout}
+        {/if}
+      </td>
       <td class="ta-r">{metric.delay}</td>
       <td>
         {#if metric.isOnline}
@@ -182,30 +189,8 @@
   {/each}
 </table>
 
-<style lang="scss">
+<style>
   .shaft {
     min-width: var(--small-icon-size);
-  }
-  dialog {
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-
-    .header {
-      display: flex;
-      flex-wrap: nowrap;
-      margin-bottom: 0.5rem;
-
-      .title {
-        flex-grow: 1;
-        font-size: large;
-        .requirement {
-          font-size: x-small;
-        }
-      }
-      .close-icon {
-        text-decoration: none;
-      }
-    }
   }
 </style>

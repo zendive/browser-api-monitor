@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TAnimationHistory } from '@/api/wrappers.ts';
+  import type { TCancelIdleCallbackHistory } from '@/api/wrappers.ts';
   import Variable from '@/view/components/Variable.svelte';
   import Trace from '@/view/components/Trace.svelte';
   import TraceDomain from '@/view/components/TraceDomain.svelte';
@@ -15,13 +15,13 @@
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
   export let caption: string = '';
-  export let metrics: TAnimationHistory[];
+  export let metrics: TCancelIdleCallbackHistory[];
 
   let field = DEFAULT_SORT.timersHistoryField;
   let order = DEFAULT_SORT.timersHistoryOrder;
 
   $: sortedMetrics = metrics.sort(
-    compareByFieldOrder(<keyof TAnimationHistory>field, order)
+    compareByFieldOrder(<keyof TCancelIdleCallbackHistory>field, order)
   );
 
   getSettings().then((settings) => {

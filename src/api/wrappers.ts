@@ -6,6 +6,8 @@ import {
   lessEval,
   requestAnimationFrame,
   cancelAnimationFrame,
+  requestIdleCallback,
+  cancelIdleCallback,
   REGEX_STACKTRACE_NAME,
   REGEX_STACKTRACE_LINK,
   TRACE_ERROR_MESSAGE,
@@ -87,6 +89,26 @@ export type TAnimationHistory = {
   handler: number | undefined | string;
   hasError?: boolean;
 };
+export type TRequestIdleCallbackHistory = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomainKeys;
+  calls: number;
+  handler: number | undefined | string;
+  delay: number | undefined | string;
+  hasError: boolean;
+  didTimeout: undefined | boolean;
+  isOnline: boolean;
+  canceledByTraceIds: string[] | null;
+};
+export type TCancelIdleCallbackHistory = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomainKeys;
+  calls: number;
+  handler: number | undefined | string;
+  hasError: boolean;
+};
 export type TWrapperMetrics = {
   onlineTimers: TOnlineTimerMetrics[] | null;
   setTimeoutHistory: TSetTimerHistory[] | null;
@@ -96,6 +118,19 @@ export type TWrapperMetrics = {
   evalHistory: TEvalHistory[] | null;
   rafHistory: TAnimationHistory[] | null;
   cafHistory: TAnimationHistory[] | null;
+  ricHistory: TRequestIdleCallbackHistory[] | null;
+  cicHistory: TCancelIdleCallbackHistory[] | null;
+  callCounter: {
+    setTimeout: number;
+    clearTimeout: number;
+    setInterval: number;
+    clearInterval: number;
+    eval: number;
+    requestAnimationFrame: number;
+    cancelAnimationFrame: number;
+    requestIdleCallback: number;
+    cancelIdleCallback: number;
+  };
 };
 
 export class Wrapper {
@@ -107,7 +142,9 @@ export class Wrapper {
   evalHistory: Map<string, TEvalHistory> = new Map();
   rafHistory: Map<string, TAnimationHistory> = new Map();
   cafHistory: Map<string, TAnimationHistory> = new Map();
-  callCounter = {
+  ricHistory: Map<string, TRequestIdleCallbackHistory> = new Map();
+  cicHistory: Map<string, TCancelIdleCallbackHistory> = new Map();
+  callCounter: TWrapperMetrics['callCounter'] = {
     setTimeout: 0,
     clearTimeout: 0,
     setInterval: 0,
@@ -115,6 +152,8 @@ export class Wrapper {
     eval: 0,
     requestAnimationFrame: 0,
     cancelAnimationFrame: 0,
+    requestIdleCallback: 0,
+    cancelIdleCallback: 0,
   };
   native = {
     setTimeout: setTimeout,
@@ -124,6 +163,8 @@ export class Wrapper {
     eval: lessEval,
     requestAnimationFrame: requestAnimationFrame,
     cancelAnimationFrame: cancelAnimationFrame,
+    requestIdleCallback: requestIdleCallback,
+    cancelIdleCallback: cancelIdleCallback,
   };
   selfTraceLink = '';
 
@@ -139,14 +180,13 @@ export class Wrapper {
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
-  #badTimerHandler(handler: unknown) {
-    return !Number.isFinite(handler) || <number>handler < 1;
+  #validTimerHandler(handler: unknown): handler is number {
+    return Number.isFinite(handler) && <number>handler > 0;
   }
 
-  #badTimerDelay(delay: unknown) {
+  #validTimerDelay(delay: unknown): delay is number {
     return (
-      (delay !== undefined && !Number.isFinite(delay)) ||
-      (Number.isFinite(delay) && <number>delay < 0)
+      delay === undefined || (Number.isFinite(delay) && <number>delay >= 0)
     );
   }
 
@@ -167,7 +207,7 @@ export class Wrapper {
     callstack: TCallstack,
     isEval: boolean
   ) {
-    if (this.#badTimerDelay(delay)) {
+    if (!this.#validTimerDelay(delay)) {
       delay = TAG_EXCEPTION(delay);
     }
     this.onlineTimers.set(handler, {
@@ -220,7 +260,7 @@ export class Wrapper {
     isEval: boolean
   ) {
     const existing = history.get(callstack.traceId);
-    const hasError = this.#badTimerDelay(delay);
+    const hasError = !this.#validTimerDelay(delay);
     let handlerDelay: string | number | undefined = delay;
 
     if (hasError) {
@@ -256,7 +296,7 @@ export class Wrapper {
     callstack: TCallstack
   ) {
     const existing = history.get(callstack.traceId);
-    const hasError = this.#badTimerHandler(handler);
+    const hasError = !this.#validTimerHandler(handler);
     const onlineTimer = hasError
       ? null
       : this.onlineTimers.get(<number>handler);
@@ -335,7 +375,7 @@ export class Wrapper {
 
   updateCafHistory(handler: number | string, callstack: TCallstack) {
     const existing = this.cafHistory.get(callstack.traceId);
-    const hasError = this.#badTimerHandler(handler);
+    const hasError = !this.#validTimerHandler(handler);
 
     if (hasError) {
       handler = TAG_EXCEPTION(handler);
@@ -357,12 +397,94 @@ export class Wrapper {
     }
   }
 
+  markIdleRicRecord(deadline: IdleDeadline, callstack: TCallstack) {
+    const record = this.ricHistory.get(callstack.traceId);
+
+    if (record) {
+      record.didTimeout = deadline.didTimeout;
+      record.isOnline = false;
+    }
+  }
+
+  updateRicHistory(
+    handler: number,
+    delay: number | undefined | string,
+    callstack: TCallstack
+  ) {
+    const existing = this.ricHistory.get(callstack.traceId);
+    const hasError = !this.#validTimerDelay(delay);
+
+    if (hasError) {
+      delay = 'N/A';
+    }
+
+    if (existing) {
+      existing.calls++;
+      existing.handler = handler;
+      existing.didTimeout = undefined;
+      existing.delay = delay;
+      existing.hasError = hasError;
+      existing.isOnline = true;
+    } else {
+      this.ricHistory.set(callstack.traceId, {
+        traceId: callstack.traceId,
+        trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        calls: 1,
+        handler,
+        didTimeout: undefined,
+        delay,
+        hasError,
+        isOnline: true,
+        canceledByTraceIds: null,
+      });
+    }
+  }
+
+  updateCicHistory(handler: number | string, callstack: TCallstack) {
+    const existing = this.cicHistory.get(callstack.traceId);
+    const hasError = !this.#validTimerHandler(handler);
+
+    if (hasError) {
+      handler = TAG_EXCEPTION(handler);
+    }
+
+    if (existing) {
+      existing.calls++;
+      existing.handler = handler;
+      existing.hasError = hasError;
+    } else {
+      this.cicHistory.set(callstack.traceId, {
+        traceId: callstack.traceId,
+        trace: callstack.trace,
+        traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        calls: 1,
+        handler,
+        hasError,
+      });
+    }
+
+    const ricRecord = this.ricHistory.get(callstack.traceId);
+    if (ricRecord) {
+      ricRecord.isOnline = false;
+      if (ricRecord.canceledByTraceIds === null) {
+        ricRecord.canceledByTraceIds = [callstack.traceId];
+      } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
+        ricRecord.canceledByTraceIds.push(callstack.traceId);
+      }
+    }
+  }
+
   cleanHistory() {
+    this.evalHistory.clear();
     this.setTimeoutHistory.clear();
     this.clearTimeoutHistory.clear();
     this.setIntervalHistory.clear();
     this.clearIntervalHistory.clear();
-    this.evalHistory.clear();
+    this.rafHistory.clear();
+    this.cafHistory.clear();
+    this.ricHistory.clear();
+    this.cicHistory.clear();
     this.callCounter.setTimeout =
       this.callCounter.clearTimeout =
       this.callCounter.setInterval =
@@ -370,50 +492,98 @@ export class Wrapper {
       this.callCounter.eval =
       this.callCounter.requestAnimationFrame =
       this.callCounter.cancelAnimationFrame =
+      this.callCounter.requestIdleCallback =
+      this.callCounter.cancelIdleCallback =
         0;
   }
 
   collectWrapperMetrics(panels: TPanelVisibilityMap): TWrapperMetrics {
     return {
+      evalHistory: panels.eval ? Array.from(this.evalHistory.values()) : null,
       onlineTimers: panels.activeTimers
         ? Array.from(this.onlineTimers.values())
         : null,
-      setTimeoutHistory: panels.setTimeoutHistory
+      setTimeoutHistory: panels.setTimeout
         ? Array.from(this.setTimeoutHistory.values())
         : null,
-      clearTimeoutHistory: panels.clearTimeoutHistory
+      clearTimeoutHistory: panels.clearTimeout
         ? Array.from(this.clearTimeoutHistory.values())
         : null,
-      setIntervalHistory: panels.setIntervalHistory
+      setIntervalHistory: panels.setInterval
         ? Array.from(this.setIntervalHistory.values())
         : null,
-      clearIntervalHistory: panels.clearIntervalHistory
+      clearIntervalHistory: panels.clearInterval
         ? Array.from(this.clearIntervalHistory.values())
         : null,
-      evalHistory: panels.eval ? Array.from(this.evalHistory.values()) : null,
       rafHistory: panels.requestAnimationFrame
         ? Array.from(this.rafHistory.values())
         : null,
       cafHistory: panels.cancelAnimationFrame
         ? Array.from(this.cafHistory.values())
         : null,
+      ricHistory: panels.requestIdleCallback
+        ? Array.from(this.ricHistory.values())
+        : null,
+      cicHistory: panels.cancelIdleCallback
+        ? Array.from(this.cicHistory.values())
+        : null,
+      callCounter: this.callCounter,
     };
   }
 
   unwrapApis() {
+    window.eval = this.native.eval;
     window.setTimeout = this.native.setTimeout;
     window.clearTimeout = this.native.clearTimeout;
     window.setInterval = this.native.setInterval;
     window.clearInterval = this.native.clearInterval;
-    window.eval = this.native.eval;
     window.requestAnimationFrame = this.native.requestAnimationFrame;
     window.cancelAnimationFrame = this.native.cancelAnimationFrame;
+    window.requestIdleCallback = this.native.requestIdleCallback;
+    window.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
   wrapApis() {
-    this.wrapTimers();
     this.wrapEval();
+    this.wrapTimers();
     this.wrapAnimation();
+    this.wrapIdleCallback();
+  }
+
+  wrapIdleCallback() {
+    window.requestIdleCallback = function requestIdleCallback(
+      this: Wrapper,
+      fn: IdleRequestCallback,
+      options?: IdleRequestOptions | undefined
+    ) {
+      this.callCounter.requestIdleCallback++;
+
+      const delay = options?.timeout;
+      const callstack = this.createCallstack(
+        new Error(TRACE_ERROR_MESSAGE),
+        fn
+      );
+      const handler = this.native.requestIdleCallback((deadline) => {
+        this.markIdleRicRecord(deadline, callstack);
+        fn(deadline);
+      }, options);
+
+      this.updateRicHistory(handler, delay, callstack);
+
+      return handler;
+    }.bind(this);
+
+    window.cancelIdleCallback = function cancelIdleCallback(
+      this: Wrapper,
+      handler: number
+    ) {
+      this.updateCicHistory(
+        handler,
+        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
+      );
+      this.callCounter.cancelIdleCallback++;
+      this.native.cancelIdleCallback(handler);
+    }.bind(this);
   }
 
   wrapAnimation() {

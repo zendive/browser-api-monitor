@@ -13,6 +13,7 @@
   import { getSettings, setSettings } from '@/api/settings.ts';
   import TickSpinner from '@/view/components/TickSpinner.svelte';
   import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '@/api/const.ts';
+  import IdleCallbackMetrics from '@/view/components/IdleCallbackMetrics.svelte';
 
   let spinner: TickSpinner | null = null;
   let paused = false;
@@ -114,6 +115,7 @@
       <Media bind:metrics={msg.mediaMetrics} />
       <Timers bind:metrics={msg.wrapperMetrics} />
       <AnimationMetrics bind:metrics={msg.wrapperMetrics} />
+      <IdleCallbackMetrics bind:metrics={msg.wrapperMetrics} />
     </main>
   {/if}
 </section>

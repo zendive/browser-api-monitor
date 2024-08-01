@@ -4,20 +4,22 @@ type TPanelKey =
   | 'eval'
   | 'media'
   | 'activeTimers'
-  | 'setTimeoutHistory'
-  | 'clearTimeoutHistory'
-  | 'setIntervalHistory'
-  | 'clearIntervalHistory'
+  | 'setTimeout'
+  | 'clearTimeout'
+  | 'setInterval'
+  | 'clearInterval'
   | 'requestAnimationFrame'
-  | 'cancelAnimationFrame';
+  | 'cancelAnimationFrame'
+  | 'requestIdleCallback'
+  | 'cancelIdleCallback';
 
-export const ETimerHistoryField = {
+export const EHistorySortField = {
   calls: 'calls',
   handler: 'handler',
   delay: 'delay',
 } as const;
-export type ETimerHistoryFieldKeys =
-  (typeof ETimerHistoryField)[keyof typeof ETimerHistoryField];
+export type EHistorySortFieldKeys =
+  (typeof EHistorySortField)[keyof typeof EHistorySortField];
 
 export const ESortOrder = {
   ASCENDING: 0,
@@ -42,20 +44,22 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'eval', label: 'eval', visible: true },
   { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true },
-  { key: 'setTimeoutHistory', label: 'setTimeout History', visible: true },
-  { key: 'clearTimeoutHistory', label: 'clearTimeout History', visible: true },
-  { key: 'setIntervalHistory', label: 'setInterval History', visible: true },
+  { key: 'setTimeout', label: 'setTimeout History', visible: true },
+  { key: 'clearTimeout', label: 'clearTimeout History', visible: true },
+  { key: 'setInterval', label: 'setInterval History', visible: true },
   {
-    key: 'clearIntervalHistory',
+    key: 'clearInterval',
     label: 'clearInterval History',
     visible: true,
   },
-  { key: 'requestAnimationFrame', label: 'RAF', visible: false },
-  { key: 'cancelAnimationFrame', label: 'CAF', visible: false },
+  { key: 'requestAnimationFrame', label: 'RAF History', visible: false },
+  { key: 'cancelAnimationFrame', label: 'CAF History', visible: false },
+  { key: 'requestIdleCallback', label: 'RIC History', visible: false },
+  { key: 'cancelIdleCallback', label: 'CIC History', visible: false },
 ];
 
 export const DEFAULT_SORT = {
-  timersHistoryField: ETimerHistoryField.delay as ETimerHistoryFieldKeys,
+  timersHistoryField: EHistorySortField.delay as EHistorySortFieldKeys,
   timersHistoryOrder: ESortOrder.DESCENDING as ESortOrderKeys,
 };
 

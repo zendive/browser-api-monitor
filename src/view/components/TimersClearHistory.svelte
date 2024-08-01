@@ -4,9 +4,9 @@
   import {
     DEFAULT_SORT,
     getSettings,
-    ETimerHistoryField,
+    EHistorySortField,
     setSettings,
-    type ETimerHistoryFieldKeys,
+    type EHistorySortFieldKeys,
     type ESortOrderKeys,
   } from '@/api/settings.ts';
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
@@ -16,7 +16,7 @@
   export let caption: string = '';
   export let metrics: TClearTimerHistory[];
 
-  let field: ETimerHistoryFieldKeys = DEFAULT_SORT.timersHistoryField;
+  let field: EHistorySortFieldKeys = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
 
   $: metrics.sort(compareByFieldOrder(field, order));
@@ -27,7 +27,7 @@
   });
 
   function onChangeSort(
-    e: CustomEvent<{ field: ETimerHistoryFieldKeys; order: ESortOrderKeys }>
+    e: CustomEvent<{ field: EHistorySortFieldKeys; order: ESortOrderKeys }>
   ) {
     field = e.detail.field;
     order = e.detail.order;
@@ -50,7 +50,7 @@
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.calls}
+        field={EHistorySortField.calls}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
@@ -58,7 +58,7 @@
     </th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.handler}
+        field={EHistorySortField.handler}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
@@ -66,7 +66,7 @@
     </th>
     <th class="ta-r">
       <TimersHistoryCellSort
-        field={ETimerHistoryField.delay}
+        field={EHistorySortField.delay}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
