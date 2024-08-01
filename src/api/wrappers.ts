@@ -121,6 +121,7 @@ export type TWrapperMetrics = {
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
   callCounter: {
+    activeTimers: number;
     setTimeout: number;
     clearTimeout: number;
     setInterval: number;
@@ -145,6 +146,7 @@ export class Wrapper {
   ricHistory: Map<string, TRequestIdleCallbackHistory> = new Map();
   cicHistory: Map<string, TCancelIdleCallbackHistory> = new Map();
   callCounter: TWrapperMetrics['callCounter'] = {
+    activeTimers: 0,
     setTimeout: 0,
     clearTimeout: 0,
     setInterval: 0,
@@ -498,6 +500,8 @@ export class Wrapper {
   }
 
   collectWrapperMetrics(panels: TPanelVisibilityMap): TWrapperMetrics {
+    this.callCounter.activeTimers = this.onlineTimers.size;
+
     return {
       evalHistory: panels.eval ? Array.from(this.evalHistory.values()) : null,
       onlineTimers: panels.activeTimers

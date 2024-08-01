@@ -11,7 +11,6 @@
   export let msg: TMetrics;
 
   let panels: TPanelVisibilityMap;
-  $: onlineTimersSize = msg?.wrapperMetrics.onlineTimers?.length ?? 0;
 
   getSettings().then((settings) => {
     panels = panelsArrayToVisibilityMap(settings.panels);
@@ -67,10 +66,13 @@
 
     <a
       href="void(0)"
-      class:panel-enabled={panels.activeTimers && onlineTimersSize}
+      class:panel-enabled={panels.activeTimers &&
+        msg.wrapperMetrics.callCounter.activeTimers}
       on:click|preventDefault={() => void scrollTo('Active')}
     >
-      <strong>Active Timers</strong>: <Variable bind:value={onlineTimersSize} />
+      <strong>Active Timers</strong>: <Variable
+        bind:value={msg.wrapperMetrics.callCounter.activeTimers}
+      />
     </a>
 
     <a
