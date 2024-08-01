@@ -1,8 +1,12 @@
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex } from '@noble/hashes/utils';
 
-export const HASH_STRING_LENGTH = 64;
+const HASH_STRING_LENGTH = 64;
 
-export function hashString(str: string): string {
-  return bytesToHex(sha256(str));
+export function hashString(str: string) {
+  if (str.length > HASH_STRING_LENGTH) {
+    return bytesToHex(sha256(str));
+  }
+
+  return str;
 }

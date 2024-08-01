@@ -20,7 +20,7 @@ import {
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
 import type { TPanelVisibilityMap } from '@/api/settings.ts';
-import { HASH_STRING_LENGTH, hashString } from '@/api//hash.ts';
+import { hashString } from '@/api/hash.ts';
 
 export type TTrace = {
   name: string | 0;
@@ -143,6 +143,8 @@ export class Wrapper {
   evalHistory: Map<string, TEvalHistory> = new Map();
   rafHistory: Map<string, TAnimationHistory> = new Map();
   cafHistory: Map<string, TAnimationHistory> = new Map();
+  /** mapping ric/cic handler to ric traceId */
+  onlineIdleCallbackLookup: Map<number, string> = new Map();
   ricHistory: Map<string, TRequestIdleCallbackHistory> = new Map();
   cicHistory: Map<string, TCancelIdleCallbackHistory> = new Map();
   callCounter: TWrapperMetrics['callCounter'] = {
@@ -399,10 +401,12 @@ export class Wrapper {
     }
   }
 
-  markIdleRicRecord(deadline: IdleDeadline, callstack: TCallstack) {
+  ricOffline(deadline: IdleDeadline, callstack: TCallstack) {
     const record = this.ricHistory.get(callstack.traceId);
 
     if (record) {
+      this.onlineIdleCallbackLookup.delete(Number(record.handler));
+
       record.didTimeout = deadline.didTimeout;
       record.isOnline = false;
     }
@@ -417,7 +421,7 @@ export class Wrapper {
     const hasError = !this.#validTimerDelay(delay);
 
     if (hasError) {
-      delay = 'N/A';
+      delay = TAG_EXCEPTION(delay);
     }
 
     if (existing) {
@@ -441,6 +445,8 @@ export class Wrapper {
         canceledByTraceIds: null,
       });
     }
+
+    this.onlineIdleCallbackLookup.set(handler, callstack.traceId);
   }
 
   updateCicHistory(handler: number | string, callstack: TCallstack) {
@@ -466,8 +472,11 @@ export class Wrapper {
       });
     }
 
-    const ricRecord = this.ricHistory.get(callstack.traceId);
+    const ricTraceId = this.onlineIdleCallbackLookup.get(Number(handler));
+    const ricRecord = ricTraceId && this.ricHistory.get(ricTraceId);
     if (ricRecord) {
+      this.onlineIdleCallbackLookup.delete(Number(handler));
+
       ricRecord.isOnline = false;
       if (ricRecord.canceledByTraceIds === null) {
         ricRecord.canceledByTraceIds = [callstack.traceId];
@@ -568,7 +577,7 @@ export class Wrapper {
         fn
       );
       const handler = this.native.requestIdleCallback((deadline) => {
-        this.markIdleRicRecord(deadline, callstack);
+        this.ricOffline(deadline, callstack);
         fn(deadline);
       }, options);
 
@@ -815,14 +824,12 @@ export class Wrapper {
       traceId += link;
     }
 
-    if (!trace.length) {
-      let name: TTrace['name'] = 0;
+    if (!traceId.length) {
+      traceId = String(uniqueTrait);
 
-      if (typeof uniqueTrait === 'function') {
-        name = uniqueTrait.name || 0;
-        traceId = hashString(String(uniqueTrait));
-      } else {
-        traceId = String(uniqueTrait);
+      let name: TTrace['name'] = 0;
+      if (typeof uniqueTrait === 'function' && uniqueTrait.name) {
+        name = uniqueTrait.name;
       }
 
       trace.push({
@@ -831,10 +838,6 @@ export class Wrapper {
       });
     }
 
-    if (traceId.length > HASH_STRING_LENGTH) {
-      traceId = hashString(traceId);
-    }
-
-    return { traceId, trace };
+    return { traceId: hashString(traceId), trace };
   }
 }
