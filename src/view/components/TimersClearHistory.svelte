@@ -19,7 +19,7 @@
   let field: EHistorySortFieldKeys = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
 
-  $: metrics.sort(compareByFieldOrder(field, order));
+  $: sortedMetrics = metrics.sort(compareByFieldOrder(field, order));
 
   getSettings().then((settings) => {
     field = settings.sort.timersHistoryField;
@@ -74,7 +74,7 @@
     </th>
   </tr>
 
-  {#each metrics as metric (metric.traceId)}
+  {#each sortedMetrics as metric (metric.traceId)}
     <TimersClearHistoryMetric bind:metric />
   {/each}
 </table>

@@ -14,6 +14,7 @@
   import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
   import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
   import { compareByFieldOrder } from '@/api/comparator.ts';
+  import Dialog from '@/view/components/Dialog.svelte';
 
   export let caption: string;
   export let metrics: TSetTimerHistory[];
@@ -22,9 +23,9 @@
 
   let field: EHistorySortFieldKeys = DEFAULT_SORT.timersHistoryField;
   let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
-  let dialog: HTMLDialogElement | null = null;
+  let dialog: Dialog | null = null;
 
-  $: metrics.sort(compareByFieldOrder(field, order));
+  $: sortedMetrics = metrics.sort(compareByFieldOrder(field, order));
 
   getSettings().then((settings) => {
     field = settings.sort.timersHistoryField;
@@ -44,78 +45,43 @@
     });
   }
 
-  function onKeyboardEvent(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      onHideRegressor();
-    }
-  }
+  let clearTimerHistoryMetrics: TClearTimerHistory[] = [];
 
-  let clearTimerHistoryMetrics: TClearTimerHistory[] | null;
-
-  function onHideRegressor() {
-    document.removeEventListener('keydown', onKeyboardEvent);
-    dialog?.close();
-    clearTimerHistoryMetrics = null;
-  }
-
-  function onShowRegressors(regressors: string[] | null) {
-    clearTimerHistoryMetrics = null;
+  function onFindRegressors(regressors: string[] | null) {
     if (!dialog || !regressors?.length) {
       return;
     }
-
-    const records = [];
 
     for (let n = regressors.length - 1; n >= 0; n--) {
       const traceId = regressors[n];
       let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
       record ??= clearIntervalHistory?.find((r) => r.traceId === traceId);
       if (record) {
-        records.push(record);
+        clearTimerHistoryMetrics.push(record);
       }
     }
 
-    if (!records.length) {
-      return;
+    if (clearTimerHistoryMetrics.length) {
+      dialog.showModal();
     }
+  }
 
-    clearTimerHistoryMetrics = records;
-
-    dialog.showModal();
-    document.addEventListener('keydown', onKeyboardEvent);
+  function onCloseDialog() {
+    clearTimerHistoryMetrics.splice(0);
   }
 </script>
 
-<dialog bind:this={dialog}>
-  {#if clearTimerHistoryMetrics}
-    <div class="header">
-      <div class="title">
-        <div>
-          Places from which timer with current callstack was prematurely
-          canceled:
-        </div>
-        <div class="requirement">
-          The information is actual only on time of demand. For full coverage -
-          requires both clearTimeout and clearInterval panels enabled.
-        </div>
-      </div>
-      <a
-        title="Close"
-        class="close-icon"
-        href="void(0)"
-        on:click|preventDefault={onHideRegressor}
-      >
-        <span class="icon -remove" />
-      </a>
-    </div>
-    <TimersClearHistory
-      caption="Canceled by"
-      bind:metrics={clearTimerHistoryMetrics}
-    />
-  {/if}
-</dialog>
+<Dialog
+  bind:this={dialog}
+  on:closeDialog={onCloseDialog}
+  title="Places from which timer with current callstack was prematurely canceled"
+  description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
+>
+  <TimersClearHistory
+    caption="Canceled by"
+    bind:metrics={clearTimerHistoryMetrics}
+  />
+</Dialog>
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
@@ -152,7 +118,7 @@
     <th class="shaft"></th>
   </tr>
 
-  {#each metrics as metric (metric.traceId)}
+  {#each sortedMetrics as metric (metric.traceId)}
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
@@ -172,7 +138,7 @@
             title={`Canceled by ${metric.canceledByTraceIds?.length}`}
             href="void(0)"
             on:click|preventDefault={() =>
-              void onShowRegressors(metric.canceledByTraceIds)}
+              void onFindRegressors(metric.canceledByTraceIds)}
           >
             <span class="icon -remove -small" />
           </a>
@@ -185,27 +151,5 @@
 <style lang="scss">
   .shaft {
     min-width: var(--small-icon-size);
-  }
-  dialog {
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-
-    .header {
-      display: flex;
-      flex-wrap: nowrap;
-      margin-bottom: 0.5rem;
-
-      .title {
-        flex-grow: 1;
-        font-size: large;
-        .requirement {
-          font-size: x-small;
-        }
-      }
-      .close-icon {
-        text-decoration: none;
-      }
-    }
   }
 </style>

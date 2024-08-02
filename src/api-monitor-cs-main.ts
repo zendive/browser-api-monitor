@@ -1,5 +1,5 @@
 import { windowListen, windowPost } from '@/api/communication.ts';
-import { IS_DEV } from './api/env.ts';
+import { IS_DEV } from '@/api/env.ts';
 import {
   TELEMETRY_FREQUENCY_1PS,
   TELEMETRY_FREQUENCY_30PS,

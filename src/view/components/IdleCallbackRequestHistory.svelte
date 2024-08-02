@@ -16,15 +16,16 @@
     type ESortOrderKeys,
   } from '@/api/settings.ts';
   import { compareByFieldOrder } from '@/api/comparator.ts';
-  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
+  import IdleCallbackCancelHistory from '@/view/components/IdleCallbackCancelHistory.svelte';
+  import Dialog from '@/view/components/Dialog.svelte';
 
   export let caption: string = '';
   export let metrics: TRequestIdleCallbackHistory[];
+  export let cicHistory: TCancelIdleCallbackHistory[] | null;
 
   let field = DEFAULT_SORT.timersHistoryField;
   let order = DEFAULT_SORT.timersHistoryOrder;
-  let dialog: HTMLDialogElement | null = null;
-  export let cicHistory: TCancelIdleCallbackHistory[] | null;
+  let dialog: Dialog | null = null;
 
   $: sortedMetrics = metrics.sort(
     compareByFieldOrder(<keyof TRequestIdleCallbackHistory>field, order)
@@ -48,77 +49,42 @@
     });
   }
 
-  function onKeyboardEvent(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      onHideRegressor();
-    }
-  }
+  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = [];
 
-  let cicHistoryMetrics: TCancelIdleCallbackHistory[] | null;
-
-  function onHideRegressor() {
-    document.removeEventListener('keydown', onKeyboardEvent);
-    dialog?.close();
-    cicHistoryMetrics = null;
-  }
-
-  function onShowRegressors(regressors: string[] | null) {
-    cicHistoryMetrics = null;
+  function onFindRegressors(regressors: string[] | null) {
     if (!dialog || !regressors?.length) {
       return;
     }
-
-    const records = [];
 
     for (let n = regressors.length - 1; n >= 0; n--) {
       const traceId = regressors[n];
       let record = cicHistory?.find((r) => r.traceId === traceId);
       if (record) {
-        records.push(record);
+        cicHistoryMetrics.push(record);
       }
     }
 
-    if (!records.length) {
-      return;
+    if (cicHistoryMetrics.length) {
+      dialog.showModal();
     }
+  }
 
-    cicHistoryMetrics = records;
-
-    dialog.showModal();
-    document.addEventListener('keydown', onKeyboardEvent);
+  function onCloseDialog() {
+    cicHistoryMetrics.splice(0);
   }
 </script>
 
-<dialog bind:this={dialog}>
-  {#if cicHistoryMetrics}
-    <div class="header">
-      <div class="title">
-        <div>
-          Places from which timer with current callstack was prematurely
-          canceled:
-        </div>
-        <div class="requirement">
-          The information is actual only on time of demand. For full coverage -
-          requires both clearTimeout and clearInterval panels enabled.
-        </div>
-      </div>
-      <a
-        title="Close"
-        class="close-icon"
-        href="void(0)"
-        on:click|preventDefault={onHideRegressor}
-      >
-        <span class="icon -remove" />
-      </a>
-    </div>
-    <IdleCallbackCancelHistory
-      caption="Canceled by"
-      bind:metrics={cicHistoryMetrics}
-    />
-  {/if}
-</dialog>
+<Dialog
+  bind:this={dialog}
+  on:closeDialog={onCloseDialog}
+  title="Places from which requestIdleCallback with current callstack was prematurely canceled"
+  description="The information is actual only on time of demand. For full coverage - requires cancelIdleCallback panels enabled."
+>
+  <IdleCallbackCancelHistory
+    caption="Canceled by"
+    bind:metrics={cicHistoryMetrics}
+  />
+</Dialog>
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
@@ -179,7 +145,7 @@
             title={`Canceled by ${metric.canceledByTraceIds?.length}`}
             href="void(0)"
             on:click|preventDefault={() =>
-              void onShowRegressors(metric.canceledByTraceIds)}
+              void onFindRegressors(metric.canceledByTraceIds)}
           >
             <span class="icon -remove -small" />
           </a>

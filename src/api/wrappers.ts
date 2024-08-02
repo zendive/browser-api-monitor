@@ -478,6 +478,7 @@ export class Wrapper {
       this.onlineIdleCallbackLookup.delete(Number(handler));
 
       ricRecord.isOnline = false;
+      ricRecord.didTimeout = undefined;
       if (ricRecord.canceledByTraceIds === null) {
         ricRecord.canceledByTraceIds = [callstack.traceId];
       } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
