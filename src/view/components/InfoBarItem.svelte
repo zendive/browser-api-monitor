@@ -57,9 +57,17 @@
     padding: 0 0.4rem;
     border-right: 1px solid var(--border);
 
+    &:hover {
+      text-decoration: none;
+    }
+
     &.panel-enabled {
       cursor: pointer;
       color: var(--text);
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
 
     &.panel-unwrapped {
