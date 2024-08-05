@@ -513,32 +513,34 @@ export class Wrapper {
     this.callCounter.activeTimers = this.onlineTimers.size;
 
     return {
-      evalHistory: panels.eval ? Array.from(this.evalHistory.values()) : null,
-      onlineTimers: panels.activeTimers
+      evalHistory: panels.eval.visible
+        ? Array.from(this.evalHistory.values())
+        : null,
+      onlineTimers: panels.activeTimers.visible
         ? Array.from(this.onlineTimers.values())
         : null,
-      setTimeoutHistory: panels.setTimeout
+      setTimeoutHistory: panels.setTimeout.visible
         ? Array.from(this.setTimeoutHistory.values())
         : null,
-      clearTimeoutHistory: panels.clearTimeout
+      clearTimeoutHistory: panels.clearTimeout.visible
         ? Array.from(this.clearTimeoutHistory.values())
         : null,
-      setIntervalHistory: panels.setInterval
+      setIntervalHistory: panels.setInterval.visible
         ? Array.from(this.setIntervalHistory.values())
         : null,
-      clearIntervalHistory: panels.clearInterval
+      clearIntervalHistory: panels.clearInterval.visible
         ? Array.from(this.clearIntervalHistory.values())
         : null,
-      rafHistory: panels.requestAnimationFrame
+      rafHistory: panels.requestAnimationFrame.visible
         ? Array.from(this.rafHistory.values())
         : null,
-      cafHistory: panels.cancelAnimationFrame
+      cafHistory: panels.cancelAnimationFrame.visible
         ? Array.from(this.cafHistory.values())
         : null,
-      ricHistory: panels.requestIdleCallback
+      ricHistory: panels.requestIdleCallback.visible
         ? Array.from(this.ricHistory.values())
         : null,
-      cicHistory: panels.cancelIdleCallback
+      cicHistory: panels.cancelIdleCallback.visible
         ? Array.from(this.cicHistory.values())
         : null,
       callCounter: this.callCounter,
@@ -560,7 +562,7 @@ export class Wrapper {
   wrapApis() {
     this.wrapEval();
     this.wrapTimers();
-    this.wrapAnimation();
+    this.wrapAnimationFrame();
     this.wrapIdleCallback();
   }
 
@@ -600,7 +602,7 @@ export class Wrapper {
     }.bind(this);
   }
 
-  wrapAnimation() {
+  wrapAnimationFrame() {
     window.requestAnimationFrame = function requestAnimationFrame(
       this: Wrapper,
       fn: FrameRequestCallback

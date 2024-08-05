@@ -5,6 +5,16 @@ import {
   cancelAnimationFrame,
 } from '@/api/const.ts';
 
+export function callingOnce(fn: (...args: any[]) => any) {
+  let runOnce = false;
+  return () => {
+    if (!runOnce) {
+      fn();
+      runOnce = true;
+    }
+  };
+}
+
 /**
  * Measure time between start/stop calls
  * programmatic alternative to console.time/console.endTime

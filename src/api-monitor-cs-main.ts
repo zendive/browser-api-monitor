@@ -4,7 +4,7 @@ import {
   TELEMETRY_FREQUENCY_1PS,
   TELEMETRY_FREQUENCY_30PS,
 } from '@/api/const.ts';
-import { Timer } from '@/api/time.ts';
+import { callingOnce, Timer } from '@/api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
@@ -24,7 +24,11 @@ export interface TMetrics {
 }
 
 const wrapper = new Wrapper();
-wrapper.wrapApis();
+const wrapEvalOnce = callingOnce(wrapper.wrapEval.bind(wrapper));
+// @NOTE: wrqpper.wrapEvel() not called here
+wrapper.wrapTimers();
+wrapper.wrapAnimationFrame();
+wrapper.wrapIdleCallback();
 
 let panels = panelsArrayToVisibilityMap(DEFAULT_SETTINGS.panels);
 const eachSecond = new Timer(
@@ -39,7 +43,7 @@ const tick = new Timer(
     const now = Date.now();
 
     const metrics: TMetrics = {
-      mediaMetrics: collectMediaMetrics(panels.media),
+      mediaMetrics: collectMediaMetrics(panels.media.visible),
       wrapperMetrics: wrapper.collectWrapperMetrics(panels),
       collectingStartTime: now,
     };
@@ -77,6 +81,9 @@ windowListen((o) => {
     typeof o.settings === 'object'
   ) {
     panels = panelsArrayToVisibilityMap(o.settings.panels);
+    if (panels.eval.wrap) {
+      wrapEvalOnce();
+    }
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();
