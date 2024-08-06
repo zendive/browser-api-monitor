@@ -137,18 +137,22 @@
       </td>
       <td class="ta-r">{metric.delay}</td>
       <td>
-        {#if metric.isOnline}
-          <span title="Scheduled" class="icon -scheduled -small" />
-        {:else if metric.canceledByTraceIds?.length}
+        {#if metric.canceledByTraceIds?.length}
           <a
             role="button"
-            title={`Canceled by ${metric.canceledByTraceIds?.length}`}
+            title={`${metric.isOnline ? 'Scheduled. ' : ''}Canceled by ${metric.canceledByTraceIds?.length}`}
             href="void(0)"
             on:click|preventDefault={() =>
               void onFindRegressors(metric.canceledByTraceIds)}
           >
-            <span class="icon -remove -small" />
+            {#if metric.isOnline}
+              <span class="icon -scheduled -small" />
+            {:else}
+              <span class="icon -remove -small" />
+            {/if}
           </a>
+        {:else if metric.isOnline}
+          <span title="Scheduled" class="icon -scheduled -small" />
         {/if}
       </td>
     </tr>
