@@ -580,10 +580,8 @@ export class Wrapper {
       this.callCounter.requestIdleCallback++;
 
       const delay = options?.timeout;
-      const callstack = this.createCallstack(
-        new Error(TRACE_ERROR_MESSAGE),
-        fn
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, fn);
       const handler = this.native.requestIdleCallback((deadline) => {
         this.ricOffline(deadline, callstack);
         fn(deadline);
@@ -600,10 +598,8 @@ export class Wrapper {
       this: Wrapper,
       handler: number
     ) {
-      this.updateCicHistory(
-        handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      this.updateCicHistory(handler, this.createCallstack(err));
       this.callCounter.cancelIdleCallback++;
       this.native.cancelIdleCallback(handler);
     }.bind(this);
@@ -616,10 +612,8 @@ export class Wrapper {
     ) {
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame(fn);
-      this.updateRafHistory(
-        handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), fn)
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      this.updateRafHistory(handler, this.createCallstack(err, fn));
 
       return handler;
     }.bind(this);
@@ -630,10 +624,8 @@ export class Wrapper {
       this: Wrapper,
       handler: number
     ) {
-      this.updateCafHistory(
-        handler,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), false)
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      this.updateCafHistory(handler, this.createCallstack(err));
       this.callCounter.cancelAnimationFrame++;
       this.native.cancelAnimationFrame(handler);
     }.bind(this);
@@ -659,10 +651,11 @@ export class Wrapper {
         }
       }
 
+      const err = new Error(TRACE_ERROR_MESSAGE);
       this.updateEvalHistory(
         code,
         rv,
-        this.createCallstack(new Error(TRACE_ERROR_MESSAGE), code),
+        this.createCallstack(err, code),
         usesLocalScope
       );
 
@@ -695,10 +688,8 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = this.createCallstack(
-        new Error(TRACE_ERROR_MESSAGE),
-        code
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
 
       this.callCounter.setTimeout++;
       this.timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
@@ -728,10 +719,8 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
-      const callstack = this.createCallstack(
-        new Error(TRACE_ERROR_MESSAGE),
-        false
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err);
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
@@ -766,10 +755,8 @@ export class Wrapper {
         delay,
         ...args
       );
-      const callstack = this.createCallstack(
-        new Error(TRACE_ERROR_MESSAGE),
-        code
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
 
       this.callCounter.setInterval++;
       this.timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
@@ -799,10 +786,8 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
-      const callstack = this.createCallstack(
-        new Error(TRACE_ERROR_MESSAGE),
-        false
-      );
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err);
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
@@ -817,10 +802,10 @@ export class Wrapper {
     }.bind(this);
   }
 
-  createCallstack(e: Error, uniqueTrait: unknown): TCallstack {
+  createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
     const trace: TTrace[] = [];
     const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
-    let traceId = '';
+    const traceId = e.stack || String(uniqueTrait);
 
     // loop from the end, excluding error name and self trace
     for (let n = stack.length - 1; n > 1; n--) {
@@ -832,19 +817,16 @@ export class Wrapper {
 
       const link = v.replace(REGEX_STACKTRACE_LINK, '$2').trim();
 
-      if (link.startsWith('<anonymous>')) {
+      if (link.indexOf('<anonymous>') >= 0) {
         continue;
       }
 
       let name = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
 
       trace.push({ name: name === link ? 0 : name, link });
-      traceId += link;
     }
 
-    if (!traceId.length) {
-      traceId = String(uniqueTrait);
-
+    if (!trace.length) {
       let name: TTrace['name'] = 0;
       if (typeof uniqueTrait === 'function' && uniqueTrait.name) {
         name = uniqueTrait.name;
