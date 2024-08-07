@@ -42,14 +42,15 @@
   }
 </script>
 
-<a
-  href="void(0)"
-  class:panel-enabled={enabled}
-  class:panel-unwrapped={!panel.wrap}
-  on:click|preventDefault={scrollTo}
->
-  <strong {title}>{label}</strong>: <Variable bind:value={count} />
-</a>
+{#if panel.wrap !== false}
+  <a
+    href="void(0)"
+    class:panel-enabled={enabled}
+    on:click|preventDefault={scrollTo}
+  >
+    <strong {title}>{label}</strong>: <Variable bind:value={count} />
+  </a>
+{/if}
 
 <style lang="scss">
   a {
@@ -68,10 +69,6 @@
       &:hover {
         text-decoration: underline;
       }
-    }
-
-    &.panel-unwrapped {
-      text-decoration: line-through;
     }
   }
 </style>

@@ -6,6 +6,7 @@
     type TSettingsPanel,
   } from '@/api/settings.ts';
 
+  const nonWrappable = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = [];
   let popoverEl: HTMLElement | null = null;
 
@@ -33,27 +34,31 @@
 
 <div class="dropdown">
   <button title="Visible panels"><span class="icon -toggle-menu" /></button>
-  <nav class="dropdown-content">
+  <table class="dropdown-content">
     {#each panels as panel, index (panel.key)}
-      <div class="menu-item">
-        <a
-          href="void(0)"
-          class="toggle-visibility"
-          class:hidden={!panel.visible}
-          on:click|preventDefault={void onTogglePanelVisibility(index)}
-          >{panel.label}</a
+      <tr class="menu-item">
+        <td
+          ><a
+            href="void(0)"
+            class="toggle-visibility"
+            class:hidden={!panel.visible}
+            on:click|preventDefault={void onTogglePanelVisibility(index)}
+            >{panel.label}</a
+          ></td
         >
 
-        {#if panel.key === 'eval'}
-          <button
-            class="btn-toggle-wrap"
-            on:click={void onTogglePanelWrap(index)}
-            >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
+        {#if !nonWrappable.includes(panel.key)}
+          <td
+            ><button
+              class="btn-toggle-wrap"
+              on:click={void onTogglePanelWrap(index)}
+              >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
+            ></td
           >
         {/if}
-      </div>
+      </tr>
     {/each}
-  </nav>
+  </table>
 </div>
 
 <div bind:this={popoverEl} class="popover bc-invert" popover="auto">
@@ -83,28 +88,21 @@
     .dropdown-content {
       position: absolute;
       display: none;
-      min-width: 8rem;
       background-color: var(--bg);
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       border-left: 1px solid var(--border);
-      list-style: none;
-      padding: 0px 6px;
       margin: 0;
       z-index: 1;
 
       .menu-item {
-        display: flex;
-        cursor: pointer;
-        line-height: 1.5rem;
+        line-height: 1.4rem;
 
         .toggle-visibility {
-          flex-grow: 1;
           color: var(--text);
+          text-wrap: nowrap;
+          margin-left: 0.375rem;
 
-          &:hover {
-            font-weight: bold;
-          }
           &.hidden {
             color: var(--text-passive);
           }
@@ -114,7 +112,7 @@
           color: var(--text);
           border-left: 1px solid var(--border);
           border-right: none;
-          margin-right: 0;
+          margin-left: 0.375rem;
         }
       }
     }

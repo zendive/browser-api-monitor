@@ -561,12 +561,17 @@ export class Wrapper {
 
   wrapApis() {
     this.wrapEval();
-    this.wrapTimers();
-    this.wrapAnimationFrame();
-    this.wrapIdleCallback();
+    this.wrapSetTimeout();
+    this.wrapClearTimeout();
+    this.wrapSetInterval();
+    this.wrapClearInterval();
+    this.wrapRequestAnimationFrame();
+    this.wrapCancelAnimationFrame();
+    this.wrapRequestIdleCallback();
+    this.wrapCancelIdleCallback();
   }
 
-  wrapIdleCallback() {
+  wrapRequestIdleCallback() {
     window.requestIdleCallback = function requestIdleCallback(
       this: Wrapper,
       fn: IdleRequestCallback,
@@ -588,7 +593,9 @@ export class Wrapper {
 
       return handler;
     }.bind(this);
+  }
 
+  wrapCancelIdleCallback() {
     window.cancelIdleCallback = function cancelIdleCallback(
       this: Wrapper,
       handler: number
@@ -602,7 +609,7 @@ export class Wrapper {
     }.bind(this);
   }
 
-  wrapAnimationFrame() {
+  wrapRequestAnimationFrame() {
     window.requestAnimationFrame = function requestAnimationFrame(
       this: Wrapper,
       fn: FrameRequestCallback
@@ -616,7 +623,9 @@ export class Wrapper {
 
       return handler;
     }.bind(this);
+  }
 
+  wrapCancelAnimationFrame() {
     window.cancelAnimationFrame = function cancelAnimationFrame(
       this: Wrapper,
       handler: number
@@ -665,7 +674,7 @@ export class Wrapper {
     }.bind(this);
   }
 
-  wrapTimers() {
+  wrapSetTimeout() {
     window.setTimeout = function setTimeout(
       this: Wrapper,
       code: TimerHandler,
@@ -712,7 +721,9 @@ export class Wrapper {
 
       return handler;
     }.bind(this);
+  }
 
+  wrapClearTimeout() {
     window.clearTimeout = function clearTimeout(
       this: Wrapper,
       handler: number | undefined
@@ -733,7 +744,9 @@ export class Wrapper {
       this.callCounter.clearTimeout++;
       this.native.clearTimeout(handler);
     }.bind(this);
+  }
 
+  wrapSetInterval() {
     window.setInterval = function setInterval(
       this: Wrapper,
       code: TimerHandler,
@@ -779,7 +792,9 @@ export class Wrapper {
 
       return handler;
     }.bind(this);
+  }
 
+  wrapClearInterval() {
     window.clearInterval = function clearInterval(
       this: Wrapper,
       handler: number | undefined

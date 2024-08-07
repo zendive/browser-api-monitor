@@ -24,12 +24,23 @@ export interface TMetrics {
 }
 
 const wrapper = new Wrapper();
-const wrapEvalOnce = callingOnce(wrapper.wrapEval.bind(wrapper));
-// @NOTE: wrqpper.wrapEvel() not called here
-wrapper.wrapTimers();
-wrapper.wrapAnimationFrame();
-wrapper.wrapIdleCallback();
-
+const wrapEvalOnce = callingOnce(() => wrapper.wrapEval());
+const wrapSetTimeoutOnce = callingOnce(() => wrapper.wrapSetTimeout());
+const wrapClearTimeoutOnce = callingOnce(() => wrapper.wrapClearTimeout());
+const wrapSetIntervalOnce = callingOnce(() => wrapper.wrapSetInterval());
+const wrapClearIntervalOnce = callingOnce(() => wrapper.wrapClearInterval());
+const wrapRequestAnimationFrameOnce = callingOnce(() =>
+  wrapper.wrapRequestAnimationFrame()
+);
+const wrapCancelAnimationFrameOnce = callingOnce(() =>
+  wrapper.wrapCancelAnimationFrame()
+);
+const wrapRequestIdleCallbackOnce = callingOnce(() =>
+  wrapper.wrapRequestIdleCallback()
+);
+const wrapCancelIdleCallbackOnce = callingOnce(() =>
+  wrapper.wrapCancelIdleCallback()
+);
 let panels = panelsArrayToVisibilityMap(DEFAULT_SETTINGS.panels);
 const eachSecond = new Timer(
   () => {
@@ -81,9 +92,15 @@ windowListen((o) => {
     typeof o.settings === 'object'
   ) {
     panels = panelsArrayToVisibilityMap(o.settings.panels);
-    if (panels.eval.wrap) {
-      wrapEvalOnce();
-    }
+    panels.eval.wrap && wrapEvalOnce();
+    panels.setTimeout.wrap && wrapSetTimeoutOnce();
+    panels.clearTimeout.wrap && wrapClearTimeoutOnce();
+    panels.setInterval.wrap && wrapSetIntervalOnce();
+    panels.clearInterval.wrap && wrapClearIntervalOnce();
+    panels.requestAnimationFrame && wrapRequestAnimationFrameOnce();
+    panels.cancelAnimationFrame && wrapCancelAnimationFrameOnce();
+    panels.requestIdleCallback && wrapRequestIdleCallbackOnce();
+    panels.cancelIdleCallback && wrapCancelIdleCallbackOnce();
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();

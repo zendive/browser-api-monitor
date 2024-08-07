@@ -23,16 +23,16 @@ export type TSettingsPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
-  wrap: boolean;
+  wrap: boolean | null;
 };
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
 const SETTINGS_VERSION = '1.0.5';
 const DEFAULT_PANELS: TSettingsPanel[] = [
+  { key: 'media', label: 'Media', visible: true, wrap: null },
+  { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
-  { key: 'media', label: 'Media', visible: true, wrap: true },
-  { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: true },
   { key: 'setTimeout', label: 'setTimeout History', visible: true, wrap: true },
   {
     key: 'clearTimeout',
