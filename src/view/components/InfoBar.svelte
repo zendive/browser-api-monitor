@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import Variable from '@/view/components/Variable.svelte';
   import {
     getSettings,
     onSettingsChange,
     panelsArrayToVisibilityMap,
     type TPanelVisibilityMap,
   } from '@/api/settings.ts';
+  import InfoBarItem from '@/view/components/InfoBarItem.svelte';
 
   export let msg: TMetrics;
 
@@ -19,121 +19,98 @@
       panels = panelsArrayToVisibilityMap(newValue.panels);
     });
   });
-
-  function scrollTo(tableCaption: string) {
-    const condition = tableCaption
-      .split('|')
-      .map((caption) => `contains(@data-navigation-tag,'${caption}')`)
-      .join(' or ');
-    const el = document.evaluate(
-      `//node()[${condition}]`,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
-    ).singleNodeValue;
-
-    if (el instanceof HTMLElement) {
-      el.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest',
-      });
-    }
-  }
 </script>
 
 <div class="infobar">
   {#if msg}
-    <div class="divider -anchor-left" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.eval && msg.callCounter.eval}
-      on:click|preventDefault={() => void scrollTo('Eval Usages')}
-    >
-      <strong>eval</strong>: <Variable bind:value={msg.callCounter.eval} />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.media && msg.mediaMetrics.total}
-      on:click|preventDefault={() => void scrollTo('Videos|Audios')}
-    >
-      <strong>Media</strong>:
-      <Variable bind:value={msg.mediaMetrics.total} />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.activeTimers &&
-        msg.wrapperMetrics.onlineTimers}
-      on:click|preventDefault={() => void scrollTo('Active')}
-    >
-      <strong>Active Timers</strong>: <Variable
-        bind:value={msg.wrapperMetrics.onlineTimers}
-      />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.setTimeoutHistory &&
-        msg.callCounter.setTimeout}
-      on:click|preventDefault={() => void scrollTo('setTimeout History')}
-    >
-      <strong>setTimeout</strong>: <Variable
-        bind:value={msg.callCounter.setTimeout}
-      />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.clearTimeoutHistory &&
-        msg.callCounter.clearTimeout}
-      on:click|preventDefault={() => void scrollTo('clearTimeout History')}
-    >
-      <strong>clearTimeout</strong>: <Variable
-        bind:value={msg.callCounter.clearTimeout}
-      />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.setIntervalHistory &&
-        msg.callCounter.setInterval}
-      on:click|preventDefault={() => void scrollTo('setInterval History')}
-    >
-      <strong>setInterval</strong>: <Variable
-        bind:value={msg.callCounter.setInterval}
-      />
-    </a>
-    <div class="divider" />
-    <a
-      href="void(0)"
-      class:panel-enabled={panels.clearIntervalHistory &&
-        msg.callCounter.clearInterval}
-      on:click|preventDefault={() => void scrollTo('clearInterval History')}
-    >
-      <strong>clearInterval</strong>: <Variable
-        bind:value={msg.callCounter.clearInterval}
-      />
-    </a>
-    <div class="divider" />
+    <InfoBarItem
+      label="eval"
+      navSelector="Eval History"
+      bind:panel={panels.eval}
+      bind:count={msg.wrapperMetrics.callCounter.eval}
+    />
+
+    <InfoBarItem
+      label="Media"
+      navSelector="Videos|Audios"
+      bind:panel={panels.media}
+      bind:count={msg.mediaMetrics.total}
+    />
+
+    <InfoBarItem
+      label="Active Timers"
+      navSelector="Active"
+      bind:panel={panels.activeTimers}
+      bind:count={msg.wrapperMetrics.callCounter.activeTimers}
+    />
+
+    <InfoBarItem
+      label="setTimeout"
+      navSelector="setTimeout History"
+      bind:panel={panels.setTimeout}
+      bind:count={msg.wrapperMetrics.callCounter.setTimeout}
+    />
+
+    <InfoBarItem
+      label="clearTimeout"
+      navSelector="clearTimeout History"
+      bind:panel={panels.clearTimeout}
+      bind:count={msg.wrapperMetrics.callCounter.clearTimeout}
+    />
+
+    <InfoBarItem
+      label="setInterval"
+      navSelector="setInterval History"
+      bind:panel={panels.setInterval}
+      bind:count={msg.wrapperMetrics.callCounter.setInterval}
+    />
+
+    <InfoBarItem
+      label="clearInterval"
+      navSelector="clearInterval History"
+      bind:panel={panels.clearInterval}
+      bind:count={msg.wrapperMetrics.callCounter.clearInterval}
+    />
+
+    <InfoBarItem
+      label="RAF"
+      tooltip="requestAnimationFrame"
+      navSelector="requestAnimationFrame History"
+      bind:panel={panels.requestAnimationFrame}
+      bind:count={msg.wrapperMetrics.callCounter.requestAnimationFrame}
+    />
+
+    <InfoBarItem
+      label="CAF"
+      tooltip="cancelAnimationFrame"
+      navSelector="cancelAnimationFrame History"
+      bind:panel={panels.cancelAnimationFrame}
+      bind:count={msg.wrapperMetrics.callCounter.cancelAnimationFrame}
+    />
+
+    <InfoBarItem
+      label="RIC"
+      tooltip="requestIdleCallback"
+      navSelector="requestIdleCallback History"
+      bind:panel={panels.requestIdleCallback}
+      bind:count={msg.wrapperMetrics.callCounter.requestIdleCallback}
+    />
+
+    <InfoBarItem
+      label="CIC"
+      tooltip="cancelIdleCallback"
+      navSelector="cancelIdleCallback History"
+      bind:panel={panels.cancelIdleCallback}
+      bind:count={msg.wrapperMetrics.callCounter.cancelIdleCallback}
+    />
   {/if}
 </div>
 
 <style lang="scss">
   .infobar {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     flex-grow: 1;
-  }
-
-  a {
-    pointer-events: none;
-
-    &.panel-enabled {
-      pointer-events: all;
-      color: var(--text);
-    }
+    align-items: center;
   }
 </style>

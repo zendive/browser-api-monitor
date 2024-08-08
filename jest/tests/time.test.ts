@@ -1,3 +1,11 @@
+// {{ jestis
+import { TextEncoder } from 'node:util';
+global.TextEncoder = TextEncoder;
+// @ts-ignore
+global.requestIdleCallback = function noop() {};
+global.cancelIdleCallback = function noop() {};
+// }}
+
 import { describe, expect, test, beforeEach } from '@jest/globals';
 import { Stopper, Timer, Fps, MeanAggregator } from '../../src/api/time.ts';
 

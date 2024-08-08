@@ -13,13 +13,14 @@ type TMediaModel = {
   metrics: TMediaMetrics;
   eventListener: (e: Event) => void;
 };
-export enum TMediaType {
-  VIDEO = 0,
-  AUDIO = 1,
-}
+export const TMediaType = {
+  VIDEO: 0,
+  AUDIO: 1,
+} as const;
+type TMediaTypeKeys = (typeof TMediaType)[keyof typeof TMediaType];
 export type TMediaMetrics = {
   mediaId: string;
-  type: TMediaType;
+  type: TMediaTypeKeys;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
 };
@@ -110,7 +111,7 @@ export function doMediaCommand(
   } else if (cmd === 'pause') {
     mediaModel.el.pause();
   } else if (cmd === 'play') {
-    mediaModel.el.play();
+    mediaModel.el.play().catch(() => {});
   } else if (cmd === 'frame-backward') {
     mediaModel.el.currentTime -= FRAME_1of60;
   } else if (cmd === 'frame-forward') {

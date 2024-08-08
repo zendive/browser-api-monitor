@@ -1,38 +1,54 @@
 <script lang="ts">
   import { runtimeListen, portPost } from '@/api/communication.ts';
   import { IS_DEV } from '@/api/env.ts';
-  import { Fps } from '@/api/time.ts';
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
   import Timers from '@/view/components/Timers.svelte';
   import Media from '@/view/components/Media.svelte';
   import EvalMetrics from '@/view/components/EvalMetrics.svelte';
+  import AnimationMetrics from '@/view/components/AnimationMetrics.svelte';
   import Version from '@/view/components/Version.svelte';
   import { onMount } from 'svelte';
   import TogglePanels from '@/view/components/TogglePanels.svelte';
   import InfoBar from '@/view/components/InfoBar.svelte';
   import { getSettings, setSettings } from '@/api/settings.ts';
+  import TickSpinner from '@/view/components/TickSpinner.svelte';
+  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '@/api/const.ts';
+  import IdleCallbackMetrics from '@/view/components/IdleCallbackMetrics.svelte';
 
-  let fpsValue = 0;
-  const fps = new Fps((value) => (fpsValue = value)).start();
+  let spinner: TickSpinner | null = null;
   let paused = false;
   let msg: TMetrics;
 
-  runtimeListen((o) => {
-    if (o.msg === 'content-script-loaded' && !paused) {
-      portPost({ msg: 'start-observe' });
+  runtimeListen(async (o) => {
+    if (o.msg === 'content-script-loaded') {
+      const settings = await getSettings();
+
+      if (settings.devtoolsPanelShown && !settings.paused) {
+        portPost({ msg: 'start-observe' });
+      }
     } else if (o.msg === 'telemetry') {
       msg = o.metrics;
-      fps.tick();
+
+      const now = Date.now();
+      const trafficDuration = now - o.metrics.collectingStartTime;
+
+      if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
+        !paused && onTogglePause();
+      } else {
+        portPost({
+          msg: 'telemetry-acknowledged',
+          trafficDuration,
+          timeSent: now,
+        });
+      }
+
+      spinner?.tick();
     }
   });
 
   onMount(() => {
-    getSettings().then((state) => {
-      paused = state.paused;
-
-      if (!paused) {
-        portPost({ msg: 'start-observe' });
-      }
+    getSettings().then((settings) => {
+      paused = settings.paused;
     });
 
     window.addEventListener('beforeunload', () => {
@@ -83,16 +99,7 @@
 
     {#if msg && !paused}
       <div class="divider" />
-      <div>
-        {#if msg.tickTook}
-          <span title="Time took to collect telemetry data for a single update">
-            {msg.tickTook}
-          </span> /
-        {/if}
-        <span title="Telemetry updates per second">
-          {fpsValue} fps
-        </span>
-      </div>
+      <TickSpinner bind:this={spinner} />
     {/if}
 
     <div class="divider" />
@@ -102,14 +109,13 @@
 
   {#if msg}
     <main>
-      <EvalMetrics
-        bind:callCount={msg.callCounter.eval}
-        bind:metrics={msg.wrapperMetrics.evalHistory}
-      />
-
+      {#if msg.wrapperMetrics.evalHistory?.length}
+        <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
+      {/if}
       <Media bind:metrics={msg.mediaMetrics} />
-
       <Timers bind:metrics={msg.wrapperMetrics} />
+      <AnimationMetrics bind:metrics={msg.wrapperMetrics} />
+      <IdleCallbackMetrics bind:metrics={msg.wrapperMetrics} />
     </main>
   {/if}
 </section>
@@ -125,6 +131,7 @@
       align-items: center;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      user-select: none;
     }
     main {
       overflow-y: scroll;

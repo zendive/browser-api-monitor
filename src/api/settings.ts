@@ -4,65 +4,107 @@ type TPanelKey =
   | 'eval'
   | 'media'
   | 'activeTimers'
-  | 'setTimeoutHistory'
-  | 'clearTimeoutHistory'
-  | 'setIntervalHistory'
-  | 'clearIntervalHistory';
+  | 'setTimeout'
+  | 'clearTimeout'
+  | 'setInterval'
+  | 'clearInterval'
+  | 'requestAnimationFrame'
+  | 'cancelAnimationFrame'
+  | 'requestIdleCallback'
+  | 'cancelIdleCallback';
 
-export enum ETimerHistoryField {
-  traceId = 'traceId',
-  individualInvocations = 'individualInvocations',
-  recentHandler = 'recentHandler',
-  handlerDelay = 'handlerDelay',
-}
-
-export enum ESortOrder {
-  ASCENDING,
-  DESCENDING,
-}
-
+export type EHistorySortFieldKeys =
+  (typeof EHistorySortField)[keyof typeof EHistorySortField];
+export type ESortOrderKeys = (typeof ESortOrder)[keyof typeof ESortOrder];
 export type TPanelVisibilityMap = {
-  [K in TPanelKey]: boolean;
+  [K in TPanelKey]: TSettingsPanel;
 };
-
 export type TSettingsPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
+  wrap: boolean | null;
 };
-
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
-const SETTINGS_VERSION = '1.0.3';
+const SETTINGS_VERSION = '1.0.5';
 const DEFAULT_PANELS: TSettingsPanel[] = [
-  { key: 'eval', label: 'eval', visible: true },
-  { key: 'media', label: 'Media', visible: true },
-  { key: 'activeTimers', label: 'Active Timers', visible: true },
-  { key: 'setTimeoutHistory', label: 'setTimeout History', visible: true },
-  { key: 'clearTimeoutHistory', label: 'clearTimeout History', visible: true },
-  { key: 'setIntervalHistory', label: 'setInterval History', visible: true },
+  { key: 'media', label: 'Media', visible: true, wrap: null },
+  { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
+  { key: 'eval', label: 'eval', visible: true, wrap: false },
+  { key: 'setTimeout', label: 'setTimeout History', visible: true, wrap: true },
   {
-    key: 'clearIntervalHistory',
+    key: 'clearTimeout',
+    label: 'clearTimeout History',
+    visible: true,
+    wrap: true,
+  },
+  {
+    key: 'setInterval',
+    label: 'setInterval History',
+    visible: true,
+    wrap: true,
+  },
+  {
+    key: 'clearInterval',
     label: 'clearInterval History',
     visible: true,
+    wrap: true,
+  },
+  {
+    key: 'requestAnimationFrame',
+    label: 'RAF History',
+    visible: false,
+    wrap: true,
+  },
+  {
+    key: 'cancelAnimationFrame',
+    label: 'CAF History',
+    visible: false,
+    wrap: true,
+  },
+  {
+    key: 'requestIdleCallback',
+    label: 'RIC History',
+    visible: false,
+    wrap: true,
+  },
+  {
+    key: 'cancelIdleCallback',
+    label: 'CIC History',
+    visible: false,
+    wrap: true,
   },
 ];
 
+export const EHistorySortField = {
+  calls: 'calls',
+  handler: 'handler',
+  delay: 'delay',
+} as const;
+
+export const ESortOrder = {
+  ASCENDING: 0,
+  DESCENDING: 1,
+} as const;
+
 export const DEFAULT_SORT = {
-  timersHistoryField: ETimerHistoryField.handlerDelay,
-  timersHistoryOrder: ESortOrder.DESCENDING,
+  timersHistoryField: EHistorySortField.delay as EHistorySortFieldKeys,
+  timersHistoryOrder: ESortOrder.DESCENDING as ESortOrderKeys,
 };
 
 export const DEFAULT_SETTINGS = {
   panels: DEFAULT_PANELS,
   sort: DEFAULT_SORT,
   paused: false,
+  devtoolsPanelShown: false,
+  traceForDebug: <string | null>null,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
   return panels.reduce(
-    (acc, o) => Object.assign(acc, { [o.key]: o.visible }),
+    (acc, o) => Object.assign(acc, { [o.key]: o }),
     {} as TPanelVisibilityMap
   );
 }

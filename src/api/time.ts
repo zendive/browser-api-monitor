@@ -1,4 +1,19 @@
-import { setTimeout, clearTimeout } from '@/api/const.ts';
+import {
+  setTimeout,
+  clearTimeout,
+  requestAnimationFrame,
+  cancelAnimationFrame,
+} from '@/api/const.ts';
+
+export function callingOnce(fn: (...args: any[]) => any) {
+  let runOnce = false;
+  return () => {
+    if (!runOnce) {
+      fn();
+      runOnce = true;
+    }
+  };
+}
 
 /**
  * Measure time between start/stop calls

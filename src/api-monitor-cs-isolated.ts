@@ -6,11 +6,6 @@ import {
 } from '@/api/communication.ts';
 import { getSettings, onSettingsChange } from '@/api/settings.ts';
 
-portListen(windowPost);
-windowListen(runtimePost);
-
-runtimePost({ msg: 'content-script-loaded' });
-
 getSettings().then((settings) => {
   windowPost({ msg: 'settings', settings: settings });
 
@@ -18,3 +13,8 @@ getSettings().then((settings) => {
     windowPost({ msg: 'settings', settings: newValue });
   });
 });
+
+portListen(windowPost);
+windowListen(runtimePost);
+
+runtimePost({ msg: 'content-script-loaded' });
