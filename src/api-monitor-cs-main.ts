@@ -101,6 +101,7 @@ windowListen((o) => {
     panels.cancelAnimationFrame && wrapCancelAnimationFrameOnce();
     panels.requestIdleCallback && wrapRequestIdleCallbackOnce();
     panels.cancelIdleCallback && wrapCancelIdleCallbackOnce();
+    wrapper.setTraceForDebug(o.settings.traceForDebug);
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();

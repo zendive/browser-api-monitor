@@ -73,7 +73,7 @@
     <tr class="t-zebra" class:bc-error={metric.hasError}>
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
-        <Trace bind:trace={metric.trace} />
+        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
       </td>
       <td class="ta-c">{metric.calls}</td>
       <td class="ta-c">{metric.handler}</td>

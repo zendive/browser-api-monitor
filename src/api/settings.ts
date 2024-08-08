@@ -99,6 +99,7 @@ export const DEFAULT_SETTINGS = {
   sort: DEFAULT_SORT,
   paused: false,
   devtoolsPanelShown: false,
+  traceForDebug: <string | null>null,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {

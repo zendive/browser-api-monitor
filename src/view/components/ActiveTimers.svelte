@@ -35,7 +35,7 @@
         <span class="handler-value">{metric.handler}</span>
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <span
-          class="icon -remove -small"
+          class="icon -clear -small"
           role="button"
           tabindex="-1"
           title="Cancel"
@@ -44,7 +44,7 @@
       </td>
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all w-full">
-        <Trace bind:trace={metric.trace} />
+        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
       </td>
     </tr>
   {/each}
@@ -55,7 +55,7 @@
     min-width: var(--small-icon-size);
   }
   .handler-cell {
-    .icon.-remove {
+    .icon {
       display: none;
       cursor: pointer;
     }
@@ -63,7 +63,7 @@
       .handler-value {
         display: none;
       }
-      .icon.-remove {
+      .icon {
         display: inline-block;
       }
     }

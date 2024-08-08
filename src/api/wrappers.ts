@@ -171,6 +171,7 @@ export class Wrapper {
     cancelIdleCallback: cancelIdleCallback,
   };
   selfTraceLink = '';
+  #traceForDebug: string | null = null;
 
   constructor() {
     this.#initSelfTrace();
@@ -202,6 +203,10 @@ export class Wrapper {
     }
 
     return ETraceDomain.UNKNOWN;
+  }
+
+  setTraceForDebug(traceId: string | null) {
+    this.#traceForDebug = traceId;
   }
 
   timerOnline(
@@ -497,6 +502,7 @@ export class Wrapper {
     this.cafHistory.clear();
     this.ricHistory.clear();
     this.cicHistory.clear();
+    this.onlineIdleCallbackLookup.clear();
     this.callCounter.setTimeout =
       this.callCounter.clearTimeout =
       this.callCounter.setInterval =
@@ -548,7 +554,7 @@ export class Wrapper {
   }
 
   unwrapApis() {
-    window.eval = this.native.eval;
+    window.eval = this.native.eval; // won't do revert effect, here for consistency
     window.setTimeout = this.native.setTimeout;
     window.clearTimeout = this.native.clearTimeout;
     window.setInterval = this.native.setInterval;
@@ -577,16 +583,17 @@ export class Wrapper {
       fn: IdleRequestCallback,
       options?: IdleRequestOptions | undefined
     ) {
-      this.callCounter.requestIdleCallback++;
-
       const delay = options?.timeout;
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, fn);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+      this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
         this.ricOffline(deadline, callstack);
         fn(deadline);
       }, options);
-
       this.updateRicHistory(handler, delay, callstack);
 
       return handler;
@@ -599,7 +606,11 @@ export class Wrapper {
       handler: number
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
-      this.updateCicHistory(handler, this.createCallstack(err));
+      const callstack = this.createCallstack(err);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+      this.updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
       this.native.cancelIdleCallback(handler);
     }.bind(this);
@@ -610,10 +621,14 @@ export class Wrapper {
       this: Wrapper,
       fn: FrameRequestCallback
     ) {
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, fn);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame(fn);
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      this.updateRafHistory(handler, this.createCallstack(err, fn));
+      this.updateRafHistory(handler, callstack);
 
       return handler;
     }.bind(this);
@@ -625,7 +640,11 @@ export class Wrapper {
       handler: number
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
-      this.updateCafHistory(handler, this.createCallstack(err));
+      const callstack = this.createCallstack(err);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+      this.updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
       this.native.cancelAnimationFrame(handler);
     }.bind(this);
@@ -633,12 +652,17 @@ export class Wrapper {
 
   wrapEval() {
     window.eval = function WrappedLessEval(this: Wrapper, code: string) {
-      this.callCounter.eval++;
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
 
       try {
+        this.callCounter.eval++;
         rv = this.native.eval(code);
       } catch (error: unknown) {
         if (error instanceof Error && 'ReferenceError' === error.name) {
@@ -651,13 +675,7 @@ export class Wrapper {
         }
       }
 
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      this.updateEvalHistory(
-        code,
-        rv,
-        this.createCallstack(err, code),
-        usesLocalScope
-      );
+      this.updateEvalHistory(code, rv, callstack, usesLocalScope);
 
       if (throwError) {
         throw throwError;
@@ -674,11 +692,19 @@ export class Wrapper {
       delay: number | undefined,
       ...args: any[]
     ) {
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+
       const isEval = typeof code === 'string';
+      this.callCounter.setTimeout++;
       const handler = this.native.setTimeout(
         (...params: any[]) => {
           this.timerOffline(handler, null);
           if (isEval) {
+            this.callCounter.eval++;
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
             this.native.eval(code);
           } else {
@@ -688,10 +714,7 @@ export class Wrapper {
         delay,
         ...args
       );
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      const callstack = this.createCallstack(err, code);
 
-      this.callCounter.setTimeout++;
       this.timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setTimeoutHistory,
@@ -701,7 +724,6 @@ export class Wrapper {
         isEval
       );
       if (isEval) {
-        this.callCounter.eval++;
         this.updateEvalHistory(
           code,
           TAG_EVAL_RETURN_SET_TIMEOUT,
@@ -721,6 +743,9 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
@@ -742,10 +767,18 @@ export class Wrapper {
       delay: number | undefined,
       ...args: any[]
     ) {
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+
       const isEval = typeof code === 'string';
+      this.callCounter.setInterval++;
       const handler = this.native.setInterval(
         (...params: any[]) => {
           if (isEval) {
+            this.callCounter.eval++;
             // see https://developer.mozilla.org/docs/Web/API/setInterval
             this.native.eval(code);
           } else {
@@ -755,10 +788,7 @@ export class Wrapper {
         delay,
         ...args
       );
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      const callstack = this.createCallstack(err, code);
 
-      this.callCounter.setInterval++;
       this.timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setIntervalHistory,
@@ -768,7 +798,6 @@ export class Wrapper {
         isEval
       );
       if (isEval) {
-        this.callCounter.eval++;
         this.updateEvalHistory(
           code,
           TAG_EVAL_RETURN_SET_INTERVAL,
@@ -788,6 +817,10 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
+
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
