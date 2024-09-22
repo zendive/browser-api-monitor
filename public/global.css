@@ -135,6 +135,7 @@ th,
   mask-size: cover;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  vertical-align: bottom;
 }
 .icon.-small {
   width: var(--small-icon-size);
@@ -207,6 +208,10 @@ th,
 .icon.-trace-local {
   -webkit-mask-image: url(img/trace-local.svg);
   mask-image: url(img/trace-local.svg);
+}
+.icon.-trace-extension {
+  -webkit-mask-image: url(img/trace-extension.svg);
+  mask-image: url(img/trace-extension.svg);
 }
 .icon.-scheduled {
   -webkit-mask-image: url(img/scheduled.svg);
