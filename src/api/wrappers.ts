@@ -312,13 +312,9 @@ export class Wrapper {
     const onlineTimer = hasError
       ? null
       : this.onlineTimers.get(<number>handler);
-    let handlerDelay: string | number | undefined = 'N/A';
-
-    if (onlineTimer) {
-      handlerDelay = onlineTimer.delay;
-    } else if (existing) {
-      handlerDelay = existing.delay;
-    }
+    const handlerDelay: string | number | undefined = onlineTimer
+      ? onlineTimer.delay
+      : 'N/A';
 
     if (hasError) {
       handler = TAG_EXCEPTION(handler);
