@@ -1,5 +1,5 @@
 {
-  "version": "1.0.5",
+  "version": "1.0.6",
   "name": "API Monitor",
   "manifest_version": 3,
   "description": "Reveal active or passed timeouts, intervals, and eval invocation call stacks. Observe events and properties of media elements",
