@@ -74,7 +74,6 @@
   .code {
     max-width: 12rem;
     display: -webkit-box;
-    max-width: 200px;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;

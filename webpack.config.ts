@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-// import { EsbuildPlugin } from 'esbuild-loader';
+import { EsbuildPlugin } from 'esbuild-loader';
 import { sveltePreprocess } from 'svelte-preprocess';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import manifest from './manifest.json' with { type: 'json' };
@@ -34,15 +34,7 @@ export default function (
       },
     },
 
-    plugins: [
-      new webpack.DefinePlugin({
-        __development__: !isProd,
-        __app_name__: `"browser-api-monitor"`,
-        __app_version__: `"${manifest.version}"`,
-        __home_page__: `"${manifest.homepage_url}"`,
-      }),
-      new MiniCssExtractPlugin({ filename: 'bundle.css' }),
-    ],
+    plugins: [new MiniCssExtractPlugin({ filename: 'bundle.css' })],
 
     module: {
       rules: [
@@ -92,7 +84,17 @@ export default function (
       splitChunks: false,
       usedExports: true,
       minimize: isProd,
-      // minimizer: [new EsbuildPlugin()],
+      minimizer: [
+        new EsbuildPlugin({
+          target: 'esnext',
+          define: {
+            __development__: `${!isProd}`,
+            __app_name__: `"browser-api-monitor"`,
+            __app_version__: `"${manifest.version}"`,
+            __home_page__: `"${manifest.homepage_url}"`,
+          },
+        }),
+      ],
     },
 
     devtool: false,

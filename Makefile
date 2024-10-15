@@ -1,11 +1,12 @@
 ZIP_CHROME_FILE="extension.chrome.zip"
 
 clean:
-	rm -rf ./node_modules ./public/build $(ZIP_CHROME_FILE)
+	rm -rf ./node_modules ./pnpm-lock.yaml ./public/build $(ZIP_CHROME_FILE)
 
 install:
 	npm i -g pnpm
 	pnpm i
+	pnpm rebuild sass
 
 dev:
 	rm -rf ./public/build

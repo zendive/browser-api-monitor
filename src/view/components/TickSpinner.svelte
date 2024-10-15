@@ -23,6 +23,7 @@
 <style lang="scss">
   .spinner {
     display: flex;
+    align-items: center;
     gap: 0.125rem;
   }
 </style>

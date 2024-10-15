@@ -38,7 +38,8 @@ export type ETimerTypeKeys = (typeof ETimerType)[keyof typeof ETimerType];
 export const ETraceDomain = {
   SAME: 0,
   EXTERNAL: 1,
-  UNKNOWN: 2,
+  EXTENSION: 2,
+  UNKNOWN: 3,
 } as const;
 export type ETraceDomainKeys = (typeof ETraceDomain)[keyof typeof ETraceDomain];
 export type TOnlineTimerMetrics = {
@@ -200,6 +201,8 @@ export class Wrapper {
       return ETraceDomain.SAME;
     } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
       return ETraceDomain.EXTERNAL;
+    } else if (trace.link.startsWith('chrome-extension://')) {
+      return ETraceDomain.EXTENSION;
     }
 
     return ETraceDomain.UNKNOWN;
@@ -309,13 +312,9 @@ export class Wrapper {
     const onlineTimer = hasError
       ? null
       : this.onlineTimers.get(<number>handler);
-    let handlerDelay: string | number | undefined = 'N/A';
-
-    if (onlineTimer) {
-      handlerDelay = onlineTimer.delay;
-    } else if (existing) {
-      handlerDelay = existing.delay;
-    }
+    const handlerDelay: string | number | undefined = onlineTimer
+      ? onlineTimer.delay
+      : 'N/A';
 
     if (hasError) {
       handler = TAG_EXCEPTION(handler);
