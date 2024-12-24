@@ -7,7 +7,7 @@
   let isAnimated = false;
   const stopper = new Stopper().start();
 
-  $: isEven = typeof value === 'number' ? 0 === value % 2 : false;
+  $: isEven = typeof value === 'number' ? !(value & 1) : false;
 
   function animateChange(node: HTMLElement, value: unknown) {
     const timer = new Timer(() => {
