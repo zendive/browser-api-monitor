@@ -84,16 +84,20 @@
       <button on:click={onDevReload} title="Reload">
         <span class="icon -refresh" />
       </button>
+      <div class="divider -thin"></div>
     {/if}
     <TogglePanels />
+    <div class="divider -thin"></div>
     <button on:click={onTogglePause} title="Toggle pause">
       {#if paused}<span class="icon -play" />{:else}<span
           class="icon -pause"
         />{/if}
     </button>
+    <div class="divider -thin"></div>
     <button on:click={onResetHistory} title="Reset history">
       <span class="icon -clear" />
     </button>
+    <div class="divider -thin"></div>
 
     <InfoBar bind:msg />
 
@@ -132,6 +136,7 @@
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       user-select: none;
+      // min-height: 1.4374rem;
     }
     main {
       overflow-y: scroll;

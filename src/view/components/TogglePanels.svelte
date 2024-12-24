@@ -8,7 +8,7 @@
 
   const nonWrappable = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = [];
-  let popoverEl: HTMLElement | null = null;
+  let reloadMessageEl: HTMLElement | null = null;
 
   getSettings().then((state) => {
     panels = state.panels;
@@ -16,7 +16,7 @@
 
   runtimeListen(async (o) => {
     if (o.msg === 'content-script-loaded') {
-      popoverEl?.hidePopover();
+      reloadMessageEl?.hidePopover();
     }
   });
 
@@ -28,13 +28,18 @@
   function onTogglePanelWrap(index: number) {
     panels[index].wrap = !panels[index].wrap;
     setSettings({ panels });
-    popoverEl?.showPopover();
+    reloadMessageEl?.showPopover();
   }
 </script>
 
-<div class="dropdown">
-  <button title="Visible panels"><span class="icon -toggle-menu" /></button>
-  <table class="dropdown-content">
+<button
+  popovertarget="toggle-panels-menu"
+  class="toggle-menu-button"
+  title="Control panels"><span class="icon -toggle-menu" /></button
+>
+
+<div popover="auto" id="toggle-panels-menu" role="menu">
+  <table class="menu-content">
     {#each panels as panel, index (panel.key)}
       <tr class="menu-item">
         <td
@@ -61,40 +66,30 @@
   </table>
 </div>
 
-<div bind:this={popoverEl} class="popover bc-invert" popover="auto">
+<div
+  popover="manual"
+  bind:this={reloadMessageEl}
+  class="reload-message bc-invert"
+>
   Tab reload required
 </div>
 
 <style lang="scss">
-  .popover {
-    inset: unset;
-    top: 2rem;
-    right: 50%;
-    transform: translateX(50%);
-    font-size: 2rem;
-    padding: 1rem;
-    border-radius: 1rem;
+  .toggle-menu-button {
+    anchor-name: --toggle-menu-button;
   }
 
-  .dropdown {
-    position: relative;
-    display: inline-block;
+  #toggle-panels-menu {
+    position: absolute;
+    position-anchor: --toggle-menu-button;
+    top: anchor(bottom);
+    left: anchor(left);
 
-    &:active,
-    &:hover .dropdown-content {
-      display: block;
-    }
+    background-color: var(--bg-popover);
+    border: 1px solid var(--border);
+    margin: 0;
 
-    .dropdown-content {
-      position: absolute;
-      display: none;
-      background-color: var(--bg);
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      border-left: 1px solid var(--border);
-      margin: 0;
-      z-index: 1;
-
+    .menu-content {
       .menu-item {
         line-height: 1.4rem;
 
@@ -116,5 +111,15 @@
         }
       }
     }
+  }
+
+  .reload-message {
+    inset: unset;
+    top: 2rem;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: 2rem;
+    padding: 1rem;
+    border-radius: 1rem;
   }
 </style>

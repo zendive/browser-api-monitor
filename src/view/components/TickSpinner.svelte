@@ -25,5 +25,6 @@
     display: flex;
     align-items: center;
     gap: 0.125rem;
+    line-height: 1;
   }
 </style>
