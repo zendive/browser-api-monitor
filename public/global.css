@@ -2,16 +2,16 @@
   color-scheme: light dark;
   --bg: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
   --bg-popover: light-dark(rgb(90%, 90%, 90%), rgb(20%, 20%, 20%));
-  --bg-invert: light-dark(rgb(10% 10% 10% / 70%), rgb(100% 100% 100% / 70%));
+  --bg-invert: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
   --bg-table-even: light-dark(rgb(30% 30% 30% / 10%), rgb(100% 100% 100% / 8%));
   --bg-error: light-dark(rgb(100% 2 2 / 30%), rgb(100% 0 0 / 55%));
   --bg-error-odd: light-dark(rgb(100% 39 2 / 50%), rgb(153 25 25 / 77%));
   --border: light-dark(rgb(0 0 0 / 35%), rgb(100% 100% 100% / 35%));
-  --text: light-dark(rgb(26 26 26), rgb(100% 100% 100%));
-  --text-invert: light-dark(rgb(100% 100% 100% / 70%), rgb(26 26 26 / 70%));
+  --text: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
+  --text-invert: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
   --text-passive: light-dark(rgb(120 120 120), rgb(120 120 120));
-  --text-zebra: light-dark(rgb(26 26 26), rgb(229 229 229));
-  --link: light-dark(rgb(91 91 91), rgb(182 182 182));
+  --text-zebra: light-dark(rgb(10% 10% 10%), rgb(229 229 229));
+  --link: light-dark(rgb(91 91 91), rgb(100% 100% 100%));
   --link-visited-text: light-dark(rgb(0 0 0), rgb(0 0 0));
   --link-visited-bg: light-dark(rgb(79 189 36 / 0.24), rgb(132 130 131));
 
@@ -77,7 +77,7 @@ th,
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
 }
-.t-zebra:nth-child(even) a {
+.t-zebra:nth-child(odd) a.-trace {
   color: var(--text-zebra);
 }
 .bc-error {

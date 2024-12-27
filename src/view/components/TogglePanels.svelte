@@ -1,5 +1,6 @@
 <script lang="ts">
   import { runtimeListen } from '@/api/communication.ts';
+  import Alert from '@/view/components/Alert.svelte';
   import {
     getSettings,
     setSettings,
@@ -8,7 +9,7 @@
 
   const nonWrappable = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = [];
-  let reloadMessageEl: HTMLElement | null = null;
+  let reloadMessageEl: Alert | null = null;
 
   getSettings().then((state) => {
     panels = state.panels;
@@ -16,7 +17,7 @@
 
   runtimeListen(async (o) => {
     if (o.msg === 'content-script-loaded') {
-      reloadMessageEl?.hidePopover();
+      reloadMessageEl?.hide();
     }
   });
 
@@ -28,7 +29,7 @@
   function onTogglePanelWrap(index: number) {
     panels[index].wrap = !panels[index].wrap;
     setSettings({ panels });
-    reloadMessageEl?.showPopover();
+    reloadMessageEl?.show();
   }
 </script>
 
@@ -66,13 +67,9 @@
   </table>
 </div>
 
-<div
-  popover="manual"
-  bind:this={reloadMessageEl}
-  class="reload-message bc-invert"
+<Alert bind:this={reloadMessageEl} dismissable={false} title="Attention"
+  >Tab reload required</Alert
 >
-  Tab reload required
-</div>
 
 <style lang="scss">
   .toggle-menu-button {
@@ -111,15 +108,5 @@
         }
       }
     }
-  }
-
-  .reload-message {
-    inset: unset;
-    top: 2rem;
-    right: 50%;
-    transform: translateX(50%);
-    font-size: 2rem;
-    padding: 1rem;
-    border-radius: 1rem;
   }
 </style>

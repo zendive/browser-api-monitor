@@ -7,24 +7,20 @@
   let showContent: boolean = false;
   const dispatch = createEventDispatcher();
 
-  export function showModal() {
+  export function show() {
     selfEl?.showModal();
     document.addEventListener('keydown', onKeyboardEvent, { capture: true });
-    selfEl?.addEventListener('click', onWindowClick);
+    selfEl?.addEventListener('click', onSelfClick);
     showContent = true;
   }
 
-  function onClose() {
-    document.removeEventListener('keydown', onKeyboardEvent, { capture: true });
-    selfEl?.removeEventListener('click', onWindowClick);
-    showContent = false;
+  export function hide() {
     selfEl?.close();
-    dispatch('closeDialog');
   }
 
-  function onWindowClick(e: MouseEvent) {
+  function onSelfClick(e: MouseEvent) {
     if (e.currentTarget === e.target) {
-      onClose();
+      hide();
     }
   }
 
@@ -32,33 +28,38 @@
     if (e.key === 'Escape') {
       e.preventDefault();
       e.stopImmediatePropagation();
-      onClose();
+      hide();
     }
+  }
+
+  function onClose() {
+    document.removeEventListener('keydown', onKeyboardEvent, { capture: true });
+    selfEl?.removeEventListener('click', onSelfClick);
+    showContent = false;
+    dispatch('close');
   }
 </script>
 
-<dialog bind:this={selfEl}>
+<dialog bind:this={selfEl} on:close={onClose}>
+  <header>
+    <div class="title">
+      {title}
+      {#if description}
+        <div class="description">{description}</div>
+      {/if}
+    </div>
+
+    <a
+      title="Close"
+      class="close-icon"
+      href="void(0)"
+      on:click|preventDefault={hide}
+    >
+      <span class="icon -remove" />
+    </a>
+  </header>
+
   {#if showContent}
-    <header>
-      <div class="title">
-        {#if title}
-          {title}
-        {/if}
-        {#if description}
-          <div class="description">{description}</div>
-        {/if}
-      </div>
-
-      <a
-        title="Close"
-        class="close-icon"
-        href="void(0)"
-        on:click|preventDefault={onClose}
-      >
-        <span class="icon -remove" />
-      </a>
-    </header>
-
     <slot />
   {/if}
 </dialog>

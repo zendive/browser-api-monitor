@@ -14,15 +14,15 @@
     link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
     10
   );
-  $: columnNumber = parseInt(
-    link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
-    10
-  );
   $: isSourceLess =
     !isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link;
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+    const columnNumber = parseInt(
+      link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
+      10
+    );
 
     chrome.devtools.panels.openResource(
       cleanUrl,
@@ -41,7 +41,7 @@
 {:else}
   <a
     href={link}
-    title={`${lineNumber}:${columnNumber}`}
+    class="-trace"
     class:isSeen
     on:click|preventDefault={showStackTraceResource}>{name || link}</a
   >

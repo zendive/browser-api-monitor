@@ -61,6 +61,7 @@ export type TSetTimerHistory = {
   isEval: boolean | undefined;
   hasError: boolean;
   isOnline: boolean;
+  canceledCounter: number;
   canceledByTraceIds: string[] | null;
 };
 export type TClearTimerHistory = {
@@ -100,6 +101,7 @@ export type TRequestIdleCallbackHistory = {
   hasError: boolean;
   didTimeout: undefined | boolean;
   isOnline: boolean;
+  canceledCounter: number;
   canceledByTraceIds: string[] | null;
 };
 export type TCancelIdleCallbackHistory = {
@@ -262,6 +264,7 @@ export class Wrapper {
     } else if (!record.canceledByTraceIds.includes(canceledByTraceId)) {
       record.canceledByTraceIds.push(canceledByTraceId);
     }
+    record.canceledCounter++;
   }
 
   updateSetTimersHistory(
@@ -297,6 +300,7 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        canceledCounter: 0,
         canceledByTraceIds: null,
       });
     }
@@ -446,6 +450,7 @@ export class Wrapper {
         delay,
         hasError,
         isOnline: true,
+        canceledCounter: 0,
         canceledByTraceIds: null,
       });
     }
@@ -488,6 +493,7 @@ export class Wrapper {
       } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
         ricRecord.canceledByTraceIds.push(callstack.traceId);
       }
+      ricRecord.canceledCounter++;
     }
   }
 
@@ -742,14 +748,17 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+
       if (this.#traceForDebug === callstack.traceId) {
         debugger;
       }
+
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
         callstack
       );
+
       if (handler !== undefined) {
         this.timerOffline(handler, callstack.traceId);
       }
@@ -816,6 +825,7 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+
       if (this.#traceForDebug === callstack.traceId) {
         debugger;
       }
@@ -825,6 +835,7 @@ export class Wrapper {
         handler,
         callstack
       );
+
       if (handler !== undefined) {
         this.timerOffline(handler, callstack.traceId);
       }

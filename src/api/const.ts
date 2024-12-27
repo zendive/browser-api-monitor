@@ -127,3 +127,4 @@ export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
 export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
 export const REGEX_STACKTRACE_LINK_PROTOCOL = new RegExp(/http[s]?\:\/\//);
 export const FRAME_1of60 = 1 / 60;
+export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
