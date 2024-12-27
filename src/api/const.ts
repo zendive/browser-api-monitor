@@ -5,6 +5,10 @@ export const ERRORS_IGNORED = [
 export const TELEMETRY_FREQUENCY_30PS = 100 / 3; //MS
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
+export const FRAME_1of60 = 1 / 60;
+export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
+export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
+
 // store native functions
 export const setTimeout = window.setTimeout.bind(window);
 export const clearTimeout = window.clearTimeout.bind(window);
@@ -126,5 +130,3 @@ export const REGEX_STACKTRACE_CLEAN_URL = new RegExp(/(.*):\d+:\d+$/);
 export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
 export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
 export const REGEX_STACKTRACE_LINK_PROTOCOL = new RegExp(/http[s]?\:\/\//);
-export const FRAME_1of60 = 1 / 60;
-export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';

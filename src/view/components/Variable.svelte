@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { Timer, Stopper } from '@/api/time.ts';
+  import { VARIABLE_ANIMATION_THROTTLE } from '@/api/const.ts';
+  import { Timer } from '@/api/time.ts';
 
   export let title: string | null = null;
   export let value: unknown;
 
-  let isAnimated = false;
-  const stopper = new Stopper().start();
+  let isAnimated: boolean = false;
+  let lastUpdated: number = 0;
 
   $: isEven = typeof value === 'number' ? !(value & 1) : false;
 
@@ -16,11 +17,15 @@
 
     return {
       update(value: unknown) {
-        if (stopper.elapsed() > 2e3) {
+        const startAnimation =
+          Date.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
+
+        if (startAnimation) {
           isAnimated = true;
           timer.start();
-          stopper.start();
         }
+
+        lastUpdated = Date.now();
       },
 
       destroy() {
