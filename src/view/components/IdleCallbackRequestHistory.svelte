@@ -132,7 +132,7 @@
   </tr>
 
   {#each sortedMetrics as metric (metric.traceId)}
-    <tr class="t-zebra" class:bc-error={metric.hasError}>
+    <tr class="t-zebra">
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
         <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />

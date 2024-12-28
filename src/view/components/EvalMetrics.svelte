@@ -32,7 +32,7 @@
     <th>Returns</th>
   </tr>
   {#each metrics as metric (metric.traceId)}
-    <tr class="t-zebra bc-error">
+    <tr class="t-zebra">
       <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
       <td class="wb-all">
         <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />

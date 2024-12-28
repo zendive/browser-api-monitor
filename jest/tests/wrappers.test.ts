@@ -109,7 +109,6 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(DELAY);
-    expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
@@ -124,7 +123,6 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
-    expect(rec.hasError).toBe(true);
     expect(rec.isEval).toBe(false);
   });
 
@@ -143,7 +141,6 @@ describe('wrappers', () => {
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
     expect(rec.delay).toBe('N/A');
-    expect(rec.hasError).toBe(false);
   });
 
   test('clearTimeoutHistory - invalid handler', () => {
@@ -153,7 +150,6 @@ describe('wrappers', () => {
 
     expect(rec.delay).toBe('N/A');
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
-    expect(rec.hasError).toBe(true);
   });
 
   test('setIntervalHistory & clearIntervalHistory - recorded', () => {
@@ -186,7 +182,6 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(DELAY);
-    expect(rec.hasError).toBe(false);
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
@@ -200,7 +195,6 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
-    expect(rec.hasError).toBe(true);
     expect(rec.isEval).toBe(false);
 
     clearInterval(handler);
@@ -221,7 +215,6 @@ describe('wrappers', () => {
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
     expect(rec.delay).toBe('N/A');
-    expect(rec.hasError).toBe(false);
   });
 
   test('clearIntervalHistory - invalid handler', () => {
@@ -230,7 +223,6 @@ describe('wrappers', () => {
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
     expect(rec.delay).toBe('N/A');
-    expect(rec.hasError).toBe(true);
   });
 
   test('evalHistory - recorded', () => {

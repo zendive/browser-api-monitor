@@ -4,8 +4,6 @@
   --bg-popover: light-dark(rgb(90%, 90%, 90%), rgb(20%, 20%, 20%));
   --bg-invert: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
   --bg-table-even: light-dark(rgb(30% 30% 30% / 10%), rgb(100% 100% 100% / 8%));
-  --bg-error: light-dark(rgb(100% 2 2 / 30%), rgb(100% 0 0 / 55%));
-  --bg-error-odd: light-dark(rgb(100% 39 2 / 50%), rgb(153 25 25 / 77%));
   --border: light-dark(rgb(0 0 0 / 35%), rgb(100% 100% 100% / 35%));
   --text: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
   --text-invert: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
@@ -79,12 +77,6 @@ th,
 }
 .t-zebra:nth-child(odd) a.-trace {
   color: var(--text-zebra);
-}
-.bc-error {
-  background-color: var(--bg-error);
-}
-.bc-error:where(:nth-child(odd)) {
-  background-color: var(--bg-error-odd);
 }
 .wb-all {
   word-break: break-all;
