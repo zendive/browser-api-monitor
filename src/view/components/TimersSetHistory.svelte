@@ -97,67 +97,63 @@
     {caption}
     <Variable bind:value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-r">
-      <TimersHistoryCellSort
-        field={HistorySortField.delay}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
-      >
-    </th>
-    <th class="shaft"></th>
-  </tr>
-
-  {#each sortedMetrics as metric (metric.traceId)}
-    <tr class="t-zebra">
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
-      </td>
-      <td class="ta-c">
-        <Variable bind:value={metric.calls} />{#if metric.canceledCounter}-<a
-            role="button"
-            href="void(0)"
-            title={CALLED_ABORTED_TOOLTIP}
-            on:click|preventDefault={() =>
-              void onFindRegressors(metric.canceledByTraceIds)}
-            ><Variable bind:value={metric.canceledCounter} />/{metric
-              .canceledByTraceIds?.length}
-          </a>
-        {/if}
-      </td>
-      <td class="ta-c">{metric.handler}</td>
-      <td class="ta-r">{metric.delay}</td>
-      <td>
-        {#if metric.isOnline}
-          <span title="Scheduled" class="icon -scheduled -small" />
-        {/if}
-      </td>
+  <tbody>
+    <tr>
+      <th class="shaft"></th>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.calls}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.handler}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-r">
+        <TimersHistoryCellSort
+          field={HistorySortField.delay}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
+        >
+      </th>
+      <th class="shaft"></th>
     </tr>
-  {/each}
-</table>
 
-<style lang="scss">
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>
+    {#each sortedMetrics as metric (metric.traceId)}
+      <tr class="t-zebra">
+        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td class="wb-all">
+          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+        </td>
+        <td class="ta-c">
+          <Variable bind:value={metric.calls} />{#if metric.canceledCounter}-<a
+              role="button"
+              href="void(0)"
+              title={CALLED_ABORTED_TOOLTIP}
+              on:click|preventDefault={() =>
+                void onFindRegressors(metric.canceledByTraceIds)}
+              ><Variable bind:value={metric.canceledCounter} />/{metric
+                .canceledByTraceIds?.length}
+            </a>
+          {/if}
+        </td>
+        <td class="ta-c">{metric.handler}</td>
+        <td class="ta-r">{metric.delay}</td>
+        <td>
+          {#if metric.isOnline}
+            <span title="Scheduled" class="icon -scheduled -small"></span>
+          {/if}
+        </td>
+      </tr>
+    {/each}
+  </tbody>
+</table>

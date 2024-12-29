@@ -81,34 +81,40 @@
 <section class="root">
   <header>
     {#if IS_DEV}
-      <button on:click={onDevReload} title="Reload">
-        <span class="icon -refresh" />
+      <button on:click={onDevReload} title="Reload" aria-label="Reload">
+        <span class="icon -refresh"></span>
       </button>
       <div class="divider -thin"></div>
     {/if}
     <TogglePanels />
     <div class="divider -thin"></div>
     <button on:click={onTogglePause} title="Toggle pause">
-      {#if paused}<span class="icon -play" />{:else}<span
-          class="icon -pause"
-        />{/if}
+      {#if paused}
+        <span class="icon -play"></span>
+      {:else}
+        <span class="icon -pause"></span>
+      {/if}
     </button>
     <div class="divider -thin"></div>
-    <button on:click={onResetHistory} title="Reset history">
-      <span class="icon -clear" />
+    <button
+      on:click={onResetHistory}
+      title="Reset history"
+      aria-label="Reset history"
+    >
+      <span class="icon -clear"></span>
     </button>
     <div class="divider -thin"></div>
 
     <InfoBar bind:msg />
 
     {#if msg && !paused}
-      <div class="divider" />
+      <div class="divider"></div>
       <TickSpinner bind:this={spinner} />
     {/if}
 
-    <div class="divider" />
+    <div class="divider"></div>
     <Version />
-    <div class="divider -anchor-right" />
+    <div class="divider -anchor-right"></div>
   </header>
 
   {#if msg}

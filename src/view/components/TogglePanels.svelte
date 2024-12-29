@@ -51,48 +51,51 @@
 <button
   popovertarget="toggle-panels-menu"
   class="toggle-menu-button"
-  title="Control panels"><span class="icon -toggle-menu" /></button
+  title="Settings"
+  aria-label="Settings"><span class="icon -toggle-menu"></span></button
 >
 
 <div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
-    <tr class="menu-item -dash">
-      <td>Callstack Type</td>
-      <td
-        ><button
-          class="btn-toggle"
-          title="Toggle callstack type: full/short"
-          on:click={onToggleWrapperCallstackType}
-          >{`${wrapperCallstackType === WrapperCallstackType.FULL ? 'full' : 'short'}`}</button
-        ></td
-      >
-    </tr>
-
-    {#each panels as panel, index (panel.key)}
-      <tr class="menu-item">
+    <tbody>
+      <tr class="menu-item -dash">
+        <td>Callstack Type</td>
         <td
-          ><a
-            href="void(0)"
-            class="toggle-visibility"
-            class:hidden={!panel.visible}
-            title="Toggle panel visibility: visible/hidden"
-            on:click|preventDefault={void onTogglePanelVisibility(index)}
-            >{panel.label}</a
+          ><button
+            class="btn-toggle"
+            title="Toggle callstack type: full/short"
+            on:click={onToggleWrapperCallstackType}
+            >{`${wrapperCallstackType === WrapperCallstackType.FULL ? 'full' : 'short'}`}</button
           ></td
         >
+      </tr>
 
-        {#if !nonWrappable.includes(panel.key)}
+      {#each panels as panel, index (panel.key)}
+        <tr class="menu-item">
           <td
-            ><button
-              class="btn-toggle"
-              title="Toggle function wrapping state: wrap/unwrap"
-              on:click={void onTogglePanelWrap(index)}
-              >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
+            ><a
+              href="void(0)"
+              class="toggle-visibility"
+              class:hidden={!panel.visible}
+              title="Toggle panel visibility: visible/hidden"
+              on:click|preventDefault={void onTogglePanelVisibility(index)}
+              >{panel.label}</a
             ></td
           >
-        {/if}
-      </tr>
-    {/each}
+
+          {#if !nonWrappable.includes(panel.key)}
+            <td
+              ><button
+                class="btn-toggle"
+                title="Toggle function wrapping state: wrap/unwrap"
+                on:click={void onTogglePanelWrap(index)}
+                >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
+              ></td
+            >
+          {/if}
+        </tr>
+      {/each}
+    </tbody>
   </table>
 </div>
 

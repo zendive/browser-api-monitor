@@ -21,39 +21,38 @@
   <caption class="bc-invert ta-l"
     >{caption} <Variable bind:value={metrics.length} /></caption
   >
-  <tr>
-    <th>Delay</th>
-    <th>Handler</th>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-  </tr>
-
-  {#each metrics as metric (metric.handler)}
-    <tr class="t-zebra">
-      <td class="ta-r">{metric.delay}</td>
-      <td class="ta-c handler-cell">
-        <span class="handler-value">{metric.handler}</span>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <span
-          class="icon -clear -small"
-          role="button"
-          tabindex="-1"
-          title="Cancel"
-          on:click={() => void onRemoveHandler(metric)}
-        />
-      </td>
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all w-full">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
-      </td>
+  <tbody>
+    <tr>
+      <th>Delay</th>
+      <th>Handler</th>
+      <th class="shaft"></th>
+      <th class="w-full">Callstack</th>
     </tr>
-  {/each}
+
+    {#each metrics as metric (metric.handler)}
+      <tr class="t-zebra">
+        <td class="ta-r">{metric.delay}</td>
+        <td class="ta-c handler-cell">
+          <span class="handler-value">{metric.handler}</span>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <span
+            class="icon -clear -small"
+            role="button"
+            tabindex="-1"
+            title="Cancel"
+            on:click={() => void onRemoveHandler(metric)}
+          ></span>
+        </td>
+        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td class="wb-all w-full">
+          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+        </td>
+      </tr>
+    {/each}
+  </tbody>
 </table>
 
 <style lang="scss">
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
   .handler-cell {
     .icon {
       display: none;

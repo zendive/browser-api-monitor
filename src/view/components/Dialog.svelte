@@ -51,12 +51,11 @@
 
     <a
       title="Close"
+      aria-label="Close"
       class="close-icon"
       href="void(0)"
-      on:click|preventDefault={hide}
+      on:click|preventDefault={hide}><span class="icon -remove"></span></a
     >
-      <span class="icon -remove" />
-    </a>
   </header>
 
   {#if showContent}

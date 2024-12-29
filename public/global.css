@@ -84,7 +84,9 @@ th,
 .w-full {
   width: 100%;
 }
-
+.shaft {
+  min-width: var(--small-icon-size);
+}
 .divider {
   width: 1px;
   height: 100%;

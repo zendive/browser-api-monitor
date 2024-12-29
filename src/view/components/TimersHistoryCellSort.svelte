@@ -42,7 +42,7 @@
       class="icon -small"
       class:-up={currentFieldOrder === ESortOrder.ASCENDING}
       class:-down={currentFieldOrder === ESortOrder.DESCENDING}
-    />
+   ></span>
   {/if}
 </a>
 

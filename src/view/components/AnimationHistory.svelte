@@ -48,41 +48,37 @@
     {caption}
     <Variable bind:value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-  </tr>
-
-  {#each sortedMetrics as metric (metric.traceId)}
-    <tr class="t-zebra">
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
-      </td>
-      <td class="ta-c">{metric.calls}</td>
-      <td class="ta-c">{metric.handler}</td>
+  <tbody>
+    <tr>
+      <th class="shaft"></th>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.calls}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.handler}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
+        >
+      </th>
     </tr>
-  {/each}
-</table>
 
-<style>
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>
+    {#each sortedMetrics as metric (metric.traceId)}
+      <tr class="t-zebra">
+        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td class="wb-all">
+          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+        </td>
+        <td class="ta-c">{metric.calls}</td>
+        <td class="ta-c">{metric.handler}</td>
+      </tr>
+    {/each}
+  </tbody>
+</table>

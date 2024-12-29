@@ -29,54 +29,60 @@
   <caption class="bc-invert ta-l">
     <MediaCommands bind:mediaId={metrics.mediaId} />
   </caption>
-  <tr>
-    <td class="events">
-      <table class="w-full">
-        <caption class="bc-invert ta-l">Events</caption>
-        {#each Object.entries(metrics.events) as [label, value] (label)}
-          <tr class:isPassive={0 === value} class:isActive={0 !== value}>
-            <td class="item-label">{label}</td>
-            <td class="item-value"><Variable bind:value /></td>
-          </tr>
-        {/each}
-      </table>
-    </td>
-    <td class="props">
-      <table class="w-full">
-        <caption class="bc-invert ta-l">Properties</caption>
-        {#each Object.entries(metrics.props) as [label, value] (label)}
-          <tr
-            class:isPassive={null === value ||
-              false === value ||
-              '' === value ||
-              0 === value}
-            class:isActive={true === value}
-          >
-            <td class="item-label">{label}</td>
-            <td class="item-value">
-              {#if isToggable(label)}
-                <i
-                  class="isToggable"
-                  role="button"
-                  tabindex="0"
-                  on:keydown={(e) => {
-                    if (e.key !== 'Enter' && e.key !== ' ') return;
-                    e.preventDefault();
-                    onToggleBoolean(label);
-                  }}
-                  on:click={() => void onToggleBoolean(label)}>{value}</i
-                >
-              {:else if ['networkState', 'readyState'].includes(label)}
-                <Variable bind:value />
-              {:else}
-                {value}
-              {/if}
-            </td>
-          </tr>
-        {/each}
-      </table>
-    </td>
-  </tr>
+  <tbody>
+    <tr>
+      <td class="events">
+        <table class="w-full">
+          <caption class="bc-invert ta-l">Events</caption>
+          <tbody>
+            {#each Object.entries(metrics.events) as [label, value] (label)}
+              <tr class:isPassive={0 === value} class:isActive={0 !== value}>
+                <td class="item-label">{label}</td>
+                <td class="item-value"><Variable bind:value /></td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </td>
+      <td class="props">
+        <table class="w-full">
+          <caption class="bc-invert ta-l">Properties</caption>
+          <tbody>
+            {#each Object.entries(metrics.props) as [label, value] (label)}
+              <tr
+                class:isPassive={null === value ||
+                  false === value ||
+                  '' === value ||
+                  0 === value}
+                class:isActive={true === value}
+              >
+                <td class="item-label">{label}</td>
+                <td class="item-value">
+                  {#if isToggable(label)}
+                    <i
+                      class="isToggable"
+                      role="button"
+                      tabindex="0"
+                      on:keydown={(e) => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                        e.preventDefault();
+                        onToggleBoolean(label);
+                      }}
+                      on:click={() => void onToggleBoolean(label)}>{value}</i
+                    >
+                  {:else if ['networkState', 'readyState'].includes(label)}
+                    <Variable bind:value />
+                  {:else}
+                    {value}
+                  {/if}
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
 </table>
 
 <style lang="scss">

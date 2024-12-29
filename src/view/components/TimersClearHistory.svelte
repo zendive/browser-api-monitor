@@ -45,42 +45,38 @@
     {caption}
     <Variable bind:value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={HistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-r">
-      <TimersHistoryCellSort
-        field={HistorySortField.delay}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
-      >
-    </th>
-  </tr>
+  <tbody>
+    <tr>
+      <th class="shaft"></th>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.calls}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.handler}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-r">
+        <TimersHistoryCellSort
+          field={HistorySortField.delay}
+          currentField={field}
+          currentFieldOrder={order}
+          on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
+        >
+      </th>
+    </tr>
 
-  {#each sortedMetrics as metric (metric.traceId)}
-    <TimersClearHistoryMetric bind:metric />
-  {/each}
+    {#each sortedMetrics as metric (metric.traceId)}
+      <TimersClearHistoryMetric bind:metric />
+    {/each}
+  </tbody>
 </table>
-
-<style>
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>
