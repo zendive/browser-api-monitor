@@ -102,6 +102,7 @@ windowListen((o) => {
     panels.requestIdleCallback && wrapRequestIdleCallbackOnce();
     panels.cancelIdleCallback && wrapCancelIdleCallbackOnce();
     wrapper.setTraceForDebug(o.settings.traceForDebug);
+    wrapper.setCallstackType(o.settings.wrapperCallstackType);
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();

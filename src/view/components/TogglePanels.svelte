@@ -4,20 +4,26 @@
   import {
     getSettings,
     setSettings,
+    WrapperCallstackType,
     type TSettingsPanel,
+    type TWrapperCallstackType,
   } from '@/api/settings.ts';
 
   const nonWrappable = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = [];
+  let wrapperCallstackType: TWrapperCallstackType;
   let reloadMessageEl: Alert | null = null;
+  let selfEl: HTMLElement | null = null;
 
   getSettings().then((state) => {
     panels = state.panels;
+    wrapperCallstackType = state.wrapperCallstackType;
   });
 
   runtimeListen(async (o) => {
     if (o.msg === 'content-script-loaded') {
       reloadMessageEl?.hide();
+      selfEl?.hidePopover();
     }
   });
 
@@ -31,6 +37,15 @@
     setSettings({ panels });
     reloadMessageEl?.show();
   }
+
+  function onToggleWrapperCallstackType() {
+    wrapperCallstackType =
+      wrapperCallstackType === WrapperCallstackType.FULL
+        ? WrapperCallstackType.SHORT
+        : WrapperCallstackType.FULL;
+    setSettings({ wrapperCallstackType });
+    reloadMessageEl?.show();
+  }
 </script>
 
 <button
@@ -39,8 +54,20 @@
   title="Control panels"><span class="icon -toggle-menu" /></button
 >
 
-<div popover="auto" id="toggle-panels-menu" role="menu">
+<div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
+    <tr class="menu-item -dash">
+      <td>Callstack Type</td>
+      <td
+        ><button
+          class="btn-toggle"
+          title="Toggle callstack type: full/short"
+          on:click={onToggleWrapperCallstackType}
+          >{`${wrapperCallstackType === WrapperCallstackType.FULL ? 'full' : 'short'}`}</button
+        ></td
+      >
+    </tr>
+
     {#each panels as panel, index (panel.key)}
       <tr class="menu-item">
         <td
@@ -48,6 +75,7 @@
             href="void(0)"
             class="toggle-visibility"
             class:hidden={!panel.visible}
+            title="Toggle panel visibility: visible/hidden"
             on:click|preventDefault={void onTogglePanelVisibility(index)}
             >{panel.label}</a
           ></td
@@ -56,7 +84,8 @@
         {#if !nonWrappable.includes(panel.key)}
           <td
             ><button
-              class="btn-toggle-wrap"
+              class="btn-toggle"
+              title="Toggle function wrapping state: wrap/unwrap"
               on:click={void onTogglePanelWrap(index)}
               >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
             ></td
@@ -85,22 +114,26 @@
     background-color: var(--bg-popover);
     border: 1px solid var(--border);
     margin: 0;
+    padding: 0 0.375rem;
 
     .menu-content {
       .menu-item {
         line-height: 1.4rem;
 
+        &.-dash {
+          border-bottom: 1px solid var(--border);
+        }
+
         .toggle-visibility {
           color: var(--text);
           text-wrap: nowrap;
-          margin-left: 0.375rem;
 
           &.hidden {
             color: var(--text-passive);
           }
         }
 
-        .btn-toggle-wrap {
+        .btn-toggle {
           color: var(--text);
           border-left: 1px solid var(--border);
           border-right: none;

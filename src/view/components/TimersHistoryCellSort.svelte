@@ -2,13 +2,13 @@
   import {
     DEFAULT_SETTINGS,
     ESortOrder,
-    type EHistorySortFieldKeys,
+    type THistorySortField,
   } from '@/api/settings.ts';
   import { createEventDispatcher } from 'svelte';
 
-  export let field: EHistorySortFieldKeys =
+  export let field: THistorySortField =
     DEFAULT_SETTINGS.sort.timersHistoryField;
-  export let currentField: EHistorySortFieldKeys =
+  export let currentField: THistorySortField =
     DEFAULT_SETTINGS.sort.timersHistoryField;
   export let currentFieldOrder = DEFAULT_SETTINGS.sort.timersHistoryOrder;
 

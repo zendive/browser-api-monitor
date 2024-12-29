@@ -8,9 +8,9 @@
     DEFAULT_SORT,
     getSettings,
     setSettings,
-    EHistorySortField,
-    type EHistorySortFieldKeys,
-    type ESortOrderKeys,
+    HistorySortField,
+    type THistorySortField,
+    type TSortOrder,
   } from '@/api/settings.ts';
   import { compareByFieldOrder } from '@/api/comparator.ts';
 
@@ -30,7 +30,7 @@
   });
 
   function onChangeSort(
-    e: CustomEvent<{ field: EHistorySortFieldKeys; order: ESortOrderKeys }>
+    e: CustomEvent<{ field: THistorySortField; order: TSortOrder }>
   ) {
     field = e.detail.field;
     order = e.detail.order;
@@ -53,7 +53,7 @@
     <th class="w-full">Callstack</th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={EHistorySortField.calls}
+        field={HistorySortField.calls}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
@@ -61,7 +61,7 @@
     </th>
     <th class="ta-c">
       <TimersHistoryCellSort
-        field={EHistorySortField.handler}
+        field={HistorySortField.handler}
         currentField={field}
         currentFieldOrder={order}
         on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort

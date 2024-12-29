@@ -19,7 +19,11 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
 } from '@/api/const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
-import type { TPanelVisibilityMap } from '@/api/settings.ts';
+import {
+  WrapperCallstackType,
+  type TWrapperCallstackType,
+  type TPanelVisibilityMap,
+} from '@/api/settings.ts';
 import { hashString } from '@/api/hash.ts';
 
 export type TTrace = {
@@ -59,7 +63,6 @@ export type TSetTimerHistory = {
   handler: number | string;
   delay: number | undefined | string;
   isEval: boolean | undefined;
-  hasError: boolean;
   isOnline: boolean;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
@@ -71,7 +74,6 @@ export type TClearTimerHistory = {
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
-  hasError: boolean;
 };
 
 export type TEvalHistory = {
@@ -89,7 +91,6 @@ export type TAnimationHistory = {
   traceDomain: ETraceDomainKeys;
   calls: number;
   handler: number | undefined | string;
-  hasError?: boolean;
 };
 export type TRequestIdleCallbackHistory = {
   traceId: string;
@@ -98,7 +99,6 @@ export type TRequestIdleCallbackHistory = {
   calls: number;
   handler: number | undefined | string;
   delay: number | undefined | string;
-  hasError: boolean;
   didTimeout: undefined | boolean;
   isOnline: boolean;
   canceledCounter: number;
@@ -110,7 +110,6 @@ export type TCancelIdleCallbackHistory = {
   traceDomain: ETraceDomainKeys;
   calls: number;
   handler: number | undefined | string;
-  hasError: boolean;
 };
 export type TWrapperMetrics = {
   onlineTimers: TOnlineTimerMetrics[] | null;
@@ -175,6 +174,7 @@ export class Wrapper {
   };
   selfTraceLink = '';
   #traceForDebug: string | null = null;
+  #callstackType: TWrapperCallstackType = WrapperCallstackType.FULL;
 
   constructor() {
     this.#initSelfTrace();
@@ -212,6 +212,10 @@ export class Wrapper {
 
   setTraceForDebug(traceId: string | null) {
     this.#traceForDebug = traceId;
+  }
+
+  setCallstackType(type: TWrapperCallstackType) {
+    this.#callstackType = type;
   }
 
   timerOnline(
@@ -287,7 +291,6 @@ export class Wrapper {
       existing.delay = handlerDelay;
       existing.calls++;
       existing.isEval = isEval;
-      existing.hasError = hasError;
       existing.isOnline = true;
     } else {
       history.set(callstack.traceId, {
@@ -295,7 +298,6 @@ export class Wrapper {
         calls: 1,
         delay: handlerDelay,
         isEval,
-        hasError,
         isOnline: true,
         traceId: callstack.traceId,
         trace: callstack.trace,
@@ -328,13 +330,11 @@ export class Wrapper {
       existing.handler = <number | string>handler;
       existing.delay = handlerDelay;
       existing.calls++;
-      existing.hasError = hasError;
     } else {
       history.set(callstack.traceId, {
         handler: <number | string>handler,
         calls: 1,
         delay: handlerDelay,
-        hasError,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
@@ -396,7 +396,6 @@ export class Wrapper {
     if (existing) {
       existing.calls++;
       existing.handler = handler;
-      existing.hasError = hasError;
     } else {
       this.cafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
@@ -404,7 +403,6 @@ export class Wrapper {
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
         calls: 1,
         handler,
-        hasError,
       });
     }
   }
@@ -437,7 +435,6 @@ export class Wrapper {
       existing.handler = handler;
       existing.didTimeout = undefined;
       existing.delay = delay;
-      existing.hasError = hasError;
       existing.isOnline = true;
     } else {
       this.ricHistory.set(callstack.traceId, {
@@ -448,7 +445,6 @@ export class Wrapper {
         handler,
         didTimeout: undefined,
         delay,
-        hasError,
         isOnline: true,
         canceledCounter: 0,
         canceledByTraceIds: null,
@@ -469,7 +465,6 @@ export class Wrapper {
     if (existing) {
       existing.calls++;
       existing.handler = handler;
-      existing.hasError = hasError;
     } else {
       this.cicHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
@@ -477,7 +472,6 @@ export class Wrapper {
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
         calls: 1,
         handler,
-        hasError,
       });
     }
 
@@ -846,9 +840,41 @@ export class Wrapper {
   }
 
   createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
-    const trace: TTrace[] = [];
-    const stack = e.stack?.split(REGEX_STACKTRACE_SPLIT) || [];
+    if (this.#callstackType === WrapperCallstackType.FULL) {
+      return this.#createFullCallstack(e, uniqueTrait);
+    } else {
+      return this.#createShortCallstack(e, uniqueTrait);
+    }
+  }
+
+  #createShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+    let traceId = e.stack || String(uniqueTrait);
+    const trace = this.#stack2traceArray(e.stack || '');
+
+    if (trace.length) {
+      trace.splice(0, trace.length - 1); // pick last one
+      traceId = trace[0].link;
+    } else {
+      trace.push(this.#createInvalidTrace(uniqueTrait));
+    }
+
+    return { traceId: hashString(traceId), trace };
+  }
+
+  #createFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
     const traceId = e.stack || String(uniqueTrait);
+    const trace = this.#stack2traceArray(e.stack || '');
+
+    if (!trace.length) {
+      trace.push(this.#createInvalidTrace(uniqueTrait));
+    }
+
+    return { traceId: hashString(traceId), trace };
+  }
+
+  #stack2traceArray(stackString: string): TTrace[] {
+    const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
+    const rv: TTrace[] = [];
 
     // loop from the end, excluding error name and self trace
     for (let n = stack.length - 1; n > 1; n--) {
@@ -864,23 +890,24 @@ export class Wrapper {
         continue;
       }
 
-      let name = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
+      const name = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
 
-      trace.push({ name: name === link ? 0 : name, link });
+      rv.push({ name: name === link ? 0 : name, link });
     }
 
-    if (!trace.length) {
-      let name: TTrace['name'] = 0;
-      if (typeof uniqueTrait === 'function' && uniqueTrait.name) {
-        name = uniqueTrait.name;
-      }
+    return rv;
+  }
 
-      trace.push({
-        name,
-        link: TAG_INVALID_CALLSTACK_LINK,
-      });
+  #createInvalidTrace(uniqueTrait?: unknown): TTrace {
+    let name: TTrace['name'] = 0;
+
+    if (typeof uniqueTrait === 'function' && uniqueTrait.name) {
+      name = uniqueTrait.name;
     }
 
-    return { traceId: hashString(traceId), trace };
+    return {
+      name,
+      link: TAG_INVALID_CALLSTACK_LINK,
+    };
   }
 }

@@ -13,9 +13,11 @@ type TPanelKey =
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
 
-export type EHistorySortFieldKeys =
-  (typeof EHistorySortField)[keyof typeof EHistorySortField];
-export type ESortOrderKeys = (typeof ESortOrder)[keyof typeof ESortOrder];
+export type THistorySortField =
+  (typeof HistorySortField)[keyof typeof HistorySortField];
+export type TWrapperCallstackType =
+  (typeof WrapperCallstackType)[keyof typeof WrapperCallstackType];
+export type TSortOrder = (typeof ESortOrder)[keyof typeof ESortOrder];
 export type TPanelVisibilityMap = {
   [K in TPanelKey]: TSettingsPanel;
 };
@@ -28,7 +30,7 @@ export type TSettingsPanel = {
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
-const SETTINGS_VERSION = '1.0.5';
+const SETTINGS_VERSION = '1.0.7';
 const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
@@ -78,7 +80,12 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
   },
 ];
 
-export const EHistorySortField = {
+export const WrapperCallstackType = {
+  FULL: 0,
+  SHORT: 1,
+} as const;
+
+export const HistorySortField = {
   calls: 'calls',
   handler: 'handler',
   delay: 'delay',
@@ -90,8 +97,8 @@ export const ESortOrder = {
 } as const;
 
 export const DEFAULT_SORT = {
-  timersHistoryField: EHistorySortField.delay as EHistorySortFieldKeys,
-  timersHistoryOrder: ESortOrder.DESCENDING as ESortOrderKeys,
+  timersHistoryField: HistorySortField.delay as THistorySortField,
+  timersHistoryOrder: ESortOrder.DESCENDING as TSortOrder,
 };
 
 export const DEFAULT_SETTINGS = {
@@ -100,6 +107,7 @@ export const DEFAULT_SETTINGS = {
   paused: false,
   devtoolsPanelShown: false,
   traceForDebug: <string | null>null,
+  wrapperCallstackType: <TWrapperCallstackType>WrapperCallstackType.FULL,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {

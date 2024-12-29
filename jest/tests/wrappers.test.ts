@@ -14,8 +14,15 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TRACE_ERROR_MESSAGE,
 } from '../../src/api/const.ts';
+import { WrapperCallstackType } from '../../src/api/settings.ts';
 
-describe('wrappers', () => {
+const TEST_STACK = `Error: ${TRACE_ERROR_MESSAGE}
+        at <anonymous>:1:1
+        at async (<anonymous>:1:1)
+        at call2 (async https://example2.com/bundle3.js:4:5)
+        at call1 (https://example1.com/bundle2.js:3:4)`;
+
+describe('wrappers full', () => {
   let wrapper: Wrapper;
 
   beforeEach(() => {
@@ -329,24 +336,35 @@ describe('wrappers', () => {
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
   });
 
-  test('createCallstack', () => {
-    const testStack = `Error: ${TRACE_ERROR_MESSAGE}
-        at <anonymous>:1:1
-        at async (<anonymous>:1:1)
-        at call2 (async https://example.com/bundle1.js:11:17811)
-        at call1 (https://example.com/bundle2.js:11:17811)`;
+  test('createCallstack full', () => {
     const standard = [
-      { name: 'call1', link: 'https://example.com/bundle2.js:11:17811' },
-      { name: 'call2', link: 'https://example.com/bundle1.js:11:17811' },
+      { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
+      { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
     const { trace } = wrapper.createCallstack(
-      <Error>{ stack: testStack },
+      <Error>{ stack: TEST_STACK },
       null
     );
 
+    expect(trace.length).toBe(2);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
     expect(trace[1].name).toBe(standard[1].name);
     expect(trace[1].link).toBe(standard[1].link);
+  });
+
+  test('createCallstack short', () => {
+    const standard = [
+      { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
+    ];
+    wrapper.setCallstackType(WrapperCallstackType.SHORT);
+    const { trace } = wrapper.createCallstack(
+      <Error>{ stack: TEST_STACK },
+      null
+    );
+
+    expect(trace.length).toBe(1);
+    expect(trace[0].name).toBe(standard[0].name);
+    expect(trace[0].link).toBe(standard[0].link);
   });
 });
