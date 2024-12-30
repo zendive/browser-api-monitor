@@ -17,14 +17,14 @@ import {
   TAG_INVALID_CALLSTACK_LINK,
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
-} from '@/api/const.ts';
-import { TAG_EXCEPTION, cloneObjectSafely } from '@/api/clone.ts';
+} from './const.ts';
+import { TAG_EXCEPTION, cloneObjectSafely } from './clone.ts';
 import {
   WrapperCallstackType,
   type TWrapperCallstackType,
   type TPanelVisibilityMap,
-} from '@/api/settings.ts';
-import { hashString } from '@/api/hash.ts';
+} from './settings.ts';
+import { hashString } from './hash.ts';
 
 export type TTrace = {
   name: string | 0;

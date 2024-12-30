@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import type { TEvalHistory } from '@/api/wrappers.ts';
+  import type { TEvalHistory } from '../../api/wrappers.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
 
   export let metrics: TEvalHistory[];
 

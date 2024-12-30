@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
+  import type { TClearTimerHistory } from '../../api/wrappers.ts';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -8,10 +7,11 @@
     setSettings,
     type THistorySortField,
     type TSortOrder,
-  } from '@/api/settings.ts';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
-  import TimersClearHistoryMetric from '@/view/components/TimersClearHistoryMetric.svelte';
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import Variable from './Variable.svelte';
+  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
+  import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
 
   export let caption: string = '';
   export let metrics: TClearTimerHistory[];

@@ -2,11 +2,7 @@
   import type {
     TRequestIdleCallbackHistory,
     TCancelIdleCallbackHistory,
-  } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
+  } from '../../api/wrappers.ts';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -14,12 +10,17 @@
     HistorySortField,
     type THistorySortField,
     type TSortOrder,
-  } from '@/api/settings.ts';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
-  import IdleCallbackCancelHistory from '@/view/components/IdleCallbackCancelHistory.svelte';
-  import Dialog from '@/view/components/Dialog.svelte';
-  import Alert from '@/view/components/Alert.svelte';
-  import { CALLED_ABORTED_TOOLTIP } from '@/api/const.ts';
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
+  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
+
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
+  import Dialog from './Dialog.svelte';
+  import Alert from './Alert.svelte';
 
   export let caption: string = '';
   export let metrics: TRequestIdleCallbackHistory[];

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { TTrace } from '@/api/wrappers.ts';
-  import TraceLink from '@/view/components/TraceLink.svelte';
-  import { TAG_INVALID_CALLSTACK_LINK } from '@/api/const.ts';
+  import type { TTrace } from '../../api/wrappers.ts';
+  import { TAG_INVALID_CALLSTACK_LINK } from '../../api/const.ts';
   import {
     getSettings,
     onSettingsChange,
     setSettings,
-  } from '@/api/settings.ts';
+  } from '../../api/settings.ts';
+  import TraceLink from './TraceLink.svelte';
 
   export let trace: TTrace[];
   export let traceId: string;

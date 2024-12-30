@@ -1,5 +1,5 @@
-import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
-import { ESortOrder, type TSortOrder } from '@/api/settings.ts';
+import type { TOnlineTimerMetrics } from './wrappers.ts';
+import { ESortOrder, type TSortOrder } from './settings.ts';
 
 // descending sort by `handler` field
 function compareIfEqual<T, Key extends keyof T>(

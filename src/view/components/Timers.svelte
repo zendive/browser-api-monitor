@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import { TimerType, type TOnlineTimerMetrics } from '@/api/wrappers.ts';
-  import ActiveTimers from '@/view/components/ActiveTimers.svelte';
-  import TimersSetHistory from '@/view/components/TimersSetHistory.svelte';
-  import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
-  import { compareByDelayThenHandlerDescending } from '@/api/comparator.ts';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import { TimerType, type TOnlineTimerMetrics } from '../../api/wrappers.ts';
+  import ActiveTimers from './ActiveTimers.svelte';
+  import TimersSetHistory from './TimersSetHistory.svelte';
+  import TimersClearHistory from './TimersClearHistory.svelte';
+  import { compareByDelayThenHandlerDescending } from '../../api/comparator.ts';
 
   export let metrics: TMetrics['wrapperMetrics'];
 

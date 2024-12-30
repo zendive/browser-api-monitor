@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '@/api/wrappers.ts';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import Variable from '@/view/components/Variable.svelte';
+  import type { TClearTimerHistory } from '../../api/wrappers.ts';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
+  import Variable from './Variable.svelte';
 
   export let metric: TClearTimerHistory;
 </script>

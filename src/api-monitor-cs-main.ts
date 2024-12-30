@@ -1,21 +1,21 @@
-import { windowListen, windowPost } from '@/api/communication.ts';
-import { IS_DEV } from '@/api/env.ts';
+import { windowListen, windowPost } from './api/communication.ts';
+import { IS_DEV } from './api/env.ts';
 import {
   TELEMETRY_FREQUENCY_1PS,
   TELEMETRY_FREQUENCY_30PS,
-} from '@/api/const.ts';
-import { callingOnce, Timer } from '@/api/time.ts';
+} from './api/const.ts';
+import { callingOnce, Timer } from './api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
   doMediaCommand,
   type TMediaTelemetry,
-} from '@/api/mediaMonitor.ts';
-import { Wrapper, TimerType, type TWrapperMetrics } from '@/api/wrappers.ts';
+} from './api/mediaMonitor.ts';
+import { Wrapper, TimerType, type TWrapperMetrics } from './api/wrappers.ts';
 import {
   DEFAULT_SETTINGS,
   panelsArrayToVisibilityMap,
-} from '@/api/settings.ts';
+} from './api/settings.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;

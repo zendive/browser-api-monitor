@@ -3,7 +3,7 @@ import {
   clearTimeout,
   requestAnimationFrame,
   cancelAnimationFrame,
-} from '@/api/const.ts';
+} from './const.ts';
 
 export function callingOnce(fn: (...args: any[]) => any) {
   let runOnce = false;

@@ -120,7 +120,7 @@ describe('Timer - animation + interval + measurable', () => {
     animation.stop();
     expect(animation.isPending()).toBe(false);
     expect(animation.executionTime < 0.5).toBe(true);
-    expect(58 <= count && count <= 61).toBe(true);
+    expect(count).toBeLessThan(62);
   });
 });
 

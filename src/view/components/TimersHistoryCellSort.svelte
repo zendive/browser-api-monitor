@@ -1,10 +1,10 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     DEFAULT_SETTINGS,
     ESortOrder,
     type THistorySortField,
-  } from '@/api/settings.ts';
-  import { createEventDispatcher } from 'svelte';
+  } from '../../api/settings.ts';
 
   export let field: THistorySortField =
     DEFAULT_SETTINGS.sort.timersHistoryField;
@@ -42,7 +42,7 @@
       class="icon -small"
       class:-up={currentFieldOrder === ESortOrder.ASCENDING}
       class:-down={currentFieldOrder === ESortOrder.DESCENDING}
-   ></span>
+    ></span>
   {/if}
 </a>
 

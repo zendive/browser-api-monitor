@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TraceDomain, type TTraceDomain } from '@/api/wrappers.ts';
+  import { TraceDomain, type TTraceDomain } from '../../api/wrappers.ts';
 
   export let traceDomain: TTraceDomain;
 </script>

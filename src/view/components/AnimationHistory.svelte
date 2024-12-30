@@ -1,9 +1,5 @@
 <script lang="ts">
-  import type { TAnimationHistory } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
+  import type { TAnimationHistory } from '../../api/wrappers.ts';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -11,8 +7,12 @@
     HistorySortField,
     type THistorySortField,
     type TSortOrder,
-  } from '@/api/settings.ts';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
+  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
 
   export let caption: string = '';
   export let metrics: TAnimationHistory[];

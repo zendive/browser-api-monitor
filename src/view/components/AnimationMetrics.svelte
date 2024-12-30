@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import AnimationHistory from '@/view/components/AnimationHistory.svelte';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import AnimationHistory from './AnimationHistory.svelte';
 
   export let metrics: TMetrics['wrapperMetrics'];
 </script>

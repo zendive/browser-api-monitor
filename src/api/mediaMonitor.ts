@@ -5,8 +5,8 @@ import {
   MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
-} from '@/api/const.ts';
-import type { TMsgMediaCommand } from '@/api/communication.ts';
+} from './const.ts';
+import type { TMsgMediaCommand } from './communication.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;

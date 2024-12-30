@@ -29,6 +29,7 @@ To explore the internals of a complex systems.
 
 - OS: Linux
 - Node: 22.12.0 (LTS)
+- Deno: 2.1.4
 
 ### Build instructions
 

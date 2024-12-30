@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Variable from '@/view/components/Variable.svelte';
-  import type { TMediaMetrics } from '@/api/mediaMonitor.ts';
-  import MediaCommands from '@/view/components/MediaCommands.svelte';
-  import { portPost } from '@/api/communication.ts';
-  import { MEDIA_ELEMENT_TOGGABLE_PROPS } from '@/api/const.ts';
+  import type { TMediaMetrics } from '../../api/mediaMonitor.ts';
+  import { portPost } from '../../api/communication.ts';
+  import { MEDIA_ELEMENT_TOGGABLE_PROPS } from '../../api/const.ts';
+  import Variable from './Variable.svelte';
+  import MediaCommands from './MediaCommands.svelte';
 
   export let metrics: TMediaMetrics;
 

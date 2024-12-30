@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Fps } from '@/api/time.ts';
+  import { Fps } from '../../api/time.ts';
 
   const FRAMES = '⣷⣯⣟⡿⢿⣻⣽⣾';
   let index = 0;

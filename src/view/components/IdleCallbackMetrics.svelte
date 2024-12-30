@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import IdleCallbackRequestHistory from '@/view/components/IdleCallbackRequestHistory.svelte';
-  import IdleCallbackCancelHistory from '@/view/components/IdleCallbackCancelHistory.svelte';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import IdleCallbackRequestHistory from './IdleCallbackRequestHistory.svelte';
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
 
   export let metrics: TMetrics['wrapperMetrics'];
 </script>

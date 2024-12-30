@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { VARIABLE_ANIMATION_THROTTLE } from '@/api/const.ts';
-  import { Timer } from '@/api/time.ts';
+  import { VARIABLE_ANIMATION_THROTTLE } from '../../api/const.ts';
+  import { Timer } from '../../api/time.ts';
 
   export let title: string | null = null;
   export let value: unknown;

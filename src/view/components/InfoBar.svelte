@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
   import {
     getSettings,
     onSettingsChange,
     panelsArrayToVisibilityMap,
     type TPanelVisibilityMap,
-  } from '@/api/settings.ts';
-  import InfoBarItem from '@/view/components/InfoBarItem.svelte';
+  } from '../../api/settings.ts';
+  import InfoBarItem from './InfoBarItem.svelte';
 
   export let msg: TMetrics;
 

@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { runtimeListen, portPost } from '@/api/communication.ts';
-  import { IS_DEV } from '@/api/env.ts';
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import Timers from '@/view/components/Timers.svelte';
-  import Media from '@/view/components/Media.svelte';
-  import EvalMetrics from '@/view/components/EvalMetrics.svelte';
-  import AnimationMetrics from '@/view/components/AnimationMetrics.svelte';
-  import Version from '@/view/components/Version.svelte';
+  import { runtimeListen, portPost } from '../api/communication.ts';
+  import { IS_DEV } from '../api/env.ts';
+  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '../api/const.ts';
+  import { getSettings, setSettings } from '../api/settings.ts';
+  import type { TMetrics } from '../api-monitor-cs-main.ts';
+  import Timers from './components/Timers.svelte';
+  import Media from './components/Media.svelte';
+  import EvalMetrics from './components/EvalMetrics.svelte';
+  import AnimationMetrics from './components/AnimationMetrics.svelte';
+  import Version from './components/Version.svelte';
   import { onMount } from 'svelte';
-  import TogglePanels from '@/view/components/TogglePanels.svelte';
-  import InfoBar from '@/view/components/InfoBar.svelte';
-  import { getSettings, setSettings } from '@/api/settings.ts';
-  import TickSpinner from '@/view/components/TickSpinner.svelte';
-  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '@/api/const.ts';
-  import IdleCallbackMetrics from '@/view/components/IdleCallbackMetrics.svelte';
+  import TogglePanels from './components/TogglePanels.svelte';
+  import InfoBar from './components/InfoBar.svelte';
+  import TickSpinner from './components/TickSpinner.svelte';
+  import IdleCallbackMetrics from './components/IdleCallbackMetrics.svelte';
 
   let spinner: TickSpinner | null = null;
   let paused = false;

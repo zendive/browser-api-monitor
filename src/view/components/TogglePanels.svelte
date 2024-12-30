@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { runtimeListen } from '@/api/communication.ts';
-  import Alert from '@/view/components/Alert.svelte';
   import {
     getSettings,
     setSettings,
     WrapperCallstackType,
     type TSettingsPanel,
     type TWrapperCallstackType,
-  } from '@/api/settings.ts';
+  } from '../../api/settings.ts';
+  import { runtimeListen } from '../../api/communication.ts';
+  import Alert from './Alert.svelte';
 
   const nonWrappable = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = [];

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { portPost, type TMsgMediaCommand } from '@/api/communication.ts';
+  import { portPost, type TMsgMediaCommand } from '../../api/communication.ts';
 
   export let mediaId: string;
 
