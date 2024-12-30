@@ -34,23 +34,23 @@ type TCallstack = {
   traceId: string;
   trace: TTrace[];
 };
-export const ETimerType = {
+export const TimerType = {
   TIMEOUT: 0,
   INTERVAL: 1,
 } as const;
-export type ETimerTypeKeys = (typeof ETimerType)[keyof typeof ETimerType];
-export const ETraceDomain = {
+export type TTimerType = (typeof TimerType)[keyof typeof TimerType];
+export const TraceDomain = {
   SAME: 0,
   EXTERNAL: 1,
   EXTENSION: 2,
   UNKNOWN: 3,
 } as const;
-export type ETraceDomainKeys = (typeof ETraceDomain)[keyof typeof ETraceDomain];
+export type TTraceDomain = (typeof TraceDomain)[keyof typeof TraceDomain];
 export type TOnlineTimerMetrics = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
-  type: ETimerTypeKeys;
+  traceDomain: TTraceDomain;
+  type: TTimerType;
   delay: number | undefined | string;
   handler: number;
   isEval: boolean;
@@ -58,7 +58,7 @@ export type TOnlineTimerMetrics = {
 export type TSetTimerHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
@@ -70,7 +70,7 @@ export type TSetTimerHistory = {
 export type TClearTimerHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
@@ -79,7 +79,7 @@ export type TClearTimerHistory = {
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   returnedValue: any;
   code: any;
@@ -88,14 +88,14 @@ export type TEvalHistory = {
 export type TAnimationHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   handler: number | undefined | string;
 };
 export type TRequestIdleCallbackHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   handler: number | undefined | string;
   delay: number | undefined | string;
@@ -107,7 +107,7 @@ export type TRequestIdleCallbackHistory = {
 export type TCancelIdleCallbackHistory = {
   traceId: string;
   trace: TTrace[];
-  traceDomain: ETraceDomainKeys;
+  traceDomain: TTraceDomain;
   calls: number;
   handler: number | undefined | string;
 };
@@ -200,14 +200,14 @@ export class Wrapper {
 
   #getTraceDomain(trace: TTrace) {
     if (trace.link.startsWith(location.origin)) {
-      return ETraceDomain.SAME;
+      return TraceDomain.SAME;
     } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
-      return ETraceDomain.EXTERNAL;
+      return TraceDomain.EXTERNAL;
     } else if (trace.link.startsWith('chrome-extension://')) {
-      return ETraceDomain.EXTENSION;
+      return TraceDomain.EXTENSION;
     }
 
-    return ETraceDomain.UNKNOWN;
+    return TraceDomain.UNKNOWN;
   }
 
   setTraceForDebug(traceId: string | null) {
@@ -219,7 +219,7 @@ export class Wrapper {
   }
 
   timerOnline(
-    type: ETimerTypeKeys,
+    type: TTimerType,
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack,
@@ -249,7 +249,7 @@ export class Wrapper {
     this.onlineTimers.delete(handler);
 
     const record =
-      timer.type === ETimerType.TIMEOUT
+      timer.type === TimerType.TIMEOUT
         ? this.setTimeoutHistory.get(timer.traceId)
         : this.setIntervalHistory.get(timer.traceId);
 
@@ -714,7 +714,7 @@ export class Wrapper {
         ...args
       );
 
-      this.timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
+      this.timerOnline(TimerType.TIMEOUT, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setTimeoutHistory,
         handler,
@@ -791,7 +791,7 @@ export class Wrapper {
         ...args
       );
 
-      this.timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
+      this.timerOnline(TimerType.INTERVAL, handler, delay, callstack, isEval);
       this.updateSetTimersHistory(
         this.setIntervalHistory,
         handler,

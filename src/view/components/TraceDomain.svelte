@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { ETraceDomain, type ETraceDomainKeys } from '@/api/wrappers.ts';
+  import { TraceDomain, type TTraceDomain } from '@/api/wrappers.ts';
 
-  export let traceDomain: ETraceDomainKeys;
+  export let traceDomain: TTraceDomain;
 </script>
 
-{#if traceDomain === ETraceDomain.SAME}
+{#if traceDomain === TraceDomain.SAME}
   <span class="icon -small -trace-local" title="Same domain"></span>
-{:else if traceDomain === ETraceDomain.EXTERNAL}
+{:else if traceDomain === TraceDomain.EXTERNAL}
   <span class="icon -small -trace-external" title="External domain"></span>
-{:else if traceDomain === ETraceDomain.EXTENSION}
+{:else if traceDomain === TraceDomain.EXTENSION}
   <span class="icon -small -trace-extension" title="Local extension"></span>
-{:else if traceDomain === ETraceDomain.UNKNOWN}
+{:else if traceDomain === TraceDomain.UNKNOWN}
   <span title="Unknown domain">❓</span>
 {/if}

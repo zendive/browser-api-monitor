@@ -13,7 +13,7 @@
 import { APPLICATION_NAME } from '@/api/env.ts';
 import { ERRORS_IGNORED } from '@/api/const.ts';
 import type { TMetrics } from '@/api-monitor-cs-main.ts';
-import type { ETimerTypeKeys } from '@/api/wrappers.ts';
+import type { TTimerType } from '@/api/wrappers.ts';
 import type { TSettings } from '@/api/settings.ts';
 
 let port: chrome.runtime.Port | null = null;
@@ -106,7 +106,7 @@ export interface TMsgResetHistory {
 }
 export interface TMsgClearHandler {
   msg: 'clear-timer-handler';
-  type: ETimerTypeKeys;
+  type: TTimerType;
   handler: number;
 }
 export interface TMsgLoaded {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import { ETimerType, type TOnlineTimerMetrics } from '@/api/wrappers.ts';
+  import { TimerType, type TOnlineTimerMetrics } from '@/api/wrappers.ts';
   import ActiveTimers from '@/view/components/ActiveTimers.svelte';
   import TimersSetHistory from '@/view/components/TimersSetHistory.svelte';
   import TimersClearHistory from '@/view/components/TimersClearHistory.svelte';
@@ -19,7 +19,7 @@
       metrics.onlineTimers.sort(compareByDelayThenHandlerDescending);
 
       for (const timer of metrics.onlineTimers) {
-        if (timer.type === ETimerType.INTERVAL) {
+        if (timer.type === TimerType.INTERVAL) {
           intervals.push(timer);
         } else {
           timeouts.push(timer);
