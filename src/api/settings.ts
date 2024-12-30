@@ -1,5 +1,3 @@
-import { cloneObjectSafely } from '@/api/clone.ts';
-
 type TPanelKey =
   | 'eval'
   | 'media'
@@ -118,13 +116,13 @@ export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
 }
 
 export async function getSettings(): Promise<typeof DEFAULT_SETTINGS> {
-  const store = await chrome.storage.local.get([SETTINGS_VERSION]);
+  let store = await chrome.storage.local.get([SETTINGS_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
   if (isEmpty) {
-    store[SETTINGS_VERSION] = cloneObjectSafely(DEFAULT_SETTINGS);
     await chrome.storage.local.clear(); // rid off previous version settings
-    await chrome.storage.local.set(store);
+    await chrome.storage.local.set({ [SETTINGS_VERSION]: DEFAULT_SETTINGS });
+    store = await chrome.storage.local.get([SETTINGS_VERSION]);
   }
 
   return store[SETTINGS_VERSION];
