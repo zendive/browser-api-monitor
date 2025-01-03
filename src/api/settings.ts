@@ -29,7 +29,7 @@ export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
 
 const SETTINGS_VERSION = '1.0.7';
-const DEFAULT_PANELS: TSettingsPanel[] = [
+export const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
   { key: 'eval', label: 'eval', visible: true, wrap: false },

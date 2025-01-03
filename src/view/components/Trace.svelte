@@ -8,12 +8,11 @@
   } from '../../api/settings.ts';
   import TraceLink from './TraceLink.svelte';
 
-  export let trace: TTrace[];
-  export let traceId: string;
-
-  let traceForDebug: string | null = null;
-  $: hardToGet =
-    trace.length === 1 && trace[0].link === TAG_INVALID_CALLSTACK_LINK;
+  let { trace, traceId }: { trace: TTrace[]; traceId: string } = $props();
+  let traceForDebug: string | null = $state(null);
+  let isTraceUnavailable = $derived.by(
+    () => trace.length === 1 && trace[0].link === TAG_INVALID_CALLSTACK_LINK
+  );
 
   getSettings().then((settings) => {
     traceForDebug = settings.traceForDebug;
@@ -24,18 +23,22 @@
   });
 
   function onPlaceDebugger() {
-    setSettings({ traceForDebug: traceForDebug === traceId ? null : traceId });
+    setSettings({
+      traceForDebug:
+        traceForDebug === traceId ? null : $state.snapshot(traceId),
+    });
   }
 </script>
 
 {#each trace as stack, index (index)}
   {#if index !== 0}&nbsp;•{/if}
-  <TraceLink bind:link={stack.link} bind:name={stack.name} />
+  <TraceLink link={stack.link} name={stack.name} />
 {/each}
 
-{#if hardToGet}
-  <button on:click={onPlaceDebugger}
-    >debugger {#if traceId === traceForDebug}🔖{/if}</button
+{#if isTraceUnavailable}
+  <button onclick={onPlaceDebugger}
+    >debugger{#if traceId === traceForDebug}
+      🔖{/if}</button
   >
 {/if}
 

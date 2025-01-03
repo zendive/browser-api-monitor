@@ -14,14 +14,16 @@
   import TraceDomain from './TraceDomain.svelte';
   import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
 
-  export let caption: string = '';
-  export let metrics: TCancelIdleCallbackHistory[];
-
-  let field = DEFAULT_SORT.timersHistoryField;
-  let order = DEFAULT_SORT.timersHistoryOrder;
-
-  $: sortedMetrics = metrics.sort(
-    compareByFieldOrder(<keyof TCancelIdleCallbackHistory>field, order)
+  let {
+    metrics,
+    caption = '',
+  }: { metrics: TCancelIdleCallbackHistory[]; caption?: string } = $props();
+  let field = $state(DEFAULT_SORT.timersHistoryField);
+  let order = $state(DEFAULT_SORT.timersHistoryOrder);
+  let sortedMetrics = $derived.by(() =>
+    metrics.sort(
+      compareByFieldOrder(<keyof TCancelIdleCallbackHistory>field, order)
+    )
   );
 
   getSettings().then((settings) => {
@@ -29,15 +31,14 @@
     order = settings.sort.timersHistoryOrder;
   });
 
-  function onChangeSort(
-    e: CustomEvent<{ field: THistorySortField; order: TSortOrder }>
-  ) {
-    field = e.detail.field;
-    order = e.detail.order;
+  function onChangeSort(_field: THistorySortField, _order: TSortOrder) {
+    field = _field;
+    order = _order;
+
     setSettings({
       sort: {
-        timersHistoryField: field,
-        timersHistoryOrder: order,
+        timersHistoryField: $state.snapshot(_field),
+        timersHistoryOrder: $state.snapshot(_order),
       },
     });
   }
@@ -46,7 +47,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable bind:value={metrics.length} />
+    <Variable value={metrics.length} />
   </caption>
   <tbody>
     <tr>
@@ -57,7 +58,7 @@
           field={HistorySortField.calls}
           currentField={field}
           currentFieldOrder={order}
-          on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
+          eventChangeSorting={onChangeSort}>Called</TimersHistoryCellSort
         >
       </th>
       <th class="ta-c">
@@ -65,16 +66,16 @@
           field={HistorySortField.handler}
           currentField={field}
           currentFieldOrder={order}
-          on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
+          eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
         >
       </th>
     </tr>
 
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all">
-          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+          <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
         <td class="ta-c">{metric.calls}</td>
         <td class="ta-c">{metric.handler}</td>

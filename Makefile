@@ -10,7 +10,8 @@ install:
 
 dev:
 	rm -rf ./public/build
-	time deno run --watch --allow-env --allow-read --allow-run deno-bundle.ts --development
+	NODE_ENV=development \
+		deno run --watch --allow-env --allow-read --allow-run deno-bundle.ts
 	
 lint:
 	pnpm exec prettier . --write
@@ -21,7 +22,8 @@ test:
 
 prod: lint test
 	rm -rf ./public/build $(ZIP_CHROME_FILE)
-	time deno run --allow-env --allow-read --allow-run deno-bundle.ts --production
+	NODE_ENV=production \
+		time deno run --allow-env --allow-read --allow-run deno-bundle.ts --production
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
 
 .PHONY: clean install dev lint prod test

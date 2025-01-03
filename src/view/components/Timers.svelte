@@ -6,65 +6,69 @@
   import TimersClearHistory from './TimersClearHistory.svelte';
   import { compareByDelayThenHandlerDescending } from '../../api/comparator.ts';
 
-  export let metrics: TMetrics['wrapperMetrics'];
-
-  let timeouts: TOnlineTimerMetrics[];
-  let intervals: TOnlineTimerMetrics[];
-
-  $: {
-    intervals = [];
-    timeouts = [];
+  let { metrics }: { metrics: TMetrics['wrapperMetrics'] } = $props();
+  let {
+    timeouts,
+    intervals,
+  }: {
+    timeouts: TOnlineTimerMetrics[];
+    intervals: TOnlineTimerMetrics[];
+  } = $derived.by(() => {
+    const timeouts: TOnlineTimerMetrics[] = [];
+    const intervals: TOnlineTimerMetrics[] = [];
 
     if (metrics.onlineTimers?.length) {
       metrics.onlineTimers.sort(compareByDelayThenHandlerDescending);
 
       for (const timer of metrics.onlineTimers) {
-        if (timer.type === TimerType.INTERVAL) {
-          intervals.push(timer);
-        } else {
+        if (timer.type === TimerType.TIMEOUT) {
           timeouts.push(timer);
+        } else {
+          intervals.push(timer);
         }
       }
     }
-  }
+
+    return { timeouts, intervals };
+  });
 </script>
 
 {#if intervals.length}
-  <ActiveTimers caption="Active Intervals" bind:metrics={intervals} />
+  <ActiveTimers caption="Active Intervals" metrics={intervals} />
 {/if}
 
 {#if timeouts.length}
-  <ActiveTimers caption="Active Timeouts" bind:metrics={timeouts} />
+  <ActiveTimers caption="Active Timeouts" metrics={timeouts} />
 {/if}
 
 {#if metrics.setTimeoutHistory?.length}
   <TimersSetHistory
     caption="setTimeout History"
-    bind:metrics={metrics.setTimeoutHistory}
-    bind:clearTimeoutHistory={metrics.clearTimeoutHistory}
-    bind:clearIntervalHistory={metrics.clearIntervalHistory}
+    metrics={metrics.setTimeoutHistory}
+    clearTimeoutHistory={metrics.clearTimeoutHistory}
+    clearIntervalHistory={metrics.clearIntervalHistory}
   />
 {/if}
 
 {#if metrics.clearTimeoutHistory?.length}
   <TimersClearHistory
     caption="clearTimeout History"
-    bind:metrics={metrics.clearTimeoutHistory}
+    metrics={metrics.clearTimeoutHistory}
   />
 {/if}
 
 {#if metrics.setIntervalHistory?.length}
   <TimersSetHistory
     caption="setInterval History"
-    bind:metrics={metrics.setIntervalHistory}
-    bind:clearTimeoutHistory={metrics.clearTimeoutHistory}
-    bind:clearIntervalHistory={metrics.clearIntervalHistory}
+    metrics={metrics.setIntervalHistory}
+    clearTimeoutHistory={metrics.clearTimeoutHistory}
+    clearIntervalHistory={metrics.clearIntervalHistory}
   />
 {/if}
 
 {#if metrics.clearIntervalHistory?.length}
   <TimersClearHistory
     caption="clearInterval History"
-    bind:metrics={metrics.clearIntervalHistory}
+    metrics={metrics.clearIntervalHistory}
   />
 {/if}

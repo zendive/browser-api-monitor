@@ -2,13 +2,20 @@
   import type { TSettingsPanel } from '../../api/settings.ts';
   import Variable from './Variable.svelte';
 
-  export let panel: TSettingsPanel;
-  export let label: string;
-  export let count: number;
-  export let navSelector: string;
-  export let tooltip: string = '';
-
-  $: enabled = panel.visible && count > 0;
+  let {
+    panel,
+    label,
+    count,
+    navSelector,
+    tooltip = '',
+  }: {
+    panel: TSettingsPanel;
+    label: string;
+    count: number;
+    navSelector: string;
+    tooltip?: string;
+  } = $props();
+  let enabled: boolean = $derived.by(() => panel.visible && count > 0);
 
   function scrollTo() {
     const condition = navSelector
@@ -37,9 +44,12 @@
   <a
     href="void(0)"
     class:link-disabled={!enabled}
-    on:click|preventDefault={scrollTo}
+    onclick={(e) => {
+      e.preventDefault();
+      scrollTo();
+    }}
   >
-    <strong title={tooltip}>{label}</strong>: <Variable bind:value={count} />
+    <strong title={tooltip}>{label}</strong>: <Variable value={count} />
   </a>
 {/if}
 

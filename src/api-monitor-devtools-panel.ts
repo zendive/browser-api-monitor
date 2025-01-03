@@ -1,3 +1,4 @@
+import { mount } from 'svelte';
 import App from './view/App.svelte';
 
-new App({ target: document.body });
+mount(App, { target: document.body });

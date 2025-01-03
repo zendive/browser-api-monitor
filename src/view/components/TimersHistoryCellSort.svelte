@@ -1,31 +1,36 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import type { Snippet } from 'svelte';
   import {
-    DEFAULT_SETTINGS,
     ESortOrder,
     type THistorySortField,
+    type TSortOrder,
   } from '../../api/settings.ts';
 
-  export let field: THistorySortField =
-    DEFAULT_SETTINGS.sort.timersHistoryField;
-  export let currentField: THistorySortField =
-    DEFAULT_SETTINGS.sort.timersHistoryField;
-  export let currentFieldOrder = DEFAULT_SETTINGS.sort.timersHistoryOrder;
-
-  const dispatch = createEventDispatcher();
+  let {
+    field,
+    currentField,
+    currentFieldOrder,
+    eventChangeSorting,
+    children,
+  }: {
+    field: THistorySortField;
+    currentField: THistorySortField;
+    currentFieldOrder: TSortOrder;
+    eventChangeSorting: (field: THistorySortField, order: TSortOrder) => void;
+    children?: Snippet;
+  } = $props();
 
   function changeSort(e: MouseEvent) {
     e.preventDefault();
 
-    dispatch('changeSort', {
-      field: field,
-      order:
-        field !== currentField
-          ? ESortOrder.DESCENDING
-          : currentFieldOrder === ESortOrder.DESCENDING
-            ? ESortOrder.ASCENDING
-            : ESortOrder.DESCENDING,
-    });
+    eventChangeSorting(
+      field,
+      field !== currentField
+        ? ESortOrder.DESCENDING
+        : currentFieldOrder === ESortOrder.DESCENDING
+          ? ESortOrder.ASCENDING
+          : ESortOrder.DESCENDING
+    );
   }
 </script>
 
@@ -33,10 +38,10 @@
   href="void(0)"
   role="cell"
   tabindex="-1"
-  on:click={changeSort}
+  onclick={changeSort}
   title="Sort by&mldr;"
 >
-  <slot />
+  {@render children?.()}
   {#if field === currentField}
     <span
       class="icon -small"

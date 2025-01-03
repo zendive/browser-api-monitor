@@ -15,9 +15,9 @@
   import TickSpinner from './components/TickSpinner.svelte';
   import IdleCallbackMetrics from './components/IdleCallbackMetrics.svelte';
 
-  let spinner: TickSpinner | null = null;
-  let paused = false;
-  let msg: TMetrics;
+  let spinnerEl: TickSpinner | null = $state(null);
+  let paused = $state(false);
+  let msg: TMetrics | null = $state.raw(null);
 
   runtimeListen(async (o) => {
     if (o.msg === 'content-script-loaded') {
@@ -42,7 +42,7 @@
         });
       }
 
-      spinner?.tick();
+      spinnerEl?.tick();
     }
   });
 
@@ -81,14 +81,14 @@
 <section class="root">
   <header>
     {#if IS_DEV}
-      <button on:click={onDevReload} title="Reload" aria-label="Reload">
+      <button onclick={onDevReload} title="Reload" aria-label="Reload">
         <span class="icon -refresh"></span>
       </button>
       <div class="divider -thin"></div>
     {/if}
     <TogglePanels />
     <div class="divider -thin"></div>
-    <button on:click={onTogglePause} title="Toggle pause">
+    <button onclick={onTogglePause} title="Toggle pause">
       {#if paused}
         <span class="icon -play"></span>
       {:else}
@@ -97,7 +97,7 @@
     </button>
     <div class="divider -thin"></div>
     <button
-      on:click={onResetHistory}
+      onclick={onResetHistory}
       title="Reset history"
       aria-label="Reset history"
     >
@@ -105,11 +105,15 @@
     </button>
     <div class="divider -thin"></div>
 
-    <InfoBar bind:msg />
+    <div class="infobar">
+      {#if msg}
+        <InfoBar {msg} />
+      {/if}
+    </div>
 
-    {#if msg && !paused}
+    {#if !paused}
       <div class="divider"></div>
-      <TickSpinner bind:this={spinner} />
+      <TickSpinner bind:this={spinnerEl} />
     {/if}
 
     <div class="divider"></div>
@@ -117,17 +121,17 @@
     <div class="divider -anchor-right"></div>
   </header>
 
-  {#if msg}
-    <main>
+  <main>
+    {#if msg}
       {#if msg.wrapperMetrics.evalHistory?.length}
-        <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
+        <EvalMetrics metrics={msg.wrapperMetrics.evalHistory} />
       {/if}
-      <Media bind:metrics={msg.mediaMetrics} />
-      <Timers bind:metrics={msg.wrapperMetrics} />
-      <AnimationMetrics bind:metrics={msg.wrapperMetrics} />
-      <IdleCallbackMetrics bind:metrics={msg.wrapperMetrics} />
-    </main>
-  {/if}
+      <Media metrics={msg.mediaMetrics} />
+      <Timers metrics={msg.wrapperMetrics} />
+      <AnimationMetrics metrics={msg.wrapperMetrics} />
+      <IdleCallbackMetrics metrics={msg.wrapperMetrics} />
+    {/if}
+  </main>
 </section>
 
 <style lang="scss">
@@ -142,7 +146,13 @@
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       user-select: none;
-      // min-height: 1.4374rem;
+
+      .infobar {
+        display: flex;
+        flex-wrap: wrap;
+        flex-grow: 1;
+        align-items: center;
+      }
     }
     main {
       overflow-y: scroll;

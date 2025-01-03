@@ -4,7 +4,7 @@
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
 
-  export let metrics: TEvalHistory[];
+  let { metrics }: { metrics: TEvalHistory[] } = $props();
 
   function dynamicValue(value: unknown): string {
     if (value === '⟪undefined⟫') {
@@ -21,7 +21,7 @@
 
 <table data-navigation-tag="Eval History">
   <caption class="ta-l bc-invert"
-    >Eval History <Variable bind:value={metrics.length} /></caption
+    >Eval History <Variable value={metrics.length} /></caption
   >
   <tbody>
     <tr>
@@ -34,9 +34,9 @@
     </tr>
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all">
-          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+          <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
         <td>
           {#if metric.usesLocalScope}
@@ -52,7 +52,7 @@
           {/if}
         </td>
         <td class="ta-c">
-          <Variable bind:value={metric.calls} />
+          <Variable value={metric.calls} />
         </td>
         <td class="limit-width">
           <div class="code">{dynamicValue(metric.code)}</div>

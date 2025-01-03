@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { TMetrics } from '../../api-monitor-cs-main.ts';
   import {
+    DEFAULT_PANELS,
     getSettings,
     onSettingsChange,
     panelsArrayToVisibilityMap,
@@ -8,9 +9,11 @@
   } from '../../api/settings.ts';
   import InfoBarItem from './InfoBarItem.svelte';
 
-  export let msg: TMetrics;
+  let { msg }: { msg: TMetrics } = $props();
 
-  let panels: TPanelVisibilityMap;
+  let panels: TPanelVisibilityMap = $state.raw(
+    panelsArrayToVisibilityMap(DEFAULT_PANELS)
+  );
 
   getSettings().then((settings) => {
     panels = panelsArrayToVisibilityMap(settings.panels);
@@ -21,96 +24,85 @@
   });
 </script>
 
-<div class="infobar">
-  {#if msg}
-    <InfoBarItem
-      label="eval"
-      navSelector="Eval History"
-      bind:panel={panels.eval}
-      bind:count={msg.wrapperMetrics.callCounter.eval}
-    />
 
-    <InfoBarItem
-      label="Media"
-      navSelector="Videos|Audios"
-      bind:panel={panels.media}
-      bind:count={msg.mediaMetrics.total}
-    />
+  <InfoBarItem
+    label="eval"
+    navSelector="Eval History"
+    panel={panels.eval}
+    count={msg.wrapperMetrics.callCounter.eval}
+  />
 
-    <InfoBarItem
-      label="Active Timers"
-      navSelector="Active"
-      bind:panel={panels.activeTimers}
-      bind:count={msg.wrapperMetrics.callCounter.activeTimers}
-    />
+  <InfoBarItem
+    label="Media"
+    navSelector="Videos|Audios"
+    panel={panels.media}
+    count={msg.mediaMetrics.total}
+  />
 
-    <InfoBarItem
-      label="setTimeout"
-      navSelector="setTimeout History"
-      bind:panel={panels.setTimeout}
-      bind:count={msg.wrapperMetrics.callCounter.setTimeout}
-    />
+  <InfoBarItem
+    label="Active Timers"
+    navSelector="Active"
+    panel={panels.activeTimers}
+    count={msg.wrapperMetrics.callCounter.activeTimers}
+  />
 
-    <InfoBarItem
-      label="clearTimeout"
-      navSelector="clearTimeout History"
-      bind:panel={panels.clearTimeout}
-      bind:count={msg.wrapperMetrics.callCounter.clearTimeout}
-    />
+  <InfoBarItem
+    label="setTimeout"
+    navSelector="setTimeout History"
+    panel={panels.setTimeout}
+    count={msg.wrapperMetrics.callCounter.setTimeout}
+  />
 
-    <InfoBarItem
-      label="setInterval"
-      navSelector="setInterval History"
-      bind:panel={panels.setInterval}
-      bind:count={msg.wrapperMetrics.callCounter.setInterval}
-    />
+  <InfoBarItem
+    label="clearTimeout"
+    navSelector="clearTimeout History"
+    panel={panels.clearTimeout}
+    count={msg.wrapperMetrics.callCounter.clearTimeout}
+  />
 
-    <InfoBarItem
-      label="clearInterval"
-      navSelector="clearInterval History"
-      bind:panel={panels.clearInterval}
-      bind:count={msg.wrapperMetrics.callCounter.clearInterval}
-    />
+  <InfoBarItem
+    label="setInterval"
+    navSelector="setInterval History"
+    panel={panels.setInterval}
+    count={msg.wrapperMetrics.callCounter.setInterval}
+  />
 
-    <InfoBarItem
-      label="RAF"
-      tooltip="requestAnimationFrame"
-      navSelector="requestAnimationFrame History"
-      bind:panel={panels.requestAnimationFrame}
-      bind:count={msg.wrapperMetrics.callCounter.requestAnimationFrame}
-    />
+  <InfoBarItem
+    label="clearInterval"
+    navSelector="clearInterval History"
+    panel={panels.clearInterval}
+    count={msg.wrapperMetrics.callCounter.clearInterval}
+  />
 
-    <InfoBarItem
-      label="CAF"
-      tooltip="cancelAnimationFrame"
-      navSelector="cancelAnimationFrame History"
-      bind:panel={panels.cancelAnimationFrame}
-      bind:count={msg.wrapperMetrics.callCounter.cancelAnimationFrame}
-    />
+  <InfoBarItem
+    label="RAF"
+    tooltip="requestAnimationFrame"
+    navSelector="requestAnimationFrame History"
+    panel={panels.requestAnimationFrame}
+    count={msg.wrapperMetrics.callCounter.requestAnimationFrame}
+  />
 
-    <InfoBarItem
-      label="RIC"
-      tooltip="requestIdleCallback"
-      navSelector="requestIdleCallback History"
-      bind:panel={panels.requestIdleCallback}
-      bind:count={msg.wrapperMetrics.callCounter.requestIdleCallback}
-    />
+  <InfoBarItem
+    label="CAF"
+    tooltip="cancelAnimationFrame"
+    navSelector="cancelAnimationFrame History"
+    panel={panels.cancelAnimationFrame}
+    count={msg.wrapperMetrics.callCounter.cancelAnimationFrame}
+  />
 
-    <InfoBarItem
-      label="CIC"
-      tooltip="cancelIdleCallback"
-      navSelector="cancelIdleCallback History"
-      bind:panel={panels.cancelIdleCallback}
-      bind:count={msg.wrapperMetrics.callCounter.cancelIdleCallback}
-    />
-  {/if}
-</div>
+  <InfoBarItem
+    label="RIC"
+    tooltip="requestIdleCallback"
+    navSelector="requestIdleCallback History"
+    panel={panels.requestIdleCallback}
+    count={msg.wrapperMetrics.callCounter.requestIdleCallback}
+  />
 
-<style lang="scss">
-  .infobar {
-    display: flex;
-    flex-wrap: wrap;
-    flex-grow: 1;
-    align-items: center;
-  }
-</style>
+  <InfoBarItem
+    label="CIC"
+    tooltip="cancelIdleCallback"
+    navSelector="cancelIdleCallback History"
+    panel={panels.cancelIdleCallback}
+    count={msg.wrapperMetrics.callCounter.cancelIdleCallback}
+  />
+

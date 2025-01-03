@@ -5,17 +5,13 @@
   import Variable from './Variable.svelte';
   import MediaCommands from './MediaCommands.svelte';
 
-  export let metrics: TMediaMetrics;
+  let { metrics }: { metrics: TMediaMetrics } = $props();
 
   function isToggable(property: string) {
     return MEDIA_ELEMENT_TOGGABLE_PROPS.has(property);
   }
 
   function onToggleBoolean(property: string) {
-    if (!isToggable(property)) {
-      return;
-    }
-
     portPost({
       msg: 'media-command',
       mediaId: metrics.mediaId,
@@ -27,7 +23,7 @@
 
 <table class="group">
   <caption class="bc-invert ta-l">
-    <MediaCommands bind:mediaId={metrics.mediaId} />
+    <MediaCommands mediaId={metrics.mediaId} />
   </caption>
   <tbody>
     <tr>
@@ -38,7 +34,7 @@
             {#each Object.entries(metrics.events) as [label, value] (label)}
               <tr class:isPassive={0 === value} class:isActive={0 !== value}>
                 <td class="item-label">{label}</td>
-                <td class="item-value"><Variable bind:value /></td>
+                <td class="item-value"><Variable {value} /></td>
               </tr>
             {/each}
           </tbody>
@@ -63,15 +59,15 @@
                       class="isToggable"
                       role="button"
                       tabindex="0"
-                      on:keydown={(e) => {
+                      onkeydown={(e) => {
                         if (e.key !== 'Enter' && e.key !== ' ') return;
                         e.preventDefault();
                         onToggleBoolean(label);
                       }}
-                      on:click={() => void onToggleBoolean(label)}>{value}</i
+                      onclick={() => void onToggleBoolean(label)}>{value}</i
                     >
                   {:else if ['networkState', 'readyState'].includes(label)}
-                    <Variable bind:value />
+                    <Variable {value} />
                   {:else}
                     {value}
                   {/if}

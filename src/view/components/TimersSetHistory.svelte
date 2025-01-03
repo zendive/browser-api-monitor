@@ -21,37 +21,43 @@
   import Dialog from './Dialog.svelte';
   import Alert from './Alert.svelte';
 
-  export let caption: string;
-  export let metrics: TSetTimerHistory[];
-  export let clearTimeoutHistory: TClearTimerHistory[] | null;
-  export let clearIntervalHistory: TClearTimerHistory[] | null;
-
-  let field: THistorySortField = DEFAULT_SORT.timersHistoryField;
-  let order: TSortOrder = DEFAULT_SORT.timersHistoryOrder;
+  let {
+    metrics,
+    clearTimeoutHistory,
+    clearIntervalHistory,
+    caption,
+  }: {
+    metrics: TSetTimerHistory[];
+    clearTimeoutHistory: TClearTimerHistory[] | null;
+    clearIntervalHistory: TClearTimerHistory[] | null;
+    caption?: string;
+  } = $props();
+  let field: THistorySortField = $state(DEFAULT_SORT.timersHistoryField);
+  let order: TSortOrder = $state(DEFAULT_SORT.timersHistoryOrder);
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
-
-  $: sortedMetrics = metrics.sort(compareByFieldOrder(field, order));
+  let sortedMetrics = $derived.by(() =>
+    metrics.sort(compareByFieldOrder(field, order))
+  );
 
   getSettings().then((settings) => {
     field = settings.sort.timersHistoryField;
     order = settings.sort.timersHistoryOrder;
   });
 
-  function onChangeSort(
-    e: CustomEvent<{ field: THistorySortField; order: TSortOrder }>
-  ) {
-    field = e.detail.field;
-    order = e.detail.order;
+  function onChangeSort(_field: THistorySortField, _order: TSortOrder) {
+    field = _field;
+    order = _order;
+
     setSettings({
       sort: {
-        timersHistoryField: field,
-        timersHistoryOrder: order,
+        timersHistoryField: $state.snapshot(_field),
+        timersHistoryOrder: $state.snapshot(_order),
       },
     });
   }
 
-  let clearTimerHistoryMetrics: TClearTimerHistory[] = [];
+  let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
     if (!dialogEl || !alertEl || !regressors?.length) {
@@ -61,7 +67,12 @@
     for (let n = regressors.length - 1; n >= 0; n--) {
       const traceId = regressors[n];
       let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
-      record ??= clearIntervalHistory?.find((r) => r.traceId === traceId);
+
+      if (record) {
+        clearTimerHistoryMetrics.push(record);
+      }
+
+      record = clearIntervalHistory?.find((r) => r.traceId === traceId);
       if (record) {
         clearTimerHistoryMetrics.push(record);
       }
@@ -81,13 +92,13 @@
 
 <Dialog
   bind:this={dialogEl}
-  on:close={onCloseDialog}
+  eventClose={onCloseDialog}
   title="Places from which timer with current callstack was prematurely canceled"
   description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
 >
   <TimersClearHistory
     caption="Canceled by"
-    bind:metrics={clearTimerHistoryMetrics}
+    metrics={clearTimerHistoryMetrics}
   />
 </Dialog>
 
@@ -98,7 +109,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable bind:value={metrics.length} />
+    <Variable value={metrics.length} />
   </caption>
   <tbody>
     <tr>
@@ -109,7 +120,7 @@
           field={HistorySortField.calls}
           currentField={field}
           currentFieldOrder={order}
-          on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
+          eventChangeSorting={onChangeSort}>Called</TimersHistoryCellSort
         >
       </th>
       <th class="ta-c">
@@ -117,7 +128,7 @@
           field={HistorySortField.handler}
           currentField={field}
           currentFieldOrder={order}
-          on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
+          eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
         >
       </th>
       <th class="ta-r">
@@ -125,7 +136,7 @@
           field={HistorySortField.delay}
           currentField={field}
           currentFieldOrder={order}
-          on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
+          eventChangeSorting={onChangeSort}>Delay</TimersHistoryCellSort
         >
       </th>
       <th class="shaft"></th>
@@ -133,18 +144,20 @@
 
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all">
-          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+          <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
         <td class="ta-c">
-          <Variable bind:value={metric.calls} />{#if metric.canceledCounter}-<a
+          <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"
               href="void(0)"
               title={CALLED_ABORTED_TOOLTIP}
-              on:click|preventDefault={() =>
-                void onFindRegressors(metric.canceledByTraceIds)}
-              ><Variable bind:value={metric.canceledCounter} />/{metric
+              onclick={(e) => {
+                e.preventDefault();
+                onFindRegressors(metric.canceledByTraceIds);
+              }}
+              ><Variable value={metric.canceledCounter} />/{metric
                 .canceledByTraceIds?.length}
             </a>
           {/if}

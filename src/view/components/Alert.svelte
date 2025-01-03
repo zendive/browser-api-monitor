@@ -1,6 +1,15 @@
 <script lang="ts">
-  export let title: string = '';
-  export let dismissable: boolean = true;
+  import type { Snippet } from 'svelte';
+
+  let {
+    title = '',
+    dismissable = true,
+    children,
+  }: {
+    title: string;
+    dismissable?: boolean;
+    children?: Snippet;
+  } = $props();
   let selfEl: HTMLElement | null = null;
 
   export function show() {
@@ -42,7 +51,7 @@
   }
 </script>
 
-<div popover="manual" bind:this={selfEl} class="alert" on:toggle={onToggle}>
+<div popover="manual" bind:this={selfEl} class="alert" ontoggle={onToggle}>
   <header>
     <div class="title">{title}</div>
     {#if dismissable}
@@ -51,12 +60,15 @@
         aria-label="Close"
         class="close-icon"
         href="void(0)"
-        on:click|preventDefault={hide}><span class="icon -remove"></span></a
+        onclick={(e) => {
+          e.preventDefault();
+          hide();
+        }}><span class="icon -remove"></span></a
       >
     {/if}
   </header>
   <footer>
-    <slot />
+    {@render children?.()}
   </footer>
 </div>
 

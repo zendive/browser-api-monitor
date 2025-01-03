@@ -6,16 +6,14 @@
     TAG_INVALID_CALLSTACK_LINK,
   } from '../../api/const.ts';
 
-  export let link: string = '';
-  export let name;
-  let isSeen = false;
-
-  $: lineNumber = parseInt(
-    link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
-    10
+  let { name, link = '' }: { name: string | 0; link?: string } = $props();
+  let visited: boolean = $state(false);
+  let lineNumber = $derived.by(() =>
+    parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
   );
-  $: isSourceLess =
-    !isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link;
+  let isSourceLess = $derived.by(
+    () => !isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link
+  );
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
@@ -30,20 +28,21 @@
       columnNumber - 1
     );
 
-    isSeen = true;
+    visited = true;
   }
 </script>
 
 {#if isSourceLess}
-  <i class="no-link">
-    {name ? `${name} ${link}` : link}
-  </i>
+  <i class="no-link">{name ? `${name} ${link}` : link}</i>
 {:else}
   <a
     href={link}
     class="-trace"
-    class:isSeen
-    on:click|preventDefault={showStackTraceResource}>{name || link}</a
+    class:visited
+    onclick={(e) => {
+      e.preventDefault();
+      showStackTraceResource();
+    }}>{name || link}</a
   >
 {/if}
 
@@ -62,8 +61,7 @@
     text-overflow: ellipsis;
     max-width: 25rem;
 
-    &.isSeen {
-      color: var(--link-visited-text);
+    &.visited {
       background-color: var(--link-visited-bg);
     }
   }

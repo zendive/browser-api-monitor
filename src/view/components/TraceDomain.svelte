@@ -1,7 +1,7 @@
 <script lang="ts">
   import { TraceDomain, type TTraceDomain } from '../../api/wrappers.ts';
 
-  export let traceDomain: TTraceDomain;
+  let { traceDomain }: { traceDomain: TTraceDomain } = $props();
 </script>
 
 {#if traceDomain === TraceDomain.SAME}

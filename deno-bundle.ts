@@ -3,11 +3,16 @@ import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
-const isProd = !Deno.args.includes('--development');
-console.log('⌥ Deno-esbuild', Deno.args);
+const isProd = process.env.NODE_ENV === 'production';
+console.log('🚧', isProd ? 'production' : 'development');
 
 const buildOptions: BuildOptions = {
-  plugins: [esbuildSvelte({ preprocess: sveltePreprocess() })],
+  plugins: [
+    esbuildSvelte({
+      preprocess: sveltePreprocess(),
+      compilerOptions: { dev: !isProd },
+    }),
+  ],
   entryPoints: [
     './src/api-monitor-devtools.ts',
     './src/api-monitor-cs-main.ts',
@@ -33,7 +38,7 @@ const buildOptions: BuildOptions = {
 
 if (isProd) {
   build(buildOptions).catch((error) => {
-    console.error('💔', error);
+    console.error(error);
   });
 } else {
   const ctx = await context(buildOptions);

@@ -3,15 +3,18 @@
     getSettings,
     setSettings,
     WrapperCallstackType,
+    DEFAULT_SETTINGS,
     type TSettingsPanel,
     type TWrapperCallstackType,
   } from '../../api/settings.ts';
   import { runtimeListen } from '../../api/communication.ts';
   import Alert from './Alert.svelte';
 
-  const nonWrappable = ['media', 'activeTimers'];
-  let panels: TSettingsPanel[] = [];
-  let wrapperCallstackType: TWrapperCallstackType;
+  const NON_WRAPPABLE = ['media', 'activeTimers'];
+  let panels: TSettingsPanel[] = $state([]);
+  let wrapperCallstackType: TWrapperCallstackType = $state(
+    DEFAULT_SETTINGS.wrapperCallstackType
+  );
   let reloadMessageEl: Alert | null = null;
   let selfEl: HTMLElement | null = null;
 
@@ -29,12 +32,12 @@
 
   function onTogglePanelVisibility(index: number) {
     panels[index].visible = !panels[index].visible;
-    setSettings({ panels });
+    setSettings({ panels: $state.snapshot(panels) });
   }
 
   function onTogglePanelWrap(index: number) {
     panels[index].wrap = !panels[index].wrap;
-    setSettings({ panels });
+    setSettings({ panels: $state.snapshot(panels) });
     reloadMessageEl?.show();
   }
 
@@ -43,7 +46,9 @@
       wrapperCallstackType === WrapperCallstackType.FULL
         ? WrapperCallstackType.SHORT
         : WrapperCallstackType.FULL;
-    setSettings({ wrapperCallstackType });
+    setSettings({
+      wrapperCallstackType: $state.snapshot(wrapperCallstackType),
+    });
     reloadMessageEl?.show();
   }
 </script>
@@ -64,7 +69,7 @@
           ><button
             class="btn-toggle"
             title="Toggle callstack type: full/short"
-            on:click={onToggleWrapperCallstackType}
+            onclick={onToggleWrapperCallstackType}
             >{`${wrapperCallstackType === WrapperCallstackType.FULL ? 'full' : 'short'}`}</button
           ></td
         >
@@ -78,17 +83,19 @@
               class="toggle-visibility"
               class:hidden={!panel.visible}
               title="Toggle panel visibility: visible/hidden"
-              on:click|preventDefault={void onTogglePanelVisibility(index)}
-              >{panel.label}</a
+              onclick={(e) => {
+                e.preventDefault();
+                onTogglePanelVisibility(index);
+              }}>{panel.label}</a
             ></td
           >
 
-          {#if !nonWrappable.includes(panel.key)}
+          {#if !NON_WRAPPABLE.includes(panel.key)}
             <td
               ><button
                 class="btn-toggle"
                 title="Toggle function wrapping state: wrap/unwrap"
-                on:click={void onTogglePanelWrap(index)}
+                onclick={() => void onTogglePanelWrap(index)}
                 >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
               ></td
             >

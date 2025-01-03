@@ -12,10 +12,7 @@ import {
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
 import { Wrapper, TimerType, type TWrapperMetrics } from './api/wrappers.ts';
-import {
-  DEFAULT_SETTINGS,
-  panelsArrayToVisibilityMap,
-} from './api/settings.ts';
+import { DEFAULT_PANELS, panelsArrayToVisibilityMap } from './api/settings.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
@@ -41,7 +38,7 @@ const wrapRequestIdleCallbackOnce = callingOnce(() =>
 const wrapCancelIdleCallbackOnce = callingOnce(() =>
   wrapper.wrapCancelIdleCallback()
 );
-let panels = panelsArrayToVisibilityMap(DEFAULT_SETTINGS.panels);
+let panels = panelsArrayToVisibilityMap(DEFAULT_PANELS);
 const eachSecond = new Timer(
   () => {
     meetMedia(document.querySelectorAll('video,audio'));

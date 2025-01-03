@@ -5,8 +5,10 @@
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
 
-  export let caption: string = '';
-  export let metrics: TOnlineTimerMetrics[];
+  let {
+    metrics,
+    caption = '',
+  }: { metrics: TOnlineTimerMetrics[]; caption?: string } = $props();
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({
@@ -19,7 +21,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l"
-    >{caption} <Variable bind:value={metrics.length} /></caption
+    >{caption} <Variable value={metrics.length} /></caption
   >
   <tbody>
     <tr>
@@ -34,18 +36,18 @@
         <td class="ta-r">{metric.delay}</td>
         <td class="ta-c handler-cell">
           <span class="handler-value">{metric.handler}</span>
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
           <span
             class="icon -clear -small"
             role="button"
             tabindex="-1"
             title="Cancel"
-            on:click={() => void onRemoveHandler(metric)}
+            onclick={() => void onRemoveHandler(metric)}
           ></span>
         </td>
-        <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
+        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all w-full">
-          <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
+          <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
       </tr>
     {/each}

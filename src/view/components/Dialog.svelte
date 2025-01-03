@@ -1,11 +1,19 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import type { Snippet } from 'svelte';
 
-  export let title: string = '';
-  export let description: string = '';
+  let {
+    title = '',
+    description = '',
+    eventClose: closeEvent,
+    children,
+  }: {
+    title: string;
+    description: string;
+    eventClose?: () => void;
+    children?: Snippet;
+  } = $props();
+  let showContent: boolean = $state(false);
   let selfEl: HTMLDialogElement | null = null;
-  let showContent: boolean = false;
-  const dispatch = createEventDispatcher();
 
   export function show() {
     selfEl?.showModal();
@@ -36,11 +44,11 @@
     document.removeEventListener('keydown', onKeyboardEvent, { capture: true });
     selfEl?.removeEventListener('click', onSelfClick);
     showContent = false;
-    dispatch('close');
+    closeEvent?.();
   }
 </script>
 
-<dialog bind:this={selfEl} on:close={onClose}>
+<dialog bind:this={selfEl} onclose={onClose}>
   <header>
     <div class="title">
       {title}
@@ -54,12 +62,15 @@
       aria-label="Close"
       class="close-icon"
       href="void(0)"
-      on:click|preventDefault={hide}><span class="icon -remove"></span></a
+      onclick={(e) => {
+        e.preventDefault();
+        hide();
+      }}><span class="icon -remove"></span></a
     >
   </header>
 
   {#if showContent}
-    <slot />
+    {@render children?.()}
   {/if}
 </dialog>
 
