@@ -23,7 +23,7 @@ test:
 prod: lint test
 	rm -rf ./public/build $(ZIP_CHROME_FILE)
 	NODE_ENV=production \
-		time deno run --allow-env --allow-read --allow-run deno-bundle.ts --production
+		time deno run --allow-env --allow-read --allow-run deno-bundle.ts
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
 
 .PHONY: clean install dev lint prod test

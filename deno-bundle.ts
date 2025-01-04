@@ -1,10 +1,10 @@
-import { build, stop, context, type BuildOptions } from 'esbuild';
+import { build, context, type BuildOptions } from 'esbuild';
 import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
 const isProd = process.env.NODE_ENV === 'production';
-console.log('🚧', isProd ? 'production' : 'development');
+console.log('🚧', process.env.NODE_ENV);
 
 const buildOptions: BuildOptions = {
   plugins: [
@@ -30,6 +30,7 @@ const buildOptions: BuildOptions = {
   platform: 'browser',
   format: 'iife',
   target: 'esnext',
+  conditions: [`${process.env.NODE_ENV}`],
   minify: isProd,
   sourcemap: false,
   treeShaking: true,
