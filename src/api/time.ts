@@ -46,7 +46,11 @@ export class Stopper {
     return this.#finish - this.#start;
   }
 
-  static toString(msTime: number) {
+  static toString(msTime: number | unknown) {
+    if (typeof msTime !== 'number' || !Number.isFinite(msTime)) {
+      return;
+    }
+
     if (msTime < 1) {
       return `${Math.trunc(msTime * 1e3)}μs`;
     } else if (msTime < 3) {
@@ -56,7 +60,7 @@ export class Stopper {
       return `${Math.trunc(msTime)}ms`;
     } else if (msTime < 60e3) {
       const s = Math.trunc(msTime / 1e3) % 60;
-      const ms = msTime % 1e3;
+      const ms = Math.trunc(msTime % 1e3);
 
       return `${s}.${ms.toString().padStart(3, '0')}s`;
     }

@@ -32,7 +32,7 @@ describe('Stopper', () => {
     const value2 = stopper.value();
 
     expect(value).toBe(value2);
-    expect(/\d+ms/.test(Stopper.toString(stopper.value()))).toBe(true);
+    expect(/\d+ms/.test(Stopper.toString(stopper.value()) || '')).toBe(true);
   });
 
   test('elapsed continues counting after stop', async () => {
@@ -45,6 +45,14 @@ describe('Stopper', () => {
     const elapsed = stopper.elapsed();
 
     expect(elapsed > 2 * value).toBe(true);
+  });
+
+  test('toString()', () => {
+    expect(Stopper.toString(0.000006)).toMatch('0μs');
+    expect(Stopper.toString(0.123456)).toMatch('123μs');
+    expect(Stopper.toString(999.123456)).toMatch('999ms');
+    expect(Stopper.toString(5432.123456)).toMatch('5.432s');
+    expect(Stopper.toString(5 * 60e3)).toMatch('0:05:00');
   });
 });
 

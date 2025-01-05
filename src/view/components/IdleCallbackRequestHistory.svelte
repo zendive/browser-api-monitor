@@ -13,11 +13,11 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
+  import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
   import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
-
   import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
   import Dialog from './Dialog.svelte';
   import Alert from './Alert.svelte';
@@ -95,7 +95,7 @@
 >
   <IdleCallbackCancelHistory
     caption="Canceled by"
-    metrics={cicHistoryMetrics}
+    metrics={$state.snapshot(cicHistoryMetrics)}
   />
 </Dialog>
 
@@ -112,6 +112,15 @@
     <tr>
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
+      <th class="ta-c">didTimeout</th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.selfTime}
+          currentField={field}
+          currentFieldOrder={order}
+          eventChangeSorting={onChangeSort}>Self</TimersHistoryCellSort
+        >
+      </th>
       <th class="ta-c">
         <TimersHistoryCellSort
           field={HistorySortField.calls}
@@ -128,7 +137,6 @@
           eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
         >
       </th>
-      <th class="ta-c">didTimeout</th>
       <th class="ta-r">
         <TimersHistoryCellSort
           field={HistorySortField.delay}
@@ -143,9 +151,11 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td><TraceDomain traceDomain={metric.traceDomain} /></td>
-        <td class="wb-all">
-          <Trace trace={metric.trace} traceId={metric.traceId} />
-        </td>
+        <td class="wb-all"
+          ><Trace trace={metric.trace} traceId={metric.traceId} /></td
+        >
+        <td class="ta-c">{metric.didTimeout}</td>
+        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
         <td class="ta-c">
           <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"
@@ -161,11 +171,6 @@
           {/if}
         </td>
         <td class="ta-c">{metric.handler}</td>
-        <td class="ta-c">
-          {#if metric.didTimeout !== undefined}
-            {metric.didTimeout}
-          {/if}
-        </td>
         <td class="ta-r">{metric.delay}</td>
         <td>
           {#if metric.isOnline}

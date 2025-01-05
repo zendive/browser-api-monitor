@@ -15,7 +15,7 @@ export type THistorySortField =
   (typeof HistorySortField)[keyof typeof HistorySortField];
 export type TWrapperCallstackType =
   (typeof WrapperCallstackType)[keyof typeof WrapperCallstackType];
-export type TSortOrder = (typeof ESortOrder)[keyof typeof ESortOrder];
+export type TSortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 export type TPanelVisibilityMap = {
   [K in TPanelKey]: TSettingsPanel;
 };
@@ -87,16 +87,17 @@ export const HistorySortField = {
   calls: 'calls',
   handler: 'handler',
   delay: 'delay',
+  selfTime: 'selfTime',
 } as const;
 
-export const ESortOrder = {
+export const SortOrder = {
   ASCENDING: 0,
   DESCENDING: 1,
 } as const;
 
 export const DEFAULT_SORT = {
   timersHistoryField: HistorySortField.delay as THistorySortField,
-  timersHistoryOrder: ESortOrder.DESCENDING as TSortOrder,
+  timersHistoryOrder: SortOrder.DESCENDING as TSortOrder,
 };
 
 export const DEFAULT_SETTINGS = {

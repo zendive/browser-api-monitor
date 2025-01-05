@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TEvalHistory } from '../../api/wrappers.ts';
+  import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -31,6 +32,7 @@
       <th>Called</th>
       <th>Code</th>
       <th>Returns</th>
+      <th>Self</th>
     </tr>
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra">
@@ -60,6 +62,7 @@
         <td class="limit-width">
           <div class="code">{dynamicValue(metric.returnedValue)}</div>
         </td>
+        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
       </tr>
     {/each}
   </tbody>

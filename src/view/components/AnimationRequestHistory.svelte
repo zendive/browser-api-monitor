@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TAnimationHistory } from '../../api/wrappers.ts';
+  import type { TRequestAnimationFrameHistory } from '../../api/wrappers.ts';
   import {
     DEFAULT_SORT,
     getSettings,
@@ -9,6 +9,7 @@
     type TSortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
+  import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -17,11 +18,13 @@
   let {
     metrics,
     caption = '',
-  }: { metrics: TAnimationHistory[]; caption?: string } = $props();
+  }: { metrics: TRequestAnimationFrameHistory[]; caption?: string } = $props();
   let field = $state(DEFAULT_SORT.timersHistoryField);
   let order = $state(DEFAULT_SORT.timersHistoryOrder);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(<keyof TAnimationHistory>field, order))
+    metrics.sort(
+      compareByFieldOrder(<keyof TRequestAnimationFrameHistory>field, order)
+    )
   );
 
   getSettings().then((settings) => {
@@ -53,6 +56,14 @@
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <TimersHistoryCellSort
+          field={HistorySortField.selfTime}
+          currentField={field}
+          currentFieldOrder={order}
+          eventChangeSorting={onChangeSort}>Self</TimersHistoryCellSort
+        >
+      </th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
           field={HistorySortField.calls}
           currentField={field}
           currentFieldOrder={order}
@@ -75,6 +86,7 @@
         <td class="wb-all">
           <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
+        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
         <td class="ta-c">{metric.calls}</td>
         <td class="ta-c">{metric.handler}</td>
       </tr>

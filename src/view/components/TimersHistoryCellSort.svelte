@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import {
-    ESortOrder,
+    SortOrder,
     type THistorySortField,
     type TSortOrder,
   } from '../../api/settings.ts';
@@ -26,10 +26,10 @@
     eventChangeSorting(
       field,
       field !== currentField
-        ? ESortOrder.DESCENDING
-        : currentFieldOrder === ESortOrder.DESCENDING
-          ? ESortOrder.ASCENDING
-          : ESortOrder.DESCENDING
+        ? SortOrder.DESCENDING
+        : currentFieldOrder === SortOrder.DESCENDING
+          ? SortOrder.ASCENDING
+          : SortOrder.DESCENDING
     );
   }
 </script>
@@ -45,8 +45,8 @@
   {#if field === currentField}
     <span
       class="icon -small"
-      class:-up={currentFieldOrder === ESortOrder.ASCENDING}
-      class:-down={currentFieldOrder === ESortOrder.DESCENDING}
+      class:-up={currentFieldOrder === SortOrder.ASCENDING}
+      class:-down={currentFieldOrder === SortOrder.DESCENDING}
     ></span>
   {/if}
 </a>

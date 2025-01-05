@@ -66,6 +66,7 @@ export type TSetTimerHistory = {
   isOnline: boolean;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
+  selfTime: number | null;
 };
 export type TClearTimerHistory = {
   traceId: string;
@@ -75,7 +76,6 @@ export type TClearTimerHistory = {
   handler: number | string;
   delay: number | undefined | string;
 };
-
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
@@ -84,8 +84,17 @@ export type TEvalHistory = {
   returnedValue: any;
   code: any;
   usesLocalScope: boolean;
+  selfTime: number | null;
 };
-export type TAnimationHistory = {
+export type TRequestAnimationFrameHistory = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: TTraceDomain;
+  calls: number;
+  handler: number | undefined | string;
+  selfTime: number | null;
+};
+export type TCancelAnimationFrameHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: TTraceDomain;
@@ -103,6 +112,7 @@ export type TRequestIdleCallbackHistory = {
   isOnline: boolean;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
+  selfTime: number | null;
 };
 export type TCancelIdleCallbackHistory = {
   traceId: string;
@@ -118,8 +128,8 @@ export type TWrapperMetrics = {
   setIntervalHistory: TSetTimerHistory[] | null;
   clearIntervalHistory: TClearTimerHistory[] | null;
   evalHistory: TEvalHistory[] | null;
-  rafHistory: TAnimationHistory[] | null;
-  cafHistory: TAnimationHistory[] | null;
+  rafHistory: TRequestAnimationFrameHistory[] | null;
+  cafHistory: TCancelAnimationFrameHistory[] | null;
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
   callCounter: {
@@ -143,8 +153,8 @@ export class Wrapper {
   setIntervalHistory: Map<string, TSetTimerHistory> = new Map();
   clearIntervalHistory: Map<string, TClearTimerHistory> = new Map();
   evalHistory: Map<string, TEvalHistory> = new Map();
-  rafHistory: Map<string, TAnimationHistory> = new Map();
-  cafHistory: Map<string, TAnimationHistory> = new Map();
+  rafHistory: Map<string, TRequestAnimationFrameHistory> = new Map();
+  cafHistory: Map<string, TCancelAnimationFrameHistory> = new Map();
   /** mapping ric/cic handler to ric traceId */
   onlineIdleCallbackLookup: Map<number, string> = new Map();
   ricHistory: Map<string, TRequestIdleCallbackHistory> = new Map();
@@ -239,7 +249,11 @@ export class Wrapper {
     });
   }
 
-  timerOffline(handler: number, canceledByTraceId: string | null) {
+  timerOffline(
+    handler: number,
+    canceledByTraceId: string | null,
+    selfTime: number | null
+  ) {
     const timer = this.onlineTimers.get(handler);
     if (!timer) {
       // already offline
@@ -258,6 +272,7 @@ export class Wrapper {
     }
 
     record.isOnline = false;
+    record.selfTime = selfTime;
 
     if (canceledByTraceId === null) {
       return;
@@ -304,6 +319,7 @@ export class Wrapper {
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
         canceledCounter: 0,
         canceledByTraceIds: null,
+        selfTime: null,
       });
     }
   }
@@ -346,7 +362,8 @@ export class Wrapper {
     code: string,
     returnedValue: any,
     callstack: TCallstack,
-    usesLocalScope: boolean
+    usesLocalScope: boolean,
+    selfTime: number | null
   ) {
     const existing = this.evalHistory.get(callstack.traceId);
 
@@ -355,6 +372,7 @@ export class Wrapper {
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.calls++;
       existing.usesLocalScope = usesLocalScope;
+      existing.selfTime = selfTime;
     } else {
       this.evalHistory.set(callstack.traceId, {
         calls: 1,
@@ -364,7 +382,22 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
+        selfTime,
       });
+    }
+  }
+
+  updateRecordSelfTime(
+    map:
+      | Map<string, TRequestAnimationFrameHistory>
+      | Map<string, TSetTimerHistory>,
+    traceId: string,
+    selfTime: number
+  ) {
+    const record = map.get(traceId);
+
+    if (record) {
+      record.selfTime = selfTime;
     }
   }
 
@@ -381,6 +414,7 @@ export class Wrapper {
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
         calls: 1,
         handler,
+        selfTime: null,
       });
     }
   }
@@ -407,7 +441,7 @@ export class Wrapper {
     }
   }
 
-  ricOffline(deadline: IdleDeadline, callstack: TCallstack) {
+  ricOffline(deadline: IdleDeadline, callstack: TCallstack, selfTime: number) {
     const record = this.ricHistory.get(callstack.traceId);
 
     if (record) {
@@ -415,6 +449,7 @@ export class Wrapper {
 
       record.didTimeout = deadline.didTimeout;
       record.isOnline = false;
+      record.selfTime = selfTime;
     }
   }
 
@@ -448,6 +483,7 @@ export class Wrapper {
         isOnline: true,
         canceledCounter: 0,
         canceledByTraceIds: null,
+        selfTime: null,
       });
     }
 
@@ -590,8 +626,9 @@ export class Wrapper {
       }
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
-        this.ricOffline(deadline, callstack);
+        const start = performance.now();
         fn(deadline);
+        this.ricOffline(deadline, callstack, performance.now() - start);
       }, options);
       this.updateRicHistory(handler, delay, callstack);
 
@@ -626,7 +663,15 @@ export class Wrapper {
         debugger;
       }
       this.callCounter.requestAnimationFrame++;
-      const handler = this.native.requestAnimationFrame(fn);
+      const handler = this.native.requestAnimationFrame((...args) => {
+        const start = performance.now();
+        fn(...args);
+        this.updateRecordSelfTime(
+          this.rafHistory,
+          callstack.traceId,
+          performance.now() - start
+        );
+      });
       this.updateRafHistory(handler, callstack);
 
       return handler;
@@ -654,6 +699,7 @@ export class Wrapper {
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;
+      let selfTime = null;
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, code);
       if (this.#traceForDebug === callstack.traceId) {
@@ -662,7 +708,9 @@ export class Wrapper {
 
       try {
         this.callCounter.eval++;
+        const start = performance.now();
         rv = this.native.eval(code);
+        selfTime = performance.now() - start;
       } catch (error: unknown) {
         if (error instanceof Error && 'ReferenceError' === error.name) {
           // most likely a side effect of `eval` reassigning
@@ -674,7 +722,7 @@ export class Wrapper {
         }
       }
 
-      this.updateEvalHistory(code, rv, callstack, usesLocalScope);
+      this.updateEvalHistory(code, rv, callstack, usesLocalScope, selfTime);
 
       if (throwError) {
         throw throwError;
@@ -701,7 +749,7 @@ export class Wrapper {
       this.callCounter.setTimeout++;
       const handler = this.native.setTimeout(
         (...params: any[]) => {
-          this.timerOffline(handler, null);
+          const start = performance.now();
           if (isEval) {
             this.callCounter.eval++;
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
@@ -709,6 +757,7 @@ export class Wrapper {
           } else {
             code(...params);
           }
+          this.timerOffline(handler, null, performance.now() - start);
         },
         delay,
         ...args
@@ -727,7 +776,8 @@ export class Wrapper {
           code,
           TAG_EVAL_RETURN_SET_TIMEOUT,
           callstack,
-          false
+          false,
+          null
         );
       }
 
@@ -754,7 +804,7 @@ export class Wrapper {
       );
 
       if (handler !== undefined) {
-        this.timerOffline(handler, callstack.traceId);
+        this.timerOffline(handler, callstack.traceId, null);
       }
 
       this.callCounter.clearTimeout++;
@@ -779,6 +829,7 @@ export class Wrapper {
       this.callCounter.setInterval++;
       const handler = this.native.setInterval(
         (...params: any[]) => {
+          const start = performance.now();
           if (isEval) {
             this.callCounter.eval++;
             // see https://developer.mozilla.org/docs/Web/API/setInterval
@@ -786,6 +837,11 @@ export class Wrapper {
           } else {
             code(...params);
           }
+          this.updateRecordSelfTime(
+            this.setIntervalHistory,
+            callstack.traceId,
+            performance.now() - start
+          );
         },
         delay,
         ...args
@@ -804,7 +860,8 @@ export class Wrapper {
           code,
           TAG_EVAL_RETURN_SET_INTERVAL,
           callstack,
-          false
+          false,
+          null
         );
       }
 
@@ -831,7 +888,7 @@ export class Wrapper {
       );
 
       if (handler !== undefined) {
-        this.timerOffline(handler, callstack.traceId);
+        this.timerOffline(handler, callstack.traceId, null);
       }
 
       this.callCounter.clearInterval++;

@@ -13,6 +13,7 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
+  import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -37,7 +38,7 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(field, order))
+    metrics.sort(compareByFieldOrder(<keyof TSetTimerHistory>field, order))
   );
 
   getSettings().then((settings) => {
@@ -98,7 +99,7 @@
 >
   <TimersClearHistory
     caption="Canceled by"
-    metrics={clearTimerHistoryMetrics}
+    metrics={$state.snapshot(clearTimerHistoryMetrics)}
   />
 </Dialog>
 
@@ -115,6 +116,14 @@
     <tr>
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <TimersHistoryCellSort
+          field={HistorySortField.selfTime}
+          currentField={field}
+          currentFieldOrder={order}
+          eventChangeSorting={onChangeSort}>Self</TimersHistoryCellSort
+        >
+      </th>
       <th class="ta-c">
         <TimersHistoryCellSort
           field={HistorySortField.calls}
@@ -148,6 +157,7 @@
         <td class="wb-all">
           <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
+        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
         <td class="ta-c">
           <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"

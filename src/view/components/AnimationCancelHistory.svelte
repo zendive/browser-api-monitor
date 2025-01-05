@@ -1,24 +1,29 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../api/wrappers.ts';
+  import type { TCancelAnimationFrameHistory } from '../../api/wrappers.ts';
   import {
     DEFAULT_SORT,
     getSettings,
-    HistorySortField,
     setSettings,
+    HistorySortField,
     type THistorySortField,
     type TSortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
   import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
-  import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
 
-  let { metrics, caption }: { metrics: TClearTimerHistory[]; caption: string } =
-    $props();
-  let field: THistorySortField = $state(DEFAULT_SORT.timersHistoryField);
-  let order: TSortOrder = $state(DEFAULT_SORT.timersHistoryOrder);
+  let {
+    metrics,
+    caption = '',
+  }: { metrics: TCancelAnimationFrameHistory[]; caption?: string } = $props();
+  let field = $state(DEFAULT_SORT.timersHistoryField);
+  let order = $state(DEFAULT_SORT.timersHistoryOrder);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(<keyof TClearTimerHistory>field, order))
+    metrics.sort(
+      compareByFieldOrder(<keyof TCancelAnimationFrameHistory>field, order)
+    )
   );
 
   getSettings().then((settings) => {
@@ -64,18 +69,17 @@
           eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
         >
       </th>
-      <th class="ta-r">
-        <TimersHistoryCellSort
-          field={HistorySortField.delay}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Delay</TimersHistoryCellSort
-        >
-      </th>
     </tr>
 
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersClearHistoryMetric {metric} />
+      <tr class="t-zebra">
+        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
+        <td class="wb-all">
+          <Trace trace={metric.trace} traceId={metric.traceId} />
+        </td>
+        <td class="ta-c">{metric.calls}</td>
+        <td class="ta-c">{metric.handler}</td>
+      </tr>
     {/each}
   </tbody>
 </table>
