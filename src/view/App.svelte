@@ -4,7 +4,7 @@
   import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '../api/const.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
   import type { TMetrics } from '../api-monitor-cs-main.ts';
-  import Timers from './components/TimersMetrics.svelte';
+  import TimersMetrics from './components/TimersMetrics.svelte';
   import Media from './components/Media.svelte';
   import EvalMetrics from './components/EvalMetrics.svelte';
   import AnimationMetrics from './components/AnimationMetrics.svelte';
@@ -127,7 +127,7 @@
         <EvalMetrics metrics={msg.wrapperMetrics.evalHistory} />
       {/if}
       <Media metrics={msg.mediaMetrics} />
-      <Timers metrics={msg.wrapperMetrics} />
+      <TimersMetrics metrics={msg.wrapperMetrics} />
       <AnimationMetrics metrics={msg.wrapperMetrics} />
       <IdleCallbackMetrics metrics={msg.wrapperMetrics} />
     {/if}
