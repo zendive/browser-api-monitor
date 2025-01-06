@@ -262,28 +262,30 @@ export class Wrapper {
 
     this.onlineTimers.delete(handler);
 
-    const record =
+    const setTimerRecord =
       timer.type === TimerType.TIMEOUT
         ? this.setTimeoutHistory.get(timer.traceId)
         : this.setIntervalHistory.get(timer.traceId);
 
-    if (!record) {
+    if (!setTimerRecord) {
       return;
     }
 
-    record.isOnline = false;
-    record.selfTime = selfTime;
+    if (setTimerRecord.handler === handler) {
+      setTimerRecord.isOnline = false;
+    }
+    setTimerRecord.selfTime = selfTime;
 
     if (canceledByTraceId === null) {
       return;
     }
 
-    if (record.canceledByTraceIds === null) {
-      record.canceledByTraceIds = [canceledByTraceId];
-    } else if (!record.canceledByTraceIds.includes(canceledByTraceId)) {
-      record.canceledByTraceIds.push(canceledByTraceId);
+    if (setTimerRecord.canceledByTraceIds === null) {
+      setTimerRecord.canceledByTraceIds = [canceledByTraceId];
+    } else if (!setTimerRecord.canceledByTraceIds.includes(canceledByTraceId)) {
+      setTimerRecord.canceledByTraceIds.push(canceledByTraceId);
     }
-    record.canceledCounter++;
+    setTimerRecord.canceledCounter++;
   }
 
   updateSetTimersHistory(
@@ -441,15 +443,22 @@ export class Wrapper {
     }
   }
 
-  ricOffline(deadline: IdleDeadline, callstack: TCallstack, selfTime: number) {
-    const record = this.ricHistory.get(callstack.traceId);
+  ricOffline(
+    handler: number,
+    callstack: TCallstack,
+    deadline: IdleDeadline,
+    selfTime: number
+  ) {
+    const ricRecord = this.ricHistory.get(callstack.traceId);
 
-    if (record) {
-      this.onlineIdleCallbackLookup.delete(Number(record.handler));
+    if (ricRecord) {
+      this.onlineIdleCallbackLookup.delete(Number(ricRecord.handler));
 
-      record.didTimeout = deadline.didTimeout;
-      record.isOnline = false;
-      record.selfTime = selfTime;
+      ricRecord.didTimeout = deadline.didTimeout;
+      if (ricRecord.handler === handler) {
+        ricRecord.isOnline = false;
+      }
+      ricRecord.selfTime = selfTime;
     }
   }
 
@@ -516,7 +525,9 @@ export class Wrapper {
     if (ricRecord) {
       this.onlineIdleCallbackLookup.delete(Number(handler));
 
-      ricRecord.isOnline = false;
+      if (ricRecord.handler === handler) {
+        ricRecord.isOnline = false;
+      }
       ricRecord.didTimeout = undefined;
       if (ricRecord.canceledByTraceIds === null) {
         ricRecord.canceledByTraceIds = [callstack.traceId];
@@ -628,7 +639,12 @@ export class Wrapper {
       const handler = this.native.requestIdleCallback((deadline) => {
         const start = performance.now();
         fn(deadline);
-        this.ricOffline(deadline, callstack, performance.now() - start);
+        this.ricOffline(
+          handler,
+          callstack,
+          deadline,
+          performance.now() - start
+        );
       }, options);
       this.updateRicHistory(handler, delay, callstack);
 
