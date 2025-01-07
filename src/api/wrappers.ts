@@ -773,7 +773,13 @@ export class Wrapper {
           } else {
             code(...params);
           }
-          this.timerOffline(handler, null, performance.now() - start);
+          const stop = performance.now() - start;
+          this.timerOffline(handler, null, stop);
+          this.updateRecordSelfTime(
+            this.setTimeoutHistory,
+            callstack.traceId,
+            stop
+          );
         },
         delay,
         ...args
