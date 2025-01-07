@@ -22,7 +22,7 @@ const TEST_STACK = `Error: ${TRACE_ERROR_MESSAGE}
         at call2 (async https://example2.com/bundle3.js:4:5)
         at call1 (https://example1.com/bundle2.js:3:4)`;
 
-describe('wrappers full', () => {
+describe('wrappers', () => {
   let wrapper: Wrapper;
 
   beforeEach(() => {
@@ -51,16 +51,17 @@ describe('wrappers full', () => {
     expect(wrapper.setTimeoutHistory.size).toBe(0);
     expect(wrapper.clearTimeoutHistory.size).toBe(0);
 
-    const handler = setTimeout(() => {}, 123);
+    const handler = setTimeout(() => {}, 1e3);
+
     expect(wrapper.onlineTimers.size).toBe(1);
     clearTimeout(handler);
-
     expect(wrapper.onlineTimers.size).toBe(0);
+
     expect(wrapper.clearTimeoutHistory.size).toBe(1);
     expect(wrapper.setTimeoutHistory.size).toBe(1);
   });
 
-  test('setTimeoutHistory - isOnline/canceledByTraceId handled after timer fired', async () => {
+  test('setTimeoutHistory - isOnline/canceledByTraceId/selfTime handled after timer fired', async () => {
     const DELAY = 5;
     setTimeout(() => {}, DELAY);
 
@@ -72,9 +73,10 @@ describe('wrappers full', () => {
 
     expect(rec.isOnline).toBe(false);
     expect(rec.canceledByTraceIds).toBe(null);
+    expect(rec.selfTime).not.toBeNull();
   });
 
-  test('setTimeoutHistory - isOnline/canceledByTraceId handled after timer canceled', () => {
+  test('setTimeoutHistory - isOnline/canceledByTraceId/selfTime handled after timer canceled', () => {
     function setTimeout_function(delay: number) {
       return Number(setTimeout(() => {}, delay));
     }
@@ -96,6 +98,7 @@ describe('wrappers full', () => {
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
     expect(rec.isOnline).toBe(false);
+    expect(rec.selfTime).toBeNull();
     if (rec.canceledByTraceIds) {
       expect(rec.canceledByTraceIds.length).toBe(2);
 
@@ -121,6 +124,7 @@ describe('wrappers full', () => {
     expect(rec.traceId.length).toBeGreaterThan(0);
 
     clearTimeout(handler);
+    expect(rec.selfTime).toBeNull();
   });
 
   test('setTimeoutHistory - invalid delay', () => {
@@ -133,12 +137,35 @@ describe('wrappers full', () => {
     expect(rec.isEval).toBe(false);
   });
 
+  test('setTimeout - poling registers selfTime', async () => {
+    await new Promise<void>((resolve) => {
+      let called = 0;
+      let handler: number;
+
+      function poll() {
+        called++;
+
+        if (called > 1) {
+          resolve();
+        } else {
+          handler && clearTimeout(handler);
+          handler = Number(setTimeout(poll, 2));
+        }
+      }
+      poll();
+    });
+
+    const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
+    expect(rec.selfTime).not.toBeNull();
+  }, 1e3);
+
   test('clearTimeoutHistory - valid handler', () => {
     const handler = setTimeout(() => {}, 1e3);
     clearTimeout(handler);
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
+    expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
   });
 
@@ -182,9 +209,13 @@ describe('wrappers full', () => {
     expect(rec.isOnline).toBe(false);
   });
 
-  test('setIntervalHistory - valid delay', () => {
+  test('setIntervalHistory - valid delay', async () => {
     const DELAY = 123;
-    const handler = setInterval(() => {}, DELAY);
+    const handler = await new Promise<number>((resolve) => {
+      const handler = setInterval(() => {
+        resolve(Number(handler));
+      }, DELAY);
+    });
     const rec = Array.from(wrapper.setIntervalHistory.values())[0];
 
     expect(rec.calls).toBe(1);
@@ -192,6 +223,7 @@ describe('wrappers full', () => {
     expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(rec.selfTime).not.toBeNull();
 
     clearInterval(handler);
   });
@@ -250,6 +282,7 @@ describe('wrappers full', () => {
     expect(rec.returnedValue).toBe(RESULT);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(rec.selfTime).not.toBeNull();
   });
 
   test('evalHistory - detects local scope usage', () => {
@@ -304,6 +337,7 @@ describe('wrappers full', () => {
     expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
+    expect(rec.selfTime).not.toBeNull();
     expect(wrapper.callCounter.requestAnimationFrame).toBe(1);
   });
 
