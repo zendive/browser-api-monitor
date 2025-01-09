@@ -242,3 +242,7 @@ export class MeanAggregator {
     return Math.sqrt(this.#M2 / this.numberOfSamples);
   }
 }
+
+export function trim2microsecond(ms: number | null) {
+  return ms === null ? null : Math.trunc(ms * 1e3) / 1e3;
+}

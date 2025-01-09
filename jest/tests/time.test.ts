@@ -7,7 +7,13 @@ global.cancelIdleCallback = function noop() {};
 // }}
 
 import { describe, expect, test, beforeEach } from '@jest/globals';
-import { Stopper, Timer, Fps, MeanAggregator } from '../../src/api/time.ts';
+import {
+  Stopper,
+  Timer,
+  Fps,
+  MeanAggregator,
+  trim2microsecond,
+} from '../../src/api/time.ts';
 
 function wait(timeout: number) {
   return new Promise((resolve) => {
@@ -168,5 +174,12 @@ describe('MeanAggregator', () => {
     expect(mean.minimum).toBe(SAMPLES[0]);
     expect(mean.maximum).toBe(SAMPLES[SAMPLES.length - 1]);
     expect(mean.standardDeviation).toBe(34.52052529534663);
+  });
+});
+
+describe('trim2microsecond', () => {
+  test('trims to microsecond', () => {
+    expect(trim2microsecond(null)).toBe(null);
+    expect(trim2microsecond(1.111999)).toBe(1.111);
   });
 });

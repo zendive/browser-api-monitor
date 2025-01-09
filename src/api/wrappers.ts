@@ -25,6 +25,7 @@ import {
   type TPanelVisibilityMap,
 } from './settings.ts';
 import { hashString } from './hash.ts';
+import { trim2microsecond } from './time.ts';
 
 export type TTrace = {
   name: string | 0;
@@ -274,7 +275,7 @@ export class Wrapper {
     if (setTimerRecord.handler === handler) {
       setTimerRecord.isOnline = false;
     }
-    setTimerRecord.selfTime = selfTime;
+    setTimerRecord.selfTime = trim2microsecond(selfTime);
 
     if (canceledByTraceId === null) {
       return;
@@ -374,7 +375,7 @@ export class Wrapper {
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.calls++;
       existing.usesLocalScope = usesLocalScope;
-      existing.selfTime = selfTime;
+      existing.selfTime = trim2microsecond(selfTime);
     } else {
       this.evalHistory.set(callstack.traceId, {
         calls: 1,
@@ -399,7 +400,7 @@ export class Wrapper {
     const record = map.get(traceId);
 
     if (record) {
-      record.selfTime = selfTime;
+      record.selfTime = trim2microsecond(selfTime);
     }
   }
 
@@ -458,7 +459,7 @@ export class Wrapper {
       if (ricRecord.handler === handler) {
         ricRecord.isOnline = false;
       }
-      ricRecord.selfTime = selfTime;
+      ricRecord.selfTime = trim2microsecond(selfTime);
     }
   }
 
