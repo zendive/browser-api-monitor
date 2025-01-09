@@ -28,17 +28,27 @@
     <tr>
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
-      <th>Scope</th>
+      <th>Self</th>
       <th>Called</th>
       <th>Code</th>
       <th>Returns</th>
-      <th>Self</th>
+      <th>Scope</th>
     </tr>
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all">
           <Trace trace={metric.trace} traceId={metric.traceId} />
+        </td>
+        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
+        <td class="ta-c">
+          <Variable value={metric.calls} />
+        </td>
+        <td class="limit-width">
+          <div class="code">{dynamicValue(metric.code)}</div>
+        </td>
+        <td class="limit-width">
+          <div class="code">{dynamicValue(metric.returnedValue)}</div>
         </td>
         <td>
           {#if metric.usesLocalScope}
@@ -53,16 +63,6 @@
             >
           {/if}
         </td>
-        <td class="ta-c">
-          <Variable value={metric.calls} />
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.code)}</div>
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.returnedValue)}</div>
-        </td>
-        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
       </tr>
     {/each}
   </tbody>
