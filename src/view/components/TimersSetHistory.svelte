@@ -13,7 +13,7 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
-  import { Stopper } from '../../api/time.ts';
+  import { delayTitle, Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -173,7 +173,7 @@
           {/if}
         </td>
         <td class="ta-c">{metric.handler}</td>
-        <td class="ta-r">{metric.delay}</td>
+        <td class="ta-r" title={delayTitle(metric.delay)}>{metric.delay}</td>
         <td>
           {#if metric.isOnline}
             <span title="Scheduled" class="icon -scheduled -small"></span>

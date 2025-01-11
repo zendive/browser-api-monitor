@@ -59,6 +59,7 @@ describe('Stopper', () => {
     expect(Stopper.toString(999.123456)).toMatch('999ms');
     expect(Stopper.toString(5432.123456)).toMatch('5.432s');
     expect(Stopper.toString(5 * 60e3)).toMatch('0:05:00');
+    expect(Stopper.toString(987654321.0123456789)).toMatch('274:20:54');
   });
 });
 

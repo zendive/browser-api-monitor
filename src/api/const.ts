@@ -2,10 +2,10 @@ export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; //MS
+export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
-export const FRAME_1of60 = 0.0166666666667;
+export const FRAME_1of60 = 0.0166666666667; // ms
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
 export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
 
@@ -99,7 +99,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-export const MEDIA_ELEMENT_TOGGABLE_PROPS = new Set([
+export const MEDIA_ELEMENT_TOGGABLE_PROPS = /*@__PURE__*/ new Set([
   'autoplay',
   'playsInline',
   'loop',

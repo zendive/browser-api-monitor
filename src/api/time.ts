@@ -65,8 +65,8 @@ export class Stopper {
       return `${s}.${ms.toString().padStart(3, '0')}s`;
     }
 
-    const h = Math.trunc(msTime / 1e3 / 60 / 60);
-    const m = Math.trunc(msTime / 1e3 / 60) % 60;
+    const h = Math.trunc(msTime / 3600e3);
+    const m = Math.trunc(msTime / 60e3) % 60;
     const s = Math.trunc(msTime / 1e3) % 60;
 
     return `${h.toString().padStart(2, '0')}:${m
@@ -245,4 +245,8 @@ export class MeanAggregator {
 
 export function trim2microsecond(ms: number | null) {
   return ms === null ? null : Math.trunc(ms * 1e3) / 1e3;
+}
+
+export function delayTitle(delay: number | unknown): string | undefined {
+  return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
 }
