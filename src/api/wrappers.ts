@@ -19,11 +19,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
 } from './const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from './clone.ts';
-import {
-  WrapperCallstackType,
-  type TWrapperCallstackType,
-  type TPanelVisibilityMap,
-} from './settings.ts';
+import { EWrapperCallstackType, type TPanelVisibilityMap } from './settings.ts';
 import { hashString } from './hash.ts';
 import { trim2microsecond } from './time.ts';
 
@@ -185,7 +181,7 @@ export class Wrapper {
   };
   selfTraceLink = '';
   #traceForDebug: string | null = null;
-  #callstackType: TWrapperCallstackType = WrapperCallstackType.FULL;
+  #callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
 
   constructor() {
     this.#initSelfTrace();
@@ -225,7 +221,7 @@ export class Wrapper {
     this.#traceForDebug = traceId;
   }
 
-  setCallstackType(type: TWrapperCallstackType) {
+  setCallstackType(type: EWrapperCallstackType) {
     this.#callstackType = type;
   }
 
@@ -920,7 +916,7 @@ export class Wrapper {
   }
 
   createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
-    if (this.#callstackType === WrapperCallstackType.FULL) {
+    if (this.#callstackType === EWrapperCallstackType.FULL) {
       return this.#createFullCallstack(e, uniqueTrait);
     } else {
       return this.#createShortCallstack(e, uniqueTrait);

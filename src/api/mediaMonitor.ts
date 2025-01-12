@@ -13,14 +13,13 @@ type TMediaModel = {
   metrics: TMediaMetrics;
   eventListener: (e: Event) => void;
 };
-export const TMediaType = {
-  VIDEO: 0,
-  AUDIO: 1,
-} as const;
-type TMediaTypeKeys = (typeof TMediaType)[keyof typeof TMediaType];
+export enum EMediaType {
+  VIDEO,
+  AUDIO,
+}
 export type TMediaMetrics = {
   mediaId: string;
-  type: TMediaTypeKeys;
+  type: EMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
 };
@@ -168,7 +167,7 @@ function startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
     metrics: {
       mediaId,
       type:
-        el instanceof HTMLVideoElement ? TMediaType.VIDEO : TMediaType.AUDIO,
+        el instanceof HTMLVideoElement ? EMediaType.VIDEO : EMediaType.AUDIO,
       events,
       props,
     },

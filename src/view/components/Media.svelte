@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { TMediaType, type TMediaTelemetry } from '../../api/mediaMonitor.ts';
+  import { EMediaType, type TMediaTelemetry } from '../../api/mediaMonitor.ts';
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from './Variable.svelte';
 
   let { metrics = { total: 0, collection: [] } }: { metrics: TMediaTelemetry } =
     $props();
   let videos = $derived.by(() =>
-    metrics.collection.filter((v) => v.type === TMediaType.VIDEO)
+    metrics.collection.filter((v) => v.type === EMediaType.VIDEO)
   );
   let audios = $derived.by(() =>
-    metrics.collection.filter((v) => v.type === TMediaType.AUDIO)
+    metrics.collection.filter((v) => v.type === EMediaType.AUDIO)
   );
 </script>
 

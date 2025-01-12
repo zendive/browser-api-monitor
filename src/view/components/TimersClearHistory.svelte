@@ -1,39 +1,37 @@
 <script lang="ts">
   import type { TClearTimerHistory } from '../../api/wrappers.ts';
   import {
-    DEFAULT_SORT,
+    DEFAULT_SORT_CLEAR_TIMERS,
     getSettings,
-    HistorySortField,
     setSettings,
-    type THistorySortField,
-    type TSortOrder,
+    type ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
-  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
+  import SortableColumn from './SortableColumn.svelte';
   import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
 
   let { metrics, caption }: { metrics: TClearTimerHistory[]; caption: string } =
     $props();
-  let field: THistorySortField = $state(DEFAULT_SORT.timersHistoryField);
-  let order: TSortOrder = $state(DEFAULT_SORT.timersHistoryOrder);
+  let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
+  let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(<keyof TClearTimerHistory>field, order))
+    metrics.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
-    field = settings.sort.timersHistoryField;
-    order = settings.sort.timersHistoryOrder;
+    sortField = settings.sortClearTimers.field;
+    sortOrder = settings.sortClearTimers.order;
   });
 
-  function onChangeSort(_field: THistorySortField, _order: TSortOrder) {
-    field = _field;
-    order = _order;
+  function onChangeSort(_field: string, _order: ESortOrder) {
+    sortField = <keyof TClearTimerHistory>_field;
+    sortOrder = _order;
 
     setSettings({
-      sort: {
-        timersHistoryField: $state.snapshot(_field),
-        timersHistoryOrder: $state.snapshot(_order),
+      sortClearTimers: {
+        field: $state.snapshot(sortField),
+        order: $state.snapshot(sortOrder),
       },
     });
   }
@@ -49,27 +47,27 @@
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">
-        <TimersHistoryCellSort
-          field={HistorySortField.calls}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Called</TimersHistoryCellSort
+        <SortableColumn
+          field="calls"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Called</SortableColumn
         >
       </th>
       <th class="ta-c">
-        <TimersHistoryCellSort
-          field={HistorySortField.handler}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
+        <SortableColumn
+          field="handler"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Handler</SortableColumn
         >
       </th>
       <th class="ta-r">
-        <TimersHistoryCellSort
-          field={HistorySortField.delay}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Delay</TimersHistoryCellSort
+        <SortableColumn
+          field="delay"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Delay</SortableColumn
         >
       </th>
     </tr>

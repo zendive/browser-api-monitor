@@ -1,45 +1,41 @@
 <script lang="ts">
   import type { TRequestAnimationFrameHistory } from '../../api/wrappers.ts';
   import {
-    DEFAULT_SORT,
+    DEFAULT_SORT_RAF,
     getSettings,
     setSettings,
-    HistorySortField,
-    type THistorySortField,
-    type TSortOrder,
+    ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
-  import TimersHistoryCellSort from './TimersHistoryCellSort.svelte';
+  import SortableColumn from './SortableColumn.svelte';
 
   let {
     metrics,
     caption = '',
-  }: { metrics: TRequestAnimationFrameHistory[]; caption?: string } = $props();
-  let field = $state(DEFAULT_SORT.timersHistoryField);
-  let order = $state(DEFAULT_SORT.timersHistoryOrder);
+  }: { metrics: TRequestAnimationFrameHistory[]; caption: string } = $props();
+  let sortField = $state(DEFAULT_SORT_RAF.field);
+  let sortOrder = $state(DEFAULT_SORT_RAF.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(
-      compareByFieldOrder(<keyof TRequestAnimationFrameHistory>field, order)
-    )
+    metrics.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
-    field = settings.sort.timersHistoryField;
-    order = settings.sort.timersHistoryOrder;
+    sortField = settings.sortRequestAnimationFrame.field;
+    sortOrder = settings.sortRequestAnimationFrame.order;
   });
 
-  function onChangeSort(_field: THistorySortField, _order: TSortOrder) {
-    field = _field;
-    order = _order;
+  function onChangeSort(_field: string, _order: ESortOrder) {
+    sortField = <keyof TRequestAnimationFrameHistory>_field;
+    sortOrder = _order;
 
     setSettings({
-      sort: {
-        timersHistoryField: $state.snapshot(_field),
-        timersHistoryOrder: $state.snapshot(_order),
+      sortRequestAnimationFrame: {
+        field: $state.snapshot(sortField),
+        order: $state.snapshot(sortOrder),
       },
     });
   }
@@ -55,27 +51,27 @@
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">
-        <TimersHistoryCellSort
-          field={HistorySortField.selfTime}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Self</TimersHistoryCellSort
+        <SortableColumn
+          field="selfTime"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Self</SortableColumn
         >
       </th>
       <th class="ta-c">
-        <TimersHistoryCellSort
-          field={HistorySortField.calls}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Called</TimersHistoryCellSort
+        <SortableColumn
+          field="calls"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Called</SortableColumn
         >
       </th>
       <th class="ta-c">
-        <TimersHistoryCellSort
-          field={HistorySortField.handler}
-          currentField={field}
-          currentFieldOrder={order}
-          eventChangeSorting={onChangeSort}>Handler</TimersHistoryCellSort
+        <SortableColumn
+          field="handler"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Handler</SortableColumn
         >
       </th>
     </tr>

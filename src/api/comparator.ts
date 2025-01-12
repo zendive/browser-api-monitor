@@ -1,12 +1,8 @@
 import type { TOnlineTimerMetrics } from './wrappers.ts';
-import { SortOrder, type TSortOrder } from './settings.ts';
+import { ESortOrder } from './settings.ts';
 
 // descending sort by `handler` field
-function compareIfEqual<T, Key extends keyof T>(
-  field: Key,
-  first: T,
-  second: T
-) {
+function compareIfEqual<T>(field: keyof T, first: T, second: T) {
   if (field === 'calls' || field === 'delay') {
     // @ts-ignore
     return second['handler'] > first['handler'] ? 1 : -1;
@@ -15,10 +11,7 @@ function compareIfEqual<T, Key extends keyof T>(
   }
 }
 
-export function compareByFieldOrder<T, Key extends keyof T>(
-  field: Key,
-  order: TSortOrder
-) {
+export function compareByFieldOrder<T>(field: keyof T, order: ESortOrder) {
   return function (first: T, second: T) {
     let a = first[field] || 0;
     let b = second[field] || 0;
@@ -27,13 +20,13 @@ export function compareByFieldOrder<T, Key extends keyof T>(
       (typeof a === 'number' && typeof b === 'number') ||
       (typeof a === 'string' && typeof b === 'string')
     ) {
-      if (order === SortOrder.DESCENDING) {
+      if (order === ESortOrder.DESCENDING) {
         return b > a ? 1 : b < a ? -1 : compareIfEqual(field, first, second);
       } else {
         return a > b ? 1 : a < b ? -1 : compareIfEqual(field, first, second);
       }
     } else {
-      return typeof (order === SortOrder.DESCENDING ? b : a) === 'number'
+      return typeof (order === ESortOrder.DESCENDING ? b : a) === 'number'
         ? -1
         : 1;
     }

@@ -14,7 +14,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TRACE_ERROR_MESSAGE,
 } from '../../src/api/const.ts';
-import { WrapperCallstackType } from '../../src/api/settings.ts';
+import { EWrapperCallstackType } from '../../src/api/settings.ts';
 
 const TEST_STACK = `Error: ${TRACE_ERROR_MESSAGE}
         at <anonymous>:1:1
@@ -391,7 +391,7 @@ describe('wrappers', () => {
     const standard = [
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    wrapper.setCallstackType(WrapperCallstackType.SHORT);
+    wrapper.setCallstackType(EWrapperCallstackType.SHORT);
     const { trace } = wrapper.createCallstack(
       <Error>{ stack: TEST_STACK },
       null

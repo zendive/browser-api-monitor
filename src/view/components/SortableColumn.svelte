@@ -1,10 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import {
-    SortOrder,
-    type THistorySortField,
-    type TSortOrder,
-  } from '../../api/settings.ts';
+  import { ESortOrder } from '../../api/settings.ts';
 
   let {
     field,
@@ -13,10 +9,10 @@
     eventChangeSorting,
     children,
   }: {
-    field: THistorySortField;
-    currentField: THistorySortField;
-    currentFieldOrder: TSortOrder;
-    eventChangeSorting: (field: THistorySortField, order: TSortOrder) => void;
+    field: string;
+    currentField: string;
+    currentFieldOrder: ESortOrder;
+    eventChangeSorting: (field: string, order: ESortOrder) => void;
     children?: Snippet;
   } = $props();
 
@@ -26,16 +22,16 @@
     eventChangeSorting(
       field,
       field !== currentField
-        ? SortOrder.DESCENDING
-        : currentFieldOrder === SortOrder.DESCENDING
-          ? SortOrder.ASCENDING
-          : SortOrder.DESCENDING
+        ? ESortOrder.DESCENDING
+        : currentFieldOrder === ESortOrder.DESCENDING
+          ? ESortOrder.ASCENDING
+          : ESortOrder.DESCENDING
     );
   }
 </script>
 
 <a
-  href="void(0)"
+  href="voidESortOrder"
   role="cell"
   tabindex="-1"
   onclick={changeSort}
@@ -45,8 +41,8 @@
   {#if field === currentField}
     <span
       class="icon -small"
-      class:-up={currentFieldOrder === SortOrder.ASCENDING}
-      class:-down={currentFieldOrder === SortOrder.DESCENDING}
+      class:-up={currentFieldOrder === ESortOrder.ASCENDING}
+      class:-down={currentFieldOrder === ESortOrder.DESCENDING}
     ></span>
   {/if}
 </a>

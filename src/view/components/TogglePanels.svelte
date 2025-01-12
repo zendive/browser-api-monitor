@@ -2,19 +2,16 @@
   import {
     getSettings,
     setSettings,
-    WrapperCallstackType,
+    EWrapperCallstackType,
     DEFAULT_SETTINGS,
     type TSettingsPanel,
-    type TWrapperCallstackType,
   } from '../../api/settings.ts';
   import { runtimeListen } from '../../api/communication.ts';
   import Alert from './Alert.svelte';
 
   const NON_WRAPPABLE = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = $state([]);
-  let wrapperCallstackType: TWrapperCallstackType = $state(
-    DEFAULT_SETTINGS.wrapperCallstackType
-  );
+  let wrapperCallstackType = $state(DEFAULT_SETTINGS.wrapperCallstackType);
   let reloadMessageEl: Alert | null = null;
   let selfEl: HTMLElement | null = null;
 
@@ -43,9 +40,9 @@
 
   function onToggleWrapperCallstackType() {
     wrapperCallstackType =
-      wrapperCallstackType === WrapperCallstackType.FULL
-        ? WrapperCallstackType.SHORT
-        : WrapperCallstackType.FULL;
+      wrapperCallstackType === EWrapperCallstackType.FULL
+        ? EWrapperCallstackType.SHORT
+        : EWrapperCallstackType.FULL;
     setSettings({
       wrapperCallstackType: $state.snapshot(wrapperCallstackType),
     });
@@ -70,7 +67,7 @@
             class="btn-toggle"
             title="Toggle callstack type: full/short"
             onclick={onToggleWrapperCallstackType}
-            >{`${wrapperCallstackType === WrapperCallstackType.FULL ? 'full' : 'short'}`}</button
+            >{`${wrapperCallstackType === EWrapperCallstackType.FULL ? 'full' : 'short'}`}</button
           ></td
         >
       </tr>

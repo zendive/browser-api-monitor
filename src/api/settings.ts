@@ -1,3 +1,12 @@
+import type {
+  TCancelAnimationFrameHistory,
+  TCancelIdleCallbackHistory,
+  TClearTimerHistory,
+  TRequestAnimationFrameHistory,
+  TRequestIdleCallbackHistory,
+  TSetTimerHistory,
+} from './wrappers.ts';
+
 type TPanelKey =
   | 'eval'
   | 'media'
@@ -11,11 +20,6 @@ type TPanelKey =
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
 
-export type THistorySortField =
-  (typeof HistorySortField)[keyof typeof HistorySortField];
-export type TWrapperCallstackType =
-  (typeof WrapperCallstackType)[keyof typeof WrapperCallstackType];
-export type TSortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 export type TPanelVisibilityMap = {
   [K in TPanelKey]: TSettingsPanel;
 };
@@ -26,7 +30,7 @@ export type TSettingsPanel = {
   wrap: boolean | null;
 };
 export type TSettings = typeof DEFAULT_SETTINGS;
-export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
+export type TSettingsProperty = Partial<TSettings>;
 
 const SETTINGS_VERSION = '1.0.7';
 export const DEFAULT_PANELS: TSettingsPanel[] = [
@@ -78,35 +82,52 @@ export const DEFAULT_PANELS: TSettingsPanel[] = [
   },
 ];
 
-export const WrapperCallstackType = {
-  FULL: 0,
-  SHORT: 1,
-} as const;
+export enum EWrapperCallstackType {
+  FULL,
+  SHORT,
+}
+export enum ESortOrder {
+  ASCENDING,
+  DESCENDING,
+}
 
-export const HistorySortField = {
-  calls: 'calls',
-  handler: 'handler',
-  delay: 'delay',
-  selfTime: 'selfTime',
+export const DEFAULT_SORT_SET_TIMERS = {
+  field: <keyof TSetTimerHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
 } as const;
-
-export const SortOrder = {
-  ASCENDING: 0,
-  DESCENDING: 1,
+export const DEFAULT_SORT_CLEAR_TIMERS = {
+  field: <keyof TClearTimerHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
 } as const;
-
-export const DEFAULT_SORT = {
-  timersHistoryField: HistorySortField.delay as THistorySortField,
-  timersHistoryOrder: SortOrder.DESCENDING as TSortOrder,
-};
+export const DEFAULT_SORT_RAF = {
+  field: <keyof TRequestAnimationFrameHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_CAF = {
+  field: <keyof TCancelAnimationFrameHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_RIC = {
+  field: <keyof TRequestIdleCallbackHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_CIC = {
+  field: <keyof TCancelIdleCallbackHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
 
 export const DEFAULT_SETTINGS = {
   panels: DEFAULT_PANELS,
-  sort: DEFAULT_SORT,
+  sortSetTimers: DEFAULT_SORT_SET_TIMERS,
+  sortClearTimers: DEFAULT_SORT_CLEAR_TIMERS,
+  sortRequestAnimationFrame: DEFAULT_SORT_RAF,
+  sortCancelAnimationFrame: DEFAULT_SORT_CAF,
+  sortRequestIdleCallback: DEFAULT_SORT_RIC,
+  sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
   traceForDebug: <string | null>null,
-  wrapperCallstackType: <TWrapperCallstackType>WrapperCallstackType.FULL,
+  wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 
 export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
@@ -116,7 +137,7 @@ export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
   );
 }
 
-export async function getSettings(): Promise<typeof DEFAULT_SETTINGS> {
+export async function getSettings(): Promise<TSettings> {
   let store = await chrome.storage.local.get([SETTINGS_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
