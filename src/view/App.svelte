@@ -14,8 +14,10 @@
   import InfoBar from './components/InfoBar.svelte';
   import TickSpinner from './components/TickSpinner.svelte';
   import IdleCallbackMetrics from './components/IdleCallbackMetrics.svelte';
+  import Alert from './components/Alert.svelte';
 
-  let spinnerEl: TickSpinner | null = $state(null);
+  let spinnerEl: TickSpinner | null = $state.raw(null);
+  let autopauseAlertEl: Alert | null = $state.raw(null);
   let paused = $state(false);
   let msg: TMetrics | null = $state.raw(null);
 
@@ -33,7 +35,10 @@
       const trafficDuration = now - o.metrics.collectingStartTime;
 
       if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
-        !paused && onTogglePause();
+        if (!paused) {
+          onTogglePause();
+          autopauseAlertEl?.show();
+        }
       } else {
         portPost({
           msg: 'telemetry-acknowledged',
@@ -89,6 +94,11 @@
     <TogglePanels />
     <div class="divider -thin"></div>
     <button onclick={onTogglePause} title="Toggle pause">
+      <Alert bind:this={autopauseAlertEl} dismissable={true} title="Autopaused"
+        >Communication with the inspected window experienced high overload and
+        was autopaused.<br />Try hiding panels you don't need at the moment to
+        minimise quantity of monitored data.</Alert
+      >
       {#if paused}
         <span class="icon -play"></span>
       {:else}
