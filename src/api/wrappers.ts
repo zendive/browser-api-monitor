@@ -60,7 +60,7 @@ export type TSetTimerHistory = {
   handler: number | string;
   delay: number | undefined | string;
   isEval: boolean | undefined;
-  isOnline: boolean;
+  online: number;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
@@ -106,7 +106,7 @@ export type TRequestIdleCallbackHistory = {
   handler: number | undefined | string;
   delay: number | undefined | string;
   didTimeout: undefined | boolean;
-  isOnline: boolean;
+  online: number;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
@@ -268,9 +268,7 @@ export class Wrapper {
       return;
     }
 
-    if (setTimerRecord.handler === handler) {
-      setTimerRecord.isOnline = false;
-    }
+    setTimerRecord.online--;
     setTimerRecord.selfTime = trim2microsecond(selfTime);
 
     if (canceledByTraceId === null) {
@@ -305,14 +303,14 @@ export class Wrapper {
       existing.delay = handlerDelay;
       existing.calls++;
       existing.isEval = isEval;
-      existing.isOnline = true;
+      existing.online++;
     } else {
       history.set(callstack.traceId, {
         handler,
         calls: 1,
         delay: handlerDelay,
         isEval,
-        isOnline: true,
+        online: 1,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
@@ -442,20 +440,21 @@ export class Wrapper {
 
   ricOffline(
     handler: number,
-    callstack: TCallstack,
+    traceId: string,
     deadline: IdleDeadline,
     selfTime: number
   ) {
-    const ricRecord = this.ricHistory.get(callstack.traceId);
+    const ricRecord = this.ricHistory.get(traceId);
+    if (!ricRecord) {
+      return;
+    }
 
-    if (ricRecord) {
-      this.onlineIdleCallbackLookup.delete(Number(ricRecord.handler));
+    ricRecord.didTimeout = deadline.didTimeout;
+    ricRecord.selfTime = trim2microsecond(selfTime);
 
-      ricRecord.didTimeout = deadline.didTimeout;
-      if (ricRecord.handler === handler) {
-        ricRecord.isOnline = false;
-      }
-      ricRecord.selfTime = trim2microsecond(selfTime);
+    if (this.onlineIdleCallbackLookup.get(handler)) {
+      this.onlineIdleCallbackLookup.delete(Number(handler));
+      ricRecord.online--;
     }
   }
 
@@ -476,7 +475,7 @@ export class Wrapper {
       existing.handler = handler;
       existing.didTimeout = undefined;
       existing.delay = delay;
-      existing.isOnline = true;
+      existing.online++;
     } else {
       this.ricHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
@@ -486,7 +485,7 @@ export class Wrapper {
         handler,
         didTimeout: undefined,
         delay,
-        isOnline: true,
+        online: 1,
         canceledCounter: 0,
         canceledByTraceIds: null,
         selfTime: null,
@@ -522,10 +521,9 @@ export class Wrapper {
     if (ricRecord) {
       this.onlineIdleCallbackLookup.delete(Number(handler));
 
-      if (ricRecord.handler === handler) {
-        ricRecord.isOnline = false;
-      }
+      ricRecord.online--;
       ricRecord.didTimeout = undefined;
+
       if (ricRecord.canceledByTraceIds === null) {
         ricRecord.canceledByTraceIds = [callstack.traceId];
       } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
@@ -638,7 +636,7 @@ export class Wrapper {
         fn(deadline);
         this.ricOffline(
           handler,
-          callstack,
+          callstack.traceId,
           deadline,
           performance.now() - start
         );

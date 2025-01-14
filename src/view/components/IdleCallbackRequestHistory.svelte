@@ -107,7 +107,7 @@
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">didTimeout</th>
-      <th class="ta-c">
+      <th class="ta-r">
         <SortableColumn
           field="selfTime"
           currentField={sortField}
@@ -139,7 +139,14 @@
           eventChangeSorting={onChangeSort}>Delay</SortableColumn
         >
       </th>
-      <th class="shaft"></th>
+      <th>
+        <SortableColumn
+          field="online"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Scheduled</SortableColumn
+        >
+      </th>
     </tr>
 
     {#each sortedMetrics as metric (metric.traceId)}
@@ -164,11 +171,11 @@
             </a>
           {/if}
         </td>
-        <td class="ta-c">{metric.handler}</td>
+        <td class="ta-c"><Variable value={metric.handler} /></td>
         <td class="ta-r" title={delayTitle(metric.delay)}>{metric.delay}</td>
-        <td>
-          {#if metric.isOnline}
-            <span title="Scheduled" class="icon -scheduled -small"></span>
+        <td class="ta-r">
+          {#if metric.online}
+            <Variable value={metric.online} />
           {/if}
         </td>
       </tr>

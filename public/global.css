@@ -191,7 +191,3 @@ th,
   -webkit-mask-image: url(img/trace-extension.svg);
   mask-image: url(img/trace-extension.svg);
 }
-.icon.-scheduled {
-  -webkit-mask-image: url(img/scheduled.svg);
-  mask-image: url(img/scheduled.svg);
-}

@@ -61,22 +61,22 @@ describe('wrappers', () => {
     expect(wrapper.setTimeoutHistory.size).toBe(1);
   });
 
-  test('setTimeoutHistory - isOnline/canceledByTraceId/selfTime handled after timer fired', async () => {
+  test('setTimeoutHistory - online/canceledByTraceId/selfTime handled after timer fired', async () => {
     const DELAY = 5;
     setTimeout(() => {}, DELAY);
 
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
-    expect(rec.isOnline).toBe(true);
+    expect(rec.online).toBe(1);
     expect(rec.canceledByTraceIds).toBe(null);
 
     await new Promise((resolve) => setTimeout(resolve, 2 * DELAY));
 
-    expect(rec.isOnline).toBe(false);
+    expect(rec.online).toBe(0);
     expect(rec.canceledByTraceIds).toBe(null);
     expect(rec.selfTime).not.toBeNull();
   });
 
-  test('setTimeoutHistory - isOnline/canceledByTraceId/selfTime handled after timer canceled', () => {
+  test('setTimeoutHistory - online/canceledByTraceId/selfTime handled after timer canceled', () => {
     function setTimeout_function(delay: number) {
       return Number(setTimeout(() => {}, delay));
     }
@@ -97,7 +97,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
 
-    expect(rec.isOnline).toBe(false);
+    expect(rec.online).toBe(0);
     expect(rec.selfTime).toBeNull();
     if (rec.canceledByTraceIds) {
       expect(rec.canceledByTraceIds.length).toBe(2);
@@ -145,18 +145,22 @@ describe('wrappers', () => {
       function poll() {
         called++;
 
-        if (called > 1) {
+        if (called > 3) {
           resolve();
         } else {
           handler && clearTimeout(handler);
-          handler = Number(setTimeout(poll, 2));
+          handler = Number(setTimeout(poll, 1));
         }
       }
       poll();
     });
 
-    const rec = Array.from(wrapper.setTimeoutHistory.values())[0];
-    expect(rec.selfTime).not.toBeNull();
+    const recs = Array.from(wrapper.setTimeoutHistory.values());
+    expect(wrapper.setTimeoutHistory.size).toBe(2);
+    expect(recs[0].selfTime).not.toBeNull();
+    expect(recs[0].calls).toBe(1);
+    expect(recs[1].selfTime).not.toBeNull();
+    expect(recs[1].calls).toBe(2);
   }, 1e3);
 
   test('clearTimeoutHistory - valid handler', () => {
@@ -199,14 +203,14 @@ describe('wrappers', () => {
     expect(wrapper.setIntervalHistory.size).toBe(1);
   });
 
-  test('setIntervalHistory - isOnline becomes false after interval canceled', () => {
+  test('setIntervalHistory - online becomes false after interval canceled', () => {
     const DELAY = 123;
     const handler = setInterval(() => {}, DELAY);
     const rec = Array.from(wrapper.setIntervalHistory.values())[0];
 
-    expect(rec.isOnline).toBe(true);
+    expect(rec.online).toBe(1);
     clearInterval(handler);
-    expect(rec.isOnline).toBe(false);
+    expect(rec.online).toBe(0);
   });
 
   test('setIntervalHistory - valid delay', async () => {

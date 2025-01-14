@@ -73,8 +73,8 @@
         <td class="wb-all">
           <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
-        <td class="ta-c">{metric.calls}</td>
-        <td class="ta-c">{metric.handler}</td>
+        <td class="ta-c"><Variable value={metric.calls} /></td>
+        <td class="ta-c"><Variable value={metric.handler} /></td>
       </tr>
     {/each}
   </tbody>

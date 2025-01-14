@@ -50,7 +50,7 @@
     <tr>
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
-      <th class="ta-c">
+      <th class="ta-r">
         <SortableColumn
           field="selfTime"
           currentField={sortField}
@@ -83,8 +83,8 @@
           <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
         <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
-        <td class="ta-c">{metric.calls}</td>
-        <td class="ta-c">{metric.handler}</td>
+        <td class="ta-c"><Variable value={metric.calls} /></td>
+        <td class="ta-c"><Variable value={metric.handler} /></td>
       </tr>
     {/each}
   </tbody>

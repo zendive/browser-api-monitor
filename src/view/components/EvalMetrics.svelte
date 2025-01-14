@@ -28,7 +28,7 @@
     <tr>
       <th class="shaft"></th>
       <th class="w-full">Callstack</th>
-      <th>Self</th>
+      <th class="ta-r">Self</th>
       <th>Called</th>
       <th>Code</th>
       <th>Returns</th>
