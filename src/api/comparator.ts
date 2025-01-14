@@ -1,9 +1,11 @@
 import type { TOnlineTimerMetrics } from './wrappers.ts';
 import { ESortOrder } from './settings.ts';
 
+const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
+
 // descending sort by `handler` field
 function compareIfEqual<T>(field: keyof T, first: T, second: T) {
-  if (field === 'calls' || field === 'delay') {
+  if (SEMISORTING_FIELDS.includes(field as string)) {
     // @ts-ignore
     return second['handler'] > first['handler'] ? 1 : -1;
   } else {
