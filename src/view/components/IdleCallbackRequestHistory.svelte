@@ -11,7 +11,7 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
-  import { delayTitle, Stopper } from '../../api/time.ts';
+  import { delayTitle } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -19,6 +19,7 @@
   import Dialog from './Dialog.svelte';
   import Alert from './Alert.svelte';
   import SortableColumn from './SortableColumn.svelte';
+  import FrameSensitiveTime from './FrameSensitiveTime.svelte';
 
   let {
     metrics,
@@ -156,7 +157,9 @@
           ><Trace trace={metric.trace} traceId={metric.traceId} /></td
         >
         <td class="ta-c">{metric.didTimeout}</td>
-        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
+        <td class="ta-r">
+          <FrameSensitiveTime value={metric.selfTime} />
+        </td>
         <td class="ta-c">
           <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"

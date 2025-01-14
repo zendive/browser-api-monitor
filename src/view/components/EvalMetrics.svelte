@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { TEvalHistory } from '../../api/wrappers.ts';
-  import { Stopper } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
+  import FrameSensitiveTime from './FrameSensitiveTime.svelte';
 
   let { metrics }: { metrics: TEvalHistory[] } = $props();
 
@@ -40,7 +40,9 @@
         <td class="wb-all">
           <Trace trace={metric.trace} traceId={metric.traceId} />
         </td>
-        <td class="ta-r">{Stopper.toString(metric.selfTime)}</td>
+        <td class="ta-r">
+          <FrameSensitiveTime value={metric.selfTime} />
+        </td>
         <td class="ta-c">
           <Variable value={metric.calls} />
         </td>

@@ -8,6 +8,7 @@ export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
 export const FRAME_1of60 = 0.0166666666667; // ms
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
 export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
+export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
 // store native functions
 export const setTimeout = /*@__PURE__*/ window.setTimeout.bind(window);
