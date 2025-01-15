@@ -243,8 +243,8 @@ export class MeanAggregator {
   }
 }
 
-export function trim2microsecond(ms: number | null) {
-  return ms === null ? null : Math.trunc(ms * 1e3) / 1e3;
+export function trim2microsecond(ms: any) {
+  return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
 }
 
 export function delayTitle(delay: number | unknown): string | undefined {

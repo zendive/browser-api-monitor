@@ -232,9 +232,10 @@ export class Wrapper {
     callstack: TCallstack,
     isEval: boolean
   ) {
-    if (!this.#validTimerDelay(delay)) {
-      delay = TAG_EXCEPTION(delay);
-    }
+    delay = this.#validTimerDelay(delay)
+      ? trim2microsecond(delay)
+      : TAG_EXCEPTION(delay);
+
     this.onlineTimers.set(handler, {
       type,
       handler,
@@ -286,21 +287,17 @@ export class Wrapper {
   updateSetTimersHistory(
     history: Map<string, TSetTimerHistory>,
     handler: number,
-    delay: number | undefined,
+    delay: number | string | undefined,
     callstack: TCallstack,
     isEval: boolean
   ) {
     const existing = history.get(callstack.traceId);
     const hasError = !this.#validTimerDelay(delay);
-    let handlerDelay: string | number | undefined = delay;
-
-    if (hasError) {
-      handlerDelay = TAG_EXCEPTION(handlerDelay);
-    }
+    delay = hasError ? TAG_EXCEPTION(delay) : trim2microsecond(delay);
 
     if (existing) {
       existing.handler = handler;
-      existing.delay = handlerDelay;
+      existing.delay = delay;
       existing.calls++;
       existing.isEval = isEval;
       existing.online++;
@@ -308,7 +305,7 @@ export class Wrapper {
       history.set(callstack.traceId, {
         handler,
         calls: 1,
-        delay: handlerDelay,
+        delay,
         isEval,
         online: 1,
         traceId: callstack.traceId,
@@ -465,10 +462,7 @@ export class Wrapper {
   ) {
     const existing = this.ricHistory.get(callstack.traceId);
     const hasError = !this.#validTimerDelay(delay);
-
-    if (hasError) {
-      delay = TAG_EXCEPTION(delay);
-    }
+    delay = hasError ? TAG_EXCEPTION(delay) : trim2microsecond(delay);
 
     if (existing) {
       existing.calls++;
