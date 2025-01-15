@@ -17,6 +17,7 @@ import {
   TAG_INVALID_CALLSTACK_LINK,
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
+  TAG_MISSFORTUNE,
 } from './const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from './clone.ts';
 import { EWrapperCallstackType, type TPanelVisibilityMap } from './settings.ts';
@@ -330,7 +331,7 @@ export class Wrapper {
       : this.onlineTimers.get(<number>handler);
     const handlerDelay: string | number | undefined = onlineTimer
       ? onlineTimer.delay
-      : 'N/A';
+      : TAG_MISSFORTUNE;
 
     if (hasError) {
       handler = TAG_EXCEPTION(handler);
