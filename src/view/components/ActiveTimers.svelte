@@ -28,7 +28,6 @@
     <tr>
       <th>Delay</th>
       <th>Handler</th>
-      <th class="shaft"></th>
       <th class="w-full">Callstack</th>
     </tr>
 
@@ -46,9 +45,9 @@
             onclick={() => void onRemoveHandler(metric)}
           ></span>
         </td>
-        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
         <td class="wb-all w-full">
-          <Trace trace={metric.trace} traceId={metric.traceId} />
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
         </td>
       </tr>
     {/each}

@@ -6,7 +6,13 @@
     TAG_INVALID_CALLSTACK_LINK,
   } from '../../api/const.ts';
 
-  let { name, link = '' }: { name: string | 0; link?: string } = $props();
+  let {
+    name,
+    link = '',
+  }: {
+    name: string | 0;
+    link?: string;
+  } = $props();
   let visited: boolean = $state(false);
   let lineNumber = $derived.by(() =>
     parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
@@ -30,19 +36,18 @@
 
     visited = true;
   }
+
+  function onClick(e: MouseEvent) {
+    e.preventDefault();
+    showStackTraceResource();
+  }
 </script>
 
 {#if isSourceLess}
   <i class="no-link">{name ? `${name} ${link}` : link}</i>
 {:else}
-  <a
-    href={link}
-    class="-trace"
-    class:visited
-    onclick={(e) => {
-      e.preventDefault();
-      showStackTraceResource();
-    }}>{name || link}</a
+  <a href={link} class="-trace" class:visited onclick={onClick}
+    >{name || link}</a
   >
 {/if}
 

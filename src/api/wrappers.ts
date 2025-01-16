@@ -622,12 +622,13 @@ export class Wrapper {
       const delay = options?.timeout;
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, fn);
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
+
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
         const start = performance.now();
+        if (this.#traceForDebug === callstack.traceId) {
+          debugger;
+        }
         fn(deadline);
         this.ricOffline(
           handler,
@@ -665,12 +666,13 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, fn);
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
+
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
         const start = performance.now();
+        if (this.#traceForDebug === callstack.traceId) {
+          debugger;
+        }
         fn(...args);
         this.updateRecordSelfTime(
           this.rafHistory,
@@ -708,13 +710,13 @@ export class Wrapper {
       let selfTime = null;
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, code);
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
 
       try {
         this.callCounter.eval++;
         const start = performance.now();
+        if (this.#traceForDebug === callstack.traceId) {
+          debugger;
+        }
         rv = this.native.eval(code);
         selfTime = performance.now() - start;
       } catch (error: unknown) {
@@ -747,20 +749,23 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, code);
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
-
       const isEval = typeof code === 'string';
+
       this.callCounter.setTimeout++;
       const handler = this.native.setTimeout(
         (...params: any[]) => {
           const start = performance.now();
           if (isEval) {
             this.callCounter.eval++;
+            if (this.#traceForDebug === callstack.traceId) {
+              debugger;
+            }
             // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
             this.native.eval(code);
           } else {
+            if (this.#traceForDebug === callstack.traceId) {
+              debugger;
+            }
             code(...params);
           }
           const stop = performance.now() - start;
@@ -805,10 +810,6 @@ export class Wrapper {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
 
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
-
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
@@ -820,6 +821,9 @@ export class Wrapper {
       }
 
       this.callCounter.clearTimeout++;
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
       this.native.clearTimeout(handler);
     }.bind(this);
   }
@@ -833,20 +837,23 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err, code);
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
-
       const isEval = typeof code === 'string';
+
       this.callCounter.setInterval++;
       const handler = this.native.setInterval(
         (...params: any[]) => {
           const start = performance.now();
           if (isEval) {
             this.callCounter.eval++;
+            if (this.#traceForDebug === callstack.traceId) {
+              debugger;
+            }
             // see https://developer.mozilla.org/docs/Web/API/setInterval
             this.native.eval(code);
           } else {
+            if (this.#traceForDebug === callstack.traceId) {
+              debugger;
+            }
             code(...params);
           }
           this.updateRecordSelfTime(
@@ -889,10 +896,6 @@ export class Wrapper {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
 
-      if (this.#traceForDebug === callstack.traceId) {
-        debugger;
-      }
-
       this.updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
@@ -904,6 +907,9 @@ export class Wrapper {
       }
 
       this.callCounter.clearInterval++;
+      if (this.#traceForDebug === callstack.traceId) {
+        debugger;
+      }
       this.native.clearInterval(handler);
     }.bind(this);
   }

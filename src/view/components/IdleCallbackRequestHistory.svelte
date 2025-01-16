@@ -20,6 +20,7 @@
   import Alert from './Alert.svelte';
   import SortableColumn from './SortableColumn.svelte';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
+  import TraceBreakpoint from './TraceBreakpoint.svelte';
 
   let {
     metrics,
@@ -105,7 +106,7 @@
   </caption>
   <tbody>
     <tr>
-      <th class="shaft"></th>
+      <th>BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">didTimeout</th>
       <th class="ta-r">
@@ -152,14 +153,13 @@
 
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceDomain traceDomain={metric.traceDomain} /></td>
-        <td class="wb-all"
-          ><Trace trace={metric.trace} traceId={metric.traceId} /></td
-        >
-        <td class="ta-c">{metric.didTimeout}</td>
-        <td class="ta-r">
-          <FrameSensitiveTime value={metric.selfTime} />
+        <td><TraceBreakpoint traceId={metric.traceId} /></td>
+        <td class="wb-all">
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
         </td>
+        <td class="ta-c">{metric.didTimeout}</td>
+        <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
         <td class="ta-c">
           <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"

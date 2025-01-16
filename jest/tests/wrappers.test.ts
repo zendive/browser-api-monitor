@@ -13,6 +13,7 @@ import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
   TRACE_ERROR_MESSAGE,
+  TAG_MISSFORTUNE,
 } from '../../src/api/const.ts';
 import { EWrapperCallstackType } from '../../src/api/settings.ts';
 
@@ -178,7 +179,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
-    expect(rec.delay).toBe('N/A');
+    expect(rec.delay).toBe(TAG_MISSFORTUNE);
   });
 
   test('clearTimeoutHistory - invalid handler', () => {
@@ -186,7 +187,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearTimeoutHistory.values())[0];
 
-    expect(rec.delay).toBe('N/A');
+    expect(rec.delay).toBe(TAG_MISSFORTUNE);
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
   });
 
@@ -257,7 +258,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
-    expect(rec.delay).toBe('N/A');
+    expect(rec.delay).toBe(TAG_MISSFORTUNE);
   });
 
   test('clearIntervalHistory - invalid handler', () => {
@@ -265,7 +266,7 @@ describe('wrappers', () => {
 
     const rec = Array.from(wrapper.clearIntervalHistory.values())[0];
 
-    expect(rec.delay).toBe('N/A');
+    expect(rec.delay).toBe(TAG_MISSFORTUNE);
   });
 
   test('evalHistory - recorded', () => {

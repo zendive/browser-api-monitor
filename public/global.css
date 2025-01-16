@@ -110,9 +110,7 @@ th,
   width: 1rem;
   height: 1rem;
   background-color: var(--text);
-  -webkit-mask-size: cover;
   mask-size: cover;
-  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   vertical-align: bottom;
 }
@@ -121,74 +119,59 @@ th,
   height: var(--small-icon-size);
 }
 .icon.-refresh {
-  -webkit-mask-image: url(img/refresh.svg);
   mask-image: url(img/refresh.svg);
 }
 .icon.-icon {
-  -webkit-mask-image: url(img/icon.svg);
   mask-image: url(img/icon.svg);
 }
 .icon.-clear {
-  -webkit-mask-image: url(img/clear.svg);
   mask-image: url(img/clear.svg);
 }
 .icon.-remove {
-  -webkit-mask-image: url(img/remove.svg);
   mask-image: url(img/remove.svg);
 }
 .icon.-pause {
-  -webkit-mask-image: url(img/pause.svg);
   mask-image: url(img/pause.svg);
 }
 .icon.-play {
-  -webkit-mask-image: url(img/play.svg);
   mask-image: url(img/play.svg);
 }
 .icon.-toggle-menu {
-  -webkit-mask-image: url(img/toggle-menu.svg);
   mask-image: url(img/toggle-menu.svg);
 }
 .icon.-down {
-  -webkit-mask-image: url(img/down.svg);
   mask-image: url(img/down.svg);
 }
 .icon.-up {
-  -webkit-mask-image: url(img/up.svg);
   mask-image: url(img/up.svg);
 }
 .icon.-console {
-  -webkit-mask-image: url(img/console.svg);
   mask-image: url(img/console.svg);
 }
 .icon.-frame-backward {
-  -webkit-mask-image: url(img/frame-backward.svg);
   mask-image: url(img/frame-backward.svg);
 }
 .icon.-frame-forward {
-  -webkit-mask-image: url(img/frame-forward.svg);
   mask-image: url(img/frame-forward.svg);
 }
 .icon.-locate {
-  -webkit-mask-image: url(img/locate.svg);
   mask-image: url(img/locate.svg);
 }
 .icon.-slower {
-  -webkit-mask-image: url(img/slower.svg);
   mask-image: url(img/slower.svg);
 }
 .icon.-faster {
-  -webkit-mask-image: url(img/faster.svg);
   mask-image: url(img/faster.svg);
 }
 .icon.-trace-external {
-  -webkit-mask-image: url(img/trace-external.svg);
   mask-image: url(img/trace-external.svg);
 }
 .icon.-trace-local {
-  -webkit-mask-image: url(img/trace-local.svg);
   mask-image: url(img/trace-local.svg);
 }
 .icon.-trace-extension {
-  -webkit-mask-image: url(img/trace-extension.svg);
   mask-image: url(img/trace-extension.svg);
+}
+.icon.-breakpoint {
+  mask-image: url(img/breakpoint.svg);
 }
