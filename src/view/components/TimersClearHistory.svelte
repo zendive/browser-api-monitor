@@ -44,7 +44,7 @@
   </caption>
   <tbody>
     <tr>
-      <th class="shaft"></th>
+      <th title="Breakpoint">BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <SortableColumn

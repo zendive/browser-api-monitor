@@ -27,7 +27,7 @@
   >
   <tbody>
     <tr>
-      <th>BP</th>
+      <th title="Breakpoint">BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-r">Self</th>
       <th>Called</th>
