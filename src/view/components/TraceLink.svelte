@@ -70,4 +70,20 @@
       background-color: var(--link-visited-bg);
     }
   }
+
+  @media only screen and (max-width: 45rem) {
+    a {
+      max-width: 15rem;
+    }
+  }
+  @media only screen and (max-width: 35rem) {
+    a {
+      max-width: 8rem;
+    }
+  }
+  @media only screen and (max-width: 27rem) {
+    a {
+      max-width: 4rem;
+    }
+  }
 </style>

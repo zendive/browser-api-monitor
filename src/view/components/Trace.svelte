@@ -8,5 +8,5 @@
 {#each trace as { link, name }, index (index)}
   {@const isLast = index === trace.length - 1}
   <TraceLink {link} {name} />
-  {#if !isLast}&nbsp;•{/if}
+  {#if !isLast}•&nbsp;{/if}
 {/each}
