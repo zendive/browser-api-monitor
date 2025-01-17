@@ -84,6 +84,12 @@
 </script>
 
 <section class="root">
+  <Alert bind:this={autopauseAlertEl} dismissable={true} title="Autopaused"
+    >Communication with the inspected window experienced a long delay and was
+    autopaused.<br />Try hiding panels you don't need at the moment to minimise
+    quantity of monitored data.</Alert
+  >
+
   <header>
     {#if IS_DEV}
       <button onclick={onDevReload} title="Reload" aria-label="Reload">
@@ -94,11 +100,6 @@
     <TogglePanels />
     <div class="divider -thin"></div>
     <button onclick={onTogglePause} title="Toggle pause">
-      <Alert bind:this={autopauseAlertEl} dismissable={true} title="Autopaused"
-        >Communication with the inspected window experienced high overload and
-        was autopaused.<br />Try hiding panels you don't need at the moment to
-        minimise quantity of monitored data.</Alert
-      >
       {#if paused}
         <span class="icon -play"></span>
       {:else}
