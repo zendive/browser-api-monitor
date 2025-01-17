@@ -146,7 +146,7 @@
           field="online"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Scheduled</SortableColumn
+          eventChangeSorting={onChangeSort}>Set</SortableColumn
         >
       </th>
     </tr>
