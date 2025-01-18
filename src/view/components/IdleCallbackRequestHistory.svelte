@@ -87,7 +87,7 @@
   bind:this={dialogEl}
   eventClose={onCloseDialog}
   title="Places from which requestIdleCallback with current callstack was prematurely canceled"
-  description="The information is actual only on time of demand. For full coverage - requires cancelIdleCallback panels enabled."
+  description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
 >
   <IdleCallbackCancelHistory
     caption="Canceled by"

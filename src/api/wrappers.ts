@@ -91,6 +91,10 @@ export type TRequestAnimationFrameHistory = {
   calls: number;
   handler: number | undefined | string;
   selfTime: number | null;
+  online: number;
+  canceledCounter: number;
+  canceledByTraceIds: string[] | null;
+  fps: number;
 };
 export type TCancelAnimationFrameHistory = {
   traceId: string;
@@ -145,18 +149,22 @@ export type TWrapperMetrics = {
 };
 
 export class Wrapper {
-  onlineTimers: Map<number, TOnlineTimerMetrics> = new Map();
-  setTimeoutHistory: Map<string, TSetTimerHistory> = new Map();
-  clearTimeoutHistory: Map<string, TClearTimerHistory> = new Map();
-  setIntervalHistory: Map<string, TSetTimerHistory> = new Map();
-  clearIntervalHistory: Map<string, TClearTimerHistory> = new Map();
-  evalHistory: Map<string, TEvalHistory> = new Map();
-  rafHistory: Map<string, TRequestAnimationFrameHistory> = new Map();
-  cafHistory: Map<string, TCancelAnimationFrameHistory> = new Map();
-  /** mapping ric/cic handler to ric traceId */
-  onlineIdleCallbackLookup: Map<number, string> = new Map();
-  ricHistory: Map<string, TRequestIdleCallbackHistory> = new Map();
-  cicHistory: Map<string, TCancelIdleCallbackHistory> = new Map();
+  onlineTimers: Map</*handler*/ number, TOnlineTimerMetrics> = new Map();
+  setTimeoutHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
+  clearTimeoutHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
+  setIntervalHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
+  clearIntervalHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
+  evalHistory: Map</*traceId*/ string, TEvalHistory> = new Map();
+  animationCallsMap = new Map</*traceId*/ string, /*calls*/ number>();
+  onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
+    new Map();
+  rafHistory: Map</*traceId*/ string, TRequestAnimationFrameHistory> =
+    new Map();
+  cafHistory: Map</*traceId*/ string, TCancelAnimationFrameHistory> = new Map();
+  onlineIdleCallbackLookup: Map</*handler*/ number, /*traceId*/ string> =
+    new Map();
+  ricHistory: Map</*traceId*/ string, TRequestIdleCallbackHistory> = new Map();
+  cicHistory: Map</*traceId*/ string, TCancelIdleCallbackHistory> = new Map();
   callCounter: TWrapperMetrics['callCounter'] = {
     activeTimers: 0,
     setTimeout: 0,
@@ -382,10 +390,8 @@ export class Wrapper {
     }
   }
 
-  updateRecordSelfTime(
-    map:
-      | Map<string, TRequestAnimationFrameHistory>
-      | Map<string, TSetTimerHistory>,
+  updateTimersSelfTime(
+    map: Map<string, TSetTimerHistory>,
     traceId: string,
     selfTime: number
   ) {
@@ -396,12 +402,23 @@ export class Wrapper {
     }
   }
 
+  updateAnimationsFramerate() {
+    for (let [, rafRecord] of this.rafHistory) {
+      const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
+      const fps = rafRecord.calls - prevCalls;
+
+      this.animationCallsMap.set(rafRecord.traceId, rafRecord.calls);
+      rafRecord.fps = fps;
+    }
+  }
+
   updateRafHistory(handler: number, callstack: TCallstack) {
     const existing = this.rafHistory.get(callstack.traceId);
 
     if (existing) {
       existing.calls++;
       existing.handler = handler;
+      existing.online++;
     } else {
       this.rafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
@@ -409,8 +426,28 @@ export class Wrapper {
         traceDomain: this.#getTraceDomain(callstack.trace[0]),
         calls: 1,
         handler,
+        online: 1,
+        canceledCounter: 0,
+        canceledByTraceIds: null,
         selfTime: null,
+        fps: 1,
       });
+    }
+
+    this.onlineAnimationFrameLookup.set(handler, callstack.traceId);
+  }
+
+  rafFired(handler: number, traceId: string, selfTime: number) {
+    const rafRecord = this.rafHistory.get(traceId);
+    if (!rafRecord) {
+      return;
+    }
+
+    rafRecord.selfTime = trim2microsecond(selfTime);
+
+    if (this.onlineAnimationFrameLookup.has(handler)) {
+      this.onlineAnimationFrameLookup.delete(handler);
+      rafRecord.online--;
     }
   }
 
@@ -434,9 +471,24 @@ export class Wrapper {
         handler,
       });
     }
+
+    const rafTraceId = this.onlineAnimationFrameLookup.get(Number(handler));
+    const rafRecord = rafTraceId && this.rafHistory.get(rafTraceId);
+    if (rafRecord) {
+      this.onlineAnimationFrameLookup.delete(Number(handler));
+
+      rafRecord.online--;
+
+      if (rafRecord.canceledByTraceIds === null) {
+        rafRecord.canceledByTraceIds = [callstack.traceId];
+      } else if (!rafRecord.canceledByTraceIds.includes(callstack.traceId)) {
+        rafRecord.canceledByTraceIds.push(callstack.traceId);
+      }
+      rafRecord.canceledCounter++;
+    }
   }
 
-  ricOffline(
+  ricFired(
     handler: number,
     traceId: string,
     deadline: IdleDeadline,
@@ -451,7 +503,7 @@ export class Wrapper {
     ricRecord.selfTime = trim2microsecond(selfTime);
 
     if (this.onlineIdleCallbackLookup.get(handler)) {
-      this.onlineIdleCallbackLookup.delete(Number(handler));
+      this.onlineIdleCallbackLookup.delete(handler);
       ricRecord.online--;
     }
   }
@@ -539,6 +591,8 @@ export class Wrapper {
     this.ricHistory.clear();
     this.cicHistory.clear();
     this.onlineIdleCallbackLookup.clear();
+    this.onlineAnimationFrameLookup.clear();
+    this.animationCallsMap.clear();
     this.callCounter.setTimeout =
       this.callCounter.clearTimeout =
       this.callCounter.setInterval =
@@ -630,7 +684,7 @@ export class Wrapper {
           debugger;
         }
         fn(deadline);
-        this.ricOffline(
+        this.ricFired(
           handler,
           callstack.traceId,
           deadline,
@@ -650,11 +704,12 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+
+      this.updateCicHistory(handler, callstack);
+      this.callCounter.cancelIdleCallback++;
       if (this.#traceForDebug === callstack.traceId) {
         debugger;
       }
-      this.updateCicHistory(handler, callstack);
-      this.callCounter.cancelIdleCallback++;
       this.native.cancelIdleCallback(handler);
     }.bind(this);
   }
@@ -674,11 +729,7 @@ export class Wrapper {
           debugger;
         }
         fn(...args);
-        this.updateRecordSelfTime(
-          this.rafHistory,
-          callstack.traceId,
-          performance.now() - start
-        );
+        this.rafFired(handler, callstack.traceId, performance.now() - start);
       });
       this.updateRafHistory(handler, callstack);
 
@@ -693,11 +744,12 @@ export class Wrapper {
     ) {
       const err = new Error(TRACE_ERROR_MESSAGE);
       const callstack = this.createCallstack(err);
+
+      this.updateCafHistory(handler, callstack);
+      this.callCounter.cancelAnimationFrame++;
       if (this.#traceForDebug === callstack.traceId) {
         debugger;
       }
-      this.updateCafHistory(handler, callstack);
-      this.callCounter.cancelAnimationFrame++;
       this.native.cancelAnimationFrame(handler);
     }.bind(this);
   }
@@ -770,7 +822,7 @@ export class Wrapper {
           }
           const stop = performance.now() - start;
           this.timerOffline(handler, null, stop);
-          this.updateRecordSelfTime(
+          this.updateTimersSelfTime(
             this.setTimeoutHistory,
             callstack.traceId,
             stop
@@ -856,7 +908,7 @@ export class Wrapper {
             }
             code(...params);
           }
-          this.updateRecordSelfTime(
+          this.updateTimersSelfTime(
             this.setIntervalHistory,
             callstack.traceId,
             performance.now() - start

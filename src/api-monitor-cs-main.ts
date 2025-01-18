@@ -45,6 +45,7 @@ let panels: TPanelVisibilityMap;
 const eachSecond = new Timer(
   () => {
     meetMedia(document.querySelectorAll('video,audio'));
+    panels.requestAnimationFrame && wrapper.updateAnimationsFramerate();
   },
   1e3,
   { interval: true }

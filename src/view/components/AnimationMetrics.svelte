@@ -10,6 +10,7 @@
   <AnimationRequestHistory
     caption="requestAnimationFrame History"
     metrics={metrics.rafHistory}
+    cafHistory={metrics.cafHistory}
   />
 {/if}
 
