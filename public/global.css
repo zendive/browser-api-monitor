@@ -111,6 +111,9 @@ th,
   mask-repeat: no-repeat;
   vertical-align: bottom;
 }
+th .icon {
+  background-color: var(--text-invert);
+}
 .icon.-small {
   width: var(--small-icon-size);
   height: var(--small-icon-size);
@@ -171,4 +174,7 @@ th,
 }
 .icon.-breakpoint {
   mask-image: url(img/breakpoint.svg);
+}
+.icon.-bypass {
+  mask-image: url(img/bypass.svg);
 }

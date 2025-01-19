@@ -12,6 +12,7 @@
   import TraceDomain from './TraceDomain.svelte';
   import SortableColumn from './SortableColumn.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
+  import TraceBypass from './TraceBypass.svelte';
 
   let {
     metrics,
@@ -48,7 +49,6 @@
   </caption>
   <tbody>
     <tr>
-      <th title="Breakpoint">BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <SortableColumn
@@ -66,17 +66,20 @@
           eventChangeSorting={onChangeSort}>Handler</SortableColumn
         >
       </th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
 
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceBreakpoint traceId={metric.traceId} /></td>
         <td class="wb-all">
           <TraceDomain traceDomain={metric.traceDomain} />
           <Trace trace={metric.trace} />
         </td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td><TraceBypass traceId={metric.traceId} /></td>
+        <td><TraceBreakpoint traceId={metric.traceId} /></td>
       </tr>
     {/each}
   </tbody>

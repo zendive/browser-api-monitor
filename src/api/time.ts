@@ -5,13 +5,10 @@ import {
   cancelAnimationFrame,
 } from './const.ts';
 
-export function callingOnce(fn: (...args: any[]) => any) {
-  let runOnce = false;
-  return () => {
-    if (!runOnce) {
-      fn();
-      runOnce = true;
-    }
+export function callingOnce(fn: ((...args: any[]) => any) | null) {
+  return function (...args: any[]) {
+    fn && fn(...args);
+    fn = null;
   };
 }
 

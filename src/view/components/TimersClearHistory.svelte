@@ -44,7 +44,6 @@
   </caption>
   <tbody>
     <tr>
-      <th title="Breakpoint">BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <SortableColumn
@@ -70,6 +69,8 @@
           eventChangeSorting={onChangeSort}>Delay</SortableColumn
         >
       </th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
 
     {#each sortedMetrics as metric (metric.traceId)}

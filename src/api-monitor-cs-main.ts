@@ -41,6 +41,9 @@ const wrapRequestIdleCallbackOnce = callingOnce(() =>
 const wrapCancelIdleCallbackOnce = callingOnce(() =>
   wrapper.wrapCancelIdleCallback()
 );
+const setCallstackTypeOnce = callingOnce((type) => {
+  wrapper.setCallstackType(type);
+});
 let panels: TPanelVisibilityMap;
 const eachSecond = new Timer(
   () => {
@@ -92,6 +95,7 @@ windowListen((o) => {
     o.settings &&
     typeof o.settings === 'object'
   ) {
+    setCallstackTypeOnce(o.settings.wrapperCallstackType);
     panels = panelsArrayToVisibilityMap(o.settings.panels);
     panels.eval.wrap && wrapEvalOnce();
     panels.setTimeout.wrap && wrapSetTimeoutOnce();
@@ -103,7 +107,7 @@ windowListen((o) => {
     panels.requestIdleCallback && wrapRequestIdleCallbackOnce();
     panels.cancelIdleCallback && wrapCancelIdleCallbackOnce();
     wrapper.setTraceForDebug(o.settings.traceForDebug);
-    wrapper.setCallstackType(o.settings.wrapperCallstackType);
+    wrapper.setTraceForBypass(o.settings.traceForBypass);
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
     tick.trigger();

@@ -5,6 +5,7 @@
   import TraceDomain from './TraceDomain.svelte';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
+  import TraceBypass from './TraceBypass.svelte';
 
   let { metrics }: { metrics: TEvalHistory[] } = $props();
 
@@ -27,17 +28,17 @@
   >
   <tbody>
     <tr>
-      <th title="Breakpoint">BP</th>
       <th class="w-full">Callstack</th>
       <th class="ta-r">Self</th>
       <th>Called</th>
       <th>Code</th>
       <th>Returns</th>
       <th>Scope</th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
     {#each metrics as metric (metric.traceId)}
       <tr class="t-zebra">
-        <td><TraceBreakpoint traceId={metric.traceId} /></td>
         <td class="wb-all">
           <TraceDomain traceDomain={metric.traceDomain} />
           <Trace trace={metric.trace} />
@@ -67,6 +68,8 @@
             >
           {/if}
         </td>
+        <td><TraceBypass traceId={metric.traceId} /></td>
+        <td><TraceBreakpoint traceId={metric.traceId} /></td>
       </tr>
     {/each}
   </tbody>

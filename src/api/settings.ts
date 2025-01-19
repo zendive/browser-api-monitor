@@ -127,6 +127,7 @@ export const DEFAULT_SETTINGS = {
   paused: false,
   devtoolsPanelShown: false,
   traceForDebug: <string | null>null,
+  traceForBypass: <string | null>null,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 

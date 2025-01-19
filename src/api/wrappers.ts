@@ -190,6 +190,7 @@ export class Wrapper {
   };
   selfTraceLink = '';
   #traceForDebug: string | null = null;
+  #traceForBypass: string | null = null;
   #callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
 
   constructor() {
@@ -228,6 +229,18 @@ export class Wrapper {
 
   setTraceForDebug(traceId: string | null) {
     this.#traceForDebug = traceId;
+  }
+
+  #shouldDebug(traceId: string) {
+    return this.#traceForDebug === traceId;
+  }
+
+  setTraceForBypass(traceId: string | null) {
+    this.#traceForBypass = traceId;
+  }
+
+  #shouldBypass(traceId: string) {
+    return this.#traceForBypass === traceId;
   }
 
   setCallstackType(type: EWrapperCallstackType) {
@@ -393,7 +406,7 @@ export class Wrapper {
   updateTimersSelfTime(
     map: Map<string, TSetTimerHistory>,
     traceId: string,
-    selfTime: number
+    selfTime: number | null
   ) {
     const record = map.get(traceId);
 
@@ -437,7 +450,7 @@ export class Wrapper {
     this.onlineAnimationFrameLookup.set(handler, callstack.traceId);
   }
 
-  rafFired(handler: number, traceId: string, selfTime: number) {
+  rafFired(handler: number, traceId: string, selfTime: number | null) {
     const rafRecord = this.rafHistory.get(traceId);
     if (!rafRecord) {
       return;
@@ -492,7 +505,7 @@ export class Wrapper {
     handler: number,
     traceId: string,
     deadline: IdleDeadline,
-    selfTime: number
+    selfTime: number | null
   ) {
     const ricRecord = this.ricHistory.get(traceId);
     if (!ricRecord) {
@@ -680,16 +693,17 @@ export class Wrapper {
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
         const start = performance.now();
-        if (this.#traceForDebug === callstack.traceId) {
+        let selfTime = null;
+
+        if (this.#shouldDebug(callstack.traceId)) {
           debugger;
         }
-        fn(deadline);
-        this.ricFired(
-          handler,
-          callstack.traceId,
-          deadline,
-          performance.now() - start
-        );
+        if (!this.#shouldBypass(callstack.traceId)) {
+          fn(deadline);
+          selfTime = performance.now() - start;
+        }
+
+        this.ricFired(handler, callstack.traceId, deadline, selfTime);
       }, options);
       this.updateRicHistory(handler, delay, callstack);
 
@@ -707,10 +721,12 @@ export class Wrapper {
 
       this.updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
-      if (this.#traceForDebug === callstack.traceId) {
+      if (this.#shouldDebug(callstack.traceId)) {
         debugger;
       }
-      this.native.cancelIdleCallback(handler);
+      if (!this.#shouldBypass(callstack.traceId)) {
+        this.native.cancelIdleCallback(handler);
+      }
     }.bind(this);
   }
 
@@ -725,11 +741,17 @@ export class Wrapper {
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
         const start = performance.now();
-        if (this.#traceForDebug === callstack.traceId) {
+        let selfTime = null;
+
+        if (this.#shouldDebug(callstack.traceId)) {
           debugger;
         }
-        fn(...args);
-        this.rafFired(handler, callstack.traceId, performance.now() - start);
+        if (!this.#shouldBypass(callstack.traceId)) {
+          fn(...args);
+          selfTime = performance.now() - start;
+        }
+
+        this.rafFired(handler, callstack.traceId, selfTime);
       });
       this.updateRafHistory(handler, callstack);
 
@@ -747,30 +769,34 @@ export class Wrapper {
 
       this.updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
-      if (this.#traceForDebug === callstack.traceId) {
+      if (this.#shouldDebug(callstack.traceId)) {
         debugger;
       }
-      this.native.cancelAnimationFrame(handler);
+      if (!this.#shouldBypass(callstack.traceId)) {
+        this.native.cancelAnimationFrame(handler);
+      }
     }.bind(this);
   }
 
   wrapEval() {
     window.eval = function WrappedLessEval(this: Wrapper, code: string) {
+      const err = new Error(TRACE_ERROR_MESSAGE);
+      const callstack = this.createCallstack(err, code);
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;
       let selfTime = null;
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      const callstack = this.createCallstack(err, code);
 
       try {
         this.callCounter.eval++;
         const start = performance.now();
-        if (this.#traceForDebug === callstack.traceId) {
+        if (this.#shouldDebug(callstack.traceId)) {
           debugger;
         }
-        rv = this.native.eval(code);
-        selfTime = performance.now() - start;
+        if (!this.#shouldBypass(callstack.traceId)) {
+          rv = this.native.eval(code);
+          selfTime = performance.now() - start;
+        }
       } catch (error: unknown) {
         if (error instanceof Error && 'ReferenceError' === error.name) {
           // most likely a side effect of `eval` reassigning
@@ -807,25 +833,33 @@ export class Wrapper {
       const handler = this.native.setTimeout(
         (...params: any[]) => {
           const start = performance.now();
+          let selfTime = null;
+
           if (isEval) {
             this.callCounter.eval++;
-            if (this.#traceForDebug === callstack.traceId) {
+            if (this.#shouldDebug(callstack.traceId)) {
               debugger;
             }
-            // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
-            this.native.eval(code);
+            if (!this.#shouldBypass(callstack.traceId)) {
+              // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
+              this.native.eval(code);
+              selfTime = performance.now() - start;
+            }
           } else {
-            if (this.#traceForDebug === callstack.traceId) {
+            if (this.#shouldDebug(callstack.traceId)) {
               debugger;
             }
-            code(...params);
+            if (!this.#shouldBypass(callstack.traceId)) {
+              code(...params);
+              selfTime = performance.now() - start;
+            }
           }
-          const stop = performance.now() - start;
-          this.timerOffline(handler, null, stop);
+
+          this.timerOffline(handler, null, selfTime);
           this.updateTimersSelfTime(
             this.setTimeoutHistory,
             callstack.traceId,
-            stop
+            selfTime
           );
         },
         delay,
@@ -873,10 +907,12 @@ export class Wrapper {
       }
 
       this.callCounter.clearTimeout++;
-      if (this.#traceForDebug === callstack.traceId) {
+      if (this.#shouldDebug(callstack.traceId)) {
         debugger;
       }
-      this.native.clearTimeout(handler);
+      if (!this.#shouldBypass(callstack.traceId)) {
+        this.native.clearTimeout(handler);
+      }
     }.bind(this);
   }
 
@@ -895,23 +931,32 @@ export class Wrapper {
       const handler = this.native.setInterval(
         (...params: any[]) => {
           const start = performance.now();
+          let selfTime = null;
+
           if (isEval) {
             this.callCounter.eval++;
-            if (this.#traceForDebug === callstack.traceId) {
+            if (this.#shouldDebug(callstack.traceId)) {
               debugger;
             }
-            // see https://developer.mozilla.org/docs/Web/API/setInterval
-            this.native.eval(code);
+            if (!this.#shouldBypass(callstack.traceId)) {
+              // see https://developer.mozilla.org/docs/Web/API/setInterval
+              this.native.eval(code);
+              selfTime = performance.now() - start;
+            }
           } else {
-            if (this.#traceForDebug === callstack.traceId) {
+            if (this.#shouldDebug(callstack.traceId)) {
               debugger;
             }
-            code(...params);
+            if (!this.#shouldBypass(callstack.traceId)) {
+              code(...params);
+              selfTime = performance.now() - start;
+            }
           }
+
           this.updateTimersSelfTime(
             this.setIntervalHistory,
             callstack.traceId,
-            performance.now() - start
+            selfTime
           );
         },
         delay,
@@ -959,10 +1004,12 @@ export class Wrapper {
       }
 
       this.callCounter.clearInterval++;
-      if (this.#traceForDebug === callstack.traceId) {
+      if (this.#shouldDebug(callstack.traceId)) {
         debugger;
       }
-      this.native.clearInterval(handler);
+      if (!this.#shouldBypass(callstack.traceId)) {
+        this.native.clearInterval(handler);
+      }
     }.bind(this);
   }
 

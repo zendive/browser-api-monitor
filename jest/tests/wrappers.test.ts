@@ -355,16 +355,19 @@ describe('wrappers', () => {
     });
     cancelAnimationFrame(handler);
 
-    const rec = Array.from(wrapper.cafHistory.values())[0];
+    const rafRec = Array.from(wrapper.rafHistory.values())[0];
+    const cafRec = Array.from(wrapper.cafHistory.values())[0];
 
     expect(changeable).toBe(unchanged);
     expect(wrapper.rafHistory.size).toBe(1);
     expect(wrapper.cafHistory.size).toBe(1);
-    expect(rec.handler).toBe(handler);
-    expect(rec.calls).toBe(1);
-    expect(rec.trace.length).toBeGreaterThan(1);
-    expect(rec.traceId.length).toBeGreaterThan(1);
+    expect(cafRec.handler).toBe(handler);
+    expect(cafRec.calls).toBe(1);
+    expect(cafRec.trace.length).toBeGreaterThan(1);
+    expect(cafRec.traceId.length).toBeGreaterThan(1);
     expect(wrapper.callCounter.cancelAnimationFrame).toBe(1);
+    expect(rafRec.canceledByTraceIds?.length).toBe(1);
+    expect(rafRec.canceledCounter).toBe(1);
   });
 
   test('cafHistory - invalid handler', () => {

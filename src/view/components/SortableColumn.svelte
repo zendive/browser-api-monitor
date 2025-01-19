@@ -53,9 +53,5 @@
     align-items: center;
     text-wrap: nowrap;
     color: var(--text-invert);
-
-    .icon {
-      background-color: var(--text-invert);
-    }
   }
 </style>
