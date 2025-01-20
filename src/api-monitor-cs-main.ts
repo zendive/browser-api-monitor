@@ -11,7 +11,7 @@ import {
   doMediaCommand,
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
-import { Wrapper, TimerType, type TWrapperMetrics } from './wrapper/main.ts';
+import { Wrapper, ETimerType, type TWrapperMetrics } from './wrapper/main.ts';
 import { panelsArray2Map, type TPanelVisibilityMap } from './api/settings.ts';
 
 export interface TMetrics {
@@ -59,7 +59,7 @@ windowListen((o) => {
     wrapper.cleanHistory();
     !tick.isPending && tick.trigger();
   } else if (o.msg === 'clear-timer-handler') {
-    if (o.type === TimerType.TIMEOUT) {
+    if (o.type === ETimerType.TIMEOUT) {
       window.clearTimeout(o.handler);
     } else {
       window.clearInterval(o.handler);

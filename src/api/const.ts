@@ -27,7 +27,6 @@ export const cancelIdleCallback =
 export const lessEval = /*@__PURE__*/ window.eval.bind(window);
 
 export const TAG_MISSFORTUNE = '❓\u00A0⟪N/A⟫';
-export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 
@@ -127,22 +126,3 @@ export const READY_STATE = [
   'HAVE_FUTURE_DATA',
   'HAVE_ENOUGH_DATA',
 ];
-
-export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
-export const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
-export const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
-export const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(
-  /.*\((async )?(.*)\)$/
-);
-export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
-  /(.*):\d+:\d+$/
-);
-export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:(\d+):\d+$/
-);
-export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:\d+:(\d+)$/
-);
-export const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?\:\/\//
-);

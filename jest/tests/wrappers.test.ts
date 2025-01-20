@@ -12,10 +12,10 @@ import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
-  TRACE_ERROR_MESSAGE,
   TAG_MISSFORTUNE,
 } from '../../src/api/const.ts';
 import { EWrapperCallstackType } from '../../src/api/settings.ts';
+import { TRACE_ERROR_MESSAGE } from '../../src/wrapper/traceUtil.ts';
 
 const TEST_STACK = `Error: ${TRACE_ERROR_MESSAGE}
         at <anonymous>:1:1
@@ -383,7 +383,7 @@ describe('wrappers', () => {
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { trace } = wrapper.createCallstack(
+    const { trace } = wrapper.traceUtil.createCallstack(
       <Error>{ stack: TEST_STACK },
       null
     );
@@ -400,7 +400,7 @@ describe('wrappers', () => {
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
     wrapper.setCallstackType(EWrapperCallstackType.SHORT);
-    const { trace } = wrapper.createCallstack(
+    const { trace } = wrapper.traceUtil.createCallstack(
       <Error>{ stack: TEST_STACK },
       null
     );

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { TraceDomain, type TTraceDomain } from 'src/wrapper/main.ts';
+  import { ETraceDomain } from '../../wrapper/traceUtil.ts';
 
-  let { traceDomain }: { traceDomain: TTraceDomain } = $props();
+  let { traceDomain }: { traceDomain: ETraceDomain } = $props();
 </script>
 
-{#if traceDomain === TraceDomain.SAME}
+{#if traceDomain === ETraceDomain.SAME}
   <span class="icon -small -trace-local" title="Same domain"></span>
-{:else if traceDomain === TraceDomain.EXTERNAL}
+{:else if traceDomain === ETraceDomain.EXTERNAL}
   <span class="icon -small -trace-external" title="External domain"></span>
-{:else if traceDomain === TraceDomain.EXTENSION}
+{:else if traceDomain === ETraceDomain.EXTENSION}
   <span class="icon -small -trace-extension" title="Local extension"></span>
-{:else if traceDomain === TraceDomain.UNKNOWN}
+{:else if traceDomain === ETraceDomain.UNKNOWN}
   <span title="Unknown domain">❓</span>
 {/if}
