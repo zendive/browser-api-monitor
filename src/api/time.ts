@@ -5,10 +5,16 @@ import {
   cancelAnimationFrame,
 } from './const.ts';
 
-export function callingOnce(fn: ((...args: any[]) => any) | null) {
-  return function (...args: any[]) {
-    fn && fn(...args);
-    fn = null;
+export function callingOnce<T extends (...args: any[]) => any>(
+  fn: T | null
+): T {
+  let rv: ReturnType<T>;
+  return <T>function (...args: Parameters<T>): ReturnType<T> {
+    if (fn) {
+      rv = fn(...args);
+      fn = null;
+    }
+    return rv;
   };
 }
 
@@ -73,7 +79,7 @@ export class Stopper {
 }
 
 interface TimerOptions {
-  interval?: boolean;
+  repetitive?: boolean;
   animation?: boolean;
   measurable?: boolean;
 }
@@ -95,7 +101,7 @@ export class Timer {
   constructor(
     fn: Function,
     delay?: number,
-    o: TimerOptions = { interval: false, animation: false, measurable: false }
+    o: TimerOptions = { repetitive: false, animation: false, measurable: false }
   ) {
     this.#fn = fn;
     this.delay = delay || 0;
@@ -116,7 +122,7 @@ export class Timer {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.interval) {
+        if (this.options.repetitive) {
           this.start(...args);
         }
       });
@@ -125,7 +131,7 @@ export class Timer {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.interval) {
+        if (this.options.repetitive) {
           this.start(...args);
         }
       }, this.delay);
@@ -182,7 +188,7 @@ export class Fps {
         callback?.(this.value);
       },
       1e3,
-      { interval: true }
+      { repetitive: true }
     );
   }
 

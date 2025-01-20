@@ -28,11 +28,11 @@ describe('wrappers', () => {
 
   beforeEach(() => {
     wrapper = new Wrapper();
-    wrapper.wrapApis();
+    wrapper.wrapAll();
   });
 
   afterEach(() => {
-    wrapper.unwrapApis();
+    wrapper.unwrapAll();
   });
 
   test('onlineTimers emptied after setTimeout expires', async () => {

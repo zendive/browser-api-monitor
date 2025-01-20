@@ -131,7 +131,7 @@ export const DEFAULT_SETTINGS = {
   wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 
-export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
+export function panelsArray2Map(panels: TSettingsPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
     {} as TPanelVisibilityMap

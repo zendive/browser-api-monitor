@@ -20,9 +20,13 @@ import {
   TAG_MISSFORTUNE,
 } from './const.ts';
 import { TAG_EXCEPTION, cloneObjectSafely } from './clone.ts';
-import { EWrapperCallstackType, type TPanelVisibilityMap } from './settings.ts';
+import {
+  EWrapperCallstackType,
+  type TPanelVisibilityMap,
+  type TSettings,
+} from './settings.ts';
 import { hashString } from './hash.ts';
-import { trim2microsecond } from './time.ts';
+import { trim2microsecond, callingOnce } from './time.ts';
 
 export type TTrace = {
   name: string | 0;
@@ -227,25 +231,17 @@ export class Wrapper {
     return TraceDomain.UNKNOWN;
   }
 
-  setTraceForDebug(traceId: string | null) {
-    this.#traceForDebug = traceId;
-  }
-
   #shouldDebug(traceId: string) {
     return this.#traceForDebug === traceId;
-  }
-
-  setTraceForBypass(traceId: string | null) {
-    this.#traceForBypass = traceId;
   }
 
   #shouldBypass(traceId: string) {
     return this.#traceForBypass === traceId;
   }
 
-  setCallstackType(type: EWrapperCallstackType) {
+  setCallstackType = callingOnce((type: EWrapperCallstackType) => {
     this.#callstackType = type;
-  }
+  });
 
   timerOnline(
     type: TTimerType,
@@ -656,19 +652,26 @@ export class Wrapper {
     };
   }
 
-  unwrapApis() {
-    window.eval = this.native.eval; // won't do revert effect, here for consistency
-    window.setTimeout = this.native.setTimeout;
-    window.clearTimeout = this.native.clearTimeout;
-    window.setInterval = this.native.setInterval;
-    window.clearInterval = this.native.clearInterval;
-    window.requestAnimationFrame = this.native.requestAnimationFrame;
-    window.cancelAnimationFrame = this.native.cancelAnimationFrame;
-    window.requestIdleCallback = this.native.requestIdleCallback;
-    window.cancelIdleCallback = this.native.cancelIdleCallback;
+  setup(panels: TPanelVisibilityMap, settings: TSettings) {
+    this.#traceForDebug = settings.traceForDebug;
+    this.#traceForBypass = settings.traceForBypass;
+    this.setCallstackType(settings.wrapperCallstackType);
+    this.wrapByPanels(panels);
   }
 
-  wrapApis() {
+  wrapByPanels = callingOnce((panels: TPanelVisibilityMap) => {
+    panels.eval.wrap && this.wrapEval();
+    panels.setTimeout.wrap && this.wrapSetTimeout();
+    panels.clearTimeout.wrap && this.wrapClearTimeout();
+    panels.setInterval.wrap && this.wrapSetInterval();
+    panels.clearInterval.wrap && this.wrapClearInterval();
+    panels.requestAnimationFrame.wrap && this.wrapRequestAnimationFrame();
+    panels.cancelAnimationFrame.wrap && this.wrapCancelAnimationFrame();
+    panels.requestIdleCallback.wrap && this.wrapRequestIdleCallback();
+    panels.cancelIdleCallback.wrap && this.wrapCancelIdleCallback();
+  });
+
+  wrapAll() {
     this.wrapEval();
     this.wrapSetTimeout();
     this.wrapClearTimeout();
@@ -678,6 +681,18 @@ export class Wrapper {
     this.wrapCancelAnimationFrame();
     this.wrapRequestIdleCallback();
     this.wrapCancelIdleCallback();
+  }
+
+  unwrapAll() {
+    window.eval = this.native.eval; // won't do revert effect, here for consistency
+    window.setTimeout = this.native.setTimeout;
+    window.clearTimeout = this.native.clearTimeout;
+    window.setInterval = this.native.setInterval;
+    window.clearInterval = this.native.clearInterval;
+    window.requestAnimationFrame = this.native.requestAnimationFrame;
+    window.cancelAnimationFrame = this.native.cancelAnimationFrame;
+    window.requestIdleCallback = this.native.requestIdleCallback;
+    window.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
   wrapRequestIdleCallback() {

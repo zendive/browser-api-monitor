@@ -4,7 +4,7 @@ import {
   TELEMETRY_FREQUENCY_1PS,
   TELEMETRY_FREQUENCY_30PS,
 } from './api/const.ts';
-import { callingOnce, Timer } from './api/time.ts';
+import { Timer } from './api/time.ts';
 import {
   collectMediaMetrics,
   meetMedia,
@@ -12,10 +12,7 @@ import {
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
 import { Wrapper, TimerType, type TWrapperMetrics } from './api/wrappers.ts';
-import {
-  panelsArrayToVisibilityMap,
-  type TPanelVisibilityMap,
-} from './api/settings.ts';
+import { panelsArray2Map, type TPanelVisibilityMap } from './api/settings.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
@@ -23,40 +20,19 @@ export interface TMetrics {
   collectingStartTime: number;
 }
 
-const wrapper = new Wrapper();
-const wrapEvalOnce = callingOnce(() => wrapper.wrapEval());
-const wrapSetTimeoutOnce = callingOnce(() => wrapper.wrapSetTimeout());
-const wrapClearTimeoutOnce = callingOnce(() => wrapper.wrapClearTimeout());
-const wrapSetIntervalOnce = callingOnce(() => wrapper.wrapSetInterval());
-const wrapClearIntervalOnce = callingOnce(() => wrapper.wrapClearInterval());
-const wrapRequestAnimationFrameOnce = callingOnce(() =>
-  wrapper.wrapRequestAnimationFrame()
-);
-const wrapCancelAnimationFrameOnce = callingOnce(() =>
-  wrapper.wrapCancelAnimationFrame()
-);
-const wrapRequestIdleCallbackOnce = callingOnce(() =>
-  wrapper.wrapRequestIdleCallback()
-);
-const wrapCancelIdleCallbackOnce = callingOnce(() =>
-  wrapper.wrapCancelIdleCallback()
-);
-const setCallstackTypeOnce = callingOnce((type) => {
-  wrapper.setCallstackType(type);
-});
 let panels: TPanelVisibilityMap;
+const wrapper = new Wrapper();
 const eachSecond = new Timer(
   () => {
     meetMedia(document.querySelectorAll('video,audio'));
     panels.requestAnimationFrame && wrapper.updateAnimationsFramerate();
   },
   1e3,
-  { interval: true }
+  { repetitive: true }
 );
 const tick = new Timer(
   function apiMonitorPostMetric() {
     const now = Date.now();
-
     const metrics: TMetrics = {
       mediaMetrics: collectMediaMetrics(panels.media.visible),
       wrapperMetrics: wrapper.collectWrapperMetrics(panels),
@@ -66,51 +42,22 @@ const tick = new Timer(
     windowPost({ msg: 'telemetry', metrics });
   },
   TELEMETRY_FREQUENCY_1PS,
-  { interval: true, animation: false, measurable: true }
+  { repetitive: true }
 );
 
-function startObserve() {
-  stopObserve();
-  tick.start();
-  eachSecond.start();
-}
-
-function stopObserve() {
-  tick.stop();
-  eachSecond.stop();
-}
-
 windowListen((o) => {
-  if (o.msg === 'telemetry-acknowledged') {
-    // adaptive update-frequency
-    const ackTrafficDuration = Date.now() - o.timeSent;
-    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
-    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+  if (o.msg === 'settings' && o.settings && typeof o.settings === 'object') {
+    panels = panelsArray2Map(o.settings.panels);
+    wrapper.setup(panels, o.settings);
   } else if (o.msg === 'start-observe') {
-    startObserve();
+    tick.start();
+    eachSecond.start();
   } else if (o.msg === 'stop-observe') {
-    stopObserve();
-  } else if (
-    o.msg === 'settings' &&
-    o.settings &&
-    typeof o.settings === 'object'
-  ) {
-    setCallstackTypeOnce(o.settings.wrapperCallstackType);
-    panels = panelsArrayToVisibilityMap(o.settings.panels);
-    panels.eval.wrap && wrapEvalOnce();
-    panels.setTimeout.wrap && wrapSetTimeoutOnce();
-    panels.clearTimeout.wrap && wrapClearTimeoutOnce();
-    panels.setInterval.wrap && wrapSetIntervalOnce();
-    panels.clearInterval.wrap && wrapClearIntervalOnce();
-    panels.requestAnimationFrame && wrapRequestAnimationFrameOnce();
-    panels.cancelAnimationFrame && wrapCancelAnimationFrameOnce();
-    panels.requestIdleCallback && wrapRequestIdleCallbackOnce();
-    panels.cancelIdleCallback && wrapCancelIdleCallbackOnce();
-    wrapper.setTraceForDebug(o.settings.traceForDebug);
-    wrapper.setTraceForBypass(o.settings.traceForBypass);
+    tick.stop();
+    eachSecond.stop();
   } else if (o.msg === 'reset-wrapper-history') {
     wrapper.cleanHistory();
-    tick.trigger();
+    !tick.isPending && tick.trigger();
   } else if (o.msg === 'clear-timer-handler') {
     if (o.type === TimerType.TIMEOUT) {
       window.clearTimeout(o.handler);
@@ -119,6 +66,11 @@ windowListen((o) => {
     }
   } else if (o.msg === 'media-command') {
     doMediaCommand(o.mediaId, o.cmd, o.property);
+  } else if (o.msg === 'telemetry-acknowledged') {
+    // adaptive update-frequency
+    const ackTrafficDuration = Date.now() - o.timeSent;
+    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
+    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
   }
 });
 
