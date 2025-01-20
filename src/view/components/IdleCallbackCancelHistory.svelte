@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TCancelIdleCallbackHistory } from '../../api/wrappers.ts';
+  import type { TCancelIdleCallbackHistory } from '../../wrapper/main.ts';
   import {
     getSettings,
     setSettings,

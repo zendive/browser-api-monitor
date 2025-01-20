@@ -5,7 +5,7 @@ import type {
   TRequestAnimationFrameHistory,
   TRequestIdleCallbackHistory,
   TSetTimerHistory,
-} from './wrappers.ts';
+} from '../wrapper/main.ts';
 
 type TPanelKey =
   | 'eval'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TCancelAnimationFrameHistory } from '../../api/wrappers.ts';
+  import type { TCancelAnimationFrameHistory } from '../../wrapper/main.ts';
   import {
     DEFAULT_SORT_CAF,
     getSettings,

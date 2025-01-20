@@ -105,7 +105,7 @@ describe('Timer - interval option', () => {
         counter++;
       },
       DELAY,
-      { interval: true }
+      { repetitive: true }
     );
 
     interval.start();
@@ -124,7 +124,7 @@ describe('Timer - animation + interval + measurable', () => {
         count++;
       },
       undefined,
-      { animation: true, interval: true, measurable: true }
+      { animation: true, repetitive: true, measurable: true }
     );
     const SECOND = 1e3;
 

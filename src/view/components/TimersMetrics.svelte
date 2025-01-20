@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TMetrics } from '../../api-monitor-cs-main.ts';
-  import { TimerType, type TOnlineTimerMetrics } from '../../api/wrappers.ts';
+  import { TimerType, type TOnlineTimerMetrics } from '../../wrapper/main.ts';
   import ActiveTimers from './ActiveTimers.svelte';
   import TimersSetHistory from './TimersSetHistory.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';

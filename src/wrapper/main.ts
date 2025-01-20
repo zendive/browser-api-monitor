@@ -18,15 +18,15 @@ import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_MISSFORTUNE,
-} from './const.ts';
-import { TAG_EXCEPTION, cloneObjectSafely } from './clone.ts';
+} from '../api/const.ts';
+import { TAG_EXCEPTION, cloneObjectSafely } from '../api/clone.ts';
 import {
   EWrapperCallstackType,
   type TPanelVisibilityMap,
   type TSettings,
-} from './settings.ts';
-import { hashString } from './hash.ts';
-import { trim2microsecond, callingOnce } from './time.ts';
+} from '../api/settings.ts';
+import { hashString } from '../api/hash.ts';
+import { trim2microsecond, callingOnce } from '../api/time.ts';
 
 export type TTrace = {
   name: string | 0;

@@ -11,7 +11,7 @@ import {
   doMediaCommand,
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
-import { Wrapper, TimerType, type TWrapperMetrics } from './api/wrappers.ts';
+import { Wrapper, TimerType, type TWrapperMetrics } from './wrapper/main.ts';
 import { panelsArray2Map, type TPanelVisibilityMap } from './api/settings.ts';
 
 export interface TMetrics {

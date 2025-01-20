@@ -7,7 +7,7 @@ global.cancelIdleCallback = function noop() {};
 // }}
 
 import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
-import { Wrapper } from '../../src/api/wrappers.ts';
+import { Wrapper } from '../../src/wrapper/main.ts';
 import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
