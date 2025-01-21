@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TTrace } from '../../wrapper/traceUtil.ts';
+  import type { TTrace } from '../../wrapper/TraceUtil.ts';
   import TraceLink from './TraceLink.svelte';
 
   let { trace }: { trace: TTrace[] } = $props();

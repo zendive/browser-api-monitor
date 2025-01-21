@@ -4,7 +4,7 @@
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
     TAG_INVALID_CALLSTACK_LINK,
-  } from 'src/wrapper/traceUtil.ts';
+  } from '../../wrapper/TraceUtil.ts';
 
   let {
     name,

@@ -2,7 +2,7 @@
   import type {
     TRequestIdleCallbackHistory,
     TCancelIdleCallbackHistory,
-  } from '../../wrapper/main.ts';
+  } from '../../wrapper/Wrapper.ts';
   import {
     DEFAULT_SORT_RIC,
     getSettings,

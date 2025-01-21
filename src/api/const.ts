@@ -24,7 +24,7 @@ export const requestIdleCallback =
 export const cancelIdleCallback =
   /*@__PURE__*/ window.cancelIdleCallback.bind(window);
 // https://rollupjs.org/troubleshooting/#avoiding-eval
-export const lessEval = /*@__PURE__*/ window.eval.bind(window);
+export const lesserEval = /*@__PURE__*/ window.eval.bind(window);
 
 export const TAG_MISSFORTUNE = '❓\u00A0⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';

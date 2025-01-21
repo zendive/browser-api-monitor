@@ -7,7 +7,7 @@ global.cancelIdleCallback = function noop() {};
 // }}
 
 import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
-import { Wrapper } from '../../src/wrapper/main.ts';
+import { Wrapper } from '../../src/wrapper/Wrapper.ts';
 import { TAG_EXCEPTION, TAG_UNDEFINED } from '../../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
@@ -15,9 +15,9 @@ import {
   TAG_MISSFORTUNE,
 } from '../../src/api/const.ts';
 import { EWrapperCallstackType } from '../../src/api/settings.ts';
-import { TRACE_ERROR_MESSAGE } from '../../src/wrapper/traceUtil.ts';
+import { TraceUtil } from '../../src/wrapper/TraceUtil.ts';
 
-const TEST_STACK = `Error: ${TRACE_ERROR_MESSAGE}
+const TEST_STACK = `Error: ${TraceUtil.SIGNATURE}
         at <anonymous>:1:1
         at async (<anonymous>:1:1)
         at call2 (async https://example2.com/bundle3.js:4:5)
@@ -277,9 +277,9 @@ describe('wrappers', () => {
     for (let i = 0, I = NUMBER_OF_INVOCATIONS; i < I; i++) {
       window.eval(CODE);
     }
-    expect(wrapper.evalHistory.size).toBe(1);
+    expect(wrapper.apiEval.evalHistory.size).toBe(1);
 
-    const rec = Array.from(wrapper.evalHistory.values())[0];
+    const rec = Array.from(wrapper.apiEval.evalHistory.values())[0];
 
     expect(rec.calls).toBe(NUMBER_OF_INVOCATIONS);
     expect(rec.usesLocalScope).toBe(false);
@@ -294,7 +294,7 @@ describe('wrappers', () => {
     const local_variable = 0;
     window.eval('(local_variable++)');
 
-    const rec = Array.from(wrapper.evalHistory.values())[0];
+    const rec = Array.from(wrapper.apiEval.evalHistory.values())[0];
 
     expect(rec.calls).toBe(1);
     expect(local_variable).toBe(0);
@@ -306,7 +306,7 @@ describe('wrappers', () => {
     const CODE = '(1+2)';
     setTimeout(CODE);
     const timerRec = Array.from(wrapper.setTimeoutHistory.values())[0];
-    const evalRec = Array.from(wrapper.evalHistory.values())[0];
+    const evalRec = Array.from(wrapper.apiEval.evalHistory.values())[0];
 
     expect(timerRec.isEval).toBe(true);
     expect(evalRec.code).toBe(CODE);
@@ -317,7 +317,7 @@ describe('wrappers', () => {
     const CODE = '(1+2)';
     const handler = setInterval(CODE, 123);
     const timerRec = Array.from(wrapper.setIntervalHistory.values())[0];
-    const evalRec = Array.from(wrapper.evalHistory.values())[0];
+    const evalRec = Array.from(wrapper.apiEval.evalHistory.values())[0];
 
     expect(timerRec.isEval).toBe(true);
     expect(evalRec.code).toBe(CODE);

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '../../wrapper/main.ts';
+  import type { TOnlineTimerMetrics } from '../../wrapper/Wrapper.ts';
   import { portPost } from '../../api/communication.ts';
   import { delayTitle } from '../../api/time.ts';
   import Variable from './Variable.svelte';

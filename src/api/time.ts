@@ -79,33 +79,43 @@ export class Stopper {
 }
 
 interface TimerOptions {
+  /** a delay of setTimeout or setInterval (default: 0); irrelevant if `animation` is true */
+  delay?: number;
+  /** act as setInterval by repeating setTimeout (default: false) */
   repetitive?: boolean;
+  /** act as requestAnimationFrame called from another requestAnimationFrame (default: false);
+  if true - `delay` is redundant */
   animation?: boolean;
+  /** populate `executionTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
 }
 
 /**
- * Universal abstraction of setTimeout/setInterval/requestAnimationFrame
- * with an optional measurement of the callback's execution time
+ * A unification of ways to delay a callback to another time in javascript event-loop
+ * - `repetitive: false` - will call `setTimeout` with constant `delay`.
+ * - `repetitive: true` - will call `setTimeout` but act as `setInterval` with changable `delay`.
+ * - `animation: true` - will call `requestAnimationFrame` in recursive way (means to follow the browser's frame-rate).
+ * - `measurable: true` - measure the callback's execution time.
  */
 export class Timer {
-  delay: number;
   readonly options: TimerOptions;
-  /** (ms) */
+  readonly #defaultOptions: TimerOptions = {
+    delay: 0,
+    repetitive: false,
+    animation: false,
+    measurable: false,
+  };
+  delay: number = 0;
+  /** callback's self-time in milliseconds */
   executionTime: number = -1;
-
   #fn: Function;
   #handler: number = 0;
   readonly #stopper?: Stopper;
 
-  constructor(
-    fn: Function,
-    delay?: number,
-    o: TimerOptions = { repetitive: false, animation: false, measurable: false }
-  ) {
+  constructor(o: TimerOptions, fn: Function) {
+    this.options = Object.assign(this.#defaultOptions, o);
     this.#fn = fn;
-    this.delay = delay || 0;
-    this.options = o;
+    this.delay = this.options.delay || 0;
 
     if (this.options.measurable) {
       this.#stopper = new Stopper();
@@ -181,15 +191,11 @@ export class Fps {
   #interval: Timer;
 
   constructor(callback?: (value: number) => void) {
-    this.#interval = new Timer(
-      () => {
-        this.value = this.#ticks;
-        this.#ticks = 0;
-        callback?.(this.value);
-      },
-      1e3,
-      { repetitive: true }
-    );
+    this.#interval = new Timer({ delay: 1e3, repetitive: true }, () => {
+      this.value = this.#ticks;
+      this.#ticks = 0;
+      callback?.(this.value);
+    });
   }
 
   start() {

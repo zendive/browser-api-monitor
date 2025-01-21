@@ -2,7 +2,7 @@
   import type {
     TCancelAnimationFrameHistory,
     TRequestAnimationFrameHistory,
-  } from '../../wrapper/main.ts';
+  } from '../../wrapper/Wrapper.ts';
   import {
     DEFAULT_SORT_RAF,
     getSettings,

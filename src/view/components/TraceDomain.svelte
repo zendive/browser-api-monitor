@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ETraceDomain } from '../../wrapper/traceUtil.ts';
+  import { ETraceDomain } from '../../wrapper/TraceUtil.ts';
 
   let { traceDomain }: { traceDomain: ETraceDomain } = $props();
 </script>

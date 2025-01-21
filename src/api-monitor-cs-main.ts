@@ -11,7 +11,11 @@ import {
   doMediaCommand,
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
-import { Wrapper, ETimerType, type TWrapperMetrics } from './wrapper/main.ts';
+import {
+  Wrapper,
+  ETimerType,
+  type TWrapperMetrics,
+} from './wrapper/Wrapper.ts';
 import { panelsArray2Map, type TPanelVisibilityMap } from './api/settings.ts';
 
 export interface TMetrics {
@@ -22,15 +26,12 @@ export interface TMetrics {
 
 let panels: TPanelVisibilityMap;
 const wrapper = new Wrapper();
-const eachSecond = new Timer(
-  () => {
-    meetMedia(document.querySelectorAll('video,audio'));
-    panels.requestAnimationFrame && wrapper.updateAnimationsFramerate();
-  },
-  1e3,
-  { repetitive: true }
-);
+const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
+  meetMedia(document.querySelectorAll('video,audio'));
+  panels.requestAnimationFrame && wrapper.updateAnimationsFramerate();
+});
 const tick = new Timer(
+  { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },
   function apiMonitorPostMetric() {
     const now = Date.now();
     const metrics: TMetrics = {
@@ -40,9 +41,7 @@ const tick = new Timer(
     };
 
     windowPost({ msg: 'telemetry', metrics });
-  },
-  TELEMETRY_FREQUENCY_1PS,
-  { repetitive: true }
+  }
 );
 
 windowListen((o) => {

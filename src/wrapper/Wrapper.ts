@@ -3,7 +3,6 @@ import {
   clearTimeout,
   setInterval,
   clearInterval,
-  lessEval,
   requestAnimationFrame,
   cancelAnimationFrame,
   requestIdleCallback,
@@ -12,7 +11,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_MISSFORTUNE,
 } from '../api/const.ts';
-import { TAG_EXCEPTION, cloneObjectSafely } from '../api/clone.ts';
+import { TAG_EXCEPTION } from '../api/clone.ts';
 import {
   EWrapperCallstackType,
   type TPanelVisibilityMap,
@@ -21,12 +20,12 @@ import {
 import { trim2microsecond, callingOnce } from '../api/time.ts';
 import {
   TraceUtil,
-  TRACE_ERROR_MESSAGE,
   ETraceDomain,
   type TCallstack,
   type TTrace,
-} from './traceUtil.ts';
+} from './TraceUtil.ts';
 import { validHandler, validTimerDelay } from './util.ts';
+import { ApiEval, type TEvalHistory } from './ApiEval.ts';
 
 export enum ETimerType {
   TIMEOUT,
@@ -61,16 +60,6 @@ export type TClearTimerHistory = {
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
-};
-export type TEvalHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
-  calls: number;
-  returnedValue: any;
-  code: any;
-  usesLocalScope: boolean;
-  selfTime: number | null;
 };
 export type TRequestAnimationFrameHistory = {
   traceId: string;
@@ -122,28 +111,33 @@ export type TWrapperMetrics = {
   cafHistory: TCancelAnimationFrameHistory[] | null;
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
-  callCounter: {
-    activeTimers: number;
-    setTimeout: number;
-    clearTimeout: number;
-    setInterval: number;
-    clearInterval: number;
-    eval: number;
-    requestAnimationFrame: number;
-    cancelAnimationFrame: number;
-    requestIdleCallback: number;
-    cancelIdleCallback: number;
-  };
+  callCounter: TWrapperCallCounter;
+};
+type TWrapperCallCounter = {
+  activeTimers: number;
+  setTimeout: number;
+  clearTimeout: number;
+  setInterval: number;
+  clearInterval: number;
+  eval: number;
+  requestAnimationFrame: number;
+  cancelAnimationFrame: number;
+  requestIdleCallback: number;
+  cancelIdleCallback: number;
 };
 
 export class Wrapper {
   traceUtil = new TraceUtil();
+  apiEval: ApiEval;
+  // apiTimer: ApiTimer,
+  // apiIdleCallback: ApiIdleCallback,
+  // apiAnimationFrame: ApiAnimationFrame,
+
   onlineTimers: Map</*handler*/ number, TOnlineTimerMetrics> = new Map();
   setTimeoutHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
   clearTimeoutHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
   setIntervalHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
   clearIntervalHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
-  evalHistory: Map</*traceId*/ string, TEvalHistory> = new Map();
   animationCallsMap = new Map</*traceId*/ string, /*calls*/ number>();
   onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
@@ -154,13 +148,12 @@ export class Wrapper {
     new Map();
   ricHistory: Map</*traceId*/ string, TRequestIdleCallbackHistory> = new Map();
   cicHistory: Map</*traceId*/ string, TCancelIdleCallbackHistory> = new Map();
-  callCounter: TWrapperMetrics['callCounter'] = {
+  callCounter = {
     activeTimers: 0,
     setTimeout: 0,
     clearTimeout: 0,
     setInterval: 0,
     clearInterval: 0,
-    eval: 0,
     requestAnimationFrame: 0,
     cancelAnimationFrame: 0,
     requestIdleCallback: 0,
@@ -171,12 +164,18 @@ export class Wrapper {
     clearTimeout: clearTimeout,
     setInterval: setInterval,
     clearInterval: clearInterval,
-    eval: lessEval,
     requestAnimationFrame: requestAnimationFrame,
     cancelAnimationFrame: cancelAnimationFrame,
     requestIdleCallback: requestIdleCallback,
     cancelIdleCallback: cancelIdleCallback,
   };
+
+  constructor() {
+    this.apiEval = new ApiEval(this.traceUtil);
+    // this.apiTimer: new ApiTimer(this.traceUtil, this.apiEval),
+    // this.apiIdleCallback: new ApiIdleCallback(this.traceUtil),
+    // this.apiAnimationFrame: new ApiAnimationFrame(this.traceUtil),
+  }
 
   setCallstackType = callingOnce((type: EWrapperCallstackType) => {
     this.traceUtil.callstackType = type;
@@ -305,35 +304,6 @@ export class Wrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
-      });
-    }
-  }
-
-  updateEvalHistory(
-    code: string,
-    returnedValue: any,
-    callstack: TCallstack,
-    usesLocalScope: boolean,
-    selfTime: number | null
-  ) {
-    const existing = this.evalHistory.get(callstack.traceId);
-
-    if (existing) {
-      existing.code = cloneObjectSafely(code);
-      existing.returnedValue = cloneObjectSafely(returnedValue);
-      existing.calls++;
-      existing.usesLocalScope = usesLocalScope;
-      existing.selfTime = trim2microsecond(selfTime);
-    } else {
-      this.evalHistory.set(callstack.traceId, {
-        calls: 1,
-        code: cloneObjectSafely(code),
-        returnedValue: cloneObjectSafely(returnedValue),
-        usesLocalScope,
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
-        selfTime,
       });
     }
   }
@@ -529,7 +499,8 @@ export class Wrapper {
   }
 
   cleanHistory() {
-    this.evalHistory.clear();
+    this.apiEval.cleanHistory();
+
     this.setTimeoutHistory.clear();
     this.clearTimeoutHistory.clear();
     this.setIntervalHistory.clear();
@@ -545,7 +516,6 @@ export class Wrapper {
       this.callCounter.clearTimeout =
       this.callCounter.setInterval =
       this.callCounter.clearInterval =
-      this.callCounter.eval =
       this.callCounter.requestAnimationFrame =
       this.callCounter.cancelAnimationFrame =
       this.callCounter.requestIdleCallback =
@@ -557,9 +527,7 @@ export class Wrapper {
     this.callCounter.activeTimers = this.onlineTimers.size;
 
     return {
-      evalHistory: panels.eval.visible
-        ? Array.from(this.evalHistory.values())
-        : null,
+      evalHistory: panels.eval.visible ? this.apiEval.collectHistory() : null,
       onlineTimers: panels.activeTimers.visible
         ? Array.from(this.onlineTimers.values())
         : null,
@@ -587,7 +555,10 @@ export class Wrapper {
       cicHistory: panels.cancelIdleCallback.visible
         ? Array.from(this.cicHistory.values())
         : null,
-      callCounter: this.callCounter,
+      callCounter: {
+        eval: this.apiEval.callCounter,
+        ...this.callCounter,
+      },
     };
   }
 
@@ -599,7 +570,7 @@ export class Wrapper {
   }
 
   wrapByPanels = callingOnce((panels: TPanelVisibilityMap) => {
-    panels.eval.wrap && this.wrapEval();
+    panels.eval.wrap && this.apiEval.wrap();
     panels.setTimeout.wrap && this.wrapSetTimeout();
     panels.clearTimeout.wrap && this.wrapClearTimeout();
     panels.setInterval.wrap && this.wrapSetInterval();
@@ -611,7 +582,7 @@ export class Wrapper {
   });
 
   wrapAll() {
-    this.wrapEval();
+    this.apiEval.wrap();
     this.wrapSetTimeout();
     this.wrapClearTimeout();
     this.wrapSetInterval();
@@ -623,7 +594,7 @@ export class Wrapper {
   }
 
   unwrapAll() {
-    window.eval = this.native.eval; // won't do revert effect, here for consistency
+    this.apiEval.unwrap();
     window.setTimeout = this.native.setTimeout;
     window.clearTimeout = this.native.clearTimeout;
     window.setInterval = this.native.setInterval;
@@ -641,7 +612,7 @@ export class Wrapper {
       options?: IdleRequestOptions | undefined
     ) {
       const delay = options?.timeout;
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err, fn);
 
       this.callCounter.requestIdleCallback++;
@@ -649,8 +620,8 @@ export class Wrapper {
         const start = performance.now();
         let selfTime = null;
 
-        if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-          if (this.traceUtil.shouldDebug(callstack.traceId)) {
+        if (this.traceUtil.shouldPass(callstack.traceId)) {
+          if (this.traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(deadline);
@@ -670,14 +641,14 @@ export class Wrapper {
       this: Wrapper,
       handler: number
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err);
 
       this.updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
 
-      if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-        if (this.traceUtil.shouldDebug(callstack.traceId)) {
+      if (this.traceUtil.shouldPass(callstack.traceId)) {
+        if (this.traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelIdleCallback(handler);
@@ -690,7 +661,7 @@ export class Wrapper {
       this: Wrapper,
       fn: FrameRequestCallback
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err, fn);
 
       this.callCounter.requestAnimationFrame++;
@@ -698,8 +669,8 @@ export class Wrapper {
         const start = performance.now();
         let selfTime = null;
 
-        if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-          if (this.traceUtil.shouldDebug(callstack.traceId)) {
+        if (this.traceUtil.shouldPass(callstack.traceId)) {
+          if (this.traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(...args);
@@ -719,59 +690,18 @@ export class Wrapper {
       this: Wrapper,
       handler: number
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err);
 
       this.updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
 
-      if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-        if (this.traceUtil.shouldDebug(callstack.traceId)) {
+      if (this.traceUtil.shouldPass(callstack.traceId)) {
+        if (this.traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelAnimationFrame(handler);
       }
-    }.bind(this);
-  }
-
-  wrapEval() {
-    window.eval = function WrappedLessEval(this: Wrapper, code: string) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
-      const callstack = this.traceUtil.createCallstack(err, code);
-      let rv: unknown;
-      let throwError = null;
-      let usesLocalScope = false;
-      let selfTime = null;
-
-      try {
-        this.callCounter.eval++;
-        const start = performance.now();
-
-        if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-          if (this.traceUtil.shouldDebug(callstack.traceId)) {
-            debugger;
-          }
-          rv = this.native.eval(code);
-          selfTime = performance.now() - start;
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error && 'ReferenceError' === error.name) {
-          // most likely a side effect of `eval` reassigning
-          // when reference to local scope variable resulting
-          // in "ReferenceError: {something} is not defined"
-          usesLocalScope = true;
-        } else {
-          throwError = error;
-        }
-      }
-
-      this.updateEvalHistory(code, rv, callstack, usesLocalScope, selfTime);
-
-      if (throwError) {
-        throw throwError;
-      }
-
-      return rv;
     }.bind(this);
   }
 
@@ -782,7 +712,7 @@ export class Wrapper {
       delay: number | undefined,
       ...args: any[]
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err, code);
       const isEval = typeof code === 'string';
 
@@ -793,18 +723,18 @@ export class Wrapper {
           let selfTime = null;
 
           if (isEval) {
-            this.callCounter.eval++;
-            if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-              if (this.traceUtil.shouldDebug(callstack.traceId)) {
+            this.apiEval.callCounter++;
+            if (this.traceUtil.shouldPass(callstack.traceId)) {
+              if (this.traceUtil.shouldPause(callstack.traceId)) {
                 debugger;
               }
               // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
-              this.native.eval(code);
+              this.apiEval.nativeEval(code);
               selfTime = performance.now() - start;
             }
           } else {
-            if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-              if (this.traceUtil.shouldDebug(callstack.traceId)) {
+            if (this.traceUtil.shouldPass(callstack.traceId)) {
+              if (this.traceUtil.shouldPause(callstack.traceId)) {
                 debugger;
               }
               code(...params);
@@ -832,7 +762,7 @@ export class Wrapper {
         isEval
       );
       if (isEval) {
-        this.updateEvalHistory(
+        this.apiEval.updateHistory(
           code,
           TAG_EVAL_RETURN_SET_TIMEOUT,
           callstack,
@@ -850,7 +780,7 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err);
 
       this.updateClearTimersHistory(
@@ -865,8 +795,8 @@ export class Wrapper {
 
       this.callCounter.clearTimeout++;
 
-      if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-        if (this.traceUtil.shouldDebug(callstack.traceId)) {
+      if (this.traceUtil.shouldPass(callstack.traceId)) {
+        if (this.traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.clearTimeout(handler);
@@ -881,7 +811,7 @@ export class Wrapper {
       delay: number | undefined,
       ...args: any[]
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err, code);
       const isEval = typeof code === 'string';
 
@@ -893,18 +823,18 @@ export class Wrapper {
           let selfTime = null;
 
           if (isEval) {
-            this.callCounter.eval++;
-            if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-              if (this.traceUtil.shouldDebug(callstack.traceId)) {
+            this.apiEval.callCounter++;
+            if (this.traceUtil.shouldPass(callstack.traceId)) {
+              if (this.traceUtil.shouldPause(callstack.traceId)) {
                 debugger;
               }
               // see https://developer.mozilla.org/docs/Web/API/setInterval
-              this.native.eval(code);
+              this.apiEval.nativeEval(code);
               selfTime = performance.now() - start;
             }
           } else {
-            if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-              if (this.traceUtil.shouldDebug(callstack.traceId)) {
+            if (this.traceUtil.shouldPass(callstack.traceId)) {
+              if (this.traceUtil.shouldPause(callstack.traceId)) {
                 debugger;
               }
               code(...params);
@@ -931,7 +861,7 @@ export class Wrapper {
         isEval
       );
       if (isEval) {
-        this.updateEvalHistory(
+        this.apiEval.updateHistory(
           code,
           TAG_EVAL_RETURN_SET_INTERVAL,
           callstack,
@@ -949,7 +879,7 @@ export class Wrapper {
       this: Wrapper,
       handler: number | undefined
     ) {
-      const err = new Error(TRACE_ERROR_MESSAGE);
+      const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err);
 
       this.updateClearTimersHistory(
@@ -964,8 +894,8 @@ export class Wrapper {
 
       this.callCounter.clearInterval++;
 
-      if (!this.traceUtil.shouldBypass(callstack.traceId)) {
-        if (this.traceUtil.shouldDebug(callstack.traceId)) {
+      if (this.traceUtil.shouldPass(callstack.traceId)) {
+        if (this.traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.clearInterval(handler);

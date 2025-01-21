@@ -67,9 +67,9 @@ describe('Timer - default options', () => {
   test('start', async () => {
     let counter = 0;
     const DELAY = 10;
-    const timer = new Timer(() => {
+    const timer = new Timer({ delay: DELAY }, () => {
       counter++;
-    }, DELAY);
+    });
 
     expect(timer.isPending()).toBe(false);
     timer.start();
@@ -82,9 +82,9 @@ describe('Timer - default options', () => {
   test('stop before expected', async () => {
     let counter = 0;
     const DELAY = 10;
-    const timer = new Timer(() => {
+    const timer = new Timer({ delay: 2 * DELAY }, () => {
       counter++;
-    }, 2 * DELAY);
+    });
 
     timer.start();
     expect(timer.isPending()).toBe(true);
@@ -100,13 +100,9 @@ describe('Timer - interval option', () => {
   test('start/stop', async () => {
     let counter = 0;
     const DELAY = 10;
-    const interval = new Timer(
-      () => {
-        counter++;
-      },
-      DELAY,
-      { repetitive: true }
-    );
+    const interval = new Timer({ delay: DELAY, repetitive: true }, () => {
+      counter++;
+    });
 
     interval.start();
     await wait(DELAY + DELAY / 2);
@@ -116,25 +112,24 @@ describe('Timer - interval option', () => {
   });
 });
 
-describe('Timer - animation + interval + measurable', () => {
+describe('Timer - animation + measurable', () => {
   test('start/stop', async () => {
-    let count = 0;
-    const animation = new Timer(
-      () => {
-        count++;
-      },
-      undefined,
-      { animation: true, repetitive: true, measurable: true }
-    );
     const SECOND = 1e3;
+    let count = 0;
+    const timer = new Timer({ animation: true, measurable: true }, () => {
+      count++;
+    });
 
-    expect(animation.isPending()).toBe(false);
-    animation.start();
-    expect(animation.isPending()).toBe(true);
+    expect(timer.isPending()).toBe(false);
+
+    timer.start();
+
+    expect(timer.isPending()).toBe(true);
     await wait(SECOND);
-    animation.stop();
-    expect(animation.isPending()).toBe(false);
-    expect(animation.executionTime < 0.5).toBe(true);
+
+    timer.stop();
+    expect(timer.isPending()).toBe(false);
+    expect(timer.executionTime < 0.5).toBe(true);
     expect(count).toBeLessThan(62);
   });
 });

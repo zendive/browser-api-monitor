@@ -2,7 +2,7 @@
   import type {
     TClearTimerHistory,
     TSetTimerHistory,
-  } from '../../wrapper/main.ts';
+  } from '../../wrapper/Wrapper.ts';
   import {
     DEFAULT_SORT_SET_TIMERS,
     getSettings,

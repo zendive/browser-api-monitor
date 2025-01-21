@@ -1,25 +1,6 @@
 import { hashString } from '../api/hash.ts';
 import { EWrapperCallstackType } from '../api/settings.ts';
 
-export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
-export const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
-export const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
-export const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(
-  /.*\((async )?(.*)\)$/
-);
-export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
-  /(.*):\d+:\d+$/
-);
-export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:(\d+):\d+$/
-);
-export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:\d+:(\d+)$/
-);
-export const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?\:\/\//
-);
-export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 export type TTrace = {
   name: string | 0;
   link: string;
@@ -35,30 +16,49 @@ export enum ETraceDomain {
   UNKNOWN,
 }
 
+export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
+  /(.*):\d+:\d+$/
+);
+export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
+  /.*:(\d+):\d+$/
+);
+export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
+  /.*:\d+:(\d+)$/
+);
+export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
+
+const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
+const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
+const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
+const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
+  /http[s]?\:\/\//
+);
+
 export class TraceUtil {
   selfTraceLink = '';
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   trace4Debug: string | null = null;
   trace4Bypass: string | null = null;
+  static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
-    this.#initSelfTrace();
+    this.#detectSelfTrace();
   }
 
-  #initSelfTrace() {
-    const error = new Error(TRACE_ERROR_MESSAGE);
+  #detectSelfTrace() {
+    const error = new Error(TraceUtil.SIGNATURE);
     this.selfTraceLink = (error?.stack || '')
       .split(REGEX_STACKTRACE_SPLIT)[1]
       .replace(REGEX_STACKTRACE_LINK, '$2')
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
-  shouldDebug(traceId: string) {
+  shouldPause(traceId: string) {
     return this.trace4Debug === traceId;
   }
 
-  shouldBypass(traceId: string) {
-    return this.trace4Bypass === traceId;
+  shouldPass(traceId: string) {
+    return this.trace4Bypass !== traceId;
   }
 
   getTraceDomain(trace: TTrace) {

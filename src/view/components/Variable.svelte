@@ -8,9 +8,9 @@
     typeof value === 'number' ? !(value & 1) : false
   );
   let lastUpdated: number = Date.now();
-  const timer = new Timer(() => {
+  const timer = new Timer({ delay: 100 }, () => {
     isAnimated = false;
-  }, 100);
+  });
 
   function animateChange(node: HTMLElement, value: unknown) {
     return {

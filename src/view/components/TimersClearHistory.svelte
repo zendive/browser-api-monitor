@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../wrapper/main.ts';
+  import type { TClearTimerHistory } from '../../wrapper/Wrapper.ts';
   import {
     DEFAULT_SORT_CLEAR_TIMERS,
     getSettings,

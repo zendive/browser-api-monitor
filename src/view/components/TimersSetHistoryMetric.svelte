@@ -2,7 +2,7 @@
   import type {
     TClearTimerHistory,
     TSetTimerHistory,
-  } from '../../wrapper/main.ts';
+  } from '../../wrapper/Wrapper.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
   import { delayTitle } from '../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
