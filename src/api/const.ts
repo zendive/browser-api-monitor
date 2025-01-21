@@ -83,6 +83,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'playsInline',
   'loop',
   'defaultMuted',
+  'mediaKeys',
   'muted',
   'volume',
   'crossOrigin',
