@@ -59,6 +59,7 @@ export const MEDIA_ELEMENT_EVENTS = [
   'timeupdate',
   'volumechange',
   'waiting',
+  'waitingforkey',
 ];
 
 export const MEDIA_ELEMENT_PROPS = [
