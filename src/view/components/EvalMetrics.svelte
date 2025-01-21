@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TEvalHistory } from '../../wrapper/ApiEval.ts';
+  import type { TEvalHistory } from '../../wrapper/EvalWrapper.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';

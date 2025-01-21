@@ -1,4 +1,3 @@
-import { lesserEval } from '../api/const.ts';
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
   TraceUtil,
@@ -19,7 +18,10 @@ export type TEvalHistory = {
   selfTime: number | null;
 };
 
-export class ApiEval {
+// https://rollupjs.org/troubleshooting/#avoiding-eval
+const lesserEval = /*@__PURE__*/ window.eval.bind(window);
+
+export class EvalWrapper {
   traceUtil: TraceUtil;
   evalHistory: Map</*traceId*/ string, TEvalHistory> = new Map();
   callCounter = 0;
@@ -59,7 +61,7 @@ export class ApiEval {
   }
 
   wrap() {
-    window.eval = function WrappedLessEval(this: ApiEval, code: string) {
+    window.eval = function WrappedLessEval(this: EvalWrapper, code: string) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.createCallstack(err, code);
       let rv: unknown;

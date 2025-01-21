@@ -1,8 +1,8 @@
 <script lang="ts">
   import type {
-    TRequestIdleCallbackHistory,
     TCancelIdleCallbackHistory,
-  } from '../../wrapper/Wrapper.ts';
+    TRequestIdleCallbackHistory,
+  } from '../../wrapper/IdleWrapper.ts';
   import {
     DEFAULT_SORT_RIC,
     getSettings,

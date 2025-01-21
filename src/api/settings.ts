@@ -1,9 +1,11 @@
 import type {
-  TCancelAnimationFrameHistory,
   TCancelIdleCallbackHistory,
+  TRequestIdleCallbackHistory,
+} from '../wrapper/IdleWrapper.ts';
+import type {
+  TCancelAnimationFrameHistory,
   TClearTimerHistory,
   TRequestAnimationFrameHistory,
-  TRequestIdleCallbackHistory,
   TSetTimerHistory,
 } from '../wrapper/Wrapper.ts';
 

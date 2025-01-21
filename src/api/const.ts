@@ -19,12 +19,6 @@ export const requestAnimationFrame =
   /*@__PURE__*/ window.requestAnimationFrame.bind(window);
 export const cancelAnimationFrame =
   /*@__PURE__*/ window.cancelAnimationFrame.bind(window);
-export const requestIdleCallback =
-  /*@__PURE__*/ window.requestIdleCallback.bind(window);
-export const cancelIdleCallback =
-  /*@__PURE__*/ window.cancelIdleCallback.bind(window);
-// https://rollupjs.org/troubleshooting/#avoiding-eval
-export const lesserEval = /*@__PURE__*/ window.eval.bind(window);
 
 export const TAG_MISSFORTUNE = '❓\u00A0⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
