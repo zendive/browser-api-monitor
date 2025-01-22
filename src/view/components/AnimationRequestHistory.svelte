@@ -2,7 +2,7 @@
   import type {
     TCancelAnimationFrameHistory,
     TRequestAnimationFrameHistory,
-  } from '../../wrapper/Wrapper.ts';
+  } from '../../wrapper/AnimationWrapper.ts';
   import {
     DEFAULT_SORT_RAF,
     getSettings,
@@ -115,7 +115,7 @@
           eventChangeSorting={onChangeSort}>Self</SortableColumn
         >
       </th>
-      <th class="ta-c" title="Frames per second">FPS</th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
@@ -151,7 +151,7 @@
           <Trace trace={metric.trace} />
         </td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
-        <td class="ta-c">{metric.fps || undefined}</td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
           <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
               role="button"

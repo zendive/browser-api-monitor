@@ -16,7 +16,7 @@ import {
   ETimerType,
   type TWrapperMetrics,
 } from './wrapper/Wrapper.ts';
-import { panelsArray2Map, type TPanelVisibilityMap } from './api/settings.ts';
+import { panelsArray2Map, type TPanelMap } from './api/settings.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
@@ -24,11 +24,13 @@ export interface TMetrics {
   collectingStartTime: number;
 }
 
-let panels: TPanelVisibilityMap;
+let panels: TPanelMap;
 const wrapper = new Wrapper();
 const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
   meetMedia(document.querySelectorAll('video,audio'));
-  panels.requestAnimationFrame && wrapper.updateAnimationsFramerate();
+  panels?.requestAnimationFrame.visible &&
+    panels?.requestAnimationFrame.wrap &&
+    wrapper.apiAnimation.updateAnimationsFramerate();
 });
 const tick = new Timer(
   { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },

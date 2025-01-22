@@ -5,13 +5,13 @@
     getSettings,
     onSettingsChange,
     panelsArray2Map,
-    type TPanelVisibilityMap,
+    type TPanelMap,
   } from '../../api/settings.ts';
   import InfoBarItem from './InfoBarItem.svelte';
 
   let { msg }: { msg: TMetrics } = $props();
 
-  let panels: TPanelVisibilityMap = $state.raw(panelsArray2Map(DEFAULT_PANELS));
+  let panels: TPanelMap = $state.raw(panelsArray2Map(DEFAULT_PANELS));
 
   getSettings().then((settings) => {
     panels = panelsArray2Map(settings.panels);

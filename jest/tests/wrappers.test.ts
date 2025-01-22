@@ -334,16 +334,16 @@ describe('wrappers', () => {
         resolve(handler);
       });
     });
-    const rec = Array.from(wrapper.rafHistory.values())[0];
+    const rec = Array.from(wrapper.apiAnimation.rafHistory.values())[0];
 
     expect(typeOfArgument).toBe('number');
-    expect(wrapper.rafHistory.size).toBe(1);
+    expect(wrapper.apiAnimation.rafHistory.size).toBe(1);
     expect(rec.handler).toBe(handler);
     expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
     expect(rec.selfTime).not.toBeNull();
-    expect(wrapper.callCounter.requestAnimationFrame).toBe(1);
+    expect(wrapper.apiAnimation.callCounter.requestAnimationFrame).toBe(1);
   });
 
   test('cafHistory - recorded', async () => {
@@ -355,17 +355,17 @@ describe('wrappers', () => {
     });
     cancelAnimationFrame(handler);
 
-    const rafRec = Array.from(wrapper.rafHistory.values())[0];
-    const cafRec = Array.from(wrapper.cafHistory.values())[0];
+    const rafRec = Array.from(wrapper.apiAnimation.rafHistory.values())[0];
+    const cafRec = Array.from(wrapper.apiAnimation.cafHistory.values())[0];
 
     expect(changeable).toBe(unchanged);
-    expect(wrapper.rafHistory.size).toBe(1);
-    expect(wrapper.cafHistory.size).toBe(1);
+    expect(wrapper.apiAnimation.rafHistory.size).toBe(1);
+    expect(wrapper.apiAnimation.cafHistory.size).toBe(1);
     expect(cafRec.handler).toBe(handler);
     expect(cafRec.calls).toBe(1);
     expect(cafRec.trace.length).toBeGreaterThan(1);
     expect(cafRec.traceId.length).toBeGreaterThan(1);
-    expect(wrapper.callCounter.cancelAnimationFrame).toBe(1);
+    expect(wrapper.apiAnimation.callCounter.cancelAnimationFrame).toBe(1);
     expect(rafRec.canceledByTraceIds?.length).toBe(1);
     expect(rafRec.canceledCounter).toBe(1);
   });
@@ -373,7 +373,7 @@ describe('wrappers', () => {
   test('cafHistory - invalid handler', () => {
     cancelAnimationFrame(0);
 
-    const rec = Array.from(wrapper.cafHistory?.values())[0];
+    const rec = Array.from(wrapper.apiAnimation.cafHistory?.values())[0];
 
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
   });

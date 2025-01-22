@@ -4,8 +4,10 @@ import type {
 } from '../wrapper/IdleWrapper.ts';
 import type {
   TCancelAnimationFrameHistory,
-  TClearTimerHistory,
   TRequestAnimationFrameHistory,
+} from '../wrapper/AnimationWrapper.ts';
+import type {
+  TClearTimerHistory,
   TSetTimerHistory,
 } from '../wrapper/Wrapper.ts';
 
@@ -21,8 +23,7 @@ type TPanelKey =
   | 'cancelAnimationFrame'
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
-
-export type TPanelVisibilityMap = {
+export type TPanelMap = {
   [K in TPanelKey]: TSettingsPanel;
 };
 export type TSettingsPanel = {
@@ -136,7 +137,7 @@ export const DEFAULT_SETTINGS = {
 export function panelsArray2Map(panels: TSettingsPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
-    {} as TPanelVisibilityMap
+    {} as TPanelMap
   );
 }
 

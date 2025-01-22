@@ -1,4 +1,4 @@
-import type { TPanelVisibilityMap } from '../api/settings.ts';
+import type { TPanelMap } from '../api/settings.ts';
 import { TAG_EXCEPTION } from '../api/clone.ts';
 import { trim2microsecond } from '../api/time.ts';
 import {
@@ -203,14 +203,16 @@ export class IdleWrapper {
     window.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
-  collectHistory(panels: TPanelVisibilityMap) {
+  collectHistory(panels: TPanelMap) {
     return {
-      ricHistory: panels.requestIdleCallback.visible
-        ? Array.from(this.ricHistory.values())
-        : null,
-      cicHistory: panels.cancelIdleCallback.visible
-        ? Array.from(this.cicHistory.values())
-        : null,
+      ricHistory:
+        panels.requestIdleCallback.visible && panels.requestIdleCallback.wrap
+          ? Array.from(this.ricHistory.values())
+          : null,
+      cicHistory:
+        panels.cancelIdleCallback.visible && panels.cancelIdleCallback.wrap
+          ? Array.from(this.cicHistory.values())
+          : null,
     };
   }
 
