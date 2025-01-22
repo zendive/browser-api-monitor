@@ -7,6 +7,7 @@ import {
   READY_STATE,
 } from './const.ts';
 import type { TMsgMediaCommand } from './communication.ts';
+import { cloneObjectSafely } from './clone.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;
@@ -136,6 +137,9 @@ function formatPropValue(prop: string, value: unknown): any {
     rv = `${value} - ${READY_STATE[value as number]}`;
   } else if ('srcObject' === prop) {
     rv = value ? `${value}` : value;
+  } else if ('mediaKeys' === prop) {
+    // `mediaKeys` serialization cautious implementation
+    rv = cloneObjectSafely(value);
   } else if (value instanceof TimeRanges) {
     rv = [];
 
