@@ -11,12 +11,9 @@ import {
   doMediaCommand,
   type TMediaTelemetry,
 } from './api/mediaMonitor.ts';
-import {
-  Wrapper,
-  ETimerType,
-  type TWrapperMetrics,
-} from './wrapper/Wrapper.ts';
+import { Wrapper, type TWrapperMetrics } from './wrapper/Wrapper.ts';
 import { panelsArray2Map, type TPanelMap } from './api/settings.ts';
+import { ETimerType } from './wrapper/TimerWrapper.ts';
 
 export interface TMetrics {
   mediaMetrics: TMediaTelemetry;
@@ -36,13 +33,15 @@ const tick = new Timer(
   { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },
   function apiMonitorPostMetric() {
     const now = Date.now();
-    const metrics: TMetrics = {
-      mediaMetrics: collectMediaMetrics(panels.media.visible),
-      wrapperMetrics: wrapper.collectWrapperMetrics(panels),
-      collectingStartTime: now,
-    };
 
-    windowPost({ msg: 'telemetry', metrics });
+    windowPost({
+      msg: 'telemetry',
+      metrics: {
+        mediaMetrics: collectMediaMetrics(panels.media.visible),
+        wrapperMetrics: wrapper.collectMetrics(panels),
+        collectingStartTime: now,
+      },
+    });
   }
 );
 

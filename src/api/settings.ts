@@ -1,15 +1,15 @@
 import type {
-  TCancelIdleCallbackHistory,
   TRequestIdleCallbackHistory,
+  TCancelIdleCallbackHistory,
 } from '../wrapper/IdleWrapper.ts';
 import type {
-  TCancelAnimationFrameHistory,
   TRequestAnimationFrameHistory,
+  TCancelAnimationFrameHistory,
 } from '../wrapper/AnimationWrapper.ts';
 import type {
-  TClearTimerHistory,
   TSetTimerHistory,
-} from '../wrapper/Wrapper.ts';
+  TClearTimerHistory,
+} from '../wrapper/TimerWrapper.ts';
 
 type TPanelKey =
   | 'eval'
@@ -129,8 +129,8 @@ export const DEFAULT_SETTINGS = {
   sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
-  traceForDebug: <string | null>null,
-  traceForBypass: <string | null>null,
+  trace4Debug: <string | null>null,
+  trace4Bypass: <string | null>null,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 

@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import { compareByDelayThenHandlerDescending } from '../../api/comparator.ts';
   import {
     ETimerType,
     type TOnlineTimerMetrics,
-  } from '../../wrapper/Wrapper.ts';
+  } from '../../wrapper/TimerWrapper.ts';
   import ActiveTimers from './ActiveTimers.svelte';
   import TimersSetHistory from './TimersSetHistory.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';
-  import { compareByDelayThenHandlerDescending } from '../../api/comparator.ts';
 
   let { metrics }: { metrics: TMetrics['wrapperMetrics'] } = $props();
   let {

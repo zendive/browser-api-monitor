@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../wrapper/Wrapper.ts';
+  import type { TClearTimerHistory } from '../../wrapper/TimerWrapper.ts';
   import { delayTitle } from '../../api/time.ts';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';

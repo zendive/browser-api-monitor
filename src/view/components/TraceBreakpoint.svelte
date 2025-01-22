@@ -6,13 +6,13 @@
   } from '../../api/settings.ts';
 
   let { traceId }: { traceId: string } = $props();
-  let traceForDebug: string | null = $state.raw(null);
+  let trace4Debug: string | null = $state.raw(null);
 
   getSettings().then((settings) => {
-    traceForDebug = settings.traceForDebug;
+    trace4Debug = settings.trace4Debug;
 
     onSettingsChange((settings) => {
-      traceForDebug = settings.traceForDebug;
+      trace4Debug = settings.trace4Debug;
     });
   });
 
@@ -20,8 +20,7 @@
     e.preventDefault();
 
     setSettings({
-      traceForDebug:
-        traceForDebug === traceId ? null : $state.snapshot(traceId),
+      trace4Debug: trace4Debug === traceId ? null : $state.snapshot(traceId),
     });
   }
 </script>
@@ -29,7 +28,7 @@
 <div class="sensor">
   <a
     href="void(0)"
-    class:active={traceForDebug === traceId}
+    class:active={trace4Debug === traceId}
     aria-label="Place breakpoint"
     onclick={onToggle}
   >

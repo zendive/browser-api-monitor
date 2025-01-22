@@ -6,13 +6,13 @@
   } from '../../api/settings.ts';
 
   let { traceId }: { traceId: string } = $props();
-  let traceForBypass: string | null = $state.raw(null);
+  let trace4Bypass: string | null = $state.raw(null);
 
   getSettings().then((settings) => {
-    traceForBypass = settings.traceForBypass;
+    trace4Bypass = settings.trace4Bypass;
 
     onSettingsChange((settings) => {
-      traceForBypass = settings.traceForBypass;
+      trace4Bypass = settings.trace4Bypass;
     });
   });
 
@@ -20,8 +20,7 @@
     e.preventDefault();
 
     setSettings({
-      traceForBypass:
-        traceForBypass === traceId ? null : $state.snapshot(traceId),
+      trace4Bypass: trace4Bypass === traceId ? null : $state.snapshot(traceId),
     });
   }
 </script>
@@ -29,7 +28,7 @@
 <div class="sensor">
   <a
     href="void(0)"
-    class:active={traceForBypass === traceId}
+    class:active={trace4Bypass === traceId}
     aria-label="Place bypass"
     onclick={onToggle}
   >

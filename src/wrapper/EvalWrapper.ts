@@ -107,9 +107,12 @@ export class EvalWrapper {
   }
 
   collectHistory(panels: TPanelMap) {
-    return panels.eval.visible && panels.eval.wrap
-      ? Array.from(this.evalHistory.values())
-      : null;
+    return {
+      evalHistory:
+        panels.eval.visible && panels.eval.wrap
+          ? Array.from(this.evalHistory.values())
+          : null,
+    };
   }
 
   cleanHistory() {

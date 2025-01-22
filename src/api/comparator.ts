@@ -1,4 +1,4 @@
-import type { TOnlineTimerMetrics } from '../wrapper/Wrapper.ts';
+import type { TOnlineTimerMetrics } from '../wrapper/TimerWrapper.ts';
 import { ESortOrder } from './settings.ts';
 
 const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
