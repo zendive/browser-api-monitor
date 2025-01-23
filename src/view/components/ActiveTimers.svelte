@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TOnlineTimerMetrics } from '../../wrapper/TimerWrapper.ts';
   import { portPost } from '../../api/communication.ts';
-  import { delayTitle } from '../../api/time.ts';
+  import { msToHms } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -33,7 +33,7 @@
 
     {#each metrics as metric (metric.handler)}
       <tr class="t-zebra">
-        <td class="ta-r" title={delayTitle(metric.delay)}>{metric.delay}</td>
+        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
         <td class="ta-c handler-cell">
           <span class="handler-value">{metric.handler}</span>
           <!-- svelte-ignore a11y_click_events_have_key_events -->

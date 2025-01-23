@@ -11,8 +11,8 @@ import {
   Stopper,
   Timer,
   Fps,
-  MeanAggregator,
   trim2microsecond,
+  callingOnce,
 } from '../../src/api/time.ts';
 
 function wait(timeout: number) {
@@ -153,29 +153,25 @@ describe('Fps', () => {
   });
 });
 
-describe('MeanAggregator', () => {
-  test('mean', () => {
-    const SAMPLES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
-    const mean = new MeanAggregator();
-    let sum = 0;
-
-    for (let i = 0, I = SAMPLES.length; i < I; i++) {
-      mean.add(SAMPLES[i]);
-      sum += SAMPLES[i];
-    }
-
-    const sumMean = sum / SAMPLES.length;
-    expect(mean.mean).toBe(sumMean);
-    expect(mean.numberOfSamples).toBe(SAMPLES.length);
-    expect(mean.minimum).toBe(SAMPLES[0]);
-    expect(mean.maximum).toBe(SAMPLES[SAMPLES.length - 1]);
-    expect(mean.standardDeviation).toBe(34.52052529534663);
-  });
-});
-
 describe('trim2microsecond', () => {
   test('trims to microsecond', () => {
     expect(trim2microsecond(null)).toBe(null);
     expect(trim2microsecond(1.111999)).toBe(1.111);
+  });
+});
+
+describe('callingOnce', () => {
+  let count = 0;
+  let fn = callingOnce(() => {
+    return ++count;
+  });
+
+  test('function called once', () => {
+    const rv1 = fn();
+    const rv2 = fn();
+
+    expect(count).toBe(1);
+    expect(rv1).toBe(1);
+    expect(rv2).toBe(1);
   });
 });

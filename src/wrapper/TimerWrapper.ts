@@ -220,6 +220,7 @@ export class TimerWrapper {
   }
 
   wrapSetTimeout() {
+    // @ts-ignore jest stub
     window.setTimeout = function setTimeout(
       this: TimerWrapper,
       code: TimerHandler,
@@ -290,6 +291,7 @@ export class TimerWrapper {
   }
 
   wrapClearTimeout() {
+    // @ts-ignore jest stub
     window.clearTimeout = function clearTimeout(
       this: TimerWrapper,
       handler: number | undefined
@@ -319,6 +321,7 @@ export class TimerWrapper {
   }
 
   wrapSetInterval() {
+    // @ts-ignore jest stub
     window.setInterval = function setInterval(
       this: TimerWrapper,
       code: TimerHandler,
@@ -389,6 +392,7 @@ export class TimerWrapper {
   }
 
   wrapClearInterval() {
+    // @ts-ignore jest stub
     window.clearInterval = function clearInterval(
       this: TimerWrapper,
       handler: number | undefined

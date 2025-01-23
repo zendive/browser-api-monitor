@@ -4,7 +4,7 @@
     TSetTimerHistory,
   } from '../../wrapper/TimerWrapper.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
-  import { delayTitle } from '../../api/time.ts';
+  import { msToHms } from '../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -98,7 +98,7 @@
     {/if}
   </td>
   <td class="ta-c"><Variable value={metric.handler} /></td>
-  <td class="ta-r" title={delayTitle(metric.delay)}>{metric.delay}</td>
+  <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
   <td class="ta-r">
     {#if metric.online}
       <Variable value={metric.online} />

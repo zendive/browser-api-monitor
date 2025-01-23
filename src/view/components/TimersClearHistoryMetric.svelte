@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TClearTimerHistory } from '../../wrapper/TimerWrapper.ts';
-  import { delayTitle } from '../../api/time.ts';
+  import { msToHms } from '../../api/time.ts';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
   import Variable from './Variable.svelte';
@@ -17,7 +17,7 @@
   </td>
   <td class="ta-c"><Variable value={metric.calls} /></td>
   <td class="ta-c"><Variable value={metric.handler} /></td>
-  <td class="ta-r" title={delayTitle(metric.delay)}>{metric.delay}</td>
+  <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
   <td><TraceBypass traceId={metric.traceId} /></td>
   <td><TraceBreakpoint traceId={metric.traceId} /></td>
 </tr>

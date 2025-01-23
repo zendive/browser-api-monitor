@@ -22,12 +22,10 @@ export interface TMetrics {
 }
 
 let panels: TPanelMap;
-const wrapper = new Wrapper();
+let wrapper: Wrapper;
 const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
   meetMedia(document.querySelectorAll('video,audio'));
-  panels?.requestAnimationFrame.visible &&
-    panels?.requestAnimationFrame.wrap &&
-    wrapper.apiAnimation.updateAnimationsFramerate();
+  wrapper.eachSecond();
 });
 const tick = new Timer(
   { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },
@@ -38,7 +36,7 @@ const tick = new Timer(
       msg: 'telemetry',
       metrics: {
         mediaMetrics: collectMediaMetrics(panels.media.visible),
-        wrapperMetrics: wrapper.collectMetrics(panels),
+        wrapperMetrics: wrapper.collectMetrics(),
         collectingStartTime: now,
       },
     });
@@ -47,6 +45,9 @@ const tick = new Timer(
 
 windowListen((o) => {
   if (o.msg === 'settings' && o.settings && typeof o.settings === 'object') {
+    if (!wrapper) {
+      wrapper = new Wrapper(panels);
+    }
     panels = panelsArray2Map(o.settings.panels);
     wrapper.setup(panels, o.settings);
   } else if (o.msg === 'start-observe') {

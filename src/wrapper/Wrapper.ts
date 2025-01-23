@@ -49,13 +49,16 @@ export type TWrapperMetrics = {
 };
 
 export class Wrapper {
-  traceUtil = new TraceUtil();
+  panels: TPanelMap;
+  traceUtil: TraceUtil;
   apiEval: EvalWrapper;
   apiTimer: TimerWrapper;
   apiAnimation: AnimationWrapper;
   apiIdle: IdleWrapper;
 
-  constructor() {
+  constructor(panels: TPanelMap) {
+    this.panels = panels;
+    this.traceUtil = new TraceUtil();
     this.apiEval = new EvalWrapper(this.traceUtil);
     this.apiTimer = new TimerWrapper(this.traceUtil, this.apiEval);
     this.apiAnimation = new AnimationWrapper(this.traceUtil);
@@ -63,18 +66,28 @@ export class Wrapper {
   }
 
   setup(panels: TPanelMap, settings: TSettings) {
+    this.panels = panels;
     this.traceUtil.trace4Debug = settings.trace4Debug;
     this.traceUtil.trace4Bypass = settings.trace4Bypass;
     this.setCallstackType(settings.wrapperCallstackType);
-    this.wrapByPanels(panels);
+    this.wrap();
   }
 
-  collectMetrics(panels: TPanelMap): TWrapperMetrics {
+  eachSecond() {
+    if (
+      this.panels.requestAnimationFrame.wrap &&
+      this.panels.requestAnimationFrame.visible
+    ) {
+      this.apiAnimation.updateAnimationsFramerate();
+    }
+  }
+
+  collectMetrics(): TWrapperMetrics {
     return {
-      ...this.apiEval.collectHistory(panels),
-      ...this.apiTimer.collectHistory(panels),
-      ...this.apiAnimation.collectHistory(panels),
-      ...this.apiIdle.collectHistory(panels),
+      ...this.apiEval.collectHistory(this.panels),
+      ...this.apiTimer.collectHistory(this.panels),
+      ...this.apiAnimation.collectHistory(this.panels),
+      ...this.apiIdle.collectHistory(this.panels),
       callCounter: {
         eval: this.apiEval.callCounter,
         activeTimers: this.apiTimer.onlineTimers.size,
@@ -89,18 +102,20 @@ export class Wrapper {
     this.traceUtil.callstackType = type;
   });
 
-  wrapByPanels = callingOnce((panels: TPanelMap) => {
-    panels.eval.wrap && this.apiEval.wrap();
-    panels.setTimeout.wrap && this.apiTimer.wrapSetTimeout();
-    panels.clearTimeout.wrap && this.apiTimer.wrapClearTimeout();
-    panels.setInterval.wrap && this.apiTimer.wrapSetInterval();
-    panels.clearInterval.wrap && this.apiTimer.wrapClearInterval();
-    panels.requestAnimationFrame.wrap &&
+  wrap = callingOnce(() => {
+    this.panels.eval.wrap && this.apiEval.wrap();
+    this.panels.setTimeout.wrap && this.apiTimer.wrapSetTimeout();
+    this.panels.clearTimeout.wrap && this.apiTimer.wrapClearTimeout();
+    this.panels.setInterval.wrap && this.apiTimer.wrapSetInterval();
+    this.panels.clearInterval.wrap && this.apiTimer.wrapClearInterval();
+    this.panels.requestAnimationFrame.wrap &&
       this.apiAnimation.wrapRequestAnimationFrame();
-    panels.cancelAnimationFrame.wrap &&
+    this.panels.cancelAnimationFrame.wrap &&
       this.apiAnimation.wrapCancelAnimationFrame();
-    panels.requestIdleCallback.wrap && this.apiIdle.wrapRequestIdleCallback();
-    panels.cancelIdleCallback.wrap && this.apiIdle.wrapCancelIdleCallback();
+    this.panels.requestIdleCallback.wrap &&
+      this.apiIdle.wrapRequestIdleCallback();
+    this.panels.cancelIdleCallback.wrap &&
+      this.apiIdle.wrapCancelIdleCallback();
   });
 
   cleanHistory() {

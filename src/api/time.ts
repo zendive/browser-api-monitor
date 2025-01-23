@@ -216,46 +216,10 @@ export class Fps {
   }
 }
 
-export class MeanAggregator {
-  numberOfSamples = 0;
-  mean = 0;
-  minimum = Infinity;
-  maximum = -Infinity;
-
-  #M2 = 0;
-
-  reset() {
-    this.numberOfSamples = 0;
-    this.mean = 0;
-    this.minimum = Infinity;
-    this.maximum = -Infinity;
-    this.#M2 = 0;
-
-    return this;
-  }
-
-  add(value: number) {
-    ++this.numberOfSamples;
-
-    this.minimum = Math.min(this.minimum, value);
-    this.maximum = Math.max(this.maximum, value);
-
-    const delta = value - this.mean;
-    this.mean += delta / this.numberOfSamples;
-    this.#M2 += delta * (value - this.mean);
-
-    return this;
-  }
-
-  get standardDeviation() {
-    return Math.sqrt(this.#M2 / this.numberOfSamples);
-  }
-}
-
 export function trim2microsecond(ms: any) {
   return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
 }
 
-export function delayTitle(delay: number | unknown): string | undefined {
+export function msToHms(delay: number | unknown): string | undefined {
   return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
 }
