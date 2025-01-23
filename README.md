@@ -2,25 +2,45 @@
 
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
-Whether you're developing a Single Page Application (SPA) and want to assess implementation correctness or are curious about how something works, this tool adds additional functionality to the Chrome browser DevTools to reveal timeouts, intervals, idle callbacks, animation frames and `eval` usages while mapping their invocation call stacks to a source code location. If the page has mounted `video` or `audio` media element's, their events and property state changes can be observed as they happen ([documentation](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement), [example](https://www.w3.org/2010/05/video/mediaevents.html)).
+If you're web developer and want to assess implementation correctness - this tool adds additional panel to the browser’s DevTool that enables to see scheduled timeouts and active intervals, as well as to review and navigate to initiators of: eval, setTimeout, setInterval, requestAnimationFrame, requestIdleCallback and their terminator functions.
 
-### Motivation
+#### Allows:
 
-To expedite issues discovery, here are some examples from experience:
+- to measure callback execution self-time.
+- to see `requestAnimationFrame` callback request frame rate.
+- visit every function in the call stack (if available), bypass or pause while debugging.
+- detect eval ­function usage, see its argument and return value, same for setTimeout and setInterval when called with a string instead of a function.
+- for every mounted video or audio media element's to see it’s state and properties.
 
-- A ~10ms delay interval constantly consuming approximately 10% of CPU from a third-party library, solely to check if the page was resized.
-- A bundled dependency library that utilizes the eval function, thereby preventing the removal of `unsafe-eval` from the Content Security Policy (CSP) header. It can be arguably intentional, but also may reveal a configuration issue when the package was bundled with webpack config's [devtool: 'eval'](https://webpack.js.org/configuration/devtool/) in production mode.
-- A substantial number of hidden video elements in the DOM that were consuming resources, unexpectedly limited to 100 medias per domain.
-- An unattended interval that was unintentionally left running and contributed to a slowly growing memory.
+#### Helps to spot:
 
-To explore the internals of a complex systems.
+- incorrect timeout delay.
+- bad handler for terminator function.
+- terminating non existing or elapsed timeout.
+
+#### Motivation:
+
+- To expedite issues discovery.
+
+#### Wrapped native functions:
+
+- eval (by default off)
+- setTimeout
+- clearTimeout
+- setInterval
+- clearInterval
+- requestAnimationFrame
+- cancelAnimationFrame
+- requestIdleCallback
+- cancelIdleCallback
+
+##### Note:
+
+- while measuring performance of your code – consider disabling this extension as it may affect the results.
 
 <details>
   <summary> <strong>Example</strong> </summary>
-
-![screenshot](./doc/screenshot-01.png)
 ![screenshot](./doc/screenshot-02.png)
-![screenshot](./doc/screenshot-03.png)
 ![screenshot](./doc/screenshot-04.png)
 
 </details>
@@ -29,7 +49,7 @@ To explore the internals of a complex systems.
 
 - OS: Linux
 - Node: 22.12.0 (LTS)
-- Deno: 2.1.4
+- Deno: 2.1.7
 
 ### Build instructions
 
