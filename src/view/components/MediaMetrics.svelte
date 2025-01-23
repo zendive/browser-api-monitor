@@ -19,6 +19,14 @@
       property: property as keyof HTMLMediaElement,
     });
   }
+
+  function propValueFilter(value: unknown) {
+    if (value && typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+
+    return value;
+  }
 </script>
 
 <table class="group">
@@ -45,13 +53,7 @@
           <caption class="bc-invert ta-l">Properties</caption>
           <tbody>
             {#each Object.entries(metrics.props) as [label, value] (label)}
-              <tr
-                class:isPassive={null === value ||
-                  false === value ||
-                  '' === value ||
-                  0 === value}
-                class:isActive={true === value}
-              >
+              <tr class:isPassive={!value} class:isActive={true === value}>
                 <td class="item-label">{label}</td>
                 <td class="item-value">
                   {#if isToggable(label)}
@@ -69,7 +71,7 @@
                   {:else if ['networkState', 'readyState'].includes(label)}
                     <Variable {value} />
                   {:else}
-                    {value}
+                    {propValueFilter(value)}
                   {/if}
                 </td>
               </tr>
