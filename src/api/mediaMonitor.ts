@@ -138,6 +138,7 @@ function formatPropValue(prop: string, value: unknown): any {
   } else if ('srcObject' === prop) {
     rv = value ? `${value}` : value;
   } else if ('mediaKeys' === prop) {
+    // https://web.dev/articles/eme-basics
     rv = cloneObjectSafely(value);
   } else if (value instanceof TimeRanges) {
     rv = [];
