@@ -1,23 +1,21 @@
 <script lang="ts">
-  import type { TSettingsPanel } from '@/api/settings.ts';
-  import Variable from '@/view/components/Variable.svelte';
+  import type { TSettingsPanel } from '../../api/settings.ts';
+  import Variable from './Variable.svelte';
 
-  export let panel: TSettingsPanel;
-  export let label: string;
-  export let count: number;
-  export let navSelector: string;
-  export let tooltip: string = '';
-
-  let enabled: boolean = false;
-  let title: string = '';
-  $: {
-    enabled = panel.visible && count > 0;
-    if (!panel.wrap) {
-      title = `${tooltip ? tooltip + ' ' : ''}not wrapped`;
-    } else {
-      title = tooltip;
-    }
-  }
+  let {
+    panel,
+    label,
+    count,
+    navSelector,
+    tooltip = '',
+  }: {
+    panel: TSettingsPanel;
+    label: string;
+    count: number;
+    navSelector: string;
+    tooltip?: string;
+  } = $props();
+  let enabled: boolean = $derived.by(() => panel.visible && count > 0);
 
   function scrollTo() {
     const condition = navSelector
@@ -45,29 +43,27 @@
 {#if panel.wrap !== false}
   <a
     href="void(0)"
-    class:panel-enabled={enabled}
-    on:click|preventDefault={scrollTo}
+    class:link-disabled={!enabled}
+    onclick={(e) => {
+      e.preventDefault();
+      scrollTo();
+    }}
   >
-    <strong {title}>{label}</strong>: <Variable bind:value={count} />
+    <strong title={tooltip}>{label}</strong>: <Variable value={count} />
   </a>
 {/if}
 
 <style lang="scss">
   a {
-    cursor: default;
     padding: 0 0.4rem;
     border-right: 1px solid var(--border);
 
-    &:hover {
-      text-decoration: none;
-    }
-
-    &.panel-enabled {
-      cursor: pointer;
-      color: var(--text);
+    &.link-disabled {
+      cursor: default;
+      color: var(--text-passive);
 
       &:hover {
-        text-decoration: underline;
+        text-decoration: none;
       }
     }
   }

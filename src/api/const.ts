@@ -2,22 +2,25 @@ export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const TELEMETRY_FREQUENCY_30PS = 100 / 3; //MS
+export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
-// store native functions
-export const setTimeout = window.setTimeout.bind(window);
-export const clearTimeout = window.clearTimeout.bind(window);
-export const setInterval = window.setInterval.bind(window);
-export const clearInterval = window.clearInterval.bind(window);
-export const requestAnimationFrame = window.requestAnimationFrame.bind(window);
-export const cancelAnimationFrame = window.cancelAnimationFrame.bind(window);
-export const requestIdleCallback = window.requestIdleCallback.bind(window);
-export const cancelIdleCallback = window.cancelIdleCallback.bind(window);
-// https://rollupjs.org/troubleshooting/#avoiding-eval
-export const lessEval = window.eval.bind(window);
+export const FRAME_1of60 = 0.0166666666667; // ms
+export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
+export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
+export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
-export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
+// store native functions
+export const setTimeout = /*@__PURE__*/ window.setTimeout.bind(window);
+export const clearTimeout = /*@__PURE__*/ window.clearTimeout.bind(window);
+export const setInterval = /*@__PURE__*/ window.setInterval.bind(window);
+export const clearInterval = /*@__PURE__*/ window.clearInterval.bind(window);
+export const requestAnimationFrame =
+  /*@__PURE__*/ window.requestAnimationFrame.bind(window);
+export const cancelAnimationFrame =
+  /*@__PURE__*/ window.cancelAnimationFrame.bind(window);
+
+export const TAG_MISSFORTUNE = '❓\u00A0⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 
@@ -50,6 +53,7 @@ export const MEDIA_ELEMENT_EVENTS = [
   'timeupdate',
   'volumechange',
   'waiting',
+  'waitingforkey',
 ];
 
 export const MEDIA_ELEMENT_PROPS = [
@@ -73,6 +77,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'playsInline',
   'loop',
   'defaultMuted',
+  'mediaKeys',
   'muted',
   'volume',
   'crossOrigin',
@@ -91,7 +96,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-export const MEDIA_ELEMENT_TOGGABLE_PROPS = new Set([
+export const MEDIA_ELEMENT_TOGGABLE_PROPS = /*@__PURE__*/ new Set([
   'autoplay',
   'playsInline',
   'loop',
@@ -117,13 +122,3 @@ export const READY_STATE = [
   'HAVE_FUTURE_DATA',
   'HAVE_ENOUGH_DATA',
 ];
-
-export const TRACE_ERROR_MESSAGE = 'browser-api-monitor';
-export const REGEX_STACKTRACE_SPLIT = new RegExp(/\n\s+at\s/);
-export const REGEX_STACKTRACE_NAME = new RegExp(/^(.+)\(.*/);
-export const REGEX_STACKTRACE_LINK = new RegExp(/.*\((async )?(.*)\)$/);
-export const REGEX_STACKTRACE_CLEAN_URL = new RegExp(/(.*):\d+:\d+$/);
-export const REGEX_STACKTRACE_LINE_NUMBER = new RegExp(/.*:(\d+):\d+$/);
-export const REGEX_STACKTRACE_COLUMN_NUMBER = new RegExp(/.*:\d+:(\d+)$/);
-export const REGEX_STACKTRACE_LINK_PROTOCOL = new RegExp(/http[s]?\:\/\//);
-export const FRAME_1of60 = 1 / 60;

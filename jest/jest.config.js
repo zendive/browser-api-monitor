@@ -16,8 +16,4 @@ export default {
   },
   rootDir: '..', // . - /
   roots: ['jest/tests'], // . - /jest
-  moduleNameMapper: {
-    // duplicates tsconfig.json/compilerOptions/path & webpack.config.ts/resolve/alias
-    '@/(.*)': '<rootDir>/src/$1',
-  },
 };

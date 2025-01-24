@@ -1,12 +1,15 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import { portPost } from '@/api/communication.ts';
+  import type { TOnlineTimerMetrics } from '../../wrapper/TimerWrapper.ts';
+  import { portPost } from '../../api/communication.ts';
+  import { msToHms } from '../../api/time.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
 
-  export let caption: string = '';
-  export let metrics: TOnlineTimerMetrics[];
+  let {
+    metrics,
+    caption = '',
+  }: { metrics: TOnlineTimerMetrics[]; caption?: string } = $props();
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({
@@ -19,41 +22,39 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l"
-    >{caption} <Variable bind:value={metrics.length} /></caption
+    >{caption} <Variable value={metrics.length} /></caption
   >
-  <tr>
-    <th>Delay</th>
-    <th>Handler</th>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-  </tr>
-
-  {#each metrics as metric (metric.handler)}
-    <tr class="t-zebra">
-      <td class="ta-r">{metric.delay}</td>
-      <td class="ta-c handler-cell">
-        <span class="handler-value">{metric.handler}</span>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <span
-          class="icon -clear -small"
-          role="button"
-          tabindex="-1"
-          title="Cancel"
-          on:click={() => void onRemoveHandler(metric)}
-        />
-      </td>
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all w-full">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
-      </td>
+  <tbody>
+    <tr>
+      <th>Delay</th>
+      <th>Handler</th>
+      <th class="w-full">Callstack</th>
     </tr>
-  {/each}
+
+    {#each metrics as metric (metric.handler)}
+      <tr class="t-zebra">
+        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
+        <td class="ta-c handler-cell">
+          <span class="handler-value">{metric.handler}</span>
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <span
+            class="icon -clear -small"
+            role="button"
+            tabindex="-1"
+            title="Cancel"
+            onclick={() => void onRemoveHandler(metric)}
+          ></span>
+        </td>
+        <td class="wb-all w-full">
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
+        </td>
+      </tr>
+    {/each}
+  </tbody>
 </table>
 
 <style lang="scss">
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
   .handler-cell {
     .icon {
       display: none;

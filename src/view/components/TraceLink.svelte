@@ -4,25 +4,29 @@
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
     TAG_INVALID_CALLSTACK_LINK,
-  } from '@/api/const.ts';
+  } from '../../wrapper/TraceUtil.ts';
 
-  export let link: string = '';
-  export let name;
-  let isSeen = false;
-
-  $: lineNumber = parseInt(
-    link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
-    10
+  let {
+    name,
+    link = '',
+  }: {
+    name: string | 0;
+    link?: string;
+  } = $props();
+  let visited: boolean = $state(false);
+  let lineNumber = $derived.by(() =>
+    parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
   );
-  $: columnNumber = parseInt(
-    link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
-    10
+  let isSourceLess = $derived.by(
+    () => !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link
   );
-  $: isSourceLess =
-    !isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link;
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+    const columnNumber = parseInt(
+      link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
+      10
+    );
 
     chrome.devtools.panels.openResource(
       cleanUrl,
@@ -30,20 +34,20 @@
       columnNumber - 1
     );
 
-    isSeen = true;
+    visited = true;
+  }
+
+  function onClick(e: MouseEvent) {
+    e.preventDefault();
+    showStackTraceResource();
   }
 </script>
 
 {#if isSourceLess}
-  <i class="no-link">
-    {name ? `${name} ${link}` : link}
-  </i>
+  <i class="no-link">{name ? `${name} ${link}` : link}</i>
 {:else}
-  <a
-    href={link}
-    title={`${lineNumber}:${columnNumber}`}
-    class:isSeen
-    on:click|preventDefault={showStackTraceResource}>{name || link}</a
+  <a href={link} class="-trace" class:visited onclick={onClick}
+    >{name || link}</a
   >
 {/if}
 
@@ -62,9 +66,24 @@
     text-overflow: ellipsis;
     max-width: 25rem;
 
-    &.isSeen {
-      color: var(--link-visited-text);
+    &.visited {
       background-color: var(--link-visited-bg);
+    }
+  }
+
+  @media only screen and (max-width: 45rem) {
+    a {
+      max-width: 15rem;
+    }
+  }
+  @media only screen and (max-width: 35rem) {
+    a {
+      max-width: 8rem;
+    }
+  }
+  @media only screen and (max-width: 27rem) {
+    a {
+      max-width: 4rem;
     }
   }
 </style>

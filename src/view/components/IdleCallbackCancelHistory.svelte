@@ -1,43 +1,42 @@
 <script lang="ts">
-  import type { TCancelIdleCallbackHistory } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
+  import type { TCancelIdleCallbackHistory } from '../../wrapper/IdleWrapper.ts';
   import {
-    DEFAULT_SORT,
     getSettings,
     setSettings,
-    EHistorySortField,
-    type EHistorySortFieldKeys,
-    type ESortOrderKeys,
-  } from '@/api/settings.ts';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
+    DEFAULT_SORT_CIC,
+    type ESortOrder,
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
+  import SortableColumn from './SortableColumn.svelte';
+  import TraceBreakpoint from './TraceBreakpoint.svelte';
+  import TraceBypass from './TraceBypass.svelte';
 
-  export let caption: string = '';
-  export let metrics: TCancelIdleCallbackHistory[];
-
-  let field = DEFAULT_SORT.timersHistoryField;
-  let order = DEFAULT_SORT.timersHistoryOrder;
-
-  $: sortedMetrics = metrics.sort(
-    compareByFieldOrder(<keyof TCancelIdleCallbackHistory>field, order)
+  let {
+    metrics,
+    caption = '',
+  }: { metrics: TCancelIdleCallbackHistory[]; caption?: string } = $props();
+  let sortField = $state(DEFAULT_SORT_CIC.field);
+  let sortOrder = $state(DEFAULT_SORT_CIC.order);
+  let sortedMetrics = $derived.by(() =>
+    metrics.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
-    field = settings.sort.timersHistoryField;
-    order = settings.sort.timersHistoryOrder;
+    sortField = settings.sortCancelIdleCallback.field;
+    sortOrder = settings.sortCancelIdleCallback.order;
   });
 
-  function onChangeSort(
-    e: CustomEvent<{ field: EHistorySortFieldKeys; order: ESortOrderKeys }>
-  ) {
-    field = e.detail.field;
-    order = e.detail.order;
+  function onChangeSort(_field: string, _order: ESortOrder) {
+    sortField = <keyof TCancelIdleCallbackHistory>_field;
+    sortOrder = _order;
+
     setSettings({
-      sort: {
-        timersHistoryField: field,
-        timersHistoryOrder: order,
+      sortCancelIdleCallback: {
+        field: $state.snapshot(sortField),
+        order: $state.snapshot(sortOrder),
       },
     });
   }
@@ -46,43 +45,42 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable bind:value={metrics.length} />
+    <Variable value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-  </tr>
-
-  {#each sortedMetrics as metric (metric.traceId)}
-    <tr class="t-zebra" class:bc-error={metric.hasError}>
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId}/>
-      </td>
-      <td class="ta-c">{metric.calls}</td>
-      <td class="ta-c">{metric.handler}</td>
+  <tbody>
+    <tr>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <SortableColumn
+          field="calls"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Called</SortableColumn
+        >
+      </th>
+      <th class="ta-c">
+        <SortableColumn
+          field="handler"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Handler</SortableColumn
+        >
+      </th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
-  {/each}
-</table>
 
-<style>
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>
+    {#each sortedMetrics as metric (metric.traceId)}
+      <tr class="t-zebra">
+        <td class="wb-all">
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
+        </td>
+        <td class="ta-c"><Variable value={metric.calls} /></td>
+        <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td><TraceBypass traceId={metric.traceId} /></td>
+        <td><TraceBreakpoint traceId={metric.traceId} /></td>
+      </tr>
+    {/each}
+  </tbody>
+</table>

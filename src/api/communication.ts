@@ -10,11 +10,11 @@
  *      panel: runtimeListen
  */
 
-import { APPLICATION_NAME } from '@/api/env.ts';
-import { ERRORS_IGNORED } from '@/api/const.ts';
-import type { TMetrics } from '@/api-monitor-cs-main.ts';
-import type { ETimerTypeKeys } from '@/api/wrappers.ts';
-import type { TSettings } from '@/api/settings.ts';
+import { APPLICATION_NAME } from './env.ts';
+import { ERRORS_IGNORED } from './const.ts';
+import type { TMetrics } from '../api-monitor-cs-main.ts';
+import { ETimerType } from '../wrapper/TimerWrapper.ts';
+import type { TSettings } from './settings.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
@@ -106,7 +106,7 @@ export interface TMsgResetHistory {
 }
 export interface TMsgClearHandler {
   msg: 'clear-timer-handler';
-  type: ETimerTypeKeys;
+  type: ETimerType;
   handler: number;
 }
 export interface TMsgLoaded {

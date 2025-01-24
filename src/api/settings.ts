@@ -1,4 +1,15 @@
-import { cloneObjectSafely } from '@/api/clone.ts';
+import type {
+  TRequestIdleCallbackHistory,
+  TCancelIdleCallbackHistory,
+} from '../wrapper/IdleWrapper.ts';
+import type {
+  TRequestAnimationFrameHistory,
+  TCancelAnimationFrameHistory,
+} from '../wrapper/AnimationWrapper.ts';
+import type {
+  TSetTimerHistory,
+  TClearTimerHistory,
+} from '../wrapper/TimerWrapper.ts';
 
 type TPanelKey =
   | 'eval'
@@ -12,11 +23,7 @@ type TPanelKey =
   | 'cancelAnimationFrame'
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
-
-export type EHistorySortFieldKeys =
-  (typeof EHistorySortField)[keyof typeof EHistorySortField];
-export type ESortOrderKeys = (typeof ESortOrder)[keyof typeof ESortOrder];
-export type TPanelVisibilityMap = {
+export type TPanelMap = {
   [K in TPanelKey]: TSettingsPanel;
 };
 export type TSettingsPanel = {
@@ -26,10 +33,10 @@ export type TSettingsPanel = {
   wrap: boolean | null;
 };
 export type TSettings = typeof DEFAULT_SETTINGS;
-export type TSettingsProperty = Partial<typeof DEFAULT_SETTINGS>;
+export type TSettingsProperty = Partial<TSettings>;
 
-const SETTINGS_VERSION = '1.0.5';
-const DEFAULT_PANELS: TSettingsPanel[] = [
+const SETTINGS_VERSION = '1.0.7';
+export const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
@@ -78,45 +85,70 @@ const DEFAULT_PANELS: TSettingsPanel[] = [
   },
 ];
 
-export const EHistorySortField = {
-  calls: 'calls',
-  handler: 'handler',
-  delay: 'delay',
-} as const;
+export enum EWrapperCallstackType {
+  FULL,
+  SHORT,
+}
+export enum ESortOrder {
+  ASCENDING,
+  DESCENDING,
+}
 
-export const ESortOrder = {
-  ASCENDING: 0,
-  DESCENDING: 1,
+export const DEFAULT_SORT_SET_TIMERS = {
+  field: <keyof TSetTimerHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
 } as const;
-
-export const DEFAULT_SORT = {
-  timersHistoryField: EHistorySortField.delay as EHistorySortFieldKeys,
-  timersHistoryOrder: ESortOrder.DESCENDING as ESortOrderKeys,
-};
+export const DEFAULT_SORT_CLEAR_TIMERS = {
+  field: <keyof TClearTimerHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_RAF = {
+  field: <keyof TRequestAnimationFrameHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_CAF = {
+  field: <keyof TCancelAnimationFrameHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_RIC = {
+  field: <keyof TRequestIdleCallbackHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
+export const DEFAULT_SORT_CIC = {
+  field: <keyof TCancelIdleCallbackHistory>'calls',
+  order: <ESortOrder>ESortOrder.DESCENDING,
+} as const;
 
 export const DEFAULT_SETTINGS = {
   panels: DEFAULT_PANELS,
-  sort: DEFAULT_SORT,
+  sortSetTimers: DEFAULT_SORT_SET_TIMERS,
+  sortClearTimers: DEFAULT_SORT_CLEAR_TIMERS,
+  sortRequestAnimationFrame: DEFAULT_SORT_RAF,
+  sortCancelAnimationFrame: DEFAULT_SORT_CAF,
+  sortRequestIdleCallback: DEFAULT_SORT_RIC,
+  sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
-  traceForDebug: <string | null>null,
+  trace4Debug: <string | null>null,
+  trace4Bypass: <string | null>null,
+  wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 
-export function panelsArrayToVisibilityMap(panels: TSettingsPanel[]) {
+export function panelsArray2Map(panels: TSettingsPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
-    {} as TPanelVisibilityMap
+    {} as TPanelMap
   );
 }
 
-export async function getSettings(): Promise<typeof DEFAULT_SETTINGS> {
-  const store = await chrome.storage.local.get([SETTINGS_VERSION]);
+export async function getSettings(): Promise<TSettings> {
+  let store = await chrome.storage.local.get([SETTINGS_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
   if (isEmpty) {
-    store[SETTINGS_VERSION] = cloneObjectSafely(DEFAULT_SETTINGS);
     await chrome.storage.local.clear(); // rid off previous version settings
-    await chrome.storage.local.set(store);
+    await chrome.storage.local.set({ [SETTINGS_VERSION]: DEFAULT_SETTINGS });
+    store = await chrome.storage.local.get([SETTINGS_VERSION]);
   }
 
   return store[SETTINGS_VERSION];

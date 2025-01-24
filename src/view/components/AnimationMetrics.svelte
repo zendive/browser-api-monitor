@@ -1,20 +1,22 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import AnimationHistory from '@/view/components/AnimationHistory.svelte';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import AnimationRequestHistory from './AnimationRequestHistory.svelte';
+  import AnimationCancelHistory from './AnimationCancelHistory.svelte';
 
-  export let metrics: TMetrics['wrapperMetrics'];
+  let { metrics }: { metrics: TMetrics['wrapperMetrics'] } = $props();
 </script>
 
 {#if metrics.rafHistory?.length}
-  <AnimationHistory
+  <AnimationRequestHistory
     caption="requestAnimationFrame History"
-    bind:metrics={metrics.rafHistory}
+    metrics={metrics.rafHistory}
+    cafHistory={metrics.cafHistory}
   />
 {/if}
 
 {#if metrics.cafHistory?.length}
-  <AnimationHistory
+  <AnimationCancelHistory
     caption="cancelAnimationFrame History"
-    bind:metrics={metrics.cafHistory}
+    metrics={metrics.cafHistory}
   />
 {/if}

@@ -1,13 +1,11 @@
-import type { TOnlineTimerMetrics } from '@/api/wrappers.ts';
-import { ESortOrder, type ESortOrderKeys } from '@/api/settings.ts';
+import type { TOnlineTimerMetrics } from '../wrapper/TimerWrapper.ts';
+import { ESortOrder } from './settings.ts';
+
+const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
 
 // descending sort by `handler` field
-function compareIfEqual<T, Key extends keyof T>(
-  field: Key,
-  first: T,
-  second: T
-) {
-  if (field === 'calls' || field === 'delay') {
+function compareIfEqual<T>(field: keyof T, first: T, second: T) {
+  if (SEMISORTING_FIELDS.includes(field as string)) {
     // @ts-ignore
     return second['handler'] > first['handler'] ? 1 : -1;
   } else {
@@ -15,10 +13,7 @@ function compareIfEqual<T, Key extends keyof T>(
   }
 }
 
-export function compareByFieldOrder<T, Key extends keyof T>(
-  field: Key,
-  order: ESortOrderKeys
-) {
+export function compareByFieldOrder<T>(field: keyof T, order: ESortOrder) {
   return function (first: T, second: T) {
     let a = first[field] || 0;
     let b = second[field] || 0;

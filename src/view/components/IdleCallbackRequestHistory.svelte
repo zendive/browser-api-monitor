@@ -1,58 +1,66 @@
 <script lang="ts">
   import type {
-    TRequestIdleCallbackHistory,
     TCancelIdleCallbackHistory,
-  } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
-  import Trace from '@/view/components/Trace.svelte';
-  import TraceDomain from '@/view/components/TraceDomain.svelte';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
+    TRequestIdleCallbackHistory,
+  } from '../../wrapper/IdleWrapper.ts';
   import {
-    DEFAULT_SORT,
+    DEFAULT_SORT_RIC,
     getSettings,
     setSettings,
-    EHistorySortField,
-    type EHistorySortFieldKeys,
-    type ESortOrderKeys,
-  } from '@/api/settings.ts';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
-  import IdleCallbackCancelHistory from '@/view/components/IdleCallbackCancelHistory.svelte';
-  import Dialog from '@/view/components/Dialog.svelte';
+    ESortOrder,
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
+  import { msToHms } from '../../api/time.ts';
+  import Variable from './Variable.svelte';
+  import Trace from './Trace.svelte';
+  import TraceDomain from './TraceDomain.svelte';
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
+  import Dialog from './Dialog.svelte';
+  import Alert from './Alert.svelte';
+  import SortableColumn from './SortableColumn.svelte';
+  import FrameSensitiveTime from './FrameSensitiveTime.svelte';
+  import TraceBreakpoint from './TraceBreakpoint.svelte';
+  import TraceBypass from './TraceBypass.svelte';
 
-  export let caption: string = '';
-  export let metrics: TRequestIdleCallbackHistory[];
-  export let cicHistory: TCancelIdleCallbackHistory[] | null;
-
-  let field = DEFAULT_SORT.timersHistoryField;
-  let order = DEFAULT_SORT.timersHistoryOrder;
-  let dialog: Dialog | null = null;
-
-  $: sortedMetrics = metrics.sort(
-    compareByFieldOrder(<keyof TRequestIdleCallbackHistory>field, order)
+  let {
+    metrics,
+    cicHistory = null,
+    caption = '',
+  }: {
+    metrics: TRequestIdleCallbackHistory[];
+    cicHistory: TCancelIdleCallbackHistory[] | null;
+    caption: string;
+  } = $props();
+  let sortField = $state(DEFAULT_SORT_RIC.field);
+  let sortOrder = $state(DEFAULT_SORT_RIC.order);
+  let dialogEl: Dialog | null = null;
+  let alertEl: Alert | null = null;
+  let sortedMetrics = $derived.by(() =>
+    metrics.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
-    field = settings.sort.timersHistoryField;
-    order = settings.sort.timersHistoryOrder;
+    sortField = settings.sortRequestIdleCallback.field;
+    sortOrder = settings.sortRequestIdleCallback.order;
   });
 
-  function onChangeSort(
-    e: CustomEvent<{ field: EHistorySortFieldKeys; order: ESortOrderKeys }>
-  ) {
-    field = e.detail.field;
-    order = e.detail.order;
+  function onChangeSort(_field: string, _order: ESortOrder) {
+    sortField = <keyof TRequestIdleCallbackHistory>_field;
+    sortOrder = _order;
+
     setSettings({
-      sort: {
-        timersHistoryField: field,
-        timersHistoryOrder: order,
+      sortRequestIdleCallback: {
+        field: $state.snapshot(sortField),
+        order: $state.snapshot(sortOrder),
       },
     });
   }
 
-  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = [];
+  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
-    if (!dialog || !regressors?.length) {
+    if (!dialogEl || !alertEl || !regressors?.length) {
       return;
     }
 
@@ -65,7 +73,9 @@
     }
 
     if (cicHistoryMetrics.length) {
-      dialog.showModal();
+      dialogEl.show();
+    } else {
+      alertEl.show();
     }
   }
 
@@ -75,92 +85,106 @@
 </script>
 
 <Dialog
-  bind:this={dialog}
-  on:closeDialog={onCloseDialog}
+  bind:this={dialogEl}
+  eventClose={onCloseDialog}
   title="Places from which requestIdleCallback with current callstack was prematurely canceled"
-  description="The information is actual only on time of demand. For full coverage - requires cancelIdleCallback panels enabled."
+  description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
 >
   <IdleCallbackCancelHistory
     caption="Canceled by"
-    bind:metrics={cicHistoryMetrics}
+    metrics={$state.snapshot(cicHistoryMetrics)}
   />
 </Dialog>
+
+<Alert bind:this={alertEl} title="Attention">
+  Requires cancelIdleCallback panel enabled
+</Alert>
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable bind:value={metrics.length} />
+    <Variable value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">didTimeout</th>
-    <th class="ta-r">
-      <TimersHistoryCellSort
-        field={EHistorySortField.delay}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
-      >
-    </th>
-    <th class="shaft"></th>
-  </tr>
-
-  {#each sortedMetrics as metric (metric.traceId)}
-    <tr class="t-zebra" class:bc-error={metric.hasError}>
-      <td><TraceDomain bind:traceDomain={metric.traceDomain} /></td>
-      <td class="wb-all">
-        <Trace bind:trace={metric.trace} bind:traceId={metric.traceId} />
-      </td>
-      <td class="ta-c">{metric.calls}</td>
-      <td class="ta-c">{metric.handler}</td>
-      <td class="ta-c">
-        {#if metric.didTimeout !== undefined}
-          {metric.didTimeout}
-        {/if}
-      </td>
-      <td class="ta-r">{metric.delay}</td>
-      <td>
-        {#if metric.canceledByTraceIds?.length}
-          <a
-            role="button"
-            title={`${metric.isOnline ? 'Scheduled. ' : ''}Canceled by ${metric.canceledByTraceIds?.length}`}
-            href="void(0)"
-            on:click|preventDefault={() =>
-              void onFindRegressors(metric.canceledByTraceIds)}
-          >
-            {#if metric.isOnline}
-              <span class="icon -scheduled -small" />
-            {:else}
-              <span class="icon -remove -small" />
-            {/if}
-          </a>
-        {:else if metric.isOnline}
-          <span title="Scheduled" class="icon -scheduled -small" />
-        {/if}
-      </td>
+  <tbody>
+    <tr>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">didTimeout</th>
+      <th class="ta-r">
+        <SortableColumn
+          field="selfTime"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Self</SortableColumn
+        >
+      </th>
+      <th class="ta-c">
+        <SortableColumn
+          field="calls"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Called</SortableColumn
+        >
+      </th>
+      <th class="ta-c">
+        <SortableColumn
+          field="handler"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Handler</SortableColumn
+        >
+      </th>
+      <th class="ta-r">
+        <SortableColumn
+          field="delay"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Delay</SortableColumn
+        >
+      </th>
+      <th>
+        <SortableColumn
+          field="online"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Set</SortableColumn
+        >
+      </th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
-  {/each}
-</table>
 
-<style>
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>
+    {#each sortedMetrics as metric (metric.traceId)}
+      <tr class="t-zebra">
+        <td class="wb-all">
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
+        </td>
+        <td class="ta-c">{metric.didTimeout}</td>
+        <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
+        <td class="ta-c">
+          <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
+              role="button"
+              href="void(0)"
+              title={CALLED_ABORTED_TOOLTIP}
+              onclick={(e) => {
+                e.preventDefault();
+                onFindRegressors(metric.canceledByTraceIds);
+              }}
+              ><Variable value={metric.canceledCounter} />/{metric
+                .canceledByTraceIds?.length}
+            </a>
+          {/if}
+        </td>
+        <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
+        <td class="ta-r">
+          {#if metric.online}
+            <Variable value={metric.online} />
+          {/if}
+        </td>
+        <td><TraceBypass traceId={metric.traceId} /></td>
+        <td><TraceBreakpoint traceId={metric.traceId} /></td>
+      </tr>
+    {/each}
+  </tbody>
+</table>

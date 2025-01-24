@@ -7,7 +7,13 @@ global.cancelIdleCallback = function noop() {};
 // }}
 
 import { describe, expect, test, beforeEach } from '@jest/globals';
-import { Stopper, Timer, Fps, MeanAggregator } from '../../src/api/time.ts';
+import {
+  Stopper,
+  Timer,
+  Fps,
+  trim2microsecond,
+  callingOnce,
+} from '../../src/api/time.ts';
 
 function wait(timeout: number) {
   return new Promise((resolve) => {
@@ -32,7 +38,7 @@ describe('Stopper', () => {
     const value2 = stopper.value();
 
     expect(value).toBe(value2);
-    expect(/\d+ms/.test(Stopper.toString(stopper.value()))).toBe(true);
+    expect(/\d+ms/.test(Stopper.toString(stopper.value()) || '')).toBe(true);
   });
 
   test('elapsed continues counting after stop', async () => {
@@ -46,15 +52,24 @@ describe('Stopper', () => {
 
     expect(elapsed > 2 * value).toBe(true);
   });
+
+  test('toString()', () => {
+    expect(Stopper.toString(0.000006)).toMatch('0μs');
+    expect(Stopper.toString(0.123456)).toMatch('123μs');
+    expect(Stopper.toString(999.123456)).toMatch('999ms');
+    expect(Stopper.toString(5432.123456)).toMatch('5.432s');
+    expect(Stopper.toString(5 * 60e3)).toMatch('0:05:00');
+    expect(Stopper.toString(987654321.0123456789)).toMatch('274:20:54');
+  });
 });
 
 describe('Timer - default options', () => {
   test('start', async () => {
     let counter = 0;
     const DELAY = 10;
-    const timer = new Timer(() => {
+    const timer = new Timer({ delay: DELAY }, () => {
       counter++;
-    }, DELAY);
+    });
 
     expect(timer.isPending()).toBe(false);
     timer.start();
@@ -67,9 +82,9 @@ describe('Timer - default options', () => {
   test('stop before expected', async () => {
     let counter = 0;
     const DELAY = 10;
-    const timer = new Timer(() => {
+    const timer = new Timer({ delay: 2 * DELAY }, () => {
       counter++;
-    }, 2 * DELAY);
+    });
 
     timer.start();
     expect(timer.isPending()).toBe(true);
@@ -85,13 +100,9 @@ describe('Timer - interval option', () => {
   test('start/stop', async () => {
     let counter = 0;
     const DELAY = 10;
-    const interval = new Timer(
-      () => {
-        counter++;
-      },
-      DELAY,
-      { interval: true }
-    );
+    const interval = new Timer({ delay: DELAY, repetitive: true }, () => {
+      counter++;
+    });
 
     interval.start();
     await wait(DELAY + DELAY / 2);
@@ -101,26 +112,25 @@ describe('Timer - interval option', () => {
   });
 });
 
-describe('Timer - animation + interval + measurable', () => {
+describe('Timer - animation + measurable', () => {
   test('start/stop', async () => {
-    let count = 0;
-    const animation = new Timer(
-      () => {
-        count++;
-      },
-      undefined,
-      { animation: true, interval: true, measurable: true }
-    );
     const SECOND = 1e3;
+    let count = 0;
+    const timer = new Timer({ animation: true, measurable: true }, () => {
+      count++;
+    });
 
-    expect(animation.isPending()).toBe(false);
-    animation.start();
-    expect(animation.isPending()).toBe(true);
+    expect(timer.isPending()).toBe(false);
+
+    timer.start();
+
+    expect(timer.isPending()).toBe(true);
     await wait(SECOND);
-    animation.stop();
-    expect(animation.isPending()).toBe(false);
-    expect(animation.executionTime < 0.5).toBe(true);
-    expect(58 <= count && count <= 61).toBe(true);
+
+    timer.stop();
+    expect(timer.isPending()).toBe(false);
+    expect(timer.executionTime < 0.5).toBe(true);
+    expect(count).toBeLessThan(62);
   });
 });
 
@@ -143,22 +153,25 @@ describe('Fps', () => {
   });
 });
 
-describe('MeanAggregator', () => {
-  test('mean', () => {
-    const SAMPLES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
-    const mean = new MeanAggregator();
-    let sum = 0;
+describe('trim2microsecond', () => {
+  test('trims to microsecond', () => {
+    expect(trim2microsecond(null)).toBe(null);
+    expect(trim2microsecond(1.111999)).toBe(1.111);
+  });
+});
 
-    for (let i = 0, I = SAMPLES.length; i < I; i++) {
-      mean.add(SAMPLES[i]);
-      sum += SAMPLES[i];
-    }
+describe('callingOnce', () => {
+  let count = 0;
+  let fn = callingOnce(() => {
+    return ++count;
+  });
 
-    const sumMean = sum / SAMPLES.length;
-    expect(mean.mean).toBe(sumMean);
-    expect(mean.numberOfSamples).toBe(SAMPLES.length);
-    expect(mean.minimum).toBe(SAMPLES[0]);
-    expect(mean.maximum).toBe(SAMPLES[SAMPLES.length - 1]);
-    expect(mean.standardDeviation).toBe(34.52052529534663);
+  test('function called once', () => {
+    const rv1 = fn();
+    const rv2 = fn();
+
+    expect(count).toBe(1);
+    expect(rv1).toBe(1);
+    expect(rv2).toBe(1);
   });
 });

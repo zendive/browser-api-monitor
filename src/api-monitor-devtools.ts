@@ -1,5 +1,5 @@
-import { portPost } from '@/api/communication.ts';
-import { getSettings, setSettings } from '@/api/settings.ts';
+import { portPost } from './api/communication.ts';
+import { getSettings, setSettings } from './api/settings.ts';
 
 // tabId may be null if user opened the devtools of the devtools
 if (chrome.devtools.inspectedWindow.tabId !== null) {

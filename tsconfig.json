@@ -8,9 +8,6 @@
     "noUnusedLocals": true,
     "types": ["chrome"],
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",

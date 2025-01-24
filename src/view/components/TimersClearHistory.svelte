@@ -1,40 +1,37 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '@/api/wrappers.ts';
-  import Variable from '@/view/components/Variable.svelte';
+  import type { TClearTimerHistory } from '../../wrapper/TimerWrapper.ts';
   import {
-    DEFAULT_SORT,
+    DEFAULT_SORT_CLEAR_TIMERS,
     getSettings,
-    EHistorySortField,
     setSettings,
-    type EHistorySortFieldKeys,
-    type ESortOrderKeys,
-  } from '@/api/settings.ts';
-  import TimersHistoryCellSort from '@/view/components/TimersHistoryCellSort.svelte';
-  import { compareByFieldOrder } from '@/api/comparator.ts';
-  import TimersClearHistoryMetric from '@/view/components/TimersClearHistoryMetric.svelte';
+    type ESortOrder,
+  } from '../../api/settings.ts';
+  import { compareByFieldOrder } from '../../api/comparator.ts';
+  import Variable from './Variable.svelte';
+  import SortableColumn from './SortableColumn.svelte';
+  import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
 
-  export let caption: string = '';
-  export let metrics: TClearTimerHistory[];
-
-  let field: EHistorySortFieldKeys = DEFAULT_SORT.timersHistoryField;
-  let order: ESortOrderKeys = DEFAULT_SORT.timersHistoryOrder;
-
-  $: sortedMetrics = metrics.sort(compareByFieldOrder(field, order));
+  let { metrics, caption }: { metrics: TClearTimerHistory[]; caption: string } =
+    $props();
+  let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
+  let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
+  let sortedMetrics = $derived.by(() =>
+    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+  );
 
   getSettings().then((settings) => {
-    field = settings.sort.timersHistoryField;
-    order = settings.sort.timersHistoryOrder;
+    sortField = settings.sortClearTimers.field;
+    sortOrder = settings.sortClearTimers.order;
   });
 
-  function onChangeSort(
-    e: CustomEvent<{ field: EHistorySortFieldKeys; order: ESortOrderKeys }>
-  ) {
-    field = e.detail.field;
-    order = e.detail.order;
+  function onChangeSort(_field: string, _order: ESortOrder) {
+    sortField = <keyof TClearTimerHistory>_field;
+    sortOrder = _order;
+
     setSettings({
-      sort: {
-        timersHistoryField: field,
-        timersHistoryOrder: order,
+      sortClearTimers: {
+        field: $state.snapshot(sortField),
+        order: $state.snapshot(sortOrder),
       },
     });
   }
@@ -43,44 +40,41 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable bind:value={metrics.length} />
+    <Variable value={metrics.length} />
   </caption>
-  <tr>
-    <th class="shaft"></th>
-    <th class="w-full">Callstack</th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.calls}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Called</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-c">
-      <TimersHistoryCellSort
-        field={EHistorySortField.handler}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Handler</TimersHistoryCellSort
-      >
-    </th>
-    <th class="ta-r">
-      <TimersHistoryCellSort
-        field={EHistorySortField.delay}
-        currentField={field}
-        currentFieldOrder={order}
-        on:changeSort={onChangeSort}>Delay</TimersHistoryCellSort
-      >
-    </th>
-  </tr>
+  <tbody>
+    <tr>
+      <th class="w-full">Callstack</th>
+      <th class="ta-c">
+        <SortableColumn
+          field="calls"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Called</SortableColumn
+        >
+      </th>
+      <th class="ta-c">
+        <SortableColumn
+          field="handler"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Handler</SortableColumn
+        >
+      </th>
+      <th class="ta-r">
+        <SortableColumn
+          field="delay"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}>Delay</SortableColumn
+        >
+      </th>
+      <th title="Bypass"><span class="icon -bypass"></span></th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
+    </tr>
 
-  {#each sortedMetrics as metric (metric.traceId)}
-    <TimersClearHistoryMetric bind:metric />
-  {/each}
+    {#each sortedMetrics as metric (metric.traceId)}
+      <TimersClearHistoryMetric {metric} />
+    {/each}
+  </tbody>
 </table>
-
-<style>
-  .shaft {
-    min-width: var(--small-icon-size);
-  }
-</style>

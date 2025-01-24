@@ -1,26 +1,29 @@
 <script lang="ts">
-  import { Timer, Stopper } from '@/api/time.ts';
+  import { VARIABLE_ANIMATION_THROTTLE } from '../../api/const.ts';
+  import { Timer } from '../../api/time.ts';
 
-  export let title: string | null = null;
-  export let value: unknown;
-
-  let isAnimated = false;
-  const stopper = new Stopper().start();
-
-  $: isEven = typeof value === 'number' ? 0 === value % 2 : false;
+  let { value, title }: { value: unknown; title?: string } = $props();
+  let isAnimated: boolean = $state(false);
+  let isEven = $derived.by(() =>
+    typeof value === 'number' ? !(value & 1) : false
+  );
+  let lastUpdated: number = Date.now();
+  const timer = new Timer({ delay: 100 }, () => {
+    isAnimated = false;
+  });
 
   function animateChange(node: HTMLElement, value: unknown) {
-    const timer = new Timer(() => {
-      isAnimated = false;
-    }, 100);
-
     return {
       update(value: unknown) {
-        if (stopper.elapsed() > 2e3) {
+        const startAnimation =
+          Date.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
+
+        if (startAnimation) {
           isAnimated = true;
           timer.start();
-          stopper.start();
         }
+
+        lastUpdated = Date.now();
       },
 
       destroy() {

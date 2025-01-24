@@ -1,23 +1,27 @@
 <script lang="ts">
-  import { TMediaType, type TMediaTelemetry } from '@/api/mediaMonitor.ts';
-  import MediaMetrics from '@/view/components/MediaMetrics.svelte';
-  import Variable from '@/view/components/Variable.svelte';
+  import { EMediaType, type TMediaTelemetry } from '../../api/mediaMonitor.ts';
+  import MediaMetrics from './MediaMetrics.svelte';
+  import Variable from './Variable.svelte';
 
-  export let metrics: TMediaTelemetry = { total: 0, collection: [] };
-
-  $: videos = metrics.collection.filter((v) => v.type === TMediaType.VIDEO);
-  $: audios = metrics.collection.filter((v) => v.type === TMediaType.AUDIO);
+  let { metrics = { total: 0, collection: [] } }: { metrics: TMediaTelemetry } =
+    $props();
+  let videos = $derived.by(() =>
+    metrics.collection.filter((v) => v.type === EMediaType.VIDEO)
+  );
+  let audios = $derived.by(() =>
+    metrics.collection.filter((v) => v.type === EMediaType.AUDIO)
+  );
 </script>
 
 {#if metrics.collection.length}
   {#if videos.length}
     <section data-navigation-tag="Videos">
       <div class="label bc-invert">
-        Videos: <Variable bind:value={videos.length} />
+        Videos: <Variable value={videos.length} />
       </div>
       <div class="list">
         {#each videos as videoMetrics (videoMetrics.mediaId)}
-          <MediaMetrics bind:metrics={videoMetrics} />
+          <MediaMetrics metrics={videoMetrics} />
         {/each}
       </div>
     </section>
@@ -26,11 +30,11 @@
   {#if audios.length}
     <section data-navigation-tag="Audios">
       <div class="label bc-invert">
-        Audios: <Variable bind:value={audios.length} />
+        Audios: <Variable value={audios.length} />
       </div>
       <div class="list">
         {#each audios as audioMetrics (audioMetrics.mediaId)}
-          <MediaMetrics bind:metrics={audioMetrics} />
+          <MediaMetrics metrics={audioMetrics} />
         {/each}
       </div>
     </section>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 20 20"
+   xmlns="http://www.w3.org/2000/svg"
+>
+  <rect
+     width="6.6"
+     height="3"
+     x="0"
+     y="11.745" />
+  <rect
+     width="6.6"
+     height="3"
+     x="14"
+     y="11.745" />
+  <rect
+     width="13"
+     height="3"
+     x="-6.835"
+     y="11.533"
+     transform="matrix(0.60856447,-0.79350443,0.76642658,0.64233192,0,0)" />
+</svg>

@@ -1,22 +1,22 @@
 <script lang="ts">
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import IdleCallbackRequestHistory from '@/view/components/IdleCallbackRequestHistory.svelte';
-  import IdleCallbackCancelHistory from '@/view/components/IdleCallbackCancelHistory.svelte';
+  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import IdleCallbackRequestHistory from './IdleCallbackRequestHistory.svelte';
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
 
-  export let metrics: TMetrics['wrapperMetrics'];
+  let { metrics }: { metrics: TMetrics['wrapperMetrics'] } = $props();
 </script>
 
 {#if metrics.ricHistory?.length}
   <IdleCallbackRequestHistory
     caption="requestIdleCallback History"
-    bind:metrics={metrics.ricHistory}
-    bind:cicHistory={metrics.cicHistory}
+    metrics={metrics.ricHistory}
+    cicHistory={metrics.cicHistory}
   />
 {/if}
 
 {#if metrics.cicHistory?.length}
   <IdleCallbackCancelHistory
     caption="cancelIdleCallback History"
-    bind:metrics={metrics.cicHistory}
+    metrics={metrics.cicHistory}
   />
 {/if}

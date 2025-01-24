@@ -1,23 +1,25 @@
 <script lang="ts">
-  import { runtimeListen, portPost } from '@/api/communication.ts';
-  import { IS_DEV } from '@/api/env.ts';
-  import type { TMetrics } from '@/api-monitor-cs-main.ts';
-  import Timers from '@/view/components/Timers.svelte';
-  import Media from '@/view/components/Media.svelte';
-  import EvalMetrics from '@/view/components/EvalMetrics.svelte';
-  import AnimationMetrics from '@/view/components/AnimationMetrics.svelte';
-  import Version from '@/view/components/Version.svelte';
+  import { runtimeListen, portPost } from '../api/communication.ts';
+  import { IS_DEV } from '../api/env.ts';
+  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '../api/const.ts';
+  import { getSettings, setSettings } from '../api/settings.ts';
+  import type { TMetrics } from '../api-monitor-cs-main.ts';
+  import TimersMetrics from './components/TimersMetrics.svelte';
+  import Media from './components/Media.svelte';
+  import EvalMetrics from './components/EvalMetrics.svelte';
+  import AnimationMetrics from './components/AnimationMetrics.svelte';
+  import Version from './components/Version.svelte';
   import { onMount } from 'svelte';
-  import TogglePanels from '@/view/components/TogglePanels.svelte';
-  import InfoBar from '@/view/components/InfoBar.svelte';
-  import { getSettings, setSettings } from '@/api/settings.ts';
-  import TickSpinner from '@/view/components/TickSpinner.svelte';
-  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '@/api/const.ts';
-  import IdleCallbackMetrics from '@/view/components/IdleCallbackMetrics.svelte';
+  import TogglePanels from './components/TogglePanels.svelte';
+  import InfoBar from './components/InfoBar.svelte';
+  import TickSpinner from './components/TickSpinner.svelte';
+  import IdleCallbackMetrics from './components/IdleCallbackMetrics.svelte';
+  import Alert from './components/Alert.svelte';
 
-  let spinner: TickSpinner | null = null;
-  let paused = false;
-  let msg: TMetrics;
+  let spinnerEl: TickSpinner | null = $state.raw(null);
+  let autopauseAlertEl: Alert | null = $state.raw(null);
+  let paused = $state(false);
+  let msg: TMetrics | null = $state.raw(null);
 
   runtimeListen(async (o) => {
     if (o.msg === 'content-script-loaded') {
@@ -33,7 +35,10 @@
       const trafficDuration = now - o.metrics.collectingStartTime;
 
       if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
-        !paused && onTogglePause();
+        if (!paused) {
+          onTogglePause();
+          autopauseAlertEl?.show();
+        }
       } else {
         portPost({
           msg: 'telemetry-acknowledged',
@@ -42,7 +47,7 @@
         });
       }
 
-      spinner?.tick();
+      spinnerEl?.tick();
     }
   });
 
@@ -79,45 +84,65 @@
 </script>
 
 <section class="root">
+  <Alert bind:this={autopauseAlertEl} dismissable={true} title="Autopaused"
+    >Communication with the inspected window experienced a long delay and was
+    autopaused.<br />Try hiding panels you don't need at the moment to minimise
+    quantity of monitored data.</Alert
+  >
+
   <header>
     {#if IS_DEV}
-      <button on:click={onDevReload} title="Reload">
-        <span class="icon -refresh" />
+      <button onclick={onDevReload} title="Reload" aria-label="Reload">
+        <span class="icon -refresh"></span>
       </button>
+      <div class="divider -thin"></div>
     {/if}
     <TogglePanels />
-    <button on:click={onTogglePause} title="Toggle pause">
-      {#if paused}<span class="icon -play" />{:else}<span
-          class="icon -pause"
-        />{/if}
+    <div class="divider -thin"></div>
+    <button onclick={onTogglePause} title="Toggle pause">
+      {#if paused}
+        <span class="icon -play"></span>
+      {:else}
+        <span class="icon -pause"></span>
+      {/if}
     </button>
-    <button on:click={onResetHistory} title="Reset history">
-      <span class="icon -clear" />
+    <div class="divider -thin"></div>
+    <button
+      onclick={onResetHistory}
+      title="Reset history"
+      aria-label="Reset history"
+    >
+      <span class="icon -clear"></span>
     </button>
+    <div class="divider -thin"></div>
 
-    <InfoBar bind:msg />
+    <div class="infobar">
+      {#if msg}
+        <InfoBar {msg} />
+      {/if}
+    </div>
 
-    {#if msg && !paused}
-      <div class="divider" />
-      <TickSpinner bind:this={spinner} />
+    {#if !paused}
+      <div class="divider"></div>
+      <TickSpinner bind:this={spinnerEl} />
     {/if}
 
-    <div class="divider" />
+    <div class="divider"></div>
     <Version />
-    <div class="divider -anchor-right" />
+    <div class="divider -anchor-right"></div>
   </header>
 
-  {#if msg}
-    <main>
+  <main>
+    {#if msg}
       {#if msg.wrapperMetrics.evalHistory?.length}
-        <EvalMetrics bind:metrics={msg.wrapperMetrics.evalHistory} />
+        <EvalMetrics metrics={msg.wrapperMetrics.evalHistory} />
       {/if}
-      <Media bind:metrics={msg.mediaMetrics} />
-      <Timers bind:metrics={msg.wrapperMetrics} />
-      <AnimationMetrics bind:metrics={msg.wrapperMetrics} />
-      <IdleCallbackMetrics bind:metrics={msg.wrapperMetrics} />
-    </main>
-  {/if}
+      <Media metrics={msg.mediaMetrics} />
+      <TimersMetrics metrics={msg.wrapperMetrics} />
+      <AnimationMetrics metrics={msg.wrapperMetrics} />
+      <IdleCallbackMetrics metrics={msg.wrapperMetrics} />
+    {/if}
+  </main>
 </section>
 
 <style lang="scss">
@@ -132,6 +157,13 @@
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       user-select: none;
+
+      .infobar {
+        display: flex;
+        flex-wrap: wrap;
+        flex-grow: 1;
+        align-items: center;
+      }
     }
     main {
       overflow-y: scroll;

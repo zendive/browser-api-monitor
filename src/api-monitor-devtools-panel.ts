@@ -1,12 +1,4 @@
-import { onColourSchemeChange } from '@/api/ui-theme.ts';
-import App from '@/view/App.svelte';
+import { mount } from 'svelte';
+import App from './view/App.svelte';
 
-onColourSchemeChange((theme) => {
-  document.body.setAttribute('class', theme);
-});
-
-const app = new App({
-  target: document.body,
-});
-
-export default app;
+mount(App, { target: document.body });

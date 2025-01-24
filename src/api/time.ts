@@ -3,15 +3,18 @@ import {
   clearTimeout,
   requestAnimationFrame,
   cancelAnimationFrame,
-} from '@/api/const.ts';
+} from './const.ts';
 
-export function callingOnce(fn: (...args: any[]) => any) {
-  let runOnce = false;
-  return () => {
-    if (!runOnce) {
-      fn();
-      runOnce = true;
+export function callingOnce<T extends (...args: any[]) => any>(
+  fn: T | null
+): T {
+  let rv: ReturnType<T>;
+  return <T>function (...args: Parameters<T>): ReturnType<T> {
+    if (fn) {
+      rv = fn(...args);
+      fn = null;
     }
+    return rv;
   };
 }
 
@@ -46,7 +49,11 @@ export class Stopper {
     return this.#finish - this.#start;
   }
 
-  static toString(msTime: number) {
+  static toString(msTime: number | unknown) {
+    if (typeof msTime !== 'number' || !Number.isFinite(msTime)) {
+      return;
+    }
+
     if (msTime < 1) {
       return `${Math.trunc(msTime * 1e3)}μs`;
     } else if (msTime < 3) {
@@ -56,13 +63,13 @@ export class Stopper {
       return `${Math.trunc(msTime)}ms`;
     } else if (msTime < 60e3) {
       const s = Math.trunc(msTime / 1e3) % 60;
-      const ms = msTime % 1e3;
+      const ms = Math.trunc(msTime % 1e3);
 
       return `${s}.${ms.toString().padStart(3, '0')}s`;
     }
 
-    const h = Math.trunc(msTime / 1e3 / 60 / 60);
-    const m = Math.trunc(msTime / 1e3 / 60) % 60;
+    const h = Math.trunc(msTime / 3600e3);
+    const m = Math.trunc(msTime / 60e3) % 60;
     const s = Math.trunc(msTime / 1e3) % 60;
 
     return `${h.toString().padStart(2, '0')}:${m
@@ -72,33 +79,43 @@ export class Stopper {
 }
 
 interface TimerOptions {
-  interval?: boolean;
+  /** a delay of setTimeout or setInterval (default: 0); irrelevant if `animation` is true */
+  delay?: number;
+  /** act as setInterval by repeating setTimeout (default: false) */
+  repetitive?: boolean;
+  /** act as requestAnimationFrame called from another requestAnimationFrame (default: false);
+  if true - `delay` is redundant */
   animation?: boolean;
+  /** populate `executionTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
 }
 
 /**
- * Universal abstraction of setTimeout/setInterval/requestAnimationFrame
- * with an optional measurement of the callback's execution time
+ * A unification of ways to delay a callback to another time in javascript event-loop
+ * - `repetitive: false` - will call `setTimeout` with constant `delay`.
+ * - `repetitive: true` - will call `setTimeout` but act as `setInterval` with changable `delay`.
+ * - `animation: true` - will call `requestAnimationFrame` in recursive way (means to follow the browser's frame-rate).
+ * - `measurable: true` - measure the callback's execution time.
  */
 export class Timer {
-  delay: number;
   readonly options: TimerOptions;
-  /** (ms) */
+  readonly #defaultOptions: TimerOptions = {
+    delay: 0,
+    repetitive: false,
+    animation: false,
+    measurable: false,
+  };
+  delay: number = 0;
+  /** callback's self-time in milliseconds */
   executionTime: number = -1;
-
   #fn: Function;
   #handler: number = 0;
   readonly #stopper?: Stopper;
 
-  constructor(
-    fn: Function,
-    delay?: number,
-    o: TimerOptions = { interval: false, animation: false, measurable: false }
-  ) {
+  constructor(o: TimerOptions, fn: Function) {
+    this.options = Object.assign(this.#defaultOptions, o);
     this.#fn = fn;
-    this.delay = delay || 0;
-    this.options = o;
+    this.delay = this.options.delay || 0;
 
     if (this.options.measurable) {
       this.#stopper = new Stopper();
@@ -115,7 +132,7 @@ export class Timer {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.interval) {
+        if (this.options.repetitive) {
           this.start(...args);
         }
       });
@@ -124,7 +141,7 @@ export class Timer {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.interval) {
+        if (this.options.repetitive) {
           this.start(...args);
         }
       }, this.delay);
@@ -174,15 +191,11 @@ export class Fps {
   #interval: Timer;
 
   constructor(callback?: (value: number) => void) {
-    this.#interval = new Timer(
-      () => {
-        this.value = this.#ticks;
-        this.#ticks = 0;
-        callback?.(this.value);
-      },
-      1e3,
-      { interval: true }
-    );
+    this.#interval = new Timer({ delay: 1e3, repetitive: true }, () => {
+      this.value = this.#ticks;
+      this.#ticks = 0;
+      callback?.(this.value);
+    });
   }
 
   start() {
@@ -203,38 +216,10 @@ export class Fps {
   }
 }
 
-export class MeanAggregator {
-  numberOfSamples = 0;
-  mean = 0;
-  minimum = Infinity;
-  maximum = -Infinity;
+export function trim2microsecond(ms: any) {
+  return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
+}
 
-  #M2 = 0;
-
-  reset() {
-    this.numberOfSamples = 0;
-    this.mean = 0;
-    this.minimum = Infinity;
-    this.maximum = -Infinity;
-    this.#M2 = 0;
-
-    return this;
-  }
-
-  add(value: number) {
-    ++this.numberOfSamples;
-
-    this.minimum = Math.min(this.minimum, value);
-    this.maximum = Math.max(this.maximum, value);
-
-    const delta = value - this.mean;
-    this.mean += delta / this.numberOfSamples;
-    this.#M2 += delta * (value - this.mean);
-
-    return this;
-  }
-
-  get standardDeviation() {
-    return Math.sqrt(this.#M2 / this.numberOfSamples);
-  }
+export function msToHms(delay: number | unknown): string | undefined {
+  return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
 }

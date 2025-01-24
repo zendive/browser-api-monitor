@@ -1,36 +1,19 @@
-:root,
-.light {
-  --header-height: 20px;
-  --small-icon-size: 0.6875rem;
-
-  --bg: rgb(255 255 255);
-  --bg-invert: rgb(10% 10% 10% / 70%);
-  --bg-table-even: rgb(30% 30% 30% / 10%);
-  --bg-error: rgb(255 2 2 / 30%);
-  --bg-error-odd: rgb(255 39 2 / 50%);
-  --border: rgb(0 0 0 / 35%);
-  --text: rgb(26 26 26);
-  --text-invert: rgb(100% 100% 100% / 70%);
-  --text-passive: rgb(120 120 120);
-  --text-zebra: rgb(26 26 26);
-  --link: rgb(91 91 91);
-  --link-visited-text: rgb(0 0 0);
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
+  --bg-popover: light-dark(rgb(90%, 90%, 90%), rgb(20%, 20%, 20%));
+  --bg-invert: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
+  --bg-table-even: light-dark(rgb(30% 30% 30% / 10%), rgb(100% 100% 100% / 8%));
+  --border: light-dark(rgb(0 0 0 / 35%), rgb(100% 100% 100% / 35%));
+  --text: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
+  --text-invert: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
+  --text-passive: light-dark(rgb(120 120 120), rgb(120 120 120));
+  --text-zebra: light-dark(rgb(30% 30% 30%), rgb(70% 70% 70%));
+  --link: light-dark(rgb(0% 0% 0%), rgb(100% 100% 100%));
   --link-visited-bg: rgb(79 189 36 / 0.24);
-}
-.dark {
-  --bg: rgb(10% 10% 10%);
-  --bg-invert: rgb(255 255 255 / 70%);
-  --bg-table-even: rgb(255 255 255 / 8%);
-  --bg-error: rgb(255 0 0 / 55%);
-  --bg-error-odd: rgb(153 25 25 / 77%);
-  --border: rgb(100% 100% 100% / 35%);
-  --text: rgb(100% 100% 100%);
-  --text-invert: rgb(26 26 26 / 70%);
-  --text-passive: rgb(120 120 120);
-  --text-zebra: rgb(229 229 229);
-  --link: rgb(182 182 182);
-  --link-visited-text: rgb(0 0 0);
-  --link-visited-bg: rgb(132 130 131);
+  --error: rgb(100% 0% 0%);
+
+  --small-icon-size: 0.6875rem;
 }
 
 html,
@@ -59,10 +42,7 @@ a:hover {
 }
 button {
   background-color: transparent;
-  border-top: none;
-  border-right: 1px solid var(--border);
-  border-bottom: none;
-  border-left: none;
+  border: none;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -95,14 +75,8 @@ th,
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
 }
-.t-zebra:nth-child(even) a {
+.t-zebra:nth-child(odd) a.-trace {
   color: var(--text-zebra);
-}
-.bc-error {
-  background-color: var(--bg-error);
-}
-.bc-error:where(:nth-child(odd)) {
-  background-color: var(--bg-error-odd);
 }
 .wb-all {
   word-break: break-all;
@@ -110,12 +84,14 @@ th,
 .w-full {
   width: 100%;
 }
-
 .divider {
   width: 1px;
-  height: var(--header-height);
+  height: 100%;
   background-color: var(--border);
   margin: 0 0.4rem;
+}
+.divider.-thin {
+  margin: 0;
 }
 .divider.-anchor-left {
   background-color: transparent;
@@ -131,89 +107,74 @@ th,
   width: 1rem;
   height: 1rem;
   background-color: var(--text);
-  -webkit-mask-size: cover;
   mask-size: cover;
-  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   vertical-align: bottom;
+}
+th .icon {
+  background-color: var(--text-invert);
 }
 .icon.-small {
   width: var(--small-icon-size);
   height: var(--small-icon-size);
 }
 .icon.-refresh {
-  -webkit-mask-image: url(img/refresh.svg);
   mask-image: url(img/refresh.svg);
 }
 .icon.-icon {
-  -webkit-mask-image: url(img/icon.svg);
   mask-image: url(img/icon.svg);
 }
 .icon.-clear {
-  -webkit-mask-image: url(img/clear.svg);
   mask-image: url(img/clear.svg);
 }
 .icon.-remove {
-  -webkit-mask-image: url(img/remove.svg);
   mask-image: url(img/remove.svg);
 }
 .icon.-pause {
-  -webkit-mask-image: url(img/pause.svg);
   mask-image: url(img/pause.svg);
 }
 .icon.-play {
-  -webkit-mask-image: url(img/play.svg);
   mask-image: url(img/play.svg);
 }
 .icon.-toggle-menu {
-  -webkit-mask-image: url(img/toggle-menu.svg);
   mask-image: url(img/toggle-menu.svg);
 }
 .icon.-down {
-  -webkit-mask-image: url(img/down.svg);
   mask-image: url(img/down.svg);
 }
 .icon.-up {
-  -webkit-mask-image: url(img/up.svg);
   mask-image: url(img/up.svg);
 }
 .icon.-console {
-  -webkit-mask-image: url(img/console.svg);
   mask-image: url(img/console.svg);
 }
 .icon.-frame-backward {
-  -webkit-mask-image: url(img/frame-backward.svg);
   mask-image: url(img/frame-backward.svg);
 }
 .icon.-frame-forward {
-  -webkit-mask-image: url(img/frame-forward.svg);
   mask-image: url(img/frame-forward.svg);
 }
 .icon.-locate {
-  -webkit-mask-image: url(img/locate.svg);
   mask-image: url(img/locate.svg);
 }
 .icon.-slower {
-  -webkit-mask-image: url(img/slower.svg);
   mask-image: url(img/slower.svg);
 }
 .icon.-faster {
-  -webkit-mask-image: url(img/faster.svg);
   mask-image: url(img/faster.svg);
 }
 .icon.-trace-external {
-  -webkit-mask-image: url(img/trace-external.svg);
   mask-image: url(img/trace-external.svg);
 }
 .icon.-trace-local {
-  -webkit-mask-image: url(img/trace-local.svg);
   mask-image: url(img/trace-local.svg);
 }
 .icon.-trace-extension {
-  -webkit-mask-image: url(img/trace-extension.svg);
   mask-image: url(img/trace-extension.svg);
 }
-.icon.-scheduled {
-  -webkit-mask-image: url(img/scheduled.svg);
-  mask-image: url(img/scheduled.svg);
+.icon.-breakpoint {
+  mask-image: url(img/breakpoint.svg);
+}
+.icon.-bypass {
+  mask-image: url(img/bypass.svg);
 }

@@ -5,22 +5,22 @@ import {
   MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
-} from '@/api/const.ts';
-import type { TMsgMediaCommand } from '@/api/communication.ts';
+} from './const.ts';
+import type { TMsgMediaCommand } from './communication.ts';
+import { cloneObjectSafely } from './clone.ts';
 
 type TMediaModel = {
   el: HTMLMediaElement;
   metrics: TMediaMetrics;
   eventListener: (e: Event) => void;
 };
-export const TMediaType = {
-  VIDEO: 0,
-  AUDIO: 1,
-} as const;
-type TMediaTypeKeys = (typeof TMediaType)[keyof typeof TMediaType];
+export enum EMediaType {
+  VIDEO,
+  AUDIO,
+}
 export type TMediaMetrics = {
   mediaId: string;
-  type: TMediaTypeKeys;
+  type: EMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
 };
@@ -137,6 +137,9 @@ function formatPropValue(prop: string, value: unknown): any {
     rv = `${value} - ${READY_STATE[value as number]}`;
   } else if ('srcObject' === prop) {
     rv = value ? `${value}` : value;
+  } else if ('mediaKeys' === prop) {
+    // https://web.dev/articles/eme-basics
+    rv = cloneObjectSafely(value);
   } else if (value instanceof TimeRanges) {
     rv = [];
 
@@ -168,7 +171,7 @@ function startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
     metrics: {
       mediaId,
       type:
-        el instanceof HTMLVideoElement ? TMediaType.VIDEO : TMediaType.AUDIO,
+        el instanceof HTMLVideoElement ? EMediaType.VIDEO : EMediaType.AUDIO,
       events,
       props,
     },
