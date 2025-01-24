@@ -40,6 +40,7 @@ If you're web developer and want to assess implementation correctness - this too
 
 <details>
   <summary> <strong>Example</strong> </summary>
+
 ![screenshot](./doc/screenshot-02.png)
 ![screenshot](./doc/screenshot-04.png)
 
