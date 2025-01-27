@@ -11,12 +11,14 @@
   import SortableColumn from './SortableColumn.svelte';
   import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
 
-  let { metrics, caption }: { metrics: TClearTimerHistory[]; caption: string } =
-    $props();
+  let {
+    clearTimerHistory,
+    caption,
+  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } = $props();
   let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
   let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    clearTimerHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -40,7 +42,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={clearTimerHistory.length} />
   </caption>
   <tbody>
     <tr>

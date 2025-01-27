@@ -23,11 +23,11 @@
   import TraceBypass from './TraceBypass.svelte';
 
   let {
-    metrics,
+    rafHistory,
     cafHistory,
     caption = '',
   }: {
-    metrics: TRequestAnimationFrameHistory[];
+    rafHistory: TRequestAnimationFrameHistory[];
     cafHistory: TCancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
@@ -36,7 +36,7 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    rafHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -91,7 +91,7 @@
 >
   <AnimationCancelHistory
     caption="Canceled by"
-    metrics={$state.snapshot(cafHistoryMetrics)}
+    cafHistory={$state.snapshot(cafHistoryMetrics)}
   />
 </Dialog>
 
@@ -102,7 +102,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={rafHistory.length} />
   </caption>
   <tbody>
     <tr>

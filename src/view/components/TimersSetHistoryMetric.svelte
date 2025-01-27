@@ -67,7 +67,7 @@
 >
   <TimersClearHistory
     caption="Canceled by"
-    metrics={$state.snapshot(clearTimerHistoryMetrics)}
+    clearTimerHistory={$state.snapshot(clearTimerHistoryMetrics)}
   />
 </Dialog>
 

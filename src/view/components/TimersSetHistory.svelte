@@ -15,12 +15,12 @@
   import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
 
   let {
-    metrics,
+    setTimerHistory,
     clearTimeoutHistory,
     clearIntervalHistory,
     caption,
   }: {
-    metrics: TSetTimerHistory[];
+    setTimerHistory: TSetTimerHistory[];
     clearTimeoutHistory: TClearTimerHistory[] | null;
     clearIntervalHistory: TClearTimerHistory[] | null;
     caption?: string;
@@ -28,7 +28,7 @@
   let sortField = $state(DEFAULT_SORT_SET_TIMERS.field);
   let sortOrder = $state(DEFAULT_SORT_SET_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    setTimerHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -52,7 +52,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={setTimerHistory.length} />
   </caption>
   <tbody>
     <tr>

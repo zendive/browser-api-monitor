@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TMetrics } from '../../api-monitor-cs-main.ts';
+  import type { TTelemetry } from '../../wrapper/Wrapper.ts';
   import {
     DEFAULT_PANELS,
     getSettings,
@@ -9,7 +9,15 @@
   } from '../../api/settings.ts';
   import InfoBarItem from './InfoBarItem.svelte';
 
-  let { msg }: { msg: TMetrics } = $props();
+  let {
+    mediaTotal,
+    activeTimers,
+    callCounter,
+  }: {
+    mediaTotal: number;
+    activeTimers: number;
+    callCounter: TTelemetry['callCounter'];
+  } = $props();
 
   let panels: TPanelMap = $state.raw(panelsArray2Map(DEFAULT_PANELS));
 
@@ -26,49 +34,49 @@
   label="eval"
   navSelector="Eval History"
   panel={panels.eval}
-  count={msg.wrapperMetrics.callCounter.eval}
+  count={callCounter.eval}
 />
 
 <InfoBarItem
   label="Media"
   navSelector="Videos|Audios"
   panel={panels.media}
-  count={msg.mediaMetrics.total}
+  count={mediaTotal}
 />
 
 <InfoBarItem
   label="Active Timers"
   navSelector="Active"
   panel={panels.activeTimers}
-  count={msg.wrapperMetrics.callCounter.activeTimers}
+  count={activeTimers}
 />
 
 <InfoBarItem
   label="setTimeout"
   navSelector="setTimeout History"
   panel={panels.setTimeout}
-  count={msg.wrapperMetrics.callCounter.setTimeout}
+  count={callCounter.setTimeout}
 />
 
 <InfoBarItem
   label="clearTimeout"
   navSelector="clearTimeout History"
   panel={panels.clearTimeout}
-  count={msg.wrapperMetrics.callCounter.clearTimeout}
+  count={callCounter.clearTimeout}
 />
 
 <InfoBarItem
   label="setInterval"
   navSelector="setInterval History"
   panel={panels.setInterval}
-  count={msg.wrapperMetrics.callCounter.setInterval}
+  count={callCounter.setInterval}
 />
 
 <InfoBarItem
   label="clearInterval"
   navSelector="clearInterval History"
   panel={panels.clearInterval}
-  count={msg.wrapperMetrics.callCounter.clearInterval}
+  count={callCounter.clearInterval}
 />
 
 <InfoBarItem
@@ -76,7 +84,7 @@
   tooltip="requestAnimationFrame"
   navSelector="requestAnimationFrame History"
   panel={panels.requestAnimationFrame}
-  count={msg.wrapperMetrics.callCounter.requestAnimationFrame}
+  count={callCounter.requestAnimationFrame}
 />
 
 <InfoBarItem
@@ -84,7 +92,7 @@
   tooltip="cancelAnimationFrame"
   navSelector="cancelAnimationFrame History"
   panel={panels.cancelAnimationFrame}
-  count={msg.wrapperMetrics.callCounter.cancelAnimationFrame}
+  count={callCounter.cancelAnimationFrame}
 />
 
 <InfoBarItem
@@ -92,7 +100,7 @@
   tooltip="requestIdleCallback"
   navSelector="requestIdleCallback History"
   panel={panels.requestIdleCallback}
-  count={msg.wrapperMetrics.callCounter.requestIdleCallback}
+  count={callCounter.requestIdleCallback}
 />
 
 <InfoBarItem
@@ -100,5 +108,5 @@
   tooltip="cancelIdleCallback"
   navSelector="cancelIdleCallback History"
   panel={panels.cancelIdleCallback}
-  count={msg.wrapperMetrics.callCounter.cancelIdleCallback}
+  count={callCounter.cancelIdleCallback}
 />

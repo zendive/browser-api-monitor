@@ -1,19 +1,22 @@
 <script lang="ts">
-  import { EMediaType, type TMediaTelemetry } from '../../api/mediaMonitor.ts';
+  import {
+    EMediaType,
+    type TMediaTelemetry,
+  } from '../../wrapper/MediaWrapper.ts';
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from './Variable.svelte';
 
-  let { metrics = { total: 0, collection: [] } }: { metrics: TMediaTelemetry } =
+  let { media = { total: 0, collection: [] } }: { media: TMediaTelemetry } =
     $props();
   let videos = $derived.by(() =>
-    metrics.collection.filter((v) => v.type === EMediaType.VIDEO)
+    media.collection.filter((v) => v.type === EMediaType.VIDEO)
   );
   let audios = $derived.by(() =>
-    metrics.collection.filter((v) => v.type === EMediaType.AUDIO)
+    media.collection.filter((v) => v.type === EMediaType.AUDIO)
   );
 </script>
 
-{#if metrics.collection.length}
+{#if media.collection.length}
   {#if videos.length}
     <section data-navigation-tag="Videos">
       <div class="label bc-invert">

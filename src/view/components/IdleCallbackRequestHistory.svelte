@@ -24,11 +24,11 @@
   import TraceBypass from './TraceBypass.svelte';
 
   let {
-    metrics,
+    ricHistory,
     cicHistory = null,
     caption = '',
   }: {
-    metrics: TRequestIdleCallbackHistory[];
+    ricHistory: TRequestIdleCallbackHistory[];
     cicHistory: TCancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
@@ -37,7 +37,7 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    ricHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -92,7 +92,7 @@
 >
   <IdleCallbackCancelHistory
     caption="Canceled by"
-    metrics={$state.snapshot(cicHistoryMetrics)}
+    cicHistory={$state.snapshot(cicHistoryMetrics)}
   />
 </Dialog>
 
@@ -103,7 +103,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={ricHistory.length} />
   </caption>
   <tbody>
     <tr>
