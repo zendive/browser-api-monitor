@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TMediaMetrics } from '../../api/mediaMonitor.ts';
-  import { portPost } from '../../api/communication.ts';
+  import type { TMediaMetrics } from '../../wrapper/MediaWrapper.ts';
+  import { EMsg, portPost } from '../../api/communication.ts';
   import { MEDIA_ELEMENT_TOGGABLE_PROPS } from '../../api/const.ts';
   import Variable from './Variable.svelte';
   import MediaCommands from './MediaCommands.svelte';
@@ -13,7 +13,7 @@
 
   function onToggleBoolean(property: string) {
     portPost({
-      msg: 'media-command',
+      msg: EMsg.MEDIA_COMMAND,
       mediaId: metrics.mediaId,
       cmd: 'toggle-boolean',
       property: property as keyof HTMLMediaElement,

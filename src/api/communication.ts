@@ -12,9 +12,10 @@
 
 import { APPLICATION_NAME } from './env.ts';
 import { ERRORS_IGNORED } from './const.ts';
-import type { TMetrics } from '../api-monitor-cs-main.ts';
 import { ETimerType } from '../wrapper/TimerWrapper.ts';
+import type { TTelemetry } from '../wrapper/Wrapper.ts';
 import type { TSettings } from './settings.ts';
+import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
@@ -95,50 +96,53 @@ function handleRuntimeMessageResponse(): void {
   }
 }
 
+export enum EMsg {
+  SETTINGS,
+  CONTENT_SCRIPT_LOADED,
+  START_OBSERVE,
+  STOP_OBSERVE,
+  TELEMETRY,
+  TELEMETRY_ACKNOWLEDGED,
+  MEDIA_COMMAND,
+  RESET_WRAPPER_HISTORY,
+  CLEAR_TIMER_HANDLER,
+}
+
 export interface TMsgStartObserve {
-  msg: 'start-observe';
+  msg: EMsg.START_OBSERVE;
 }
 export interface TMsgStopObserve {
-  msg: 'stop-observe';
+  msg: EMsg.STOP_OBSERVE;
 }
 export interface TMsgResetHistory {
-  msg: 'reset-wrapper-history';
+  msg: EMsg.RESET_WRAPPER_HISTORY;
 }
 export interface TMsgClearHandler {
-  msg: 'clear-timer-handler';
+  msg: EMsg.CLEAR_TIMER_HANDLER;
   type: ETimerType;
   handler: number;
 }
 export interface TMsgLoaded {
-  msg: 'content-script-loaded';
+  msg: EMsg.CONTENT_SCRIPT_LOADED;
 }
 export interface TMsgTelemetry {
-  msg: 'telemetry';
-  metrics: TMetrics;
+  msg: EMsg.TELEMETRY;
+  collectingStartTime: number;
+  telemetry: TTelemetry;
 }
 export interface TMsgTelemetryAcknowledged {
-  msg: 'telemetry-acknowledged';
+  msg: EMsg.TELEMETRY_ACKNOWLEDGED;
   trafficDuration: number;
   timeSent: number;
 }
 export interface TMsgSettings {
-  msg: 'settings';
+  msg: EMsg.SETTINGS;
   settings: TSettings;
 }
 export interface TMsgMediaCommand {
-  msg: 'media-command';
+  msg: EMsg.MEDIA_COMMAND;
   mediaId: string;
-  cmd:
-    | 'log'
-    | 'frame-backward'
-    | 'frame-forward'
-    | 'pause'
-    | 'play'
-    | 'load'
-    | 'locate'
-    | 'toggle-boolean'
-    | 'slower'
-    | 'faster';
+  cmd: TMediaCommand;
   property?: keyof HTMLMediaElement;
 }
 export type TMsgOptions =

@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { portPost, type TMsgMediaCommand } from '../../api/communication.ts';
+  import {
+    EMsg,
+    portPost,
+    type TMsgMediaCommand,
+  } from '../../api/communication.ts';
 
   let { mediaId }: { mediaId: string } = $props();
 
   function onMediaCommand(cmd: TMsgMediaCommand['cmd']) {
-    portPost({ msg: 'media-command', mediaId, cmd });
+    portPost({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
   }
 </script>
 

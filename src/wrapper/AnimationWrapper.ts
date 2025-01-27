@@ -1,4 +1,4 @@
-import type { TPanelMap } from '../api/settings.ts';
+import type { TSettingsPanel } from '../api/settings.ts';
 import { requestAnimationFrame, cancelAnimationFrame } from '../api/const.ts';
 import {
   ETraceDomain,
@@ -193,15 +193,14 @@ export class AnimationWrapper {
     window.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
-  collectHistory(panels: TPanelMap) {
+  collectHistory(rafPanel: TSettingsPanel, cafPanel: TSettingsPanel) {
     return {
       rafHistory:
-        panels.requestAnimationFrame.visible &&
-        panels.requestAnimationFrame.wrap
+        rafPanel.wrap && rafPanel.visible
           ? Array.from(this.rafHistory.values())
           : null,
       cafHistory:
-        panels.cancelAnimationFrame.visible && panels.cancelAnimationFrame.wrap
+        cafPanel.wrap && cafPanel.visible
           ? Array.from(this.cafHistory.values())
           : null,
     };

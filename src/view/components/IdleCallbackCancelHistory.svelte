@@ -15,13 +15,13 @@
   import TraceBypass from './TraceBypass.svelte';
 
   let {
-    metrics,
+    cicHistory,
     caption = '',
-  }: { metrics: TCancelIdleCallbackHistory[]; caption?: string } = $props();
+  }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } = $props();
   let sortField = $state(DEFAULT_SORT_CIC.field);
   let sortOrder = $state(DEFAULT_SORT_CIC.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    cicHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -45,7 +45,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={cicHistory.length} />
   </caption>
   <tbody>
     <tr>

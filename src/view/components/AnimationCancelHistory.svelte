@@ -15,13 +15,14 @@
   import TraceBypass from './TraceBypass.svelte';
 
   let {
-    metrics,
+    cafHistory,
     caption = '',
-  }: { metrics: TCancelAnimationFrameHistory[]; caption?: string } = $props();
+  }: { cafHistory: TCancelAnimationFrameHistory[]; caption?: string } =
+    $props();
   let sortField = $state(DEFAULT_SORT_CAF.field);
   let sortOrder = $state(DEFAULT_SORT_CAF.order);
   let sortedMetrics = $derived.by(() =>
-    metrics.sort(compareByFieldOrder(sortField, sortOrder))
+    cafHistory.sort(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
@@ -45,7 +46,7 @@
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
     {caption}
-    <Variable value={metrics.length} />
+    <Variable value={cafHistory.length} />
   </caption>
   <tbody>
     <tr>

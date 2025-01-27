@@ -1,4 +1,4 @@
-import type { TPanelMap } from '../api/settings.ts';
+import type { TSettingsPanel } from '../api/settings.ts';
 import { TAG_EXCEPTION } from '../api/clone.ts';
 import { trim2microsecond } from '../api/time.ts';
 import {
@@ -203,14 +203,14 @@ export class IdleWrapper {
     window.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
-  collectHistory(panels: TPanelMap) {
+  collectHistory(ricPanel: TSettingsPanel, cicPanel: TSettingsPanel) {
     return {
       ricHistory:
-        panels.requestIdleCallback.visible && panels.requestIdleCallback.wrap
+        ricPanel.wrap && ricPanel.visible
           ? Array.from(this.ricHistory.values())
           : null,
       cicHistory:
-        panels.cancelIdleCallback.visible && panels.cancelIdleCallback.wrap
+        cicPanel.wrap && cicPanel.visible
           ? Array.from(this.cicHistory.values())
           : null,
     };

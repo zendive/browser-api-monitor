@@ -6,7 +6,7 @@
     DEFAULT_SETTINGS,
     type TSettingsPanel,
   } from '../../api/settings.ts';
-  import { runtimeListen } from '../../api/communication.ts';
+  import { EMsg, runtimeListen } from '../../api/communication.ts';
   import Alert from './Alert.svelte';
 
   const NON_WRAPPABLE = ['media', 'activeTimers'];
@@ -21,7 +21,7 @@
   });
 
   runtimeListen(async (o) => {
-    if (o.msg === 'content-script-loaded') {
+    if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
       reloadMessageEl?.hide();
       selfEl?.hidePopover();
     }

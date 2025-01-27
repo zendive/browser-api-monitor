@@ -7,7 +7,7 @@
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
 
-  let { metrics }: { metrics: TEvalHistory[] } = $props();
+  let { evalHistory }: { evalHistory: TEvalHistory[] | null } = $props();
 
   function dynamicValue(value: unknown): string {
     if (value === '⟪undefined⟫') {
@@ -22,58 +22,60 @@
   }
 </script>
 
-<table data-navigation-tag="Eval History">
-  <caption class="ta-l bc-invert"
-    >Eval History <Variable value={metrics.length} /></caption
-  >
-  <tbody>
-    <tr>
-      <th class="w-full">Callstack</th>
-      <th class="ta-r">Self</th>
-      <th>Called</th>
-      <th>Code</th>
-      <th>Returns</th>
-      <th>Scope</th>
-      <th title="Bypass"><span class="icon -bypass"></span></th>
-      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
-    </tr>
-    {#each metrics as metric (metric.traceId)}
-      <tr class="t-zebra">
-        <td class="wb-all">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
-        </td>
-        <td class="ta-r">
-          <FrameSensitiveTime value={metric.selfTime} />
-        </td>
-        <td class="ta-c">
-          <Variable value={metric.calls} />
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.code)}</div>
-        </td>
-        <td class="limit-width">
-          <div class="code">{dynamicValue(metric.returnedValue)}</div>
-        </td>
-        <td>
-          {#if metric.usesLocalScope}
-            <span
-              title="Throwed an error while trying to get local scope variables, return value is unreliable"
-              >LOCAL & GLOBAL</span
-            >
-          {:else}
-            <span
-              title="Had access to global scope (local scope usage has not been detected)"
-              >GLOBAL</span
-            >
-          {/if}
-        </td>
-        <td><TraceBypass traceId={metric.traceId} /></td>
-        <td><TraceBreakpoint traceId={metric.traceId} /></td>
+{#if evalHistory?.length}
+  <table data-navigation-tag="Eval History">
+    <caption class="ta-l bc-invert"
+      >Eval History <Variable value={evalHistory.length} /></caption
+    >
+    <tbody>
+      <tr>
+        <th class="w-full">Callstack</th>
+        <th class="ta-r">Self</th>
+        <th>Called</th>
+        <th>Code</th>
+        <th>Returns</th>
+        <th>Scope</th>
+        <th title="Bypass"><span class="icon -bypass"></span></th>
+        <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
       </tr>
-    {/each}
-  </tbody>
-</table>
+      {#each evalHistory as metric (metric.traceId)}
+        <tr class="t-zebra">
+          <td class="wb-all">
+            <TraceDomain traceDomain={metric.traceDomain} />
+            <Trace trace={metric.trace} />
+          </td>
+          <td class="ta-r">
+            <FrameSensitiveTime value={metric.selfTime} />
+          </td>
+          <td class="ta-c">
+            <Variable value={metric.calls} />
+          </td>
+          <td class="limit-width">
+            <div class="code">{dynamicValue(metric.code)}</div>
+          </td>
+          <td class="limit-width">
+            <div class="code">{dynamicValue(metric.returnedValue)}</div>
+          </td>
+          <td>
+            {#if metric.usesLocalScope}
+              <span
+                title="Throwed an error while trying to get local scope variables, return value is unreliable"
+                >LOCAL & GLOBAL</span
+              >
+            {:else}
+              <span
+                title="Had access to global scope (local scope usage has not been detected)"
+                >GLOBAL</span
+              >
+            {/if}
+          </td>
+          <td><TraceBypass traceId={metric.traceId} /></td>
+          <td><TraceBreakpoint traceId={metric.traceId} /></td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+{/if}
 
 <style lang="scss">
   .limit-width {

@@ -45,20 +45,12 @@ export class TraceUtil {
     this.#detectSelfTrace();
   }
 
-  #detectSelfTrace() {
-    const error = new Error(TraceUtil.SIGNATURE);
-    this.selfTraceLink = (error?.stack || '')
-      .split(REGEX_STACKTRACE_SPLIT)[1]
-      .replace(REGEX_STACKTRACE_LINK, '$2')
-      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
-  }
-
-  shouldPause(traceId: string) {
-    return this.trace4Debug === traceId;
-  }
-
-  shouldPass(traceId: string) {
-    return this.trace4Bypass !== traceId;
+  createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+    if (this.callstackType === EWrapperCallstackType.FULL) {
+      return this.#createFullCallstack(e, uniqueTrait);
+    } else {
+      return this.#createShortCallstack(e, uniqueTrait);
+    }
   }
 
   getTraceDomain(trace: TTrace) {
@@ -73,12 +65,20 @@ export class TraceUtil {
     return ETraceDomain.UNKNOWN;
   }
 
-  createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
-    if (this.callstackType === EWrapperCallstackType.FULL) {
-      return this.#createFullCallstack(e, uniqueTrait);
-    } else {
-      return this.#createShortCallstack(e, uniqueTrait);
-    }
+  shouldPass(traceId: string) {
+    return this.trace4Bypass !== traceId;
+  }
+
+  shouldPause(traceId: string) {
+    return this.trace4Debug === traceId;
+  }
+
+  #detectSelfTrace() {
+    const error = new Error(TraceUtil.SIGNATURE);
+    this.selfTraceLink = (error?.stack || '')
+      .split(REGEX_STACKTRACE_SPLIT)[1]
+      .replace(REGEX_STACKTRACE_LINK, '$2')
+      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
   #createShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {

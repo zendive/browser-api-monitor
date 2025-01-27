@@ -1,4 +1,4 @@
-import { windowListen, windowPost } from './api/communication.ts';
+import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { IS_DEV } from './api/env.ts';
 import {
   TELEMETRY_FREQUENCY_1PS,
@@ -6,72 +6,57 @@ import {
 } from './api/const.ts';
 import { Timer } from './api/time.ts';
 import {
-  collectMediaMetrics,
-  meetMedia,
-  doMediaCommand,
-  type TMediaTelemetry,
-} from './api/mediaMonitor.ts';
-import { Wrapper, type TWrapperMetrics } from './wrapper/Wrapper.ts';
-import { panelsArray2Map, type TPanelMap } from './api/settings.ts';
+  wrapperOnEachSecond as onEachSecond,
+  setSettings,
+  cleanHistory,
+  collectMetrics,
+  runMediaCommand,
+} from './wrapper/Wrapper.ts';
 import { ETimerType } from './wrapper/TimerWrapper.ts';
 
-export interface TMetrics {
-  mediaMetrics: TMediaTelemetry;
-  wrapperMetrics: TWrapperMetrics;
-  collectingStartTime: number;
-}
-
-let panels: TPanelMap;
-let wrapper: Wrapper;
-const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
-  meetMedia(document.querySelectorAll('video,audio'));
-  wrapper.eachSecond();
-});
+const eachSecond = new Timer({ delay: 1e3, repetitive: true }, onEachSecond);
 const tick = new Timer(
   { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },
-  function apiMonitorPostMetric() {
+  function apiMonitorTelemetryTick() {
     const now = Date.now();
 
     windowPost({
-      msg: 'telemetry',
-      metrics: {
-        mediaMetrics: collectMediaMetrics(panels.media.visible),
-        wrapperMetrics: wrapper.collectMetrics(),
-        collectingStartTime: now,
-      },
+      msg: EMsg.TELEMETRY,
+      collectingStartTime: now,
+      telemetry: collectMetrics(),
     });
   }
 );
 
 windowListen((o) => {
-  if (o.msg === 'settings' && o.settings && typeof o.settings === 'object') {
-    if (!wrapper) {
-      wrapper = new Wrapper(panels);
-    }
-    panels = panelsArray2Map(o.settings.panels);
-    wrapper.setup(panels, o.settings);
-  } else if (o.msg === 'start-observe') {
+  if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
+    // adaptive update-frequency
+    const ackTrafficDuration = Date.now() - o.timeSent;
+    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
+    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+  } else if (
+    o.msg === EMsg.SETTINGS &&
+    o.settings &&
+    typeof o.settings === 'object'
+  ) {
+    setSettings(o.settings);
+  } else if (o.msg === EMsg.START_OBSERVE) {
     tick.start();
     eachSecond.start();
-  } else if (o.msg === 'stop-observe') {
+  } else if (o.msg === EMsg.STOP_OBSERVE) {
     tick.stop();
     eachSecond.stop();
-  } else if (o.msg === 'reset-wrapper-history') {
-    wrapper.cleanHistory();
+  } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
+    cleanHistory();
     !tick.isPending && tick.trigger();
-  } else if (o.msg === 'clear-timer-handler') {
+  } else if (o.msg === EMsg.CLEAR_TIMER_HANDLER) {
     if (o.type === ETimerType.TIMEOUT) {
       window.clearTimeout(o.handler);
     } else {
       window.clearInterval(o.handler);
     }
-  } else if (o.msg === 'media-command') {
-    doMediaCommand(o.mediaId, o.cmd, o.property);
-  } else if (o.msg === 'telemetry-acknowledged') {
-    // adaptive update-frequency
-    const ackTrafficDuration = Date.now() - o.timeSent;
-    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
-    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+  } else if (o.msg === EMsg.MEDIA_COMMAND) {
+    runMediaCommand(o.mediaId, o.cmd, o.property);
   }
 });
 

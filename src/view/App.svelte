@@ -1,38 +1,42 @@
 <script lang="ts">
-  import { runtimeListen, portPost } from '../api/communication.ts';
+  import { runtimeListen, portPost, EMsg } from '../api/communication.ts';
   import { IS_DEV } from '../api/env.ts';
   import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '../api/const.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
-  import type { TMetrics } from '../api-monitor-cs-main.ts';
-  import TimersMetrics from './components/TimersMetrics.svelte';
+  import type { TTelemetry } from '../wrapper/Wrapper.ts';
+  import { onMount } from 'svelte';
   import Media from './components/Media.svelte';
   import EvalMetrics from './components/EvalMetrics.svelte';
-  import AnimationMetrics from './components/AnimationMetrics.svelte';
   import Version from './components/Version.svelte';
-  import { onMount } from 'svelte';
   import TogglePanels from './components/TogglePanels.svelte';
   import InfoBar from './components/InfoBar.svelte';
   import TickSpinner from './components/TickSpinner.svelte';
-  import IdleCallbackMetrics from './components/IdleCallbackMetrics.svelte';
   import Alert from './components/Alert.svelte';
+  import OnlineTimers from './components/OnlineTimers.svelte';
+  import IdleCallbackRequestHistory from './components/IdleCallbackRequestHistory.svelte';
+  import IdleCallbackCancelHistory from './components/IdleCallbackCancelHistory.svelte';
+  import AnimationRequestHistory from './components/AnimationRequestHistory.svelte';
+  import AnimationCancelHistory from './components/AnimationCancelHistory.svelte';
+  import TimersSetHistory from './components/TimersSetHistory.svelte';
+  import TimersClearHistory from './components/TimersClearHistory.svelte';
 
   let spinnerEl: TickSpinner | null = $state.raw(null);
   let autopauseAlertEl: Alert | null = $state.raw(null);
-  let paused = $state(false);
-  let msg: TMetrics | null = $state.raw(null);
+  let paused = $state.raw(false);
+  let telemetry: TTelemetry | null = $state.raw(null);
 
-  runtimeListen(async (o) => {
-    if (o.msg === 'content-script-loaded') {
-      const settings = await getSettings();
-
-      if (settings.devtoolsPanelShown && !settings.paused) {
-        portPost({ msg: 'start-observe' });
-      }
-    } else if (o.msg === 'telemetry') {
-      msg = o.metrics;
+  runtimeListen((o) => {
+    if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
+      getSettings().then((settings) => {
+        if (settings.devtoolsPanelShown && !settings.paused) {
+          portPost({ msg: EMsg.START_OBSERVE });
+        }
+      });
+    } else if (o.msg === EMsg.TELEMETRY) {
+      telemetry = o.telemetry;
 
       const now = Date.now();
-      const trafficDuration = now - o.metrics.collectingStartTime;
+      const trafficDuration = now - o.collectingStartTime;
 
       if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
         if (!paused) {
@@ -41,7 +45,7 @@
         }
       } else {
         portPost({
-          msg: 'telemetry-acknowledged',
+          msg: EMsg.TELEMETRY_ACKNOWLEDGED,
           trafficDuration,
           timeSent: now,
         });
@@ -57,7 +61,7 @@
     });
 
     window.addEventListener('beforeunload', () => {
-      portPost({ msg: 'stop-observe' });
+      portPost({ msg: EMsg.STOP_OBSERVE });
     });
   });
 
@@ -66,14 +70,14 @@
     setSettings({ paused });
 
     if (paused) {
-      portPost({ msg: 'stop-observe' });
+      portPost({ msg: EMsg.STOP_OBSERVE });
     } else {
-      portPost({ msg: 'start-observe' });
+      portPost({ msg: EMsg.START_OBSERVE });
     }
   }
 
   function onResetHistory() {
-    portPost({ msg: 'reset-wrapper-history' });
+    portPost({ msg: EMsg.RESET_WRAPPER_HISTORY });
   }
 
   function onDevReload() {
@@ -117,8 +121,12 @@
     <div class="divider -thin"></div>
 
     <div class="infobar">
-      {#if msg}
-        <InfoBar {msg} />
+      {#if telemetry}
+        <InfoBar
+          mediaTotal={telemetry.media.total}
+          activeTimers={telemetry.activeTimers}
+          callCounter={telemetry.callCounter}
+        />
       {/if}
     </div>
 
@@ -133,14 +141,68 @@
   </header>
 
   <main>
-    {#if msg}
-      {#if msg.wrapperMetrics.evalHistory?.length}
-        <EvalMetrics metrics={msg.wrapperMetrics.evalHistory} />
+    {#if telemetry}
+      <EvalMetrics evalHistory={telemetry.evalHistory} />
+      <Media media={telemetry.media} />
+      <OnlineTimers onlineTimers={telemetry.onlineTimers} />
+
+      {#if telemetry.setTimeoutHistory?.length}
+        <TimersSetHistory
+          caption="setTimeout History"
+          setTimerHistory={telemetry.setTimeoutHistory}
+          clearTimeoutHistory={telemetry.clearTimeoutHistory}
+          clearIntervalHistory={telemetry.clearIntervalHistory}
+        />
       {/if}
-      <Media metrics={msg.mediaMetrics} />
-      <TimersMetrics metrics={msg.wrapperMetrics} />
-      <AnimationMetrics metrics={msg.wrapperMetrics} />
-      <IdleCallbackMetrics metrics={msg.wrapperMetrics} />
+      {#if telemetry.clearTimeoutHistory?.length}
+        <TimersClearHistory
+          caption="clearTimeout History"
+          clearTimerHistory={telemetry.clearTimeoutHistory}
+        />
+      {/if}
+
+      {#if telemetry.setIntervalHistory?.length}
+        <TimersSetHistory
+          caption="setInterval History"
+          setTimerHistory={telemetry.setIntervalHistory}
+          clearTimeoutHistory={telemetry.clearTimeoutHistory}
+          clearIntervalHistory={telemetry.clearIntervalHistory}
+        />
+      {/if}
+      {#if telemetry.clearIntervalHistory?.length}
+        <TimersClearHistory
+          caption="clearInterval History"
+          clearTimerHistory={telemetry.clearIntervalHistory}
+        />
+      {/if}
+
+      {#if telemetry.rafHistory?.length}
+        <AnimationRequestHistory
+          caption="requestAnimationFrame History"
+          rafHistory={telemetry.rafHistory}
+          cafHistory={telemetry.cafHistory}
+        />
+      {/if}
+      {#if telemetry.cafHistory?.length}
+        <AnimationCancelHistory
+          caption="cancelAnimationFrame History"
+          cafHistory={telemetry.cafHistory}
+        />
+      {/if}
+
+      {#if telemetry.ricHistory?.length}
+        <IdleCallbackRequestHistory
+          caption="requestIdleCallback History"
+          ricHistory={telemetry.ricHistory}
+          cicHistory={telemetry.cicHistory}
+        />
+      {/if}
+      {#if telemetry.cicHistory?.length}
+        <IdleCallbackCancelHistory
+          caption="cancelIdleCallback History"
+          cicHistory={telemetry.cicHistory}
+        />
+      {/if}
     {/if}
   </main>
 </section>

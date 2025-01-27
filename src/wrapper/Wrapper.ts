@@ -3,6 +3,7 @@ import { TraceUtil } from './TraceUtil.ts';
 import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
   EWrapperCallstackType,
+  panelsArray2Map,
   type TPanelMap,
   type TSettings,
 } from '../api/settings.ts';
@@ -22,8 +23,10 @@ import {
   type TCancelIdleCallbackHistory,
   type TRequestIdleCallbackHistory,
 } from './IdleWrapper.ts';
+import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
 
-export type TWrapperMetrics = {
+export type TTelemetry = {
+  media: TMediaTelemetry;
   onlineTimers: TOnlineTimerMetrics[] | null;
   setTimeoutHistory: TSetTimerHistory[] | null;
   clearTimeoutHistory: TClearTimerHistory[] | null;
@@ -34,8 +37,8 @@ export type TWrapperMetrics = {
   cafHistory: TCancelAnimationFrameHistory[] | null;
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
+  activeTimers: number;
   callCounter: {
-    activeTimers: number;
     setTimeout: number;
     clearTimeout: number;
     setInterval: number;
@@ -48,80 +51,86 @@ export type TWrapperMetrics = {
   };
 };
 
-export class Wrapper {
-  panels: TPanelMap;
-  traceUtil: TraceUtil;
-  apiEval: EvalWrapper;
-  apiTimer: TimerWrapper;
-  apiAnimation: AnimationWrapper;
-  apiIdle: IdleWrapper;
+let panels: TPanelMap;
+const traceUtil = new TraceUtil();
+const apiMedia = new MediaWrapper();
+const apiEval = new EvalWrapper(traceUtil);
+const apiTimer = new TimerWrapper(traceUtil, apiEval);
+const apiAnimation = new AnimationWrapper(traceUtil);
+const apiIdle = new IdleWrapper(traceUtil);
 
-  constructor(panels: TPanelMap) {
-    this.panels = panels;
-    this.traceUtil = new TraceUtil();
-    this.apiEval = new EvalWrapper(this.traceUtil);
-    this.apiTimer = new TimerWrapper(this.traceUtil, this.apiEval);
-    this.apiAnimation = new AnimationWrapper(this.traceUtil);
-    this.apiIdle = new IdleWrapper(this.traceUtil);
+const setCallstackType = callingOnce((type: EWrapperCallstackType) => {
+  traceUtil.callstackType = type;
+});
+
+const wrapApis = callingOnce(() => {
+  panels.eval.wrap && apiEval.wrap();
+  panels.setTimeout.wrap && apiTimer.wrapSetTimeout();
+  panels.clearTimeout.wrap && apiTimer.wrapClearTimeout();
+  panels.setInterval.wrap && apiTimer.wrapSetInterval();
+  panels.clearInterval.wrap && apiTimer.wrapClearInterval();
+  panels.requestAnimationFrame.wrap && apiAnimation.wrapRequestAnimationFrame();
+  panels.cancelAnimationFrame.wrap && apiAnimation.wrapCancelAnimationFrame();
+  panels.requestIdleCallback.wrap && apiIdle.wrapRequestIdleCallback();
+  panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
+});
+
+export function setSettings(settings: TSettings) {
+  panels = panelsArray2Map(settings.panels);
+  traceUtil.trace4Debug = settings.trace4Debug;
+  traceUtil.trace4Bypass = settings.trace4Bypass;
+  setCallstackType(settings.wrapperCallstackType);
+  wrapApis();
+}
+
+export function wrapperOnEachSecond() {
+  apiMedia.meetMedia();
+  if (
+    panels.requestAnimationFrame.wrap &&
+    panels.requestAnimationFrame.visible
+  ) {
+    apiAnimation.updateAnimationsFramerate();
   }
+}
 
-  setup(panels: TPanelMap, settings: TSettings) {
-    this.panels = panels;
-    this.traceUtil.trace4Debug = settings.trace4Debug;
-    this.traceUtil.trace4Bypass = settings.trace4Bypass;
-    this.setCallstackType(settings.wrapperCallstackType);
-    this.wrap();
-  }
+export function collectMetrics(): TTelemetry {
+  return {
+    media: apiMedia.collectMetrics(panels.media.visible),
+    evalHistory: apiEval.collectHistory(panels.eval),
+    ...apiTimer.collectHistory(
+      panels.activeTimers,
+      panels.setTimeout,
+      panels.clearTimeout,
+      panels.setInterval,
+      panels.clearInterval
+    ),
+    ...apiAnimation.collectHistory(
+      panels.requestAnimationFrame,
+      panels.cancelAnimationFrame
+    ),
+    ...apiIdle.collectHistory(
+      panels.requestIdleCallback,
+      panels.cancelIdleCallback
+    ),
+    activeTimers: apiTimer.onlineTimers.size,
+    callCounter: {
+      eval: apiEval.callCounter,
+      ...apiTimer.callCounter,
+      ...apiAnimation.callCounter,
+      ...apiIdle.callCounter,
+    },
+  };
+}
 
-  eachSecond() {
-    if (
-      this.panels.requestAnimationFrame.wrap &&
-      this.panels.requestAnimationFrame.visible
-    ) {
-      this.apiAnimation.updateAnimationsFramerate();
-    }
-  }
+export function runMediaCommand(
+  ...args: Parameters<MediaWrapper['runCommand']>
+) {
+  apiMedia.runCommand(...args);
+}
 
-  collectMetrics(): TWrapperMetrics {
-    return {
-      ...this.apiEval.collectHistory(this.panels),
-      ...this.apiTimer.collectHistory(this.panels),
-      ...this.apiAnimation.collectHistory(this.panels),
-      ...this.apiIdle.collectHistory(this.panels),
-      callCounter: {
-        eval: this.apiEval.callCounter,
-        activeTimers: this.apiTimer.onlineTimers.size,
-        ...this.apiTimer.callCounter,
-        ...this.apiAnimation.callCounter,
-        ...this.apiIdle.callCounter,
-      },
-    };
-  }
-
-  setCallstackType = callingOnce((type: EWrapperCallstackType) => {
-    this.traceUtil.callstackType = type;
-  });
-
-  wrap = callingOnce(() => {
-    this.panels.eval.wrap && this.apiEval.wrap();
-    this.panels.setTimeout.wrap && this.apiTimer.wrapSetTimeout();
-    this.panels.clearTimeout.wrap && this.apiTimer.wrapClearTimeout();
-    this.panels.setInterval.wrap && this.apiTimer.wrapSetInterval();
-    this.panels.clearInterval.wrap && this.apiTimer.wrapClearInterval();
-    this.panels.requestAnimationFrame.wrap &&
-      this.apiAnimation.wrapRequestAnimationFrame();
-    this.panels.cancelAnimationFrame.wrap &&
-      this.apiAnimation.wrapCancelAnimationFrame();
-    this.panels.requestIdleCallback.wrap &&
-      this.apiIdle.wrapRequestIdleCallback();
-    this.panels.cancelIdleCallback.wrap &&
-      this.apiIdle.wrapCancelIdleCallback();
-  });
-
-  cleanHistory() {
-    this.apiEval.cleanHistory();
-    this.apiTimer.cleanHistory();
-    this.apiAnimation.cleanHistory();
-    this.apiIdle.cleanHistory();
-  }
+export function cleanHistory() {
+  apiEval.cleanHistory();
+  apiTimer.cleanHistory();
+  apiAnimation.cleanHistory();
+  apiIdle.cleanHistory();
 }

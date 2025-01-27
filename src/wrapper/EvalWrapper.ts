@@ -6,7 +6,7 @@ import {
   type TTrace,
 } from './TraceUtil.ts';
 import { trim2microsecond } from '../api/time.ts';
-import type { TPanelMap } from '../api/settings.ts';
+import type { TSettingsPanel } from '../api/settings.ts';
 
 export type TEvalHistory = {
   traceId: string;
@@ -106,13 +106,10 @@ export class EvalWrapper {
     // noop - it's impossible to restore native eval afterwards
   }
 
-  collectHistory(panels: TPanelMap) {
-    return {
-      evalHistory:
-        panels.eval.visible && panels.eval.wrap
-          ? Array.from(this.evalHistory.values())
-          : null,
-    };
+  collectHistory(evalPanel: TSettingsPanel) {
+    return evalPanel.wrap && evalPanel.visible
+      ? Array.from(this.evalHistory.values())
+      : null;
   }
 
   cleanHistory() {

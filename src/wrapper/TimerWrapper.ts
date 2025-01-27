@@ -13,7 +13,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_MISSFORTUNE,
 } from '../api/const.ts';
-import type { TPanelMap } from '../api/settings.ts';
+import type { TSettingsPanel } from '../api/settings.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
 import { TAG_EXCEPTION } from '../api/clone.ts';
 import { validHandler, validTimerDelay } from './util.ts';
@@ -436,25 +436,31 @@ export class TimerWrapper {
     window.clearInterval = this.native.clearInterval;
   }
 
-  collectHistory(panels: TPanelMap) {
+  collectHistory(
+    activeTimers: TSettingsPanel,
+    setTimeout: TSettingsPanel,
+    clearTimeout: TSettingsPanel,
+    setInterval: TSettingsPanel,
+    clearInterval: TSettingsPanel
+  ) {
     return {
-      onlineTimers: panels.activeTimers.visible
+      onlineTimers: activeTimers.visible
         ? Array.from(this.onlineTimers.values())
         : null,
       setTimeoutHistory:
-        panels.setTimeout.visible && panels.setTimeout.wrap
+        setTimeout.wrap && setTimeout.visible
           ? Array.from(this.setTimeoutHistory.values())
           : null,
       clearTimeoutHistory:
-        panels.clearTimeout.visible && panels.clearTimeout.wrap
+        clearTimeout.wrap && clearTimeout.visible
           ? Array.from(this.clearTimeoutHistory.values())
           : null,
       setIntervalHistory:
-        panels.setInterval.visible && panels.setInterval.wrap
+        setInterval.wrap && setInterval.visible
           ? Array.from(this.setIntervalHistory.values())
           : null,
       clearIntervalHistory:
-        panels.clearInterval.visible && panels.clearInterval.wrap
+        clearInterval.wrap && clearInterval.visible
           ? Array.from(this.clearIntervalHistory.values())
           : null,
     };

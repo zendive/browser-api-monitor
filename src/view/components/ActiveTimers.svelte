@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TOnlineTimerMetrics } from '../../wrapper/TimerWrapper.ts';
-  import { portPost } from '../../api/communication.ts';
+  import { EMsg, portPost } from '../../api/communication.ts';
   import { msToHms } from '../../api/time.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
@@ -13,7 +13,7 @@
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({
-      msg: 'clear-timer-handler',
+      msg: EMsg.CLEAR_TIMER_HANDLER,
       type: metric.type,
       handler: metric.handler,
     });
