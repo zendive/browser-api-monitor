@@ -8,17 +8,18 @@ import { TextEncoder } from 'node:util';
 
 global.TextEncoder = TextEncoder;
 
-const TEST_STACK = `Error: ${TraceUtil.SIGNATURE}
-        at <anonymous>:1:1
-        at async (<anonymous>:1:1)
-        at call2 (async https://example2.com/bundle3.js:4:5)
-        at call1 (https://example1.com/bundle2.js:3:4)`;
-const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
-        at <anonymous>:1:1
-        at async (<anonymous>:1:1)`;
-
 describe('TraceUtil', () => {
   let traceUtil = new TraceUtil();
+  const TEST_STACK = `Error: ${TraceUtil.SIGNATURE}
+  at self (${traceUtil.selfTraceLink}:77:19)
+  at async (<anonymous>:1:1)
+  at call2 (async https://example2.com/bundle3.js:4:5)
+  at call1 (https://example1.com/bundle2.js:3:4)
+  at self (${traceUtil.selfTraceLink}:77:19)`;
+  const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
+    at self (${traceUtil.selfTraceLink}:77:19)
+    at async (<anonymous>:1:1)
+    at self (${traceUtil.selfTraceLink}:77:19)`;
 
   test('createCallstack full', () => {
     traceUtil.callstackType = EWrapperCallstackType.FULL;
