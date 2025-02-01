@@ -39,6 +39,7 @@ export class TraceUtil {
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   trace4Debug: string | null = null;
   trace4Bypass: string | null = null;
+  #fullCallstackCacheTrace: Map</*traceId*/ string, TTrace[]> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
@@ -82,13 +83,22 @@ export class TraceUtil {
   }
 
   #getFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
-    const trace = this.#getFullTrace(e.stack || '');
-    const traceId = e.stack || String(uniqueTrait);
+    const traceId = hashString(e.stack || String(uniqueTrait));
+    const cached = this.#fullCallstackCacheTrace.get(traceId);
+    let rv;
 
-    return {
-      traceId: hashString(traceId),
-      trace: trace || [this.#getInvalidTrace(uniqueTrait)],
-    };
+    if (cached) {
+      rv = { traceId, trace: cached };
+    } else {
+      const trace = this.#getFullTrace(e.stack || '');
+      rv = {
+        traceId,
+        trace: trace || [this.#getInvalidTrace(uniqueTrait)],
+      };
+      this.#fullCallstackCacheTrace.set(traceId, rv.trace);
+    }
+
+    return rv;
   }
 
   #getFullTrace(stackString: string): TTrace[] | null {
@@ -112,13 +122,13 @@ export class TraceUtil {
     let traceId;
 
     if (trace) {
-      traceId = trace.link;
+      traceId = hashString(trace.link);
     } else {
-      traceId = e.stack || String(uniqueTrait);
+      traceId = hashString(e.stack || String(uniqueTrait));
       trace = this.#getInvalidTrace(uniqueTrait);
     }
 
-    return { traceId: hashString(traceId), trace: [trace] };
+    return { traceId, trace: [trace] };
   }
 
   #getShortTrace(stackString: string): TTrace | null {
