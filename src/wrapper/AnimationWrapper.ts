@@ -142,7 +142,7 @@ export class AnimationWrapper {
       fn: FrameRequestCallback
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err, fn);
+      const callstack = this.traceUtil.getCallstack(err, fn);
 
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
@@ -171,7 +171,7 @@ export class AnimationWrapper {
       handler: number
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err);
+      const callstack = this.traceUtil.getCallstack(err);
 
       this.updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;

@@ -228,7 +228,7 @@ export class TimerWrapper {
       ...args: any[]
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err, code);
+      const callstack = this.traceUtil.getCallstack(err, code);
       const isEval = typeof code === 'string';
 
       this.callCounter.setTimeout++;
@@ -297,7 +297,7 @@ export class TimerWrapper {
       handler: number | undefined
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err);
+      const callstack = this.traceUtil.getCallstack(err);
 
       this.updateClearTimersHistory(
         this.clearTimeoutHistory,
@@ -329,7 +329,7 @@ export class TimerWrapper {
       ...args: any[]
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err, code);
+      const callstack = this.traceUtil.getCallstack(err, code);
       const isEval = typeof code === 'string';
 
       this.callCounter.setInterval++;
@@ -398,7 +398,7 @@ export class TimerWrapper {
       handler: number | undefined
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err);
+      const callstack = this.traceUtil.getCallstack(err);
 
       this.updateClearTimersHistory(
         this.clearIntervalHistory,

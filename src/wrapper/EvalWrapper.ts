@@ -64,7 +64,7 @@ export class EvalWrapper {
   wrap() {
     window.eval = function WrappedLessEval(this: EvalWrapper, code: string) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err, code);
+      const callstack = this.traceUtil.getCallstack(err, code);
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;

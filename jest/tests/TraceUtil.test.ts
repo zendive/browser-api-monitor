@@ -27,7 +27,7 @@ describe('TraceUtil', () => {
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { trace } = traceUtil.createCallstack(
+    const { trace } = traceUtil.getCallstack(
       <Error>{ stack: TEST_STACK },
       null
     );
@@ -44,7 +44,7 @@ describe('TraceUtil', () => {
     const standard = [
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { trace } = traceUtil.createCallstack(
+    const { trace } = traceUtil.getCallstack(
       <Error>{ stack: TEST_STACK },
       null
     );
@@ -60,7 +60,7 @@ describe('TraceUtil', () => {
       { name: functionTrace.name, link: TAG_INVALID_CALLSTACK_LINK },
     ];
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
-    const { trace } = traceUtil.createCallstack(
+    const { trace } = traceUtil.getCallstack(
       <Error>{ stack: TEST_MISSING_STACK },
       functionTrace
     );

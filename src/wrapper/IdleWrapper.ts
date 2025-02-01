@@ -152,7 +152,7 @@ export class IdleWrapper {
     ) {
       const delay = options?.timeout;
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err, fn);
+      const callstack = this.traceUtil.getCallstack(err, fn);
 
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
@@ -181,7 +181,7 @@ export class IdleWrapper {
       handler: number
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.createCallstack(err);
+      const callstack = this.traceUtil.getCallstack(err);
 
       this.updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;

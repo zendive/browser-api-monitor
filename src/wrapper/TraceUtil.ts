@@ -42,14 +42,14 @@ export class TraceUtil {
   static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
-    this.#detectSelfTrace();
+    this.selfTraceLink = this.#getSelfTraceLink();
   }
 
-  createCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  getCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
     if (this.callstackType === EWrapperCallstackType.FULL) {
-      return this.#createFullCallstack(e, uniqueTrait);
+      return this.#getFullCallstack(e, uniqueTrait);
     } else {
-      return this.#createShortCallstack(e, uniqueTrait);
+      return this.#getShortCallstack(e, uniqueTrait);
     }
   }
 
@@ -73,74 +73,93 @@ export class TraceUtil {
     return this.trace4Debug === traceId;
   }
 
-  #detectSelfTrace() {
+  #getSelfTraceLink() {
     const error = new Error(TraceUtil.SIGNATURE);
-    this.selfTraceLink = (error?.stack || '')
+    return (error?.stack || '')
       .split(REGEX_STACKTRACE_SPLIT)[1]
       .replace(REGEX_STACKTRACE_LINK, '$2')
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
-  #createShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
-    let traceId = e.stack || String(uniqueTrait);
-    const trace = this.#stack2traceArray(e.stack || '');
-
-    if (trace.length) {
-      trace.splice(0, trace.length - 1); // pick last one
-      traceId = trace[0].link;
-    } else {
-      trace.push(this.#createInvalidTrace(uniqueTrait));
-    }
-
-    return { traceId: hashString(traceId), trace };
-  }
-
-  #createFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  #getFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+    const trace = this.#getFullTrace(e.stack || '');
     const traceId = e.stack || String(uniqueTrait);
-    const trace = this.#stack2traceArray(e.stack || '');
 
-    if (!trace.length) {
-      trace.push(this.#createInvalidTrace(uniqueTrait));
-    }
-
-    return { traceId: hashString(traceId), trace };
+    return {
+      traceId: hashString(traceId),
+      trace: trace || [this.#getInvalidTrace(uniqueTrait)],
+    };
   }
 
-  #stack2traceArray(stackString: string): TTrace[] {
+  #getFullTrace(stackString: string): TTrace[] | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
     const rv: TTrace[] = [];
 
-    // loop from the end, excluding error name and self trace
+    // loop from the end, excluding error name at [0] and self trace at [1|x]
     for (let n = stack.length - 1; n > 1; n--) {
-      let v = stack[n];
+      const parsed = this.#parseTraceRow(stack[n]);
 
-      if (v.indexOf(this.selfTraceLink) >= 0) {
-        continue;
+      if (parsed) {
+        rv.push(parsed);
       }
-
-      const link = v.replace(REGEX_STACKTRACE_LINK, '$2').trim();
-
-      if (link.indexOf('<anonymous>') >= 0) {
-        continue;
-      }
-
-      const name = v.replace(REGEX_STACKTRACE_NAME, '$1').trim();
-
-      rv.push({ name: name === link ? 0 : name, link });
     }
 
-    return rv;
+    return rv.length ? rv : null;
   }
 
-  #createInvalidTrace(uniqueTrait?: unknown): TTrace {
-    let name: TTrace['name'] = 0;
+  #getShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+    let trace = this.#getShortTrace(e.stack || '');
+    let traceId;
 
-    if (typeof uniqueTrait === 'function' && uniqueTrait.name) {
-      name = uniqueTrait.name;
+    if (trace) {
+      traceId = trace.link;
+    } else {
+      traceId = e.stack || String(uniqueTrait);
+      trace = this.#getInvalidTrace(uniqueTrait);
     }
 
+    return { traceId: hashString(traceId), trace: [trace] };
+  }
+
+  #getShortTrace(stackString: string): TTrace | null {
+    const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
+
+    // loop from the start, excluding error name at [0] and self trace at [1|x]
+    for (let n = 2, N = stack.length; n < N; n++) {
+      const parsed = this.#parseTraceRow(stack[n]);
+
+      if (parsed) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }
+
+  #parseTraceRow(stackRow: string) {
+    if (stackRow.indexOf(this.selfTraceLink) >= 0) {
+      return;
+    }
+
+    const link = stackRow.replace(REGEX_STACKTRACE_LINK, '$2').trim();
+    if (link.indexOf('<anonymous>') >= 0) {
+      return;
+    }
+
+    let name: string | 0 = stackRow.replace(REGEX_STACKTRACE_NAME, '$1').trim();
+    if (name === link) {
+      name = 0;
+    }
+
+    return { name, link };
+  }
+
+  #getInvalidTrace(uniqueTrait?: unknown): TTrace {
     return {
-      name,
+      name:
+        typeof uniqueTrait === 'function' && uniqueTrait.name
+          ? uniqueTrait.name
+          : 0,
       link: TAG_INVALID_CALLSTACK_LINK,
     };
   }
