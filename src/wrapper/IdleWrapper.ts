@@ -52,7 +52,7 @@ export class IdleWrapper {
     this.traceUtil = traceUtil;
   }
 
-  ricFired(
+  #ricFired(
     handler: number,
     traceId: string,
     deadline: IdleDeadline,
@@ -72,7 +72,7 @@ export class IdleWrapper {
     }
   }
 
-  updateRicHistory(
+  #updateRicHistory(
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack
@@ -106,7 +106,7 @@ export class IdleWrapper {
     this.onlineIdleCallbackLookup.set(handler, callstack.traceId);
   }
 
-  updateCicHistory(handler: number | string, callstack: TCallstack) {
+  #updateCicHistory(handler: number | string, callstack: TCallstack) {
     const existing = this.cicHistory.get(callstack.traceId);
     const hasError = !validHandler(handler);
 
@@ -167,9 +167,9 @@ export class IdleWrapper {
           selfTime = performance.now() - start;
         }
 
-        this.ricFired(handler, callstack.traceId, deadline, selfTime);
+        this.#ricFired(handler, callstack.traceId, deadline, selfTime);
       }, options);
-      this.updateRicHistory(handler, delay, callstack);
+      this.#updateRicHistory(handler, delay, callstack);
 
       return handler;
     }.bind(this);
@@ -183,7 +183,7 @@ export class IdleWrapper {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
 
-      this.updateCicHistory(handler, callstack);
+      this.#updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
 
       if (this.traceUtil.shouldPass(callstack.traceId)) {

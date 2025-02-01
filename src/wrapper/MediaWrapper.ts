@@ -43,6 +43,66 @@ export type TMediaCommand =
 export class MediaWrapper {
   mediaCollection: TMediaModel[] = [];
 
+  #formatPropValue(prop: string, value: unknown): any {
+    let rv: any = value;
+
+    if ('networkState' === prop) {
+      rv = `${value} - ${NETWORK_STATE[value as number]}`;
+    } else if ('readyState' === prop) {
+      rv = `${value} - ${READY_STATE[value as number]}`;
+    } else if ('srcObject' === prop) {
+      rv = value ? `${value}` : value;
+    } else if ('mediaKeys' === prop) {
+      // https://web.dev/articles/eme-basics
+      rv = cloneObjectSafely(value);
+    } else if (value instanceof TimeRanges) {
+      rv = [];
+
+      for (let n = 0, N = value.length; n < N; n++) {
+        rv.push(`<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`);
+      }
+
+      rv = rv.join('');
+    } else if (value instanceof TextTrackList) {
+      rv = value.length;
+    } else if (value instanceof MediaError) {
+      rv = `${value.code}/${value.message}`;
+    }
+
+    return rv;
+  }
+
+  #stopMonitorMedia(entry: TMediaModel) {
+    for (const eventType of MEDIA_ELEMENT_EVENTS) {
+      entry.el.removeEventListener(eventType, entry.eventListener);
+    }
+  }
+
+  #startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
+    const events: TMediaMetrics['events'] = {};
+    const props: TMediaMetrics['props'] = {};
+    const rv = {
+      el,
+      metrics: {
+        mediaId,
+        type:
+          el instanceof HTMLVideoElement ? EMediaType.VIDEO : EMediaType.AUDIO,
+        events,
+        props,
+      },
+      eventListener: function (this: typeof events, e: Event) {
+        this[e.type]++;
+      }.bind(events),
+    };
+
+    for (const event of MEDIA_ELEMENT_EVENTS) {
+      events[event] = 0;
+      el.addEventListener(event, rv.eventListener);
+    }
+
+    return rv;
+  }
+
   meetMedia() {
     const els: NodeListOf<HTMLMediaElement> =
       document.querySelectorAll('video,audio');
@@ -140,65 +200,5 @@ export class MediaWrapper {
     } else if (cmd === 'faster') {
       mediaModel.el.playbackRate += 0.1;
     }
-  }
-
-  #formatPropValue(prop: string, value: unknown): any {
-    let rv: any = value;
-
-    if ('networkState' === prop) {
-      rv = `${value} - ${NETWORK_STATE[value as number]}`;
-    } else if ('readyState' === prop) {
-      rv = `${value} - ${READY_STATE[value as number]}`;
-    } else if ('srcObject' === prop) {
-      rv = value ? `${value}` : value;
-    } else if ('mediaKeys' === prop) {
-      // https://web.dev/articles/eme-basics
-      rv = cloneObjectSafely(value);
-    } else if (value instanceof TimeRanges) {
-      rv = [];
-
-      for (let n = 0, N = value.length; n < N; n++) {
-        rv.push(`<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`);
-      }
-
-      rv = rv.join('');
-    } else if (value instanceof TextTrackList) {
-      rv = value.length;
-    } else if (value instanceof MediaError) {
-      rv = `${value.code}/${value.message}`;
-    }
-
-    return rv;
-  }
-
-  #stopMonitorMedia(entry: TMediaModel) {
-    for (const eventType of MEDIA_ELEMENT_EVENTS) {
-      entry.el.removeEventListener(eventType, entry.eventListener);
-    }
-  }
-
-  #startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
-    const events: TMediaMetrics['events'] = {};
-    const props: TMediaMetrics['props'] = {};
-    const rv = {
-      el,
-      metrics: {
-        mediaId,
-        type:
-          el instanceof HTMLVideoElement ? EMediaType.VIDEO : EMediaType.AUDIO,
-        events,
-        props,
-      },
-      eventListener: function (this: typeof events, e: Event) {
-        this[e.type]++;
-      }.bind(events),
-    };
-
-    for (const event of MEDIA_ELEMENT_EVENTS) {
-      events[event] = 0;
-      el.addEventListener(event, rv.eventListener);
-    }
-
-    return rv;
   }
 }

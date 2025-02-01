@@ -51,16 +51,7 @@ export class AnimationWrapper {
     this.traceUtil = traceUtil;
   }
 
-  updateAnimationsFramerate() {
-    for (let [, rafRecord] of this.rafHistory) {
-      const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
-      rafRecord.cps = rafRecord.calls - prevCalls;
-
-      this.animationCallsMap.set(rafRecord.traceId, rafRecord.calls);
-    }
-  }
-
-  updateRafHistory(handler: number, callstack: TCallstack) {
+  #updateRafHistory(handler: number, callstack: TCallstack) {
     const existing = this.rafHistory.get(callstack.traceId);
 
     if (existing) {
@@ -85,7 +76,7 @@ export class AnimationWrapper {
     this.onlineAnimationFrameLookup.set(handler, callstack.traceId);
   }
 
-  rafFired(handler: number, traceId: string, selfTime: number | null) {
+  #rafFired(handler: number, traceId: string, selfTime: number | null) {
     const rafRecord = this.rafHistory.get(traceId);
     if (!rafRecord) {
       return;
@@ -99,7 +90,7 @@ export class AnimationWrapper {
     }
   }
 
-  updateCafHistory(handler: number | string, callstack: TCallstack) {
+  #updateCafHistory(handler: number | string, callstack: TCallstack) {
     const existing = this.cafHistory.get(callstack.traceId);
     const hasError = !validHandler(handler);
 
@@ -136,6 +127,15 @@ export class AnimationWrapper {
     }
   }
 
+  updateAnimationsFramerate() {
+    for (let [, rafRecord] of this.rafHistory) {
+      const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
+      rafRecord.cps = rafRecord.calls - prevCalls;
+
+      this.animationCallsMap.set(rafRecord.traceId, rafRecord.calls);
+    }
+  }
+
   wrapRequestAnimationFrame() {
     window.requestAnimationFrame = function requestAnimationFrame(
       this: AnimationWrapper,
@@ -157,9 +157,9 @@ export class AnimationWrapper {
           selfTime = performance.now() - start;
         }
 
-        this.rafFired(handler, callstack.traceId, selfTime);
+        this.#rafFired(handler, callstack.traceId, selfTime);
       });
-      this.updateRafHistory(handler, callstack);
+      this.#updateRafHistory(handler, callstack);
 
       return handler;
     }.bind(this);
@@ -173,7 +173,7 @@ export class AnimationWrapper {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
 
-      this.updateCafHistory(handler, callstack);
+      this.#updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
 
       if (this.traceUtil.shouldPass(callstack.traceId)) {

@@ -80,7 +80,7 @@ export class TimerWrapper {
     this.apiEval = apiEval;
   }
 
-  timerOnline(
+  #timerOnline(
     type: ETimerType,
     handler: number,
     delay: number | undefined | string,
@@ -102,7 +102,7 @@ export class TimerWrapper {
     });
   }
 
-  timerOffline(
+  #timerOffline(
     handler: number,
     canceledByTraceId: string | null,
     selfTime: number | null
@@ -139,7 +139,7 @@ export class TimerWrapper {
     setTimerRecord.canceledCounter++;
   }
 
-  updateSetTimersHistory(
+  #updateSetTimersHistory(
     history: Map<string, TSetTimerHistory>,
     handler: number,
     delay: number | string | undefined,
@@ -173,7 +173,7 @@ export class TimerWrapper {
     }
   }
 
-  updateClearTimersHistory(
+  #updateClearTimersHistory(
     history: Map<string, TClearTimerHistory>,
     handler: unknown,
     callstack: TCallstack
@@ -207,7 +207,7 @@ export class TimerWrapper {
     }
   }
 
-  updateTimersSelfTime(
+  #updateTimersSelfTime(
     map: Map<string, TSetTimerHistory>,
     traceId: string,
     selfTime: number | null
@@ -257,8 +257,8 @@ export class TimerWrapper {
             }
           }
 
-          this.timerOffline(handler, null, selfTime);
-          this.updateTimersSelfTime(
+          this.#timerOffline(handler, null, selfTime);
+          this.#updateTimersSelfTime(
             this.setTimeoutHistory,
             callstack.traceId,
             selfTime
@@ -268,8 +268,8 @@ export class TimerWrapper {
         ...args
       );
 
-      this.timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
-      this.updateSetTimersHistory(
+      this.#timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
+      this.#updateSetTimersHistory(
         this.setTimeoutHistory,
         handler,
         delay,
@@ -299,14 +299,14 @@ export class TimerWrapper {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
 
-      this.updateClearTimersHistory(
+      this.#updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
         callstack
       );
 
       if (handler !== undefined) {
-        this.timerOffline(handler, callstack.traceId, null);
+        this.#timerOffline(handler, callstack.traceId, null);
       }
 
       this.callCounter.clearTimeout++;
@@ -359,7 +359,7 @@ export class TimerWrapper {
             }
           }
 
-          this.updateTimersSelfTime(
+          this.#updateTimersSelfTime(
             this.setIntervalHistory,
             callstack.traceId,
             selfTime
@@ -369,8 +369,8 @@ export class TimerWrapper {
         ...args
       );
 
-      this.timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
-      this.updateSetTimersHistory(
+      this.#timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
+      this.#updateSetTimersHistory(
         this.setIntervalHistory,
         handler,
         delay,
@@ -400,14 +400,14 @@ export class TimerWrapper {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
 
-      this.updateClearTimersHistory(
+      this.#updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
         callstack
       );
 
       if (handler !== undefined) {
-        this.timerOffline(handler, callstack.traceId, null);
+        this.#timerOffline(handler, callstack.traceId, null);
       }
 
       this.callCounter.clearInterval++;
