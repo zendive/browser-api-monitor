@@ -466,6 +466,14 @@ export class TimerWrapper {
     };
   }
 
+  runCommand(type: ETimerType, handler: number) {
+    if (type === ETimerType.TIMEOUT) {
+      window.clearTimeout(handler);
+    } else {
+      window.clearInterval(handler);
+    }
+  }
+
   cleanHistory() {
     this.setTimeoutHistory.clear();
     this.clearTimeoutHistory.clear();

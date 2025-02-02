@@ -1,18 +1,15 @@
 import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { IS_DEV } from './api/env.ts';
+import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
+import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
-  TELEMETRY_FREQUENCY_1PS,
-  TELEMETRY_FREQUENCY_30PS,
-} from './api/const.ts';
-import { Timer } from './api/time.ts';
-import {
-  wrapperOnEachSecond as onEachSecond,
+  onEachSecond,
   setSettings,
   cleanHistory,
   collectMetrics,
   runMediaCommand,
+  runTimerCommand,
 } from './wrapper/Wrapper.ts';
-import { ETimerType } from './wrapper/TimerWrapper.ts';
 
 const eachSecond = new Timer({ delay: 1e3, repetitive: true }, onEachSecond);
 const tick = new Timer(
@@ -22,7 +19,7 @@ const tick = new Timer(
 
     windowPost({
       msg: EMsg.TELEMETRY,
-      collectingStartTime: now,
+      timeOfCollection: now,
       telemetry: collectMetrics(),
     });
   }
@@ -30,10 +27,7 @@ const tick = new Timer(
 
 windowListen((o) => {
   if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
-    // adaptive update-frequency
-    const ackTrafficDuration = Date.now() - o.timeSent;
-    const newDelay = (o.trafficDuration + ackTrafficDuration) * 3;
-    tick.delay = Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+    tick.delay = adjustTelemetryDelay(o.timeOfCollection);
   } else if (
     o.msg === EMsg.SETTINGS &&
     o.settings &&
@@ -49,12 +43,8 @@ windowListen((o) => {
   } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
     cleanHistory();
     !tick.isPending && tick.trigger();
-  } else if (o.msg === EMsg.CLEAR_TIMER_HANDLER) {
-    if (o.type === ETimerType.TIMEOUT) {
-      window.clearTimeout(o.handler);
-    } else {
-      window.clearInterval(o.handler);
-    }
+  } else if (o.msg === EMsg.TIMER_COMMAND) {
+    runTimerCommand(o.type, o.handler);
   } else if (o.msg === EMsg.MEDIA_COMMAND) {
     runMediaCommand(o.mediaId, o.cmd, o.property);
   }

@@ -4,7 +4,7 @@ export const ERRORS_IGNORED = [
 ];
 export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
-export const MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE = 2e3; // ms
+export const MAX_SENDING_TIME_LAG = 2e3; // ms
 export const FRAME_1of60 = 0.0166666666667; // ms
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
 export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';

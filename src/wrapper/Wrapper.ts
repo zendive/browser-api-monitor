@@ -83,7 +83,7 @@ export function setSettings(settings: TSettings) {
   wrapApis();
 }
 
-export function wrapperOnEachSecond() {
+export function onEachSecond() {
   apiMedia.meetMedia();
   if (
     panels.requestAnimationFrame.wrap &&
@@ -126,6 +126,12 @@ export function runMediaCommand(
   ...args: Parameters<MediaWrapper['runCommand']>
 ) {
   apiMedia.runCommand(...args);
+}
+
+export function runTimerCommand(
+  ...args: Parameters<TimerWrapper['runCommand']>
+) {
+  apiTimer.runCommand(...args);
 }
 
 export function cleanHistory() {

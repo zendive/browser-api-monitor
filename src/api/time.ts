@@ -3,6 +3,7 @@ import {
   clearTimeout,
   requestAnimationFrame,
   cancelAnimationFrame,
+  TELEMETRY_FREQUENCY_30PS,
 } from './const.ts';
 
 export function callingOnce<T extends (...args: any[]) => any>(
@@ -222,4 +223,13 @@ export function trim2microsecond(ms: any) {
 
 export function msToHms(delay: number | unknown): string | undefined {
   return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
+}
+
+const TICK_TIME_LAG_SCALAR = 3;
+
+export function adjustTelemetryDelay(timeOfCollection: number) {
+  const timeLag = Date.now() - timeOfCollection;
+  const newDelay = timeLag * TICK_TIME_LAG_SCALAR;
+
+  return Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
 }

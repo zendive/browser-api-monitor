@@ -13,7 +13,7 @@
 
   function onRemoveHandler(metric: TOnlineTimerMetrics) {
     portPost({
-      msg: EMsg.CLEAR_TIMER_HANDLER,
+      msg: EMsg.TIMER_COMMAND,
       type: metric.type,
       handler: metric.handler,
     });

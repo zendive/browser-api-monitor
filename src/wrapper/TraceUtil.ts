@@ -105,7 +105,7 @@ export class TraceUtil {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
     const rv: TTrace[] = [];
 
-    // loop from the end, excluding error name at [0] and self trace at [1|x]
+    // loop from the end, excluding error name at [0] and self trace at [1|n]
     for (let n = stack.length - 1; n > 1; n--) {
       const parsed = this.#parseTraceRow(stack[n]);
 
@@ -134,7 +134,7 @@ export class TraceUtil {
   #getShortTrace(stackString: string): TTrace | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
 
-    // loop from the start, excluding error name at [0] and self trace at [1|x]
+    // loop from the start, excluding error name at [0] and self trace at [1|n]
     for (let n = 2, N = stack.length; n < N; n++) {
       const parsed = this.#parseTraceRow(stack[n]);
 

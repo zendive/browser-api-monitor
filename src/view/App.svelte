@@ -1,7 +1,7 @@
 <script lang="ts">
   import { runtimeListen, portPost, EMsg } from '../api/communication.ts';
   import { IS_DEV } from '../api/env.ts';
-  import { MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE } from '../api/const.ts';
+  import { MAX_SENDING_TIME_LAG } from '../api/const.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
   import type { TTelemetry } from '../wrapper/Wrapper.ts';
   import { onMount } from 'svelte';
@@ -35,10 +35,10 @@
     } else if (o.msg === EMsg.TELEMETRY) {
       telemetry = o.telemetry;
 
-      const now = Date.now();
-      const trafficDuration = now - o.collectingStartTime;
+      const shouldPause =
+        Date.now() - o.timeOfCollection > MAX_SENDING_TIME_LAG;
 
-      if (trafficDuration > MAX_TRAFFIC_DURATION_BEFORE_AUTOPAUSE) {
+      if (shouldPause) {
         if (!paused) {
           onTogglePause();
           autopauseAlertEl?.show();
@@ -46,8 +46,7 @@
       } else {
         portPost({
           msg: EMsg.TELEMETRY_ACKNOWLEDGED,
-          trafficDuration,
-          timeSent: now,
+          timeOfCollection: o.timeOfCollection,
         });
       }
 

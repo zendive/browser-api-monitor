@@ -105,7 +105,7 @@ export enum EMsg {
   TELEMETRY_ACKNOWLEDGED,
   MEDIA_COMMAND,
   RESET_WRAPPER_HISTORY,
-  CLEAR_TIMER_HANDLER,
+  TIMER_COMMAND,
 }
 
 export interface TMsgStartObserve {
@@ -117,8 +117,8 @@ export interface TMsgStopObserve {
 export interface TMsgResetHistory {
   msg: EMsg.RESET_WRAPPER_HISTORY;
 }
-export interface TMsgClearHandler {
-  msg: EMsg.CLEAR_TIMER_HANDLER;
+export interface TMsgTimerCommand {
+  msg: EMsg.TIMER_COMMAND;
   type: ETimerType;
   handler: number;
 }
@@ -127,13 +127,12 @@ export interface TMsgLoaded {
 }
 export interface TMsgTelemetry {
   msg: EMsg.TELEMETRY;
-  collectingStartTime: number;
+  timeOfCollection: number;
   telemetry: TTelemetry;
 }
 export interface TMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
-  trafficDuration: number;
-  timeSent: number;
+  timeOfCollection: number;
 }
 export interface TMsgSettings {
   msg: EMsg.SETTINGS;
@@ -152,6 +151,6 @@ export type TMsgOptions =
   | TMsgStopObserve
   | TMsgLoaded
   | TMsgResetHistory
-  | TMsgClearHandler
+  | TMsgTimerCommand
   | TMsgSettings
   | TMsgMediaCommand;
