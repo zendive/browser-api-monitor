@@ -18,7 +18,7 @@
   let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
   let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    clearTimerHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    clearTimerHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {

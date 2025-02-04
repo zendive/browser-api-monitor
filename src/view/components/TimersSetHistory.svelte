@@ -28,7 +28,7 @@
   let sortField = $state(DEFAULT_SORT_SET_TIMERS.field);
   let sortOrder = $state(DEFAULT_SORT_SET_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    setTimerHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    setTimerHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {

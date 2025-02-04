@@ -22,7 +22,7 @@
   let sortField = $state(DEFAULT_SORT_CAF.field);
   let sortOrder = $state(DEFAULT_SORT_CAF.order);
   let sortedMetrics = $derived.by(() =>
-    cafHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    cafHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {

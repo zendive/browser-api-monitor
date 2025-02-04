@@ -37,7 +37,7 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    ricHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    ricHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {

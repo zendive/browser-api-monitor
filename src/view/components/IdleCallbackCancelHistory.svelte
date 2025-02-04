@@ -21,7 +21,7 @@
   let sortField = $state(DEFAULT_SORT_CIC.field);
   let sortOrder = $state(DEFAULT_SORT_CIC.order);
   let sortedMetrics = $derived.by(() =>
-    cicHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    cicHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
