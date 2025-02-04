@@ -1,7 +1,10 @@
 import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { IS_DEV } from './api/env.ts';
-import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
-import { adjustTelemetryDelay, Stopper, Timer } from './api/time.ts';
+import {
+  TELEMETRY_FREQUENCY_1PS,
+  TELEMETRY_FREQUENCY_30PS,
+} from './api/const.ts';
+import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
   onEachSecond,
   setSettings,
@@ -13,56 +16,38 @@ import {
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
 
-let original: TTelemetry | null;
-let resetOriginalWhen = 0;
-const resetOriginalNow = 5;
+let originalMetrics: TTelemetry | null;
+let currentMetrics: TTelemetry | null;
 const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
   onEachSecond();
-
-  if (++resetOriginalWhen === resetOriginalNow) {
-    original = null;
-    resetOriginalWhen = 0;
-  }
 });
-const metricsStopper = new Stopper();
-const diffStopper = new Stopper();
 const tick = new Timer(
-  { delay: TELEMETRY_FREQUENCY_1PS, repetitive: true },
+  { delay: TELEMETRY_FREQUENCY_1PS, repetitive: false },
   function apiMonitorTelemetryTick() {
     const now = Date.now();
+    currentMetrics = structuredClone(collectMetrics());
 
-    // @ts-ignore
-    window.stoppers = [
-      Stopper.toString(metricsStopper.value()),
-      Stopper.toString(diffStopper.value()),
-    ];
-
-    if (!original) {
-      metricsStopper.start();
-      const current = collectMetrics();
-      original = structuredClone(current);
-      metricsStopper.stop();
+    if (!originalMetrics) {
+      originalMetrics = currentMetrics;
 
       windowPost({
         msg: EMsg.TELEMETRY,
         timeOfCollection: now,
-        telemetry: original,
+        telemetry: originalMetrics,
       });
     } else {
-      diffStopper.start();
-      const current = collectMetrics();
-      const delta = diff.diff(original, current);
-      diffStopper.stop();
+      const delta = diff.diff(originalMetrics, currentMetrics);
 
-      if (!delta) {
-        return;
+      if (delta) {
+        windowPost({
+          msg: EMsg.TELEMETRY,
+          timeOfCollection: now,
+          telemetryDelta: delta,
+        });
+      } else {
+        tick.delay = TELEMETRY_FREQUENCY_30PS;
+        tick.start();
       }
-
-      windowPost({
-        msg: EMsg.TELEMETRY,
-        timeOfCollection: now,
-        telemetryDelta: delta,
-      });
     }
   }
 );
@@ -70,6 +55,8 @@ const tick = new Timer(
 windowListen((o) => {
   if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
     tick.delay = adjustTelemetryDelay(o.timeOfCollection);
+    originalMetrics = currentMetrics;
+    tick.start();
   } else if (
     o.msg === EMsg.SETTINGS &&
     o.settings &&
@@ -77,12 +64,15 @@ windowListen((o) => {
   ) {
     setSettings(o.settings);
   } else if (o.msg === EMsg.START_OBSERVE) {
-    tick.start();
+    originalMetrics = null;
+    tick.trigger();
     eachSecond.start();
   } else if (o.msg === EMsg.STOP_OBSERVE) {
     tick.stop();
     eachSecond.stop();
+    originalMetrics = currentMetrics = null;
   } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
+    originalMetrics = null;
     cleanHistory();
     !tick.isPending && tick.trigger();
   } else if (o.msg === EMsg.TIMER_COMMAND) {

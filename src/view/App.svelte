@@ -25,7 +25,7 @@
   let autopauseAlertEl: Alert | null = $state.raw(null);
   let paused = $state.raw(false);
   let telemetry: TTelemetry | null = $state.raw(null);
-  let telemetryFullCopy: TTelemetry | null = null;
+  let telemetryProgressive: TTelemetry | null = null;
 
   runtimeListen((o) => {
     if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
@@ -35,13 +35,12 @@
         }
       });
     } else if (o.msg === EMsg.TELEMETRY) {
-      if (o.telemetryDelta && telemetry) {
-        telemetry = <TTelemetry>(
-          diff.patch(structuredClone(telemetryFullCopy), o.telemetryDelta)
-        );
-      } else if (o.telemetry) {
+      if (o.telemetry) {
+        telemetryProgressive = structuredClone(o.telemetry);
         telemetry = o.telemetry;
-        telemetryFullCopy = structuredClone(o.telemetry);
+      } else if (o.telemetryDelta) {
+        diff.patch(telemetryProgressive, o.telemetryDelta);
+        telemetry = structuredClone(telemetryProgressive);
       }
 
       if (shouldAutopause(o.timeOfCollection)) {
