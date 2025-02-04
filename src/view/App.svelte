@@ -1,8 +1,8 @@
 <script lang="ts">
   import { runtimeListen, portPost, EMsg } from '../api/communication.ts';
   import { IS_DEV } from '../api/env.ts';
-  import { MAX_SENDING_TIME_LAG } from '../api/const.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
+  import diff from '../api/diff.ts';
   import type { TTelemetry } from '../wrapper/Wrapper.ts';
   import { onMount } from 'svelte';
   import Media from './components/Media.svelte';
@@ -19,11 +19,13 @@
   import AnimationCancelHistory from './components/AnimationCancelHistory.svelte';
   import TimersSetHistory from './components/TimersSetHistory.svelte';
   import TimersClearHistory from './components/TimersClearHistory.svelte';
+  import { shouldAutopause } from 'src/api/time.ts';
 
   let spinnerEl: TickSpinner | null = $state.raw(null);
   let autopauseAlertEl: Alert | null = $state.raw(null);
   let paused = $state.raw(false);
   let telemetry: TTelemetry | null = $state.raw(null);
+  let telemetryFullCopy: TTelemetry | null = null;
 
   runtimeListen((o) => {
     if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
@@ -33,12 +35,16 @@
         }
       });
     } else if (o.msg === EMsg.TELEMETRY) {
-      telemetry = o.telemetry;
+      if (o.telemetryDelta && telemetry) {
+        telemetry = <TTelemetry>(
+          diff.patch(structuredClone(telemetryFullCopy), o.telemetryDelta)
+        );
+      } else if (o.telemetry) {
+        telemetry = o.telemetry;
+        telemetryFullCopy = structuredClone(o.telemetry);
+      }
 
-      const shouldPause =
-        Date.now() - o.timeOfCollection > MAX_SENDING_TIME_LAG;
-
-      if (shouldPause) {
+      if (shouldAutopause(o.timeOfCollection)) {
         if (!paused) {
           onTogglePause();
           autopauseAlertEl?.show();

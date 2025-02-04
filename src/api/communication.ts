@@ -16,6 +16,7 @@ import { ETimerType } from '../wrapper/TimerWrapper.ts';
 import type { TTelemetry } from '../wrapper/Wrapper.ts';
 import type { TSettings } from './settings.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
+import type { Delta } from 'jsondiffpatch';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
@@ -128,7 +129,8 @@ export interface TMsgLoaded {
 export interface TMsgTelemetry {
   msg: EMsg.TELEMETRY;
   timeOfCollection: number;
-  telemetry: TTelemetry;
+  telemetry?: TTelemetry;
+  telemetryDelta?: Delta;
 }
 export interface TMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;

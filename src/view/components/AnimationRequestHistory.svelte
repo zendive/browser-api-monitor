@@ -36,7 +36,7 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    rafHistory.sort(compareByFieldOrder(sortField, sortOrder))
+    rafHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
