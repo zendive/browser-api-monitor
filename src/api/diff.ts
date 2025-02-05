@@ -1,5 +1,4 @@
 import { create, DiffPatcher } from 'jsondiffpatch';
-export type { Delta } from 'jsondiffpatch';
 
 const patcher = create({
   // used to match objects when diffing arrays, by default only === operator is used

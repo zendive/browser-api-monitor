@@ -18,9 +18,7 @@ import diff from './api/diff.ts';
 
 let originalMetrics: TTelemetry | null;
 let currentMetrics: TTelemetry | null;
-const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
-  onEachSecond();
-});
+const eachSecond = new Timer({ delay: 1e3, repetitive: true }, onEachSecond);
 const tick = new Timer(
   { delay: TELEMETRY_FREQUENCY_1PS, repetitive: false },
   function apiMonitorTelemetryTick() {
@@ -56,7 +54,7 @@ windowListen((o) => {
   if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
     tick.delay = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
-    tick.start();
+    !o.paused && tick.start();
   } else if (
     o.msg === EMsg.SETTINGS &&
     o.settings &&
