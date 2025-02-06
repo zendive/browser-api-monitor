@@ -60,7 +60,7 @@
             {#if metric.usesLocalScope}
               <span
                 title="Throwed an error while trying to get local scope variables, return value is unreliable"
-                >LOCAL & GLOBAL</span
+                >⁉️ LOCAL & GLOBAL</span
               >
             {:else}
               <span
