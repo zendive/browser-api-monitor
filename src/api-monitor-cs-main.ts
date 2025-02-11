@@ -72,7 +72,7 @@ windowListen((o) => {
   } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
     originalMetrics = null;
     cleanHistory();
-    !tick.isPending && tick.trigger();
+    !tick.isPending() && tick.trigger();
   } else if (o.msg === EMsg.TIMER_COMMAND) {
     runTimerCommand(o.type, o.handler);
   } else if (o.msg === EMsg.MEDIA_COMMAND) {
