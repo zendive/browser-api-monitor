@@ -135,7 +135,6 @@ export interface TMsgTelemetry {
 export interface TMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
   timeOfCollection: number;
-  paused: boolean;
 }
 export interface TMsgSettings {
   msg: EMsg.SETTINGS;

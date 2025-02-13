@@ -52,7 +52,6 @@
         portPost({
           msg: EMsg.TELEMETRY_ACKNOWLEDGED,
           timeOfCollection: o.timeOfCollection,
-          paused,
         });
       }
 

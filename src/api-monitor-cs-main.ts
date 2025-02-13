@@ -54,7 +54,7 @@ windowListen((o) => {
   if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
     tick.delay = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
-    !o.paused && tick.start();
+    eachSecond.isPending() && tick.start();
   } else if (
     o.msg === EMsg.SETTINGS &&
     o.settings &&
@@ -62,7 +62,7 @@ windowListen((o) => {
   ) {
     setSettings(o.settings);
   } else if (o.msg === EMsg.START_OBSERVE) {
-    originalMetrics = null;
+    originalMetrics = currentMetrics = null;
     tick.trigger();
     eachSecond.start();
   } else if (o.msg === EMsg.STOP_OBSERVE) {
@@ -70,7 +70,7 @@ windowListen((o) => {
     eachSecond.stop();
     originalMetrics = currentMetrics = null;
   } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
-    originalMetrics = null;
+    originalMetrics = currentMetrics = null;
     cleanHistory();
     !tick.isPending() && tick.trigger();
   } else if (o.msg === EMsg.TIMER_COMMAND) {
