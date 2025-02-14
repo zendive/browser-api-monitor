@@ -1,9 +1,6 @@
 import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { IS_DEV } from './api/env.ts';
-import {
-  TELEMETRY_FREQUENCY_1PS,
-  TELEMETRY_FREQUENCY_30PS,
-} from './api/const.ts';
+import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
 import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
   onEachSecond,
@@ -43,7 +40,6 @@ const tick = new Timer(
           telemetryDelta: delta,
         });
       } else {
-        tick.delay = TELEMETRY_FREQUENCY_30PS;
         tick.start();
       }
     }
