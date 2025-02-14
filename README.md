@@ -50,7 +50,7 @@ If you're web developer and want to assess implementation correctness - this too
 
 - OS: Linux
 - Node: 22.12.0 (LTS)
-- Deno: 2.1.7
+- Deno: 2.1.10
 
 ### Build instructions
 
