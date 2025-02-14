@@ -67,6 +67,8 @@ export class MediaWrapper {
       rv = value.length;
     } else if (value instanceof MediaError) {
       rv = `${value.code}/${value.message}`;
+    } else if (Number.isNaN(value)) {
+      rv = null;
     }
 
     return rv;
