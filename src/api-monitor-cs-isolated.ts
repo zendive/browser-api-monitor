@@ -1,9 +1,9 @@
 import {
-  runtimePost,
-  windowPost,
-  windowListen,
-  portListen,
   EMsg,
+  portListen,
+  runtimePost,
+  windowListen,
+  windowPost,
 } from './api/communication.ts';
 import { getSettings, onSettingsChange } from './api/settings.ts';
 

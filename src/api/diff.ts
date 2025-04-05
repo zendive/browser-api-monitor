@@ -1,10 +1,14 @@
 import { create, DiffPatcher } from 'jsondiffpatch';
 
 const patcher = create({
-  // used to match objects when diffing arrays, by default only === operator is used
-  objectHash(obj: any, index) {
-    // this function is used only to when objects are not equal by ref
-    return obj?.traceId || obj?.mediaId || index;
+  /**
+   * used to match objects when diffing arrays, by default only === operator is used
+   * this function is used only to when objects are not equal by ref
+   */
+  objectHash(item: object, index?: number) {
+    if ('traceId' in item) return <string> item['traceId'];
+    if ('mediaId' in item) return <string> item['mediaId'];
+    return index?.toString();
   },
 
   arrays: {

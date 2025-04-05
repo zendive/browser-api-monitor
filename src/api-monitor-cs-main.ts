@@ -3,12 +3,12 @@ import { IS_DEV } from './api/env.ts';
 import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
 import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
-  onEachSecond,
-  setSettings,
   cleanHistory,
   collectMetrics,
+  onEachSecond,
   runMediaCommand,
   runTimerCommand,
+  setSettings,
   type TTelemetry,
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
@@ -43,7 +43,7 @@ const tick = new Timer(
         tick.start();
       }
     }
-  }
+  },
 );
 
 windowListen((o) => {

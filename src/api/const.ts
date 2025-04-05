@@ -10,16 +10,22 @@ export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
 export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
 // store native functions
-export const setTimeout = /*@__PURE__*/ window.setTimeout.bind(window);
-export const clearTimeout = /*@__PURE__*/ window.clearTimeout.bind(window);
-export const setInterval = /*@__PURE__*/ window.setInterval.bind(window);
-export const clearInterval = /*@__PURE__*/ window.clearInterval.bind(window);
-export const requestAnimationFrame =
-  /*@__PURE__*/ window.requestAnimationFrame.bind(window);
-export const cancelAnimationFrame =
-  /*@__PURE__*/ window.cancelAnimationFrame.bind(window);
+export const setTimeout = /*@__PURE__*/ globalThis.setTimeout.bind(globalThis);
+export const clearTimeout = /*@__PURE__*/ globalThis.clearTimeout.bind(
+  globalThis,
+);
+export const setInterval = /*@__PURE__*/ globalThis.setInterval.bind(
+  globalThis,
+);
+export const clearInterval = /*@__PURE__*/ globalThis.clearInterval.bind(
+  globalThis,
+);
+export const requestAnimationFrame = /*@__PURE__*/ globalThis
+  .requestAnimationFrame.bind(globalThis);
+export const cancelAnimationFrame = /*@__PURE__*/ globalThis
+  .cancelAnimationFrame.bind(globalThis);
 
-export const TAG_MISSFORTUNE = '❓\u00A0⟪N/A⟫';
+export const TAG_MISFORTUNE = '❓\u00A0⟪N/A⟫';
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 
@@ -95,7 +101,9 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-export const MEDIA_ELEMENT_TOGGABLE_PROPS = /*@__PURE__*/ new Set([
+export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<
+  Partial<keyof HTMLVideoElement> | Partial<keyof HTMLAudioElement>
+> = /*@__PURE__*/ new Set([
   'autoplay',
   'playsInline',
   'loop',

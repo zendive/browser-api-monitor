@@ -1,14 +1,14 @@
 import type {
-  TRequestIdleCallbackHistory,
   TCancelIdleCallbackHistory,
+  TRequestIdleCallbackHistory,
 } from '../wrapper/IdleWrapper.ts';
 import type {
-  TRequestAnimationFrameHistory,
   TCancelAnimationFrameHistory,
+  TRequestAnimationFrameHistory,
 } from '../wrapper/AnimationWrapper.ts';
 import type {
-  TSetTimerHistory,
   TClearTimerHistory,
+  TSetTimerHistory,
 } from '../wrapper/TimerWrapper.ts';
 
 type TPanelKey =
@@ -95,28 +95,28 @@ export enum ESortOrder {
 }
 
 export const DEFAULT_SORT_SET_TIMERS = {
-  field: <keyof TSetTimerHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TSetTimerHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 export const DEFAULT_SORT_CLEAR_TIMERS = {
-  field: <keyof TClearTimerHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TClearTimerHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 export const DEFAULT_SORT_RAF = {
-  field: <keyof TRequestAnimationFrameHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TRequestAnimationFrameHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 export const DEFAULT_SORT_CAF = {
-  field: <keyof TCancelAnimationFrameHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TCancelAnimationFrameHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 export const DEFAULT_SORT_RIC = {
-  field: <keyof TRequestIdleCallbackHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TRequestIdleCallbackHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 export const DEFAULT_SORT_CIC = {
-  field: <keyof TCancelIdleCallbackHistory>'calls',
-  order: <ESortOrder>ESortOrder.DESCENDING,
+  field: <keyof TCancelIdleCallbackHistory> 'calls',
+  order: <ESortOrder> ESortOrder.DESCENDING,
 } as const;
 
 export const DEFAULT_SETTINGS = {
@@ -129,15 +129,15 @@ export const DEFAULT_SETTINGS = {
   sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
-  trace4Debug: <string | null>null,
-  trace4Bypass: <string | null>null,
+  trace4Debug: <string | null> null,
+  trace4Bypass: <string | null> null,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 
 export function panelsArray2Map(panels: TSettingsPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
-    {} as TPanelMap
+    {} as TPanelMap,
   );
 }
 
@@ -155,7 +155,7 @@ export async function getSettings(): Promise<TSettings> {
 }
 
 export async function setSettings(value: TSettingsProperty) {
-  let store = await chrome.storage.local.get([SETTINGS_VERSION]);
+  const store = await chrome.storage.local.get([SETTINGS_VERSION]);
 
   Object.assign(store[SETTINGS_VERSION], value);
 
@@ -163,17 +163,15 @@ export async function setSettings(value: TSettingsProperty) {
 }
 
 export function onSettingsChange(
-  callback: (newValue: TSettings, oldValue: TSettings) => void
+  callback: (newValue: TSettings, oldValue: TSettings) => void,
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
     if (
-      change &&
-      change[SETTINGS_VERSION] &&
-      change[SETTINGS_VERSION].newValue
+      change && change[SETTINGS_VERSION] && change[SETTINGS_VERSION].newValue
     ) {
       callback(
         change[SETTINGS_VERSION].newValue,
-        change[SETTINGS_VERSION].oldValue
+        change[SETTINGS_VERSION].oldValue,
       );
     }
   });

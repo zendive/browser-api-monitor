@@ -1,15 +1,14 @@
-import { EWrapperCallstackType } from '../../src/api/settings.ts';
+import { wait } from './util.ts';
+import { EWrapperCallstackType } from '../src/api/settings.ts';
 import {
   TAG_INVALID_CALLSTACK_LINK,
   TraceUtil,
-} from '../../src/wrapper/TraceUtil.ts';
-import { describe, expect, test } from '@jest/globals';
-import { TextEncoder } from 'node:util';
-
-global.TextEncoder = TextEncoder;
+} from '../src/wrapper/TraceUtil.ts';
+import { describe, test } from '@std/testing/bdd';
+import { expect } from '@std/expect';
 
 describe('TraceUtil', () => {
-  let traceUtil = new TraceUtil();
+  const traceUtil = new TraceUtil();
   const TEST_STACK = `Error: ${TraceUtil.SIGNATURE}
   at self (${traceUtil.selfTraceLink}:77:19)
   at async (<anonymous>:1:1)
@@ -28,8 +27,8 @@ describe('TraceUtil', () => {
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
     const { trace } = traceUtil.getCallstack(
-      <Error>{ stack: TEST_STACK },
-      null
+      <Error> { stack: TEST_STACK },
+      null,
     );
 
     expect(trace.length).toBe(2);
@@ -42,11 +41,14 @@ describe('TraceUtil', () => {
   test('createCallstack short', () => {
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
     const standard = [
-      { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
+      {
+        name: 'call2',
+        link: 'https://example2.com/bundle3.js:4:5',
+      },
     ];
     const { trace } = traceUtil.getCallstack(
-      <Error>{ stack: TEST_STACK },
-      null
+      <Error> { stack: TEST_STACK },
+      null,
     );
 
     expect(trace.length).toBe(1);
@@ -57,15 +59,20 @@ describe('TraceUtil', () => {
   test('missing link - use trait', () => {
     function functionTrace() {}
     const standard = [
-      { name: functionTrace.name, link: TAG_INVALID_CALLSTACK_LINK },
+      {
+        name: functionTrace.name,
+        link: TAG_INVALID_CALLSTACK_LINK,
+      },
     ];
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
     const { trace } = traceUtil.getCallstack(
-      <Error>{ stack: TEST_MISSING_STACK },
-      functionTrace
+      <Error> { stack: TEST_MISSING_STACK },
+      functionTrace,
     );
 
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
   });
 });
+
+await wait(1e3);

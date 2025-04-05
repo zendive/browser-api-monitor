@@ -1,11 +1,10 @@
-import { build, context, type BuildOptions } from 'esbuild';
+import { build, type BuildOptions, context, stop } from 'esbuild';
 import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
-const isProd = process.env.NODE_ENV === 'production';
-console.log('🚧', process.env.NODE_ENV);
-
+const nodeEnv = Deno.env.get('NODE_ENV');
+const isProd = nodeEnv === 'production';
 const buildOptions: BuildOptions = {
   plugins: [
     esbuildSvelte({
@@ -30,7 +29,7 @@ const buildOptions: BuildOptions = {
   platform: 'browser',
   format: 'iife',
   target: 'esnext',
-  conditions: [`${process.env.NODE_ENV}`],
+  conditions: [`${nodeEnv}`],
   minify: isProd,
   sourcemap: false,
   treeShaking: true,
@@ -38,9 +37,8 @@ const buildOptions: BuildOptions = {
 };
 
 if (isProd) {
-  build(buildOptions).catch((error) => {
-    console.error(error);
-  });
+  await build(buildOptions);
+  await stop();
 } else {
   const ctx = await context(buildOptions);
   await ctx.watch();

@@ -1,17 +1,17 @@
 import {
-  TraceUtil,
   ETraceDomain,
   type TCallstack,
+  TraceUtil,
   type TTrace,
 } from './TraceUtil.ts';
 import {
-  setTimeout,
+  clearInterval,
   clearTimeout,
   setInterval,
-  clearInterval,
-  TAG_EVAL_RETURN_SET_TIMEOUT,
+  setTimeout,
   TAG_EVAL_RETURN_SET_INTERVAL,
-  TAG_MISSFORTUNE,
+  TAG_EVAL_RETURN_SET_TIMEOUT,
+  TAG_MISFORTUNE,
 } from '../api/const.ts';
 import type { TSettingsPanel } from '../api/settings.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
@@ -85,7 +85,7 @@ export class TimerWrapper {
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack,
-    isEval: boolean
+    isEval: boolean,
   ) {
     delay = validTimerDelay(delay)
       ? trim2microsecond(delay)
@@ -105,7 +105,7 @@ export class TimerWrapper {
   #timerOffline(
     handler: number,
     canceledByTraceId: string | null,
-    selfTime: number | null
+    selfTime: number | null,
   ) {
     const timer = this.onlineTimers.get(handler);
     if (!timer) {
@@ -115,10 +115,9 @@ export class TimerWrapper {
 
     this.onlineTimers.delete(handler);
 
-    const setTimerRecord =
-      timer.type === ETimerType.TIMEOUT
-        ? this.setTimeoutHistory.get(timer.traceId)
-        : this.setIntervalHistory.get(timer.traceId);
+    const setTimerRecord = timer.type === ETimerType.TIMEOUT
+      ? this.setTimeoutHistory.get(timer.traceId)
+      : this.setIntervalHistory.get(timer.traceId);
 
     if (!setTimerRecord) {
       return;
@@ -144,7 +143,7 @@ export class TimerWrapper {
     handler: number,
     delay: number | string | undefined,
     callstack: TCallstack,
-    isEval: boolean
+    isEval: boolean,
   ) {
     const existing = history.get(callstack.traceId);
     const hasError = !validTimerDelay(delay);
@@ -176,28 +175,28 @@ export class TimerWrapper {
   #updateClearTimersHistory(
     history: Map<string, TClearTimerHistory>,
     handler: unknown,
-    callstack: TCallstack
+    callstack: TCallstack,
   ) {
     const existing = history.get(callstack.traceId);
     const hasError = !validHandler(handler);
     const onlineTimer = hasError
       ? null
-      : this.onlineTimers.get(<number>handler);
+      : this.onlineTimers.get(<number> handler);
     const handlerDelay: string | number | undefined = onlineTimer
       ? onlineTimer.delay
-      : TAG_MISSFORTUNE;
+      : TAG_MISFORTUNE;
 
     if (hasError) {
       handler = TAG_EXCEPTION(handler);
     }
 
     if (existing) {
-      existing.handler = <number | string>handler;
+      existing.handler = <number | string> handler;
       existing.delay = handlerDelay;
       existing.calls++;
     } else {
       history.set(callstack.traceId, {
-        handler: <number | string>handler,
+        handler: <number | string> handler,
         calls: 1,
         delay: handlerDelay,
         traceId: callstack.traceId,
@@ -210,7 +209,7 @@ export class TimerWrapper {
   #updateTimersSelfTime(
     map: Map<string, TSetTimerHistory>,
     traceId: string,
-    selfTime: number | null
+    selfTime: number | null,
   ) {
     const record = map.get(traceId);
 
@@ -220,12 +219,11 @@ export class TimerWrapper {
   }
 
   wrapSetTimeout() {
-    // @ts-ignore jest stub
-    window.setTimeout = function setTimeout(
+    globalThis.setTimeout = function setTimeout(
       this: TimerWrapper,
       code: TimerHandler,
       delay: number | undefined,
-      ...args: any[]
+      ...args: unknown[]
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, code);
@@ -233,7 +231,7 @@ export class TimerWrapper {
 
       this.callCounter.setTimeout++;
       const handler = this.native.setTimeout(
-        (...params: any[]) => {
+        (...params: unknown[]) => {
           const start = performance.now();
           let selfTime = null;
 
@@ -261,11 +259,11 @@ export class TimerWrapper {
           this.#updateTimersSelfTime(
             this.setTimeoutHistory,
             callstack.traceId,
-            selfTime
+            selfTime,
           );
         },
         delay,
-        ...args
+        ...args,
       );
 
       this.#timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
@@ -274,7 +272,7 @@ export class TimerWrapper {
         handler,
         delay,
         callstack,
-        isEval
+        isEval,
       );
       if (isEval) {
         this.apiEval.updateHistory(
@@ -282,7 +280,7 @@ export class TimerWrapper {
           TAG_EVAL_RETURN_SET_TIMEOUT,
           callstack,
           false,
-          null
+          null,
         );
       }
 
@@ -291,10 +289,9 @@ export class TimerWrapper {
   }
 
   wrapClearTimeout() {
-    // @ts-ignore jest stub
-    window.clearTimeout = function clearTimeout(
+    globalThis.clearTimeout = function clearTimeout(
       this: TimerWrapper,
-      handler: number | undefined
+      handler: number | undefined,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
@@ -302,7 +299,7 @@ export class TimerWrapper {
       this.#updateClearTimersHistory(
         this.clearTimeoutHistory,
         handler,
-        callstack
+        callstack,
       );
 
       if (handler !== undefined) {
@@ -321,12 +318,11 @@ export class TimerWrapper {
   }
 
   wrapSetInterval() {
-    // @ts-ignore jest stub
-    window.setInterval = function setInterval(
+    globalThis.setInterval = function setInterval(
       this: TimerWrapper,
       code: TimerHandler,
       delay: number | undefined,
-      ...args: any[]
+      ...args: unknown[]
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, code);
@@ -335,7 +331,7 @@ export class TimerWrapper {
       this.callCounter.setInterval++;
 
       const handler = this.native.setInterval(
-        (...params: any[]) => {
+        (...params: unknown[]) => {
           const start = performance.now();
           let selfTime = null;
 
@@ -362,11 +358,11 @@ export class TimerWrapper {
           this.#updateTimersSelfTime(
             this.setIntervalHistory,
             callstack.traceId,
-            selfTime
+            selfTime,
           );
         },
         delay,
-        ...args
+        ...args,
       );
 
       this.#timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
@@ -375,7 +371,7 @@ export class TimerWrapper {
         handler,
         delay,
         callstack,
-        isEval
+        isEval,
       );
       if (isEval) {
         this.apiEval.updateHistory(
@@ -383,7 +379,7 @@ export class TimerWrapper {
           TAG_EVAL_RETURN_SET_INTERVAL,
           callstack,
           false,
-          null
+          null,
         );
       }
 
@@ -392,10 +388,9 @@ export class TimerWrapper {
   }
 
   wrapClearInterval() {
-    // @ts-ignore jest stub
-    window.clearInterval = function clearInterval(
+    globalThis.clearInterval = function clearInterval(
       this: TimerWrapper,
-      handler: number | undefined
+      handler: number | undefined,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
@@ -403,7 +398,7 @@ export class TimerWrapper {
       this.#updateClearTimersHistory(
         this.clearIntervalHistory,
         handler,
-        callstack
+        callstack,
       );
 
       if (handler !== undefined) {
@@ -422,18 +417,18 @@ export class TimerWrapper {
   }
 
   unwrapSetTimeout() {
-    window.setTimeout = this.native.setTimeout;
+    globalThis.setTimeout = this.native.setTimeout;
   }
 
   unwrapClearTimeout() {
-    window.clearTimeout = this.native.clearTimeout;
+    globalThis.clearTimeout = this.native.clearTimeout;
   }
 
   unwrapSetInterval() {
-    window.setInterval = this.native.setInterval;
+    globalThis.setInterval = this.native.setInterval;
   }
   unwrapClearInterval() {
-    window.clearInterval = this.native.clearInterval;
+    globalThis.clearInterval = this.native.clearInterval;
   }
 
   collectHistory(
@@ -441,36 +436,32 @@ export class TimerWrapper {
     setTimeout: TSettingsPanel,
     clearTimeout: TSettingsPanel,
     setInterval: TSettingsPanel,
-    clearInterval: TSettingsPanel
+    clearInterval: TSettingsPanel,
   ) {
     return {
       onlineTimers: activeTimers.visible
         ? Array.from(this.onlineTimers.values())
         : null,
-      setTimeoutHistory:
-        setTimeout.wrap && setTimeout.visible
-          ? Array.from(this.setTimeoutHistory.values())
-          : null,
-      clearTimeoutHistory:
-        clearTimeout.wrap && clearTimeout.visible
-          ? Array.from(this.clearTimeoutHistory.values())
-          : null,
-      setIntervalHistory:
-        setInterval.wrap && setInterval.visible
-          ? Array.from(this.setIntervalHistory.values())
-          : null,
-      clearIntervalHistory:
-        clearInterval.wrap && clearInterval.visible
-          ? Array.from(this.clearIntervalHistory.values())
-          : null,
+      setTimeoutHistory: setTimeout.wrap && setTimeout.visible
+        ? Array.from(this.setTimeoutHistory.values())
+        : null,
+      clearTimeoutHistory: clearTimeout.wrap && clearTimeout.visible
+        ? Array.from(this.clearTimeoutHistory.values())
+        : null,
+      setIntervalHistory: setInterval.wrap && setInterval.visible
+        ? Array.from(this.setIntervalHistory.values())
+        : null,
+      clearIntervalHistory: clearInterval.wrap && clearInterval.visible
+        ? Array.from(this.clearIntervalHistory.values())
+        : null,
     };
   }
 
   runCommand(type: ETimerType, handler: number) {
     if (type === ETimerType.TIMEOUT) {
-      window.clearTimeout(handler);
+      globalThis.clearTimeout(handler);
     } else {
-      window.clearInterval(handler);
+      globalThis.clearInterval(handler);
     }
   }
 

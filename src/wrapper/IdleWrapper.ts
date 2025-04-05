@@ -2,9 +2,9 @@ import type { TSettingsPanel } from '../api/settings.ts';
 import { TAG_EXCEPTION } from '../api/clone.ts';
 import { trim2microsecond } from '../api/time.ts';
 import {
-  TraceUtil,
   type ETraceDomain,
   type TCallstack,
+  TraceUtil,
   type TTrace,
 } from './TraceUtil.ts';
 import { validHandler, validTimerDelay } from './util.ts';
@@ -30,8 +30,12 @@ export type TCancelIdleCallbackHistory = {
   handler: number | undefined | string;
 };
 
-const requestIdleCallback = window.requestIdleCallback.bind(window);
-const cancelIdleCallback = window.cancelIdleCallback.bind(window);
+const requestIdleCallback = /*@__PURE__*/ globalThis.requestIdleCallback.bind(
+  globalThis,
+);
+const cancelIdleCallback = /*@__PURE__*/ globalThis.cancelIdleCallback.bind(
+  globalThis,
+);
 
 export class IdleWrapper {
   traceUtil: TraceUtil;
@@ -56,7 +60,7 @@ export class IdleWrapper {
     handler: number,
     traceId: string,
     deadline: IdleDeadline,
-    selfTime: number | null
+    selfTime: number | null,
   ) {
     const ricRecord = this.ricHistory.get(traceId);
     if (!ricRecord) {
@@ -75,7 +79,7 @@ export class IdleWrapper {
   #updateRicHistory(
     handler: number,
     delay: number | undefined | string,
-    callstack: TCallstack
+    callstack: TCallstack,
   ) {
     const existing = this.ricHistory.get(callstack.traceId);
     const hasError = !validTimerDelay(delay);
@@ -145,10 +149,10 @@ export class IdleWrapper {
   }
 
   wrapRequestIdleCallback() {
-    window.requestIdleCallback = function requestIdleCallback(
+    globalThis.requestIdleCallback = function requestIdleCallback(
       this: IdleWrapper,
       fn: IdleRequestCallback,
-      options?: IdleRequestOptions | undefined
+      options?: IdleRequestOptions | undefined,
     ) {
       const delay = options?.timeout;
       const err = new Error(TraceUtil.SIGNATURE);
@@ -176,9 +180,9 @@ export class IdleWrapper {
   }
 
   wrapCancelIdleCallback() {
-    window.cancelIdleCallback = function cancelIdleCallback(
+    globalThis.cancelIdleCallback = function cancelIdleCallback(
       this: IdleWrapper,
-      handler: number
+      handler: number,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
@@ -196,23 +200,21 @@ export class IdleWrapper {
   }
 
   unwrapRequestIdleCallback() {
-    window.requestIdleCallback = this.native.requestIdleCallback;
+    globalThis.requestIdleCallback = this.native.requestIdleCallback;
   }
 
   unwrapCancelIdleCallback() {
-    window.cancelIdleCallback = this.native.cancelIdleCallback;
+    globalThis.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
   collectHistory(ricPanel: TSettingsPanel, cicPanel: TSettingsPanel) {
     return {
-      ricHistory:
-        ricPanel.wrap && ricPanel.visible
-          ? Array.from(this.ricHistory.values())
-          : null,
-      cicHistory:
-        cicPanel.wrap && cicPanel.visible
-          ? Array.from(this.cicHistory.values())
-          : null,
+      ricHistory: ricPanel.wrap && ricPanel.visible
+        ? Array.from(this.ricHistory.values())
+        : null,
+      cicHistory: cicPanel.wrap && cicPanel.visible
+        ? Array.from(this.cicHistory.values())
+        : null,
     };
   }
 

@@ -9,14 +9,14 @@ If you're web developer and want to assess implementation correctness - this too
 - to measure callback execution self-time.
 - to see `requestAnimationFrame` callback request frame rate.
 - visit every function in the call stack (if available), bypass or pause while debugging.
-- detect eval ­function usage, see its argument and return value, same for setTimeout and setInterval when called with a string instead of a function.
+- detect `eval` function usage, see its argument and return value, same for `setTimeout` and `setInterval` when called with a string instead of a function.
 - for every mounted video or audio media element's to see it’s state and properties.
 
 #### Helps to spot:
 
 - incorrect timeout delay.
 - bad handler for terminator function.
-- terminating non existing or elapsed timeout.
+- terminating non-existing or elapsed timeout.
 
 #### Motivation:
 
@@ -50,7 +50,7 @@ If you're web developer and want to assess implementation correctness - this too
 
 - OS: Linux
 - Node: 22.12.0 (LTS)
-- Deno: 2.1.10
+- Deno: 2.2.8
 
 ### Build instructions
 

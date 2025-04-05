@@ -1,4 +1,4 @@
-import { cloneObjectSafely } from '../api/clone';
+import { cloneObjectSafely } from '../api/clone.ts';
 import {
   FRAME_1of60,
   MEDIA_ELEMENT_EVENTS,
@@ -8,8 +8,9 @@ import {
   READY_STATE,
 } from '../api/const';
 
+type TMediaElement = HTMLVideoElement | HTMLAudioElement;
 type TMediaModel = {
-  el: HTMLMediaElement;
+  el: TMediaElement;
   metrics: TMediaMetrics;
   eventListener: (e: Event) => void;
 };
@@ -40,11 +41,15 @@ export type TMediaCommand =
   | 'slower'
   | 'faster';
 
+export function isToggableMediaProp(property: string) {
+  return MEDIA_ELEMENT_TOGGABLE_PROPS.has(property);
+}
+
 export class MediaWrapper {
   mediaCollection: TMediaModel[] = [];
 
-  #formatPropValue(prop: string, value: unknown): any {
-    let rv: any = value;
+  #formatPropValue(prop: string, value: unknown): unknown {
+    let rv: unknown = value;
 
     if ('networkState' === prop) {
       rv = `${value} - ${NETWORK_STATE[value as number]}`;
@@ -56,13 +61,15 @@ export class MediaWrapper {
       // https://web.dev/articles/eme-basics
       rv = cloneObjectSafely(value);
     } else if (value instanceof TimeRanges) {
-      rv = [];
+      const ranges: string[] = [];
 
       for (let n = 0, N = value.length; n < N; n++) {
-        rv.push(`<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`);
+        ranges.push(
+          `<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`,
+        );
       }
 
-      rv = rv.join('');
+      rv = ranges.join('');
     } else if (value instanceof TextTrackList) {
       rv = value.length;
     } else if (value instanceof MediaError) {
@@ -80,15 +87,16 @@ export class MediaWrapper {
     }
   }
 
-  #startMonitorMedia(mediaId: string, el: HTMLMediaElement): TMediaModel {
+  #startMonitorMedia(mediaId: string, el: TMediaElement): TMediaModel {
     const events: TMediaMetrics['events'] = {};
     const props: TMediaMetrics['props'] = {};
     const rv = {
       el,
       metrics: {
         mediaId,
-        type:
-          el instanceof HTMLVideoElement ? EMediaType.VIDEO : EMediaType.AUDIO,
+        type: el instanceof HTMLVideoElement
+          ? EMediaType.VIDEO
+          : EMediaType.AUDIO,
         events,
         props,
       },
@@ -106,8 +114,9 @@ export class MediaWrapper {
   }
 
   meetMedia() {
-    const els: NodeListOf<HTMLMediaElement> =
-      document.querySelectorAll('video,audio');
+    const els: NodeListOf<TMediaElement> = document.querySelectorAll(
+      'video,audio',
+    );
     // farewell old
     for (const entry of this.mediaCollection) {
       let found = false;
@@ -122,7 +131,7 @@ export class MediaWrapper {
       if (!found) {
         this.#stopMonitorMedia(entry);
         this.mediaCollection = this.mediaCollection.filter(
-          (v) => v.el !== entry.el
+          (v) => v.el !== entry.el,
         );
       }
     }
@@ -150,7 +159,7 @@ export class MediaWrapper {
           if (prop in v.el) {
             v.metrics.props[prop] = this.#formatPropValue(
               prop,
-              v.el[prop as keyof HTMLMediaElement]
+              v.el[prop as keyof TMediaElement],
             );
           }
         }
@@ -164,10 +173,10 @@ export class MediaWrapper {
   runCommand(
     mediaId: string,
     cmd: TMediaCommand,
-    property: keyof HTMLMediaElement | undefined
+    property: keyof TMediaElement | undefined,
   ) {
     const mediaModel = this.mediaCollection.find(
-      (model) => model.metrics.mediaId === mediaId
+      (model) => model.metrics.mediaId === mediaId,
     );
 
     if (!mediaModel || !mediaModel.el || !document.contains(mediaModel.el)) {
@@ -194,7 +203,7 @@ export class MediaWrapper {
       mediaModel.el.currentTime += FRAME_1of60;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
       if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
-        // @ts-expect-error
+        // @ts-expect-error props a handy picked to be overwritable booleans
         mediaModel.el[property] = !mediaModel.el[property];
       }
     } else if (cmd === 'slower') {

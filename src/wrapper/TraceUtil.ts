@@ -17,13 +17,13 @@ export enum ETraceDomain {
 }
 
 export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
-  /(.*):\d+:\d+$/
+  /(.*):\d+:\d+$/,
 );
 export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:(\d+):\d+$/
+  /.*:(\d+):\d+$/,
 );
 export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
-  /.*:\d+:(\d+)$/
+  /.*:\d+:(\d+)$/,
 );
 export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
@@ -31,7 +31,7 @@ const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
 const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
 const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
 const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?\:\/\//
+  /http[s]?\:\/\//,
 );
 
 export class TraceUtil {
@@ -166,10 +166,9 @@ export class TraceUtil {
 
   #getInvalidTrace(uniqueTrait?: unknown): TTrace {
     return {
-      name:
-        typeof uniqueTrait === 'function' && uniqueTrait.name
-          ? uniqueTrait.name
-          : 0,
+      name: typeof uniqueTrait === 'function' && uniqueTrait.name
+        ? uniqueTrait.name
+        : 0,
       link: TAG_INVALID_CALLSTACK_LINK,
     };
   }
