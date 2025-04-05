@@ -32,20 +32,13 @@
         }
       });
     } else if (o.msg === EMsg.TELEMETRY) {
-      if (o.telemetry) {
-        telemetryProgressive = structuredClone(o.telemetry);
-        telemetry = o.telemetry;
-      } else if (o.telemetryDelta) {
-        diff.patch(telemetryProgressive, o.telemetryDelta);
-        telemetry = structuredClone(telemetryProgressive);
-      }
-
-      portPost({
-        msg: EMsg.TELEMETRY_ACKNOWLEDGED,
-        timeOfCollection: o.timeOfCollection,
-      });
-
-      spinnerEl?.tick();
+      telemetryProgressive = structuredClone(o.telemetry);
+      telemetry = o.telemetry;
+      acknowledgeTelemetry(o.timeOfCollection);
+    } else if (o.msg === EMsg.TELEMETRY_DELTA) {
+      diff.patch(telemetryProgressive, o.telemetryDelta);
+      telemetry = structuredClone(telemetryProgressive);
+      acknowledgeTelemetry(o.timeOfCollection);
     }
   });
 
@@ -58,6 +51,15 @@
       portPost({ msg: EMsg.STOP_OBSERVE });
     });
   });
+
+  function acknowledgeTelemetry(timeOfCollection: number) {
+    portPost({
+      msg: EMsg.TELEMETRY_ACKNOWLEDGED,
+      timeOfCollection,
+    });
+
+    spinnerEl?.tick();
+  }
 
   function onTogglePause() {
     paused = !paused;

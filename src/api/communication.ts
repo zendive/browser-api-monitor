@@ -96,6 +96,7 @@ export enum EMsg {
   START_OBSERVE,
   STOP_OBSERVE,
   TELEMETRY,
+  TELEMETRY_DELTA,
   TELEMETRY_ACKNOWLEDGED,
   MEDIA_COMMAND,
   RESET_WRAPPER_HISTORY,
@@ -122,8 +123,12 @@ export interface TMsgLoaded {
 export interface TMsgTelemetry {
   msg: EMsg.TELEMETRY;
   timeOfCollection: number;
-  telemetry?: TTelemetry;
-  telemetryDelta?: Delta;
+  telemetry: TTelemetry;
+}
+export interface TMsgTelemetryDelta {
+  msg: EMsg.TELEMETRY_DELTA;
+  timeOfCollection: number;
+  telemetryDelta: Delta;
 }
 export interface TMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
@@ -141,6 +146,7 @@ export interface TMsgMediaCommand {
 }
 export type TMsgOptions =
   | TMsgTelemetry
+  | TMsgTelemetryDelta
   | TMsgTelemetryAcknowledged
   | TMsgStartObserve
   | TMsgStopObserve
