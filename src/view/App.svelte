@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { runtimeListen, portPost, EMsg } from '../api/communication.ts';
+  import { EMsg, portPost, runtimeListen } from '../api/communication.ts';
   import { IS_DEV } from '../api/env.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
   import diff from '../api/diff.ts';
@@ -11,7 +11,6 @@
   import TogglePanels from './components/TogglePanels.svelte';
   import InfoBar from './components/InfoBar.svelte';
   import TickSpinner from './components/TickSpinner.svelte';
-  import Alert from './components/Alert.svelte';
   import OnlineTimers from './components/OnlineTimers.svelte';
   import IdleCallbackRequestHistory from './components/IdleCallbackRequestHistory.svelte';
   import IdleCallbackCancelHistory from './components/IdleCallbackCancelHistory.svelte';
@@ -19,10 +18,8 @@
   import AnimationCancelHistory from './components/AnimationCancelHistory.svelte';
   import TimersSetHistory from './components/TimersSetHistory.svelte';
   import TimersClearHistory from './components/TimersClearHistory.svelte';
-  import { shouldAutopause } from 'src/api/time.ts';
 
   let spinnerEl: TickSpinner | null = $state.raw(null);
-  let autopauseAlertEl: Alert | null = $state.raw(null);
   let paused = $state.raw(false);
   let telemetry: TTelemetry | null = $state.raw(null);
   let telemetryProgressive: TTelemetry | null = null;
@@ -43,17 +40,10 @@
         telemetry = structuredClone(telemetryProgressive);
       }
 
-      if (shouldAutopause(o.timeOfCollection)) {
-        if (!paused) {
-          onTogglePause();
-          autopauseAlertEl?.show();
-        }
-      } else {
-        portPost({
-          msg: EMsg.TELEMETRY_ACKNOWLEDGED,
-          timeOfCollection: o.timeOfCollection,
-        });
-      }
+      portPost({
+        msg: EMsg.TELEMETRY_ACKNOWLEDGED,
+        timeOfCollection: o.timeOfCollection,
+      });
 
       spinnerEl?.tick();
     }
@@ -92,12 +82,6 @@
 </script>
 
 <section class="root">
-  <Alert bind:this={autopauseAlertEl} dismissable={true} title="Autopaused"
-    >Communication with the inspected window experienced a long delay and was
-    autopaused.<br />Try hiding panels you don't need at the moment to minimise
-    quantity of monitored data.</Alert
-  >
-
   <header>
     {#if IS_DEV}
       <button onclick={onDevReload} title="Reload" aria-label="Reload">

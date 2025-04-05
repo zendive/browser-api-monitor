@@ -236,8 +236,3 @@ export function adjustTelemetryDelay(timeOfCollection: number) {
 
   return Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
 }
-
-const MAX_SENDING_TIME_LAG = 2e3; // ms
-export function shouldAutopause(timeOfCollection: number) {
-  return Date.now() - timeOfCollection > MAX_SENDING_TIME_LAG;
-}
