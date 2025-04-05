@@ -1,5 +1,8 @@
 .PHONY: clean install dev valid test prod
 .DEFAULT_GOAL := dev
+DENO_DEV = NODE_ENV=development deno run --watch
+DENO_PROD = NODE_ENV=production deno run
+DENO_OPTIONS = --allow-env --allow-read --allow-run
 ZIP_CHROME_FILE="extension.chrome.zip"
 BUNDLE = ./deno-bundle.ts
 
@@ -14,8 +17,7 @@ install:
 
 dev:
 	rm -rf ./public/build
-	NODE_ENV=development \
-		deno run --watch --allow-env --allow-read --allow-run $(BUNDLE)
+	$(DENO_DEV) $(DENO_OPTIONS) $(BUNDLE)
 
 valid:
 	deno fmt --unstable-component
@@ -27,7 +29,6 @@ test: valid
 
 prod: test
 	rm -rf ./public/build $(ZIP_CHROME_FILE)
-	NODE_ENV=production \
-		deno run --allow-env --allow-read --allow-run $(BUNDLE)
+	$(DENO_PROD) $(DENO_OPTIONS) $(BUNDLE)
 	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
 	ls -l public/build/; ls -l extension.chrome.zip
