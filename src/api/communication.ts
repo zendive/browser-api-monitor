@@ -1,5 +1,5 @@
 /**
- * Communication controlls for these scenarios:
+ * Communication controls for these scenarios:
  * - between main and isolated content scripts (bi direction):
  *      windowListen/windowPost
  * - devtools/panel to isolated content script (one direction):
@@ -39,17 +39,17 @@ export function portListen(callback: (payload: TMsgOptions) => void) {
 }
 
 export function windowPost(payload: TMsgOptions) {
-  window.postMessage(
+  globalThis.postMessage(
     {
       application: APPLICATION_NAME,
       payload,
     },
-    '*'
+    '*',
   );
 }
 
 export function windowListen(callback: (payload: TMsgOptions) => void) {
-  window.addEventListener('message', (e: MessageEvent) => {
+  globalThis.addEventListener('message', (e: MessageEvent) => {
     if (
       e.source === window &&
       typeof e.data === 'object' &&
@@ -62,26 +62,19 @@ export function windowListen(callback: (payload: TMsgOptions) => void) {
 }
 
 export function runtimePost(payload: TMsgOptions) {
-  chrome.runtime.sendMessage(
-    {
-      application: APPLICATION_NAME,
-      payload,
-    },
-    handleRuntimeMessageResponse
-  );
+  chrome.runtime.sendMessage(payload, handleRuntimeMessageResponse);
 }
 
 export function runtimeListen(callback: (payload: TMsgOptions) => void) {
   chrome.runtime.onMessage.addListener(
-    (e, sender: chrome.runtime.MessageSender, sendResponse) => {
+    (payload, sender: chrome.runtime.MessageSender, sendResponse) => {
       if (
-        sender.tab?.id === chrome.devtools.inspectedWindow.tabId &&
-        e.application === APPLICATION_NAME
+        sender.tab?.id === chrome.devtools.inspectedWindow.tabId
       ) {
-        callback(e.payload);
+        callback(payload);
         sendResponse();
       }
-    }
+    },
   );
 }
 

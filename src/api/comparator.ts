@@ -6,8 +6,7 @@ const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
 // descending sort by `handler` field
 function compareIfEqual<T>(field: keyof T, first: T, second: T) {
   if (SEMISORTING_FIELDS.includes(field as string)) {
-    // @ts-ignore
-    return second['handler'] > first['handler'] ? 1 : -1;
+    return second[<keyof T> 'handler'] > first[<keyof T> 'handler'] ? 1 : -1;
   } else {
     return 0;
   }
@@ -15,8 +14,8 @@ function compareIfEqual<T>(field: keyof T, first: T, second: T) {
 
 export function compareByFieldOrder<T>(field: keyof T, order: ESortOrder) {
   return function (first: T, second: T) {
-    let a = first[field] || 0;
-    let b = second[field] || 0;
+    const a = first[field] || 0;
+    const b = second[field] || 0;
 
     if (
       (typeof a === 'number' && typeof b === 'number') ||
@@ -43,8 +42,8 @@ export function compareByDelayThenHandlerDescending<
   return bDelay > aDelay
     ? 1
     : bDelay < aDelay
-      ? -1
-      : b.handler > a.handler
-        ? 1
-        : -1;
+    ? -1
+    : b.handler > a.handler
+    ? 1
+    : -1;
 }

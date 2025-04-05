@@ -8,8 +8,8 @@ import {
   type TSettings,
 } from '../api/settings.ts';
 import {
-  TimerWrapper,
   type TClearTimerHistory,
+  TimerWrapper,
   type TOnlineTimerMetrics,
   type TSetTimerHistory,
 } from './TimerWrapper.ts';
@@ -102,15 +102,15 @@ export function collectMetrics(): TTelemetry {
       panels.setTimeout,
       panels.clearTimeout,
       panels.setInterval,
-      panels.clearInterval
+      panels.clearInterval,
     ),
     ...apiAnimation.collectHistory(
       panels.requestAnimationFrame,
-      panels.cancelAnimationFrame
+      panels.cancelAnimationFrame,
     ),
     ...apiIdle.collectHistory(
       panels.requestIdleCallback,
-      panels.cancelIdleCallback
+      panels.cancelIdleCallback,
     ),
     activeTimers: apiTimer.onlineTimers.size,
     callCounter: {

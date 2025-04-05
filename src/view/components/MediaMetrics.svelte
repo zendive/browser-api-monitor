@@ -1,15 +1,12 @@
 <script lang="ts">
-  import type { TMediaMetrics } from '../../wrapper/MediaWrapper.ts';
+  import { isToggableMediaProp, type TMediaMetrics  } from '../../wrapper/MediaWrapper.ts';
   import { EMsg, portPost } from '../../api/communication.ts';
-  import { MEDIA_ELEMENT_TOGGABLE_PROPS } from '../../api/const.ts';
-  import Variable from './Variable.svelte';
+    import Variable from './Variable.svelte';
   import MediaCommands from './MediaCommands.svelte';
 
   let { metrics }: { metrics: TMediaMetrics } = $props();
 
-  function isToggable(property: string) {
-    return MEDIA_ELEMENT_TOGGABLE_PROPS.has(property);
-  }
+  
 
   function onToggleBoolean(property: string) {
     portPost({
@@ -56,9 +53,9 @@
               <tr class:isPassive={!value} class:isActive={true === value}>
                 <td class="item-label">{label}</td>
                 <td class="item-value">
-                  {#if isToggable(label)}
+                  {#if isToggableMediaProp(label)}
                     <i
-                      class="isToggable"
+                      class="is-toggable"
                       role="button"
                       tabindex="0"
                       onkeydown={(e) => {
@@ -99,7 +96,7 @@
     color: var(--text-passive);
     font-weight: normal;
   }
-  .isToggable {
+  .is-toggable {
     cursor: pointer;
   }
   .isActive {

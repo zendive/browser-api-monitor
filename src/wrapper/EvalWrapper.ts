@@ -1,8 +1,8 @@
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
-  TraceUtil,
   type ETraceDomain,
   type TCallstack,
+  TraceUtil,
   type TTrace,
 } from './TraceUtil.ts';
 import { trim2microsecond } from '../api/time.ts';
@@ -13,14 +13,14 @@ export type TEvalHistory = {
   trace: TTrace[];
   traceDomain: ETraceDomain;
   calls: number;
-  returnedValue: any;
-  code: any;
+  returnedValue: unknown;
+  code: unknown;
   usesLocalScope: boolean;
   selfTime: number | null;
 };
 
 // https://rollupjs.org/troubleshooting/#avoiding-eval
-const lesserEval = /*@__PURE__*/ window.eval.bind(window);
+const lesserEval = /*@__PURE__*/ globalThis.eval.bind(globalThis);
 
 export class EvalWrapper {
   traceUtil: TraceUtil;
@@ -34,10 +34,10 @@ export class EvalWrapper {
 
   updateHistory(
     code: string,
-    returnedValue: any,
+    returnedValue: unknown,
     callstack: TCallstack,
     usesLocalScope: boolean,
-    selfTime: number | null
+    selfTime: number | null,
   ) {
     const existing = this.evalHistory.get(callstack.traceId);
 
@@ -62,7 +62,10 @@ export class EvalWrapper {
   }
 
   wrap() {
-    window.eval = function WrappedLessEval(this: EvalWrapper, code: string) {
+    globalThis.eval = function WrappedLessEval(
+      this: EvalWrapper,
+      code: string,
+    ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, code);
       let rv: unknown;

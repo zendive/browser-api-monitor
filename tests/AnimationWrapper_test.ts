@@ -1,10 +1,10 @@
-import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
-import { AnimationWrapper } from '../../src/wrapper/AnimationWrapper.ts';
-import { TraceUtil } from '../../src/wrapper/TraceUtil.ts';
-import { TAG_EXCEPTION } from '../../src/api/clone.ts';
-import { TextEncoder } from 'node:util';
-
-global.TextEncoder = TextEncoder;
+import './browserPolyfill.ts';
+import { wait } from './util.ts';
+import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
+import { expect } from '@std/expect';
+import { AnimationWrapper } from '../src/wrapper/AnimationWrapper.ts';
+import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
+import { TAG_EXCEPTION } from '../src/api/clone.ts';
 
 describe('AnimationWrapper', () => {
   const traceUtil = new TraceUtil();
@@ -41,7 +41,7 @@ describe('AnimationWrapper', () => {
     expect(apiAnimation.callCounter.requestAnimationFrame).toBe(1);
   });
 
-  test('cafHistory - recorded', async () => {
+  test('cafHistory - recorded', () => {
     const unchanged = 0,
       changed = 1;
     let changeable = unchanged;
@@ -73,3 +73,5 @@ describe('AnimationWrapper', () => {
     expect(rec.handler).toBe(TAG_EXCEPTION(0));
   });
 });
+
+await wait(1e3);

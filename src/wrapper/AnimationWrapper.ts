@@ -1,9 +1,9 @@
 import type { TSettingsPanel } from '../api/settings.ts';
-import { requestAnimationFrame, cancelAnimationFrame } from '../api/const.ts';
+import { cancelAnimationFrame, requestAnimationFrame } from '../api/const.ts';
 import {
   ETraceDomain,
-  TraceUtil,
   type TCallstack,
+  TraceUtil,
   type TTrace,
 } from './TraceUtil.ts';
 import { trim2microsecond } from '../api/time.ts';
@@ -128,7 +128,7 @@ export class AnimationWrapper {
   }
 
   updateAnimationsFramerate() {
-    for (let [, rafRecord] of this.rafHistory) {
+    for (const [, rafRecord] of this.rafHistory) {
       const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
       rafRecord.cps = rafRecord.calls - prevCalls;
 
@@ -137,9 +137,9 @@ export class AnimationWrapper {
   }
 
   wrapRequestAnimationFrame() {
-    window.requestAnimationFrame = function requestAnimationFrame(
+    globalThis.requestAnimationFrame = function requestAnimationFrame(
       this: AnimationWrapper,
-      fn: FrameRequestCallback
+      fn: FrameRequestCallback,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, fn);
@@ -166,9 +166,9 @@ export class AnimationWrapper {
   }
 
   wrapCancelAnimationFrame() {
-    window.cancelAnimationFrame = function cancelAnimationFrame(
+    globalThis.cancelAnimationFrame = function cancelAnimationFrame(
       this: AnimationWrapper,
-      handler: number
+      handler: number,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err);
@@ -186,23 +186,21 @@ export class AnimationWrapper {
   }
 
   unwrapRequestAnimationFrame() {
-    window.requestAnimationFrame = this.native.requestAnimationFrame;
+    globalThis.requestAnimationFrame = this.native.requestAnimationFrame;
   }
 
   unwrapCancelAnimationFrame() {
-    window.cancelAnimationFrame = this.native.cancelAnimationFrame;
+    globalThis.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
   collectHistory(rafPanel: TSettingsPanel, cafPanel: TSettingsPanel) {
     return {
-      rafHistory:
-        rafPanel.wrap && rafPanel.visible
-          ? Array.from(this.rafHistory.values())
-          : null,
-      cafHistory:
-        cafPanel.wrap && cafPanel.visible
-          ? Array.from(this.cafHistory.values())
-          : null,
+      rafHistory: rafPanel.wrap && rafPanel.visible
+        ? Array.from(this.rafHistory.values())
+        : null,
+      cafHistory: cafPanel.wrap && cafPanel.visible
+        ? Array.from(this.cafHistory.values())
+        : null,
     };
   }
 

@@ -1,15 +1,15 @@
-import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
-import { EvalWrapper } from '../../src/wrapper/EvalWrapper.ts';
-import { TimerWrapper } from '../../src/wrapper/TimerWrapper.ts';
-import { TraceUtil } from '../../src/wrapper/TraceUtil.ts';
-import { TAG_UNDEFINED } from '../../src/api/clone.ts';
-import { TextEncoder } from 'node:util';
+import './browserPolyfill.ts';
+import { wait } from './util.ts';
+import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
+import { expect } from '@std/expect';
+import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
+import { TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
+import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
+import { TAG_UNDEFINED } from '../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
-} from '../../src/api/const.ts';
-
-global.TextEncoder = TextEncoder;
+} from '../src/api/const.ts';
 
 describe('EvalWrapper', () => {
   const traceUtil = new TraceUtil();
@@ -36,7 +36,7 @@ describe('EvalWrapper', () => {
     const RESULT = 3;
 
     for (let i = 0, I = NUMBER_OF_INVOCATIONS; i < I; i++) {
-      window.eval(CODE);
+      globalThis.eval(CODE);
     }
     expect(apiEval.evalHistory.size).toBe(1);
 
@@ -53,7 +53,7 @@ describe('EvalWrapper', () => {
 
   test('evalHistory - detects local scope usage', () => {
     const local_variable = 0;
-    window.eval('(local_variable++)');
+    globalThis.eval('(local_variable++)');
 
     const rec = Array.from(apiEval.evalHistory.values())[0];
 
@@ -87,3 +87,5 @@ describe('EvalWrapper', () => {
     clearInterval(handler);
   });
 });
+
+await wait(1e3);

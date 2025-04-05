@@ -27,12 +27,12 @@
 
     if (e.newState === 'open') {
       document.addEventListener('keydown', onKeyboardEvent, { capture: true });
-      window.addEventListener('click', onWindowClick);
+      globalThis.addEventListener('click', onWindowClick);
     } else if (e.newState === 'closed') {
       document.removeEventListener('keydown', onKeyboardEvent, {
         capture: true,
       });
-      window.removeEventListener('click', onWindowClick);
+      globalThis.removeEventListener('click', onWindowClick);
     }
   }
 

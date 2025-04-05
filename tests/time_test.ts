@@ -1,25 +1,14 @@
-// {{ jestis
-import { TextEncoder } from 'node:util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.requestIdleCallback = function noop() {};
-global.cancelIdleCallback = function noop() {};
-// }}
-
-import { describe, expect, test, beforeEach } from '@jest/globals';
+import './browserPolyfill.ts';
+import { wait } from './util.ts';
+import { beforeEach, describe, test } from '@std/testing/bdd';
+import { expect } from '@std/expect';
 import {
+  callingOnce,
+  Fps,
   Stopper,
   Timer,
-  Fps,
   trim2microsecond,
-  callingOnce,
-} from '../../src/api/time.ts';
-
-function wait(timeout: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeout);
-  });
-}
+} from '../src/api/time.ts';
 
 describe('Stopper', () => {
   let stopper: Stopper;
@@ -54,12 +43,12 @@ describe('Stopper', () => {
   });
 
   test('toString()', () => {
-    expect(Stopper.toString(0.000006)).toMatch('0μs');
-    expect(Stopper.toString(0.123456)).toMatch('123μs');
-    expect(Stopper.toString(999.123456)).toMatch('999ms');
-    expect(Stopper.toString(5432.123456)).toMatch('5.432s');
-    expect(Stopper.toString(5 * 60e3)).toMatch('0:05:00');
-    expect(Stopper.toString(987654321.0123456789)).toMatch('274:20:54');
+    expect(Stopper.toString(0.000006)).toBe('0μs');
+    expect(Stopper.toString(0.123456)).toBe('123μs');
+    expect(Stopper.toString(999.123456)).toBe('999ms');
+    expect(Stopper.toString(5432.123456)).toBe('5.432s');
+    expect(Stopper.toString(5 * 60e3)).toBe('00:05:00');
+    expect(Stopper.toString(987654321.0123456789)).toBe('274:20:54');
   });
 });
 
@@ -136,20 +125,19 @@ describe('Timer - animation + measurable', () => {
 
 describe('Fps', () => {
   test('collects ticks after a second', async () => {
-    return new Promise<void>((resolve) => {
-      const COUNT = 20;
-      const fps = new Fps((value) => {
-        fps.stop();
-        expect(value).toBe(COUNT);
-        resolve();
-      });
+    const COUNT = 20;
+    const noop = () => {};
+    const fps = new Fps(noop);
+    fps.start();
 
-      fps.start();
+    for (let i = 0, I = COUNT; i < I; i++) {
+      fps.tick();
+    }
 
-      for (let i = 0, I = COUNT; i < I; i++) {
-        fps.tick();
-      }
-    });
+    await wait(1.2e3);
+    fps.stop();
+
+    expect(fps.value).toBe(COUNT);
   });
 });
 
@@ -162,7 +150,7 @@ describe('trim2microsecond', () => {
 
 describe('callingOnce', () => {
   let count = 0;
-  let fn = callingOnce(() => {
+  const fn = callingOnce(() => {
     return ++count;
   });
 
@@ -175,3 +163,5 @@ describe('callingOnce', () => {
     expect(rv2).toBe(1);
   });
 });
+
+await wait(2e3);

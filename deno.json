@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "lint": {
+    "include": [
+      "deno-bundle.ts",
+      "src/",
+      "tests/",
+      "public/*.html",
+      "public/*.css"
+    ],
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-debugger"]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": [
+      "src/",
+      "tests/",
+      "deno-bundle.ts",
+      "deno.json",
+      "manifest.json",
+      "tsconfig.json"
+    ]
+  },
+  "imports": {
+    "esbuild": "https://deno.land/x/esbuild@v0.25.2/mod.js",
+    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@0.11.1",
+    "esbuild-svelte": "npm:esbuild-svelte@0.9.0",
+    "svelte-preprocess": "npm:svelte-preprocess@6.0.3",
+
+    "@std/expect": "jsr:@std/expect@1.0.14",
+    "@std/testing": "jsr:@std/testing@1.0.10",
+    "happy-dom": "npm:happy-dom@17.4.4"
+  }
+}

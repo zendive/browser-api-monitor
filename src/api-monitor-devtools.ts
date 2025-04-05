@@ -19,6 +19,6 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
         portPost({ msg: EMsg.STOP_OBSERVE });
         setSettings({ devtoolsPanelShown: false });
       });
-    }
+    },
   );
 }

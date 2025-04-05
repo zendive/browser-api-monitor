@@ -64,7 +64,7 @@
       paused = settings.paused;
     });
 
-    window.addEventListener('beforeunload', () => {
+    globalThis.addEventListener('beforeunload', () => {
       portPost({ msg: EMsg.STOP_OBSERVE });
     });
   });

@@ -1,16 +1,18 @@
 import {
-  setTimeout,
+  cancelAnimationFrame,
   clearTimeout,
   requestAnimationFrame,
-  cancelAnimationFrame,
+  setTimeout,
   TELEMETRY_FREQUENCY_30PS,
 } from './const.ts';
 
-export function callingOnce<T extends (...args: any[]) => any>(
-  fn: T | null
+export function callingOnce<
+  T extends (...args: Parameters<T>) => ReturnType<T>,
+>(
+  fn: T | null,
 ): T {
   let rv: ReturnType<T>;
-  return <T>function (...args: Parameters<T>): ReturnType<T> {
+  return <T> function (...args: Parameters<T>): ReturnType<T> {
     if (fn) {
       rv = fn(...args);
       fn = null;
@@ -73,9 +75,11 @@ export class Stopper {
     const m = Math.trunc(msTime / 60e3) % 60;
     const s = Math.trunc(msTime / 1e3) % 60;
 
-    return `${h.toString().padStart(2, '0')}:${m
-      .toString()
-      .padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${h.toString().padStart(2, '0')}:${
+      m
+        .toString()
+        .padStart(2, '0')
+    }:${s.toString().padStart(2, '0')}`;
   }
 }
 
@@ -109,11 +113,11 @@ export class Timer {
   delay: number = 0;
   /** callback's self-time in milliseconds */
   executionTime: number = -1;
-  #fn: Function;
+  #fn: (...args: unknown[]) => void;
   #handler: number = 0;
   readonly #stopper?: Stopper;
 
-  constructor(o: TimerOptions, fn: Function) {
+  constructor(o: TimerOptions, fn: (...args: unknown[]) => void) {
     this.options = Object.assign(this.#defaultOptions, o);
     this.#fn = fn;
     this.delay = this.options.delay || 0;
@@ -123,7 +127,7 @@ export class Timer {
     }
   }
 
-  start(...args: any[]) {
+  start(...args: unknown[]) {
     if (this.#handler) {
       this.stop();
     }
@@ -151,7 +155,7 @@ export class Timer {
     return this;
   }
 
-  trigger(...args: any[]) {
+  trigger(...args: unknown[]) {
     this.#stopper?.start();
     this.#fn(...args);
     if (this.#stopper) {
@@ -217,7 +221,7 @@ export class Fps {
   }
 }
 
-export function trim2microsecond(ms: any) {
+export function trim2microsecond<T>(ms: T) {
   return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
 }
 

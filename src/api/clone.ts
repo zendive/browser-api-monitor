@@ -19,7 +19,7 @@ interface ICatalogRecord {
   seen: boolean;
 }
 interface ISerializeToObject {
-  [key: string]: any;
+  [key: string | symbol]: unknown;
 }
 interface IFunction {
   name: string;
@@ -61,7 +61,7 @@ class ObjectsCatalog {
 
   lookup(
     value: unknown,
-    badge: TInstanceBadgeTag | TSymbolBadgeTag
+    badge: TInstanceBadgeTag | TSymbolBadgeTag,
   ): ICatalogRecord {
     let record = this.#records.get(value);
 
@@ -99,7 +99,7 @@ function recursiveClone(catalog: ObjectsCatalog, value: unknown): unknown {
   } else if (isMap(value)) {
     rv = serializeMap(catalog, value);
   } else if (isObject(value)) {
-    rv = serializeObject(catalog, value);
+    rv = serializeObject(catalog, <ISerializeToObject> value);
   } else if (isNumericSpecials(value)) {
     rv = TAG_NUMERIC(value);
   } else if (value === undefined) {
@@ -121,7 +121,7 @@ function isNumericSpecials(value: unknown): value is bigint | number {
 function serializeArrayAlike(
   catalog: ObjectsCatalog,
   value: unknown[] | Set<unknown>,
-  badge: TInstanceBadgeTag
+  badge: TInstanceBadgeTag,
 ): unknown[] | string {
   const record = catalog.lookup(value, badge);
   let rv;
@@ -144,7 +144,7 @@ function serializeArrayAlike(
 
 function serializeMap(
   catalog: ObjectsCatalog,
-  value: Map<unknown, unknown>
+  value: Map<unknown, unknown>,
 ): unknown {
   const record = catalog.lookup(value, TAG_RECURRING_MAP);
   let rv;
@@ -202,7 +202,10 @@ function serializeMapKey(catalog: ObjectsCatalog, key: unknown): string {
   return rv;
 }
 
-function serializeObject(catalog: ObjectsCatalog, value: object): unknown {
+function serializeObject(
+  catalog: ObjectsCatalog,
+  value: ISerializeToObject,
+): unknown {
   const record = catalog.lookup(value, TAG_RECURRING_OBJECT);
   let rv;
 
@@ -230,7 +233,7 @@ function serializeObject(catalog: ObjectsCatalog, value: object): unknown {
 
         try {
           // accessing value by key may throw
-          newValue = recursiveClone(catalog, (value as any)[key]);
+          newValue = recursiveClone(catalog, value[key]);
         } catch (error) {
           newValue = stringifyError(error);
         }
@@ -278,16 +281,17 @@ function isArray(that: unknown): that is unknown[] {
   return (
     that instanceof Array ||
     that instanceof Uint8Array ||
-    that instanceof Int8Array ||
     that instanceof Uint8ClampedArray ||
     that instanceof Uint16Array ||
-    that instanceof Int16Array ||
     that instanceof Uint32Array ||
+    that instanceof Int8Array ||
+    that instanceof Int16Array ||
     that instanceof Int32Array ||
+    that instanceof Float16Array ||
     that instanceof Float32Array ||
+    that instanceof Float64Array ||
     that instanceof BigUint64Array ||
-    that instanceof BigInt64Array ||
-    that instanceof Float64Array
+    that instanceof BigInt64Array
   );
 }
 
@@ -311,12 +315,11 @@ function isSelfSerializableObject(that: unknown): that is IHasToJSON {
   let rv;
 
   try {
-    rv =
-      that !== null &&
+    rv = that !== null &&
       typeof that === 'object' &&
       'toJSON' in that &&
       typeof that.toJSON === 'function';
-  } catch (ignore) {
+  } catch (_ignore) {
     rv = false;
   }
 
@@ -327,7 +330,7 @@ function isUnserializable(that: unknown): boolean {
   return that instanceof Element || that instanceof Document;
 }
 
-function isSymbol(that: unknown): that is Symbol {
+function isSymbol(that: unknown): that is symbol {
   return typeof that === 'symbol';
 }
 
