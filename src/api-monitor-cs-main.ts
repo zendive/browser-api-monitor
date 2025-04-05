@@ -35,7 +35,7 @@ const tick = new Timer(
 
       if (delta) {
         windowPost({
-          msg: EMsg.TELEMETRY,
+          msg: EMsg.TELEMETRY_DELTA,
           timeOfCollection: now,
           telemetryDelta: delta,
         });
