@@ -38,8 +38,8 @@
   class:even={isEven}
   class:animated={isAnimated}
   {title}
-  use:animateChange={value}>{value}</span
->
+  use:animateChange={value}
+>{value}</span>
 
 <style lang="scss">
   .number {

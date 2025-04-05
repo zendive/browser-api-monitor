@@ -18,7 +18,7 @@ dev:
 		deno run --watch --allow-env --allow-read --allow-run $(BUNDLE)
 
 valid:
-	deno fmt
+	deno fmt --unstable-component
 	deno lint
 	pnpm exec svelte-check --no-tsconfig # only for *.svelte files
 

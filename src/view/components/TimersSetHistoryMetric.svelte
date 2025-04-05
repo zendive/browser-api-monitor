@@ -84,7 +84,8 @@
     <FrameSensitiveTime value={metric.selfTime} />
   </td>
   <td class="ta-c">
-    <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
+    <Variable value={metric.calls} />
+    {#if metric.canceledCounter}-<a
         role="button"
         href="void(0)"
         title={CALLED_ABORTED_TOOLTIP}
@@ -92,8 +93,10 @@
           e.preventDefault();
           onFindRegressors(metric.canceledByTraceIds);
         }}
-        ><Variable value={metric.canceledCounter} />/{metric.canceledByTraceIds
-          ?.length}
+      ><Variable value={metric.canceledCounter} />/{
+          metric.canceledByTraceIds
+          ?.length
+        }
       </a>
     {/if}
   </td>

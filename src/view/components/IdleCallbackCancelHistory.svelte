@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { TCancelIdleCallbackHistory } from '../../wrapper/IdleWrapper.ts';
   import {
-    getSettings,
-    setSettings,
     DEFAULT_SORT_CIC,
     type ESortOrder,
+    getSettings,
+    setSettings,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
@@ -17,7 +17,8 @@
   let {
     cicHistory,
     caption = '',
-  }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } = $props();
+  }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } =
+    $props();
   let sortField = $state(DEFAULT_SORT_CIC.field);
   let sortOrder = $state(DEFAULT_SORT_CIC.order);
   let sortedMetrics = $derived.by(() =>
@@ -30,7 +31,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TCancelIdleCallbackHistory>_field;
+    sortField = <keyof TCancelIdleCallbackHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -44,8 +45,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={cicHistory.length} />
+    {caption} <Variable value={cicHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -55,16 +55,16 @@
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>

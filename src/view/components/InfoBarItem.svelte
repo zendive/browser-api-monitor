@@ -27,7 +27,7 @@
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue;
 
     if (el instanceof HTMLElement) {

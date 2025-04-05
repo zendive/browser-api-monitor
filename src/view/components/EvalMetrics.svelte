@@ -24,9 +24,9 @@
 
 {#if evalHistory?.length}
   <table data-navigation-tag="Eval History">
-    <caption class="ta-l bc-invert"
-      >Eval History <Variable value={evalHistory.length} /></caption
-    >
+    <caption class="ta-l bc-invert">
+      Eval History <Variable value={evalHistory.length} />
+    </caption>
     <tbody>
       <tr>
         <th class="w-full">Callstack</th>
@@ -60,13 +60,11 @@
             {#if metric.usesLocalScope}
               <span
                 title="Throwed an error while trying to get local scope variables, return value is unreliable"
-                >⁉️ LOCAL & GLOBAL</span
-              >
+              >⁉️ LOCAL & GLOBAL</span>
             {:else}
               <span
                 title="Had access to global scope (local scope usage has not been detected)"
-                >GLOBAL</span
-              >
+              >GLOBAL</span>
             {/if}
           </td>
           <td><TraceBypass traceId={metric.traceId} /></td>

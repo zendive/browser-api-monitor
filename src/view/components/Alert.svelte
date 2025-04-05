@@ -26,7 +26,9 @@
     }
 
     if (e.newState === 'open') {
-      document.addEventListener('keydown', onKeyboardEvent, { capture: true });
+      document.addEventListener('keydown', onKeyboardEvent, {
+        capture: true,
+      });
       globalThis.addEventListener('click', onWindowClick);
     } else if (e.newState === 'closed') {
       document.removeEventListener('keydown', onKeyboardEvent, {
@@ -63,8 +65,8 @@
         onclick={(e) => {
           e.preventDefault();
           hide();
-        }}><span class="icon -remove"></span></a
-      >
+        }}
+      ><span class="icon -remove"></span></a>
     {/if}
   </header>
   <footer>

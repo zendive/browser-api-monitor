@@ -2,9 +2,9 @@
   import type { TClearTimerHistory } from '../../wrapper/TimerWrapper.ts';
   import {
     DEFAULT_SORT_CLEAR_TIMERS,
+    type ESortOrder,
     getSettings,
     setSettings,
-    type ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
@@ -14,7 +14,8 @@
   let {
     clearTimerHistory,
     caption,
-  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } = $props();
+  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } =
+    $props();
   let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
   let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
@@ -27,7 +28,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TClearTimerHistory>_field;
+    sortField = <keyof TClearTimerHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -41,8 +42,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={clearTimerHistory.length} />
+    {caption} <Variable value={clearTimerHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -52,24 +52,24 @@
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th class="ta-r">
         <SortableColumn
           field="delay"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Delay</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Delay</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>

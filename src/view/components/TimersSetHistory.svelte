@@ -5,9 +5,9 @@
   } from '../../wrapper/TimerWrapper.ts';
   import {
     DEFAULT_SORT_SET_TIMERS,
+    ESortOrder,
     getSettings,
     setSettings,
-    ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
@@ -37,7 +37,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TSetTimerHistory>_field;
+    sortField = <keyof TSetTimerHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -51,8 +51,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={setTimerHistory.length} />
+    {caption} <Variable value={setTimerHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -62,40 +61,40 @@
           field="selfTime"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Self</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Self</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th class="ta-r">
         <SortableColumn
           field="delay"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Delay</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Delay</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Set</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Set</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
