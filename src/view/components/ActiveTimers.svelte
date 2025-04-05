@@ -21,9 +21,9 @@
 </script>
 
 <table data-navigation-tag={caption}>
-  <caption class="bc-invert ta-l"
-    >{caption} <Variable value={metrics.length} /></caption
-  >
+  <caption class="bc-invert ta-l">
+    {caption} <Variable value={metrics.length} />
+  </caption>
   <tbody>
     <tr>
       <th>Delay</th>

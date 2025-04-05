@@ -5,9 +5,9 @@
   } from '../../wrapper/IdleWrapper.ts';
   import {
     DEFAULT_SORT_RIC,
+    ESortOrder,
     getSettings,
     setSettings,
-    ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
@@ -46,7 +46,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TRequestIdleCallbackHistory>_field;
+    sortField = <keyof TRequestIdleCallbackHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -102,8 +102,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={ricHistory.length} />
+    {caption} <Variable value={ricHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -114,40 +113,40 @@
           field="selfTime"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Self</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Self</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th class="ta-r">
         <SortableColumn
           field="delay"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Delay</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Delay</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Set</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Set</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
@@ -162,7 +161,8 @@
         <td class="ta-c">{metric.didTimeout}</td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
         <td class="ta-c">
-          <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
+          <Variable value={metric.calls} />
+          {#if metric.canceledCounter}-<a
               role="button"
               href="void(0)"
               title={CALLED_ABORTED_TOOLTIP}
@@ -170,8 +170,10 @@
                 e.preventDefault();
                 onFindRegressors(metric.canceledByTraceIds);
               }}
-              ><Variable value={metric.canceledCounter} />/{metric
-                .canceledByTraceIds?.length}
+            ><Variable value={metric.canceledCounter} />/{
+                metric
+                .canceledByTraceIds?.length
+              }
             </a>
           {/if}
         </td>

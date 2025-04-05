@@ -5,9 +5,9 @@
   } from '../../wrapper/AnimationWrapper.ts';
   import {
     DEFAULT_SORT_RAF,
+    ESortOrder,
     getSettings,
     setSettings,
-    ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
@@ -45,7 +45,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TRequestAnimationFrameHistory>_field;
+    sortField = <keyof TRequestAnimationFrameHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -101,8 +101,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={rafHistory.length} />
+    {caption} <Variable value={rafHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -112,8 +111,8 @@
           field="selfTime"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Self</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Self</SortableColumn>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
@@ -121,24 +120,24 @@
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Set</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Set</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
@@ -153,7 +152,8 @@
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
         <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
-          <Variable value={metric.calls} />{#if metric.canceledCounter}-<a
+          <Variable value={metric.calls} />
+          {#if metric.canceledCounter}-<a
               role="button"
               href="void(0)"
               title={CALLED_ABORTED_TOOLTIP}
@@ -161,9 +161,10 @@
                 e.preventDefault();
                 onFindRegressors(metric.canceledByTraceIds);
               }}
-              ><Variable value={metric.canceledCounter} />/{metric
-                .canceledByTraceIds?.length}</a
-            >
+            ><Variable value={metric.canceledCounter} />/{
+                metric
+                .canceledByTraceIds?.length
+              }</a>
           {/if}
         </td>
         <td class="ta-c"><Variable value={metric.handler} /></td>

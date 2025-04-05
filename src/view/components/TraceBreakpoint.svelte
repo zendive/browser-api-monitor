@@ -1,8 +1,8 @@
 <script lang="ts">
   import {
     getSettings,
-    setSettings,
     onSettingsChange,
+    setSettings,
   } from '../../api/settings.ts';
 
   let { traceId }: { traceId: string } = $props();
@@ -20,7 +20,9 @@
     e.preventDefault();
 
     setSettings({
-      trace4Debug: trace4Debug === traceId ? null : $state.snapshot(traceId),
+      trace4Debug: trace4Debug === traceId
+        ? null
+        : $state.snapshot(traceId),
     });
   }
 </script>

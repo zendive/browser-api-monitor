@@ -1,9 +1,9 @@
 <script lang="ts">
   import {
+    DEFAULT_SETTINGS,
+    EWrapperCallstackType,
     getSettings,
     setSettings,
-    EWrapperCallstackType,
-    DEFAULT_SETTINGS,
     type TSettingsPanel,
   } from '../../api/settings.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
@@ -54,28 +54,38 @@
   popovertarget="toggle-panels-menu"
   class="toggle-menu-button"
   title="Settings"
-  aria-label="Settings"><span class="icon -toggle-menu"></span></button
+  aria-label="Settings"
 >
+  <span class="icon -toggle-menu"></span>
+</button>
 
 <div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
     <tbody>
       <tr class="menu-item -dash">
         <td>Callstack Type</td>
-        <td
-          ><button
+        <td>
+          <button
             class="btn-toggle"
             title="Toggle callstack type: full/short"
             onclick={onToggleWrapperCallstackType}
-            >{`${wrapperCallstackType === EWrapperCallstackType.FULL ? 'full' : 'short'}`}</button
-          ></td
-        >
+          >
+            {
+              `${
+                wrapperCallstackType ===
+                    EWrapperCallstackType.FULL
+                  ? 'full'
+                  : 'short'
+              }`
+            }
+          </button>
+        </td>
       </tr>
 
       {#each panels as panel, index (panel.key)}
         <tr class="menu-item">
-          <td
-            ><a
+          <td>
+            <a
               href="void(0)"
               class="toggle-visibility"
               class:hidden={!panel.visible}
@@ -83,19 +93,20 @@
               onclick={(e) => {
                 e.preventDefault();
                 onTogglePanelVisibility(index);
-              }}>{panel.label}</a
-            ></td
-          >
+              }}
+            >{panel.label}</a>
+          </td>
 
           {#if !NON_WRAPPABLE.includes(panel.key)}
-            <td
-              ><button
+            <td>
+              <button
                 class="btn-toggle"
                 title="Toggle function wrapping state: wrap/unwrap"
                 onclick={() => void onTogglePanelWrap(index)}
-                >{`${panel.wrap ? 'unwrap' : 'wrap'}`}</button
-              ></td
-            >
+              >
+                {`${panel.wrap ? 'unwrap' : 'wrap'}`}
+              </button>
+            </td>
           {/if}
         </tr>
       {/each}
@@ -104,8 +115,7 @@
 </div>
 
 <Alert bind:this={reloadMessageEl} dismissable={false} title="Attention"
-  >Tab reload required</Alert
->
+>Tab reload required</Alert>
 
 <style lang="scss">
   .toggle-menu-button {

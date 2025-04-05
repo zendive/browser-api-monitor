@@ -17,7 +17,9 @@
 
   export function show() {
     selfEl?.showModal();
-    document.addEventListener('keydown', onKeyboardEvent, { capture: true });
+    document.addEventListener('keydown', onKeyboardEvent, {
+      capture: true,
+    });
     selfEl?.addEventListener('click', onSelfClick);
     showContent = true;
   }
@@ -41,7 +43,9 @@
   }
 
   function onClose() {
-    document.removeEventListener('keydown', onKeyboardEvent, { capture: true });
+    document.removeEventListener('keydown', onKeyboardEvent, {
+      capture: true,
+    });
     selfEl?.removeEventListener('click', onSelfClick);
     showContent = false;
     closeEvent?.();
@@ -65,8 +69,8 @@
       onclick={(e) => {
         e.preventDefault();
         hide();
-      }}><span class="icon -remove"></span></a
-    >
+      }}
+    ><span class="icon -remove"></span></a>
   </header>
 
   {#if showContent}

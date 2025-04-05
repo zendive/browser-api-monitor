@@ -24,8 +24,8 @@
       field !== currentField
         ? ESortOrder.DESCENDING
         : currentFieldOrder === ESortOrder.DESCENDING
-          ? ESortOrder.ASCENDING
-          : ESortOrder.DESCENDING
+        ? ESortOrder.ASCENDING
+        : ESortOrder.DESCENDING,
     );
   }
 </script>

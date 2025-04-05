@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { isToggableMediaProp, type TMediaMetrics  } from '../../wrapper/MediaWrapper.ts';
+  import {
+    isToggableMediaProp,
+    type TMediaMetrics,
+  } from '../../wrapper/MediaWrapper.ts';
   import { EMsg, portPost } from '../../api/communication.ts';
-    import Variable from './Variable.svelte';
+  import Variable from './Variable.svelte';
   import MediaCommands from './MediaCommands.svelte';
 
   let { metrics }: { metrics: TMediaMetrics } = $props();
-
-  
 
   function onToggleBoolean(property: string) {
     portPost({
@@ -59,13 +60,17 @@
                       role="button"
                       tabindex="0"
                       onkeydown={(e) => {
-                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                        if (
+                          e.key !== 'Enter' && e.key !== ' '
+                        ) return;
                         e.preventDefault();
                         onToggleBoolean(label);
                       }}
-                      onclick={() => void onToggleBoolean(label)}>{value}</i
-                    >
-                  {:else if ['networkState', 'readyState'].includes(label)}
+                      onclick={() => void onToggleBoolean(label)}
+                    >{value}</i>
+                  {:else if ['networkState', 'readyState'].includes(
+                    label,
+                  )}
                     <Variable {value} />
                   {:else}
                     {propValueFilter(value)}

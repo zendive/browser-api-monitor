@@ -2,9 +2,9 @@
   import type { TCancelAnimationFrameHistory } from '../../wrapper/AnimationWrapper.ts';
   import {
     DEFAULT_SORT_CAF,
+    ESortOrder,
     getSettings,
     setSettings,
-    ESortOrder,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
@@ -31,7 +31,7 @@
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TCancelAnimationFrameHistory>_field;
+    sortField = <keyof TCancelAnimationFrameHistory> _field;
     sortOrder = _order;
 
     setSettings({
@@ -45,8 +45,7 @@
 
 <table data-navigation-tag={caption}>
   <caption class="bc-invert ta-l">
-    {caption}
-    <Variable value={cafHistory.length} />
+    {caption} <Variable value={cafHistory.length} />
   </caption>
   <tbody>
     <tr>
@@ -56,16 +55,16 @@
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Called</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
           currentField={sortField}
           currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}>Handler</SortableColumn
-        >
+          eventChangeSorting={onChangeSort}
+        >Handler</SortableColumn>
       </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
