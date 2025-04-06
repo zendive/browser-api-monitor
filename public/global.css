@@ -8,7 +8,7 @@
   --text: light-dark(rgb(10% 10% 10%), rgb(100% 100% 100%));
   --text-invert: light-dark(rgb(100% 100% 100%), rgb(10% 10% 10%));
   --text-passive: light-dark(rgb(120 120 120), rgb(120 120 120));
-  --text-zebra: light-dark(rgb(30% 30% 30%), rgb(70% 70% 70%));
+  --text-trace: light-dark(rgb(30% 30% 30%), rgb(70% 70% 70%));
   --link: light-dark(rgb(0% 0% 0%), rgb(100% 100% 100%));
   --link-visited-bg: rgb(79 189 36 / 0.24);
   --error: rgb(100% 0% 0%);
@@ -76,8 +76,8 @@ th,
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
 }
-.t-zebra:nth-child(odd) a.-trace {
-  color: var(--text-zebra);
+.t-zebra a.-trace {
+  color: var(--text-trace);
 }
 .wb-all {
   word-break: break-all;
