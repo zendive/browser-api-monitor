@@ -100,18 +100,27 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<
-  Partial<keyof HTMLVideoElement> | Partial<keyof HTMLAudioElement>
-> = /*@__PURE__*/ new Set([
-  'autoplay',
-  'playsInline',
-  'loop',
-  'defaultMuted',
-  'muted',
-  'preservesPitch',
-  'controls',
-  'disablePictureInPicture',
-]);
+export type TWritableBooleanKeys<T> = {
+  [K in keyof T]-?: boolean extends T[K]
+    ? (<U>() => { [P in K]: T[K] } extends { -readonly [P in K]: T[K] } ? K
+      : never) extends (<U>() => infer I) ? I
+    : never
+    : never;
+}[keyof T];
+export type TToggableMediaProps = TWritableBooleanKeys<
+  HTMLVideoElement & HTMLAudioElement
+>;
+export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<TToggableMediaProps> =
+  /*@__PURE__*/ new Set([
+    'autoplay',
+    'playsInline',
+    'loop',
+    'defaultMuted',
+    'muted',
+    'preservesPitch',
+    'controls',
+    'disablePictureInPicture',
+  ]);
 
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [

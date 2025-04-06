@@ -527,6 +527,7 @@
       "jsr:@luca/esbuild-deno-loader@0.11.1",
       "jsr:@std/expect@1.0.14",
       "jsr:@std/testing@1.0.10",
+      "npm:@types/chrome@*",
       "npm:esbuild-svelte@0.9.0",
       "npm:happy-dom@17.4.4",
       "npm:svelte-preprocess@6.0.3"

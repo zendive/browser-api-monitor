@@ -5,7 +5,6 @@
   "description": "Show active intervals, scheduled timeouts, animation frames, idle callbacks, eval invocations, media events and properties",
   "minimum_chrome_version": "135.0",
   "homepage_url": "https://github.com/zendive/browser-api-monitor",
-  "author": "3756473+zendive@users.noreply.github.com",
   "permissions": ["storage"],
   "host_permissions": ["*://*/*"],
   "devtools_page": "public/api-monitor-devtools.html",
