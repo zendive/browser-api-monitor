@@ -12,9 +12,9 @@
     isAnimated = false;
   });
 
-  function animateChange(node: HTMLElement, value: unknown) {
+  function animateChange(_node: HTMLElement, _value: unknown) {
     return {
-      update(value: unknown) {
+      update(_value: unknown) {
         const startAnimation =
           Date.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
 
