@@ -6,7 +6,7 @@ import {
   MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
-} from '../api/const';
+} from '../api/const.ts';
 
 type TMediaElement = HTMLVideoElement | HTMLAudioElement;
 type TMediaModel = {
@@ -203,7 +203,6 @@ export class MediaWrapper {
       mediaModel.el.currentTime += FRAME_1of60;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
       if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
-        // @ts-expect-error props a handy picked to be overwritable booleans
         mediaModel.el[property] = !mediaModel.el[property];
       }
     } else if (cmd === 'slower') {
