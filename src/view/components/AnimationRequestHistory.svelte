@@ -10,7 +10,6 @@
     setSettings,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
-  import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
   import Variable from './Variable.svelte';
   import Trace from './Trace.svelte';
   import TraceDomain from './TraceDomain.svelte';
@@ -21,6 +20,7 @@
   import Alert from './Alert.svelte';
   import AnimationCancelHistory from './AnimationCancelHistory.svelte';
   import TraceBypass from './TraceBypass.svelte';
+  import CancelableCallMetric from './CancelableCallMetric.svelte';
 
   let {
     rafHistory,
@@ -152,20 +152,12 @@
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
         <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
-          <Variable value={metric.calls} />
-          {#if metric.canceledCounter}-<a
-              role="button"
-              href="void(0)"
-              title={CALLED_ABORTED_TOOLTIP}
-              onclick={(e) => {
-                e.preventDefault();
-                onFindRegressors(metric.canceledByTraceIds);
-              }}
-            ><Variable value={metric.canceledCounter} />/{
-                metric
-                .canceledByTraceIds?.length
-              }</a>
-          {/if}
+          <CancelableCallMetric
+            calls={metric.calls}
+            canceledCounter={metric.canceledCounter}
+            canceledByTraceIds={metric.canceledByTraceIds}
+            onClick={onFindRegressors}
+          />
         </td>
         <td class="ta-c"><Variable value={metric.handler} /></td>
         <td class="ta-r">
