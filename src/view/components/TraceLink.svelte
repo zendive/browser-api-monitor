@@ -47,9 +47,16 @@
 {#if isSourceLess}
   <i class="no-link">{name ? `${name} ${link}` : link}</i>
 {:else}
-  <a href={link} class="-trace" class:visited onclick={onClick}>{
-    name || link
-  }</a>
+  <a
+    href={link}
+    title={link}
+    class="-trace"
+    class:visited
+    class:name={!!name}
+    onclick={onClick}
+  >
+    {name || link}
+  </a>
 {/if}
 
 <style lang="scss">
@@ -67,6 +74,9 @@
     text-overflow: ellipsis;
     max-width: 25rem;
 
+    &.name {
+      font-weight: 600;
+    }
     &.visited {
       background-color: var(--link-visited-bg);
     }
