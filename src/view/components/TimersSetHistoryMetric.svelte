@@ -3,7 +3,6 @@
     TClearTimerHistory,
     TSetTimerHistory,
   } from '../../wrapper/TimerWrapper.ts';
-  import { CALLED_ABORTED_TOOLTIP } from '../../api/const.ts';
   import { msToHms } from '../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
   import Trace from './Trace.svelte';
@@ -14,6 +13,7 @@
   import Dialog from './Dialog.svelte';
   import Alert from './Alert.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';
+  import CancelableCallMetric from './CancelableCallMetric.svelte';
 
   let {
     metric,
@@ -84,21 +84,12 @@
     <FrameSensitiveTime value={metric.selfTime} />
   </td>
   <td class="ta-c">
-    <Variable value={metric.calls} />
-    {#if metric.canceledCounter}-<a
-        role="button"
-        href="void(0)"
-        title={CALLED_ABORTED_TOOLTIP}
-        onclick={(e) => {
-          e.preventDefault();
-          onFindRegressors(metric.canceledByTraceIds);
-        }}
-      ><Variable value={metric.canceledCounter} />/{
-          metric.canceledByTraceIds
-          ?.length
-        }
-      </a>
-    {/if}
+    <CancelableCallMetric
+      calls={metric.calls}
+      canceledCounter={metric.canceledCounter}
+      canceledByTraceIds={metric.canceledByTraceIds}
+      onClick={onFindRegressors}
+    />
   </td>
   <td class="ta-c"><Variable value={metric.handler} /></td>
   <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>

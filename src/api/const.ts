@@ -6,7 +6,6 @@ export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 export const FRAME_1of60 = 0.0166666666667; // ms
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
-export const CALLED_ABORTED_TOOLTIP = '<called>-<aborted>/<abort-locations>';
 export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
 // store native functions
