@@ -89,7 +89,7 @@
               href="void(0)"
               class="toggle-visibility"
               class:hidden={!panel.visible}
-              title="Toggle panel visibility: visible/hidden"
+              title="Toggle panel visibility"
               onclick={(e) => {
                 e.preventDefault();
                 onTogglePanelVisibility(index);
@@ -101,10 +101,10 @@
             <td>
               <button
                 class="btn-toggle"
-                title="Toggle function wrapping state: wrap/unwrap"
+                title="wrap/unwrap function to start/stop collect it's metrics"
                 onclick={() => void onTogglePanelWrap(index)}
               >
-                {`${panel.wrap ? 'unwrap' : 'wrap'}`}
+                {`${panel.wrap ? 'wrapped' : 'unwrapped'}`}
               </button>
             </td>
           {/if}
