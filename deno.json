@@ -6,7 +6,7 @@
   },
   "lint": {
     "include": [
-      "deno-bundle.ts",
+      "build.ts",
       "src/",
       "tests/",
       "public/*.html",
@@ -27,10 +27,8 @@
     "include": [
       "src/",
       "tests/",
-      "deno-bundle.ts",
-      "deno.json",
-      "manifest.json",
-      "tsconfig.json"
+      "build.ts",
+      "*.json"
     ]
   },
   "imports": {

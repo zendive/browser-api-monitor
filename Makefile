@@ -3,21 +3,21 @@
 DENO_DEV = NODE_ENV=development deno run --watch
 DENO_PROD = NODE_ENV=production deno run
 DENO_OPTIONS = --allow-env --allow-read --allow-run
-ZIP_CHROME_FILE="extension.chrome.zip"
-BUNDLE = ./deno-bundle.ts
+CHROME_ZIP="extension.chrome.zip"
+OUTPUT_DIR = ./public/
+BUILD_DIR = ./public/build/
+BUILD_SCRIPT = ./build.ts
 
 clean:
-	rm -rf ./node_modules ./pnpm-lock.yaml ./public/build $(ZIP_CHROME_FILE)
+	rm -rf ./node_modules $(BUILD_DIR) $(CHROME_ZIP)
 
 install:
 	deno install --allow-scripts
-	npm i -g pnpm
-	pnpm i
-	pnpm rebuild sass
+	npm i -g pnpm # for svelte-check
 
 dev:
-	rm -rf ./public/build
-	$(DENO_DEV) $(DENO_OPTIONS) $(BUNDLE)
+	rm -rf $(BUILD_DIR)
+	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT)
 
 valid:
 	deno fmt --unstable-component
@@ -28,7 +28,7 @@ test: valid
 	deno test --no-check --trace-leaks --reporter=dot
 
 prod: test
-	rm -rf ./public/build $(ZIP_CHROME_FILE)
-	$(DENO_PROD) $(DENO_OPTIONS) $(BUNDLE)
-	zip -r $(ZIP_CHROME_FILE) ./public ./manifest.json > /dev/null
-	ls -l public/build/; ls -l extension.chrome.zip
+	rm -rf $(BUILD_DIR) $(CHROME_ZIP)
+	$(DENO_PROD) $(DENO_OPTIONS) $(BUILD_SCRIPT)
+	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json > /dev/null
+	tree -Dis $(BUILD_DIR) *.zip

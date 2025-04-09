@@ -16,6 +16,6 @@
     "noEmit": true
   },
 
-  "include": ["src/**/*", "webpack.config.ts", "deno-bundle.ts"],
+  "include": ["src/**/*", "build.ts"],
   "exclude": ["node_modules/*", "public/*"]
 }

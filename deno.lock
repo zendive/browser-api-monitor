@@ -14,6 +14,7 @@
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/testing@1.0.10": "1.0.10",
     "npm:@noble/hashes@1.7.1": "1.7.1",
+    "npm:@types/chrome@*": "0.0.313",
     "npm:@types/chrome@0.0.313": "0.0.313",
     "npm:@types/deno@2.2.0": "2.2.0",
     "npm:esbuild-svelte@0.9.0": "0.9.0_esbuild@0.25.2_svelte@5.25.7__acorn@8.14.1",
