@@ -33,7 +33,7 @@ const buildOptions: BuildOptions = {
   minify: isProd,
   sourcemap: false,
   treeShaking: true,
-  logLevel: 'debug',
+  logLevel: 'warning',
 };
 
 if (isProd) {
