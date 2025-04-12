@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "API Monitor",
   "manifest_version": 3,
   "description": "Show active intervals, scheduled timeouts, animation frames, idle callbacks, eval invocations, media events and properties",
