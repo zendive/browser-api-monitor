@@ -1,6 +1,5 @@
 <script lang="ts">
   import { EMsg, portPost, runtimeListen } from '../api/communication.ts';
-  import { IS_DEV } from '../api/env.ts';
   import { getSettings, setSettings } from '../api/settings.ts';
   import diff from '../api/diff.ts';
   import type { TTelemetry } from '../wrapper/Wrapper.ts';
@@ -85,7 +84,7 @@
 
 <section class="root">
   <header>
-    {#if IS_DEV}
+    {#if __development__}
       <button onclick={onDevReload} title="Reload" aria-label="Reload">
         <span class="icon -refresh"></span>
       </button>
