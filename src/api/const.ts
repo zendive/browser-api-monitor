@@ -1,3 +1,5 @@
+import type { TWritableBooleanKeys } from './generics.ts';
+
 export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
@@ -100,14 +102,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-export type TWritableBooleanKeys<T> = {
-  [K in keyof T]-?: boolean extends T[K]
-    ? (<U>() => { [P in K]: T[K] } extends { -readonly [P in K]: T[K] } ? K
-      : never) extends (<U>() => infer I) ? I
-    : never
-    : never;
-}[keyof T];
-export type TToggableMediaProps = TWritableBooleanKeys<
+type TToggableMediaProps = TWritableBooleanKeys<
   HTMLVideoElement & HTMLAudioElement
 >;
 export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<TToggableMediaProps> =
