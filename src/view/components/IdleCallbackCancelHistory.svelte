@@ -13,6 +13,9 @@
   import SortableColumn from './SortableColumn.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
+  import { CafFact } from '../../wrapper/AnimationWrapper.ts';
+  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import FactsCell from './FactsCell.svelte';
 
   let {
     cicHistory,
@@ -24,6 +27,13 @@
   let sortedMetrics = $derived.by(() =>
     cicHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
+  const CicFacts: TFactsMap = new Map([
+    [CafFact.NOT_FOUND, { tag: 'I', details: 'Idle Callback not found' }],
+    [CafFact.BAD_HANDLER, {
+      tag: 'H',
+      details: 'Handler is not a positive number',
+    }],
+  ]);
 
   getSettings().then((settings) => {
     sortField = settings.sortCancelIdleCallback.field;
@@ -52,6 +62,14 @@
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <SortableColumn
+          field="facts"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        ><span class="icon -facts"></span></SortableColumn>
+      </th>
+      <th class="ta-c">
+        <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
@@ -75,6 +93,9 @@
         <td class="wb-all">
           <TraceDomain traceDomain={metric.traceDomain} />
           <Trace trace={metric.trace} />
+        </td>
+        <td class="ta-c">
+          <FactsCell facts={metric.facts} factsMap={CicFacts} />
         </td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td class="ta-c"><Variable value={metric.handler} /></td>

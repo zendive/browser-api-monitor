@@ -3,13 +3,14 @@ import { wait } from './util.ts';
 import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
-import { TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
+import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
 import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../src/api/const.ts';
+import { Fact } from '../src/wrapper/Fact.ts';
 
 describe('EvalWrapper', () => {
   const traceUtil = new TraceUtil();
@@ -69,7 +70,7 @@ describe('EvalWrapper', () => {
     const timerRec = Array.from(apiTimer.setTimeoutHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
 
-    expect(timerRec.isEval).toBe(true);
+    expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_TIMEOUT);
   });
@@ -80,7 +81,7 @@ describe('EvalWrapper', () => {
     const timerRec = Array.from(apiTimer.setIntervalHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
 
-    expect(timerRec.isEval).toBe(true);
+    expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_INTERVAL);
 
@@ -88,4 +89,4 @@ describe('EvalWrapper', () => {
   });
 });
 
-await wait(1e3);
+await wait(1e1);

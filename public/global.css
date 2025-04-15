@@ -179,3 +179,6 @@ th .icon {
 .icon.-bypass {
   mask-image: url(img/bypass.svg);
 }
+.icon.-facts {
+  mask-image: url(img/facts.svg);
+}

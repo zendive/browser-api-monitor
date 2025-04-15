@@ -75,4 +75,4 @@ describe('TraceUtil', () => {
   });
 });
 
-await wait(1e3);
+await wait(1e1);

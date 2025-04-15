@@ -66,6 +66,14 @@
       </th>
       <th class="ta-c">
         <SortableColumn
+          field="facts"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        ><span class="icon -facts"></span></SortableColumn>
+      </th>
+      <th class="ta-c">
+        <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}

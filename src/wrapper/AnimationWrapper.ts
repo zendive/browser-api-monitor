@@ -1,5 +1,9 @@
 import type { TSettingsPanel } from '../api/settings.ts';
-import { cancelAnimationFrame, requestAnimationFrame } from '../api/const.ts';
+import {
+  cancelAnimationFrame,
+  requestAnimationFrame,
+  TAG_BAD_HANDLER,
+} from '../api/const.ts';
 import {
   ETraceDomain,
   type TCallstack,
@@ -8,7 +12,7 @@ import {
 } from './TraceUtil.ts';
 import { trim2microsecond } from '../api/time.ts';
 import { validHandler } from './util.ts';
-import { TAG_EXCEPTION } from '../api/clone.ts';
+import { Fact, type TFact } from './Fact.ts';
 
 export type TRequestAnimationFrameHistory = {
   traceId: string;
@@ -26,9 +30,15 @@ export type TCancelAnimationFrameHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   handler: number | undefined | string;
 };
+
+export const CafFact = /*@__PURE__*/ {
+  NOT_FOUND: Fact.define(1 << 0),
+  BAD_HANDLER: Fact.define(1 << 1),
+} as const;
 
 export class AnimationWrapper {
   traceUtil: TraceUtil;
@@ -92,38 +102,50 @@ export class AnimationWrapper {
 
   #updateCafHistory(handler: number | string, callstack: TCallstack) {
     const existing = this.cafHistory.get(callstack.traceId);
-    const hasError = !validHandler(handler);
+    let facts = <TFact> 0;
+    let rafTraceId;
 
-    if (hasError) {
-      handler = TAG_EXCEPTION(handler);
+    if (validHandler(handler)) {
+      rafTraceId = this.onlineAnimationFrameLookup.get(handler);
+
+      if (rafTraceId) {
+        this.onlineAnimationFrameLookup.delete(handler);
+      } else {
+        facts = Fact.assign(facts, CafFact.NOT_FOUND);
+      }
+    } else {
+      handler = TAG_BAD_HANDLER(handler);
+      facts = Fact.assign(facts, CafFact.BAD_HANDLER);
     }
 
     if (existing) {
       existing.calls++;
       existing.handler = handler;
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       this.cafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        facts,
         calls: 1,
         handler,
       });
     }
 
-    const rafTraceId = this.onlineAnimationFrameLookup.get(Number(handler));
     const rafRecord = rafTraceId && this.rafHistory.get(rafTraceId);
     if (rafRecord) {
-      this.onlineAnimationFrameLookup.delete(Number(handler));
-
       rafRecord.online--;
+      rafRecord.canceledCounter++;
 
       if (rafRecord.canceledByTraceIds === null) {
         rafRecord.canceledByTraceIds = [callstack.traceId];
       } else if (!rafRecord.canceledByTraceIds.includes(callstack.traceId)) {
         rafRecord.canceledByTraceIds.push(callstack.traceId);
       }
-      rafRecord.canceledCounter++;
     }
   }
 

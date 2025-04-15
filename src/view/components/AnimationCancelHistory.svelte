@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { TCancelAnimationFrameHistory } from '../../wrapper/AnimationWrapper.ts';
+  import {
+    CafFact,
+    type TCancelAnimationFrameHistory,
+  } from '../../wrapper/AnimationWrapper.ts';
   import {
     DEFAULT_SORT_CAF,
     ESortOrder,
@@ -13,6 +16,8 @@
   import SortableColumn from './SortableColumn.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
+  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import FactsCell from './FactsCell.svelte';
 
   let {
     cafHistory,
@@ -24,6 +29,13 @@
   let sortedMetrics = $derived.by(() =>
     cafHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
+  const CafFacts: TFactsMap = new Map([
+    [CafFact.NOT_FOUND, { tag: 'A', details: 'Animation not found' }],
+    [CafFact.BAD_HANDLER, {
+      tag: 'H',
+      details: 'Handler is not a positive number',
+    }],
+  ]);
 
   getSettings().then((settings) => {
     sortField = settings.sortCancelAnimationFrame.field;
@@ -52,6 +64,14 @@
       <th class="w-full">Callstack</th>
       <th class="ta-c">
         <SortableColumn
+          field="facts"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        ><span class="icon -facts"></span></SortableColumn>
+      </th>
+      <th class="ta-c">
+        <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
@@ -75,6 +95,9 @@
         <td class="wb-all">
           <TraceDomain traceDomain={metric.traceDomain} />
           <Trace trace={metric.trace} />
+        </td>
+        <td class="ta-c">
+          <FactsCell facts={metric.facts} factsMap={CafFacts} />
         </td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td class="ta-c"><Variable value={metric.handler} /></td>
