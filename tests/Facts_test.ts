@@ -30,7 +30,10 @@ describe('Facts', () => {
 
   test('getDetails', () => {
     let data = 0;
-    const factsMap = new Map([[fact_1, 'fact_1'], [fact_2, 'fact_2']]);
+    const factsMap = new Map([
+      [fact_1, { tag: '1', details: 'fact_1' }],
+      [fact_2, { tag: '2', details: 'fact_2' }],
+    ]);
 
     for (const [fact, _detail] of factsMap) {
       data = Fact.assign(data, fact);
@@ -38,6 +41,6 @@ describe('Facts', () => {
 
     const details = Fact.getDetails(data, factsMap);
 
-    expect(details.length).toBe(factsMap.size);
+    expect(details).toBe(`1: fact_1\n2: fact_2`);
   });
 });

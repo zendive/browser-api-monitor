@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type {
-    TClearTimerHistory,
-    TSetTimerHistory,
+  import {
+    SetTimerFact,
+    type TClearTimerHistory,
+    type TSetTimerHistory,
   } from '../../wrapper/TimerWrapper.ts';
   import { msToHms } from '../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
@@ -14,6 +15,8 @@
   import Alert from './Alert.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';
   import CancelableCallMetric from './CancelableCallMetric.svelte';
+  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import FactsCell from './FactsCell.svelte';
 
   let {
     metric,
@@ -27,6 +30,16 @@
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
+  const SetTimerFacts: TFactsMap = new Map([
+    [SetTimerFact.NOT_A_FUNCTION, {
+      tag: 'C',
+      details: 'Callback is not a function',
+    }],
+    [SetTimerFact.BAD_DELAY, {
+      tag: 'D',
+      details: 'Delay is not a positive number or undefined',
+    }],
+  ]);
 
   function onFindRegressors(regressors: string[] | null) {
     if (!dialogEl || !alertEl || !regressors?.length) {
@@ -82,6 +95,9 @@
   </td>
   <td class="ta-r">
     <FrameSensitiveTime value={metric.selfTime} />
+  </td>
+  <td class="ta-c">
+    <FactsCell facts={metric.facts} factsMap={SetTimerFacts} />
   </td>
   <td class="ta-c">
     <CancelableCallMetric

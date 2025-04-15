@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type {
-    TCancelIdleCallbackHistory,
-    TRequestIdleCallbackHistory,
+  import {
+    RicFact,
+    type TCancelIdleCallbackHistory,
+    type TRequestIdleCallbackHistory,
   } from '../../wrapper/IdleWrapper.ts';
   import {
     DEFAULT_SORT_RIC,
@@ -22,6 +23,8 @@
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import CancelableCallMetric from './CancelableCallMetric.svelte';
+  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import FactsCell from './FactsCell.svelte';
 
   let {
     ricHistory,
@@ -39,6 +42,12 @@
   let sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
+  const RicFacts: TFactsMap = new Map([
+    [RicFact.BAD_DELAY, {
+      tag: 'D',
+      details: 'Delay is not a positive number or undefined',
+    }],
+  ]);
 
   getSettings().then((settings) => {
     sortField = settings.sortRequestIdleCallback.field;
@@ -118,6 +127,14 @@
       </th>
       <th class="ta-c">
         <SortableColumn
+          field="facts"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        ><span class="icon -facts"></span></SortableColumn>
+      </th>
+      <th class="ta-c">
+        <SortableColumn
           field="calls"
           currentField={sortField}
           currentFieldOrder={sortOrder}
@@ -160,6 +177,9 @@
         </td>
         <td class="ta-c">{metric.didTimeout}</td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
+        <td class="ta-c">
+          <FactsCell facts={metric.facts} factsMap={RicFacts} />
+        </td>
         <td class="ta-c">
           <CancelableCallMetric
             calls={metric.calls}

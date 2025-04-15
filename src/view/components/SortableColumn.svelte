@@ -31,11 +31,11 @@
 </script>
 
 <a
-  href="voidESortOrder"
+  href="void(0)"
   role="cell"
-  tabindex="-1"
+  tabindex="0"
   onclick={changeSort}
-  title="Sort by&mldr;"
+  title={`Sort by ${field}`}
 >
   {@render children?.()}
   {#if field === currentField}

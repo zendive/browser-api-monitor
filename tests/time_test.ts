@@ -164,4 +164,4 @@ describe('callingOnce', () => {
   });
 });
 
-await wait(2e3);
+await wait(1e3);

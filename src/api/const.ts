@@ -26,7 +26,9 @@ export const requestAnimationFrame = /*@__PURE__*/ globalThis
 export const cancelAnimationFrame = /*@__PURE__*/ globalThis
   .cancelAnimationFrame.bind(globalThis);
 
-export const TAG_MISFORTUNE = '❓\u00A0⟪N/A⟫';
+export const TAG_DELAY_NOT_FOUND = '';
+export const TAG_BAD_DELAY = (x: unknown) => `${x}`;
+export const TAG_BAD_HANDLER = (x: unknown) => `${x}`;
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 

@@ -2,11 +2,19 @@ import './browserPolyfill.ts';
 import { wait } from './util.ts';
 import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { TAG_EXCEPTION } from '../src/api/clone.ts';
-import { TAG_MISFORTUNE } from '../src/api/const.ts';
+import {
+  TAG_BAD_DELAY,
+  TAG_BAD_HANDLER,
+  TAG_DELAY_NOT_FOUND,
+} from '../src/api/const.ts';
 import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
-import { TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
+import {
+  ClearTimerFact,
+  SetTimerFact,
+  TimerWrapper,
+} from '../src/wrapper/TimerWrapper.ts';
 import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
+import { Fact } from '../src/wrapper/Fact.ts';
 
 describe('wrappers', () => {
   const traceUtil = new TraceUtil();
@@ -114,22 +122,24 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(DELAY);
-    expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(false);
+    expect(Fact.check(rec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(false);
 
     globalThis.clearTimeout(handler);
     expect(rec.selfTime).toBeNull();
   });
 
   test('setTimeoutHistory - invalid delay', () => {
-    globalThis.setTimeout(() => {}, -1);
+    const BAD_DELAY = -1;
+    globalThis.setTimeout(() => {}, BAD_DELAY);
 
     const rec = Array.from(apiTimer.setTimeoutHistory.values())[0];
 
     expect(rec.calls).toBe(1);
-    expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
-    expect(rec.isEval).toBe(false);
+    expect(rec.delay).toBe(TAG_BAD_DELAY(BAD_DELAY));
+    expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(true);
   });
 
   test('setTimeout - poling registers selfTime', async () => {
@@ -166,6 +176,8 @@ describe('wrappers', () => {
 
     expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
   });
 
   test('clearTimeoutHistory - non existent handler', () => {
@@ -173,7 +185,9 @@ describe('wrappers', () => {
 
     const rec = Array.from(apiTimer.clearTimeoutHistory.values())[0];
 
-    expect(rec.delay).toBe(TAG_MISFORTUNE);
+    expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(true);
   });
 
   test('clearTimeoutHistory - invalid handler', () => {
@@ -181,8 +195,10 @@ describe('wrappers', () => {
 
     const rec = Array.from(apiTimer.clearTimeoutHistory.values())[0];
 
-    expect(rec.delay).toBe(TAG_MISFORTUNE);
-    expect(rec.handler).toBe(TAG_EXCEPTION(0));
+    expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
+    expect(rec.handler).toBe(TAG_BAD_HANDLER(0));
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(true);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
   });
 
   test('setIntervalHistory & clearIntervalHistory - recorded', () => {
@@ -219,10 +235,11 @@ describe('wrappers', () => {
 
     expect(rec.calls).toBe(1);
     expect(rec.delay).toBe(DELAY);
-    expect(rec.isEval).toBe(false);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
     expect(rec.selfTime).not.toBeNull();
+    expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(false);
+    expect(Fact.check(rec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(false);
 
     globalThis.clearInterval(handler);
   });
@@ -232,8 +249,9 @@ describe('wrappers', () => {
     const rec = Array.from(apiTimer.setIntervalHistory.values())[0];
 
     expect(rec.calls).toBe(1);
-    expect(rec.delay).toBe(TAG_EXCEPTION('-1'));
-    expect(rec.isEval).toBe(false);
+    expect(rec.delay).toBe(TAG_BAD_DELAY('-1'));
+    expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(true);
+    expect(Fact.check(rec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(false);
 
     globalThis.clearInterval(handler);
   });
@@ -245,6 +263,7 @@ describe('wrappers', () => {
     const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
 
     expect(rec.delay).toBe(1e3);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
   });
 
   test('clearIntervalHistory - non existent handler', () => {
@@ -252,7 +271,9 @@ describe('wrappers', () => {
 
     const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
 
-    expect(rec.delay).toBe(TAG_MISFORTUNE);
+    expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(true);
   });
 
   test('clearIntervalHistory - invalid handler', () => {
@@ -260,8 +281,10 @@ describe('wrappers', () => {
 
     const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
 
-    expect(rec.delay).toBe(TAG_MISFORTUNE);
+    expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(true);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
   });
 });
 
-await wait(1e3);
+await wait(1e1);

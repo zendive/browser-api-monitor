@@ -9,15 +9,17 @@ import {
   clearTimeout,
   setInterval,
   setTimeout,
+  TAG_BAD_DELAY,
+  TAG_BAD_HANDLER,
+  TAG_DELAY_NOT_FOUND,
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
-  TAG_MISFORTUNE,
 } from '../api/const.ts';
 import type { TSettingsPanel } from '../api/settings.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
-import { TAG_EXCEPTION } from '../api/clone.ts';
 import { validHandler, validTimerDelay } from './util.ts';
 import { trim2microsecond } from '../api/time.ts';
+import { Fact, type TFact } from './Fact.ts';
 
 export enum ETimerType {
   TIMEOUT,
@@ -30,16 +32,15 @@ export type TOnlineTimerMetrics = {
   type: ETimerType;
   delay: number | undefined | string;
   handler: number;
-  isEval: boolean;
 };
 export type TSetTimerHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
-  isEval: boolean | undefined;
   online: number;
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
@@ -49,10 +50,20 @@ export type TClearTimerHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
 };
+
+export const SetTimerFact = /*@__PURE__*/ {
+  NOT_A_FUNCTION: Fact.define(1 << 0),
+  BAD_DELAY: Fact.define(1 << 1),
+} as const;
+export const ClearTimerFact = /*@__PURE__*/ {
+  NOT_FOUND: Fact.define(1 << 0),
+  BAD_HANDLER: Fact.define(1 << 1),
+} as const;
 
 export class TimerWrapper {
   traceUtil: TraceUtil;
@@ -85,17 +96,15 @@ export class TimerWrapper {
     handler: number,
     delay: number | undefined | string,
     callstack: TCallstack,
-    isEval: boolean,
   ) {
     delay = validTimerDelay(delay)
       ? trim2microsecond(delay)
-      : TAG_EXCEPTION(delay);
+      : TAG_BAD_DELAY(delay);
 
     this.onlineTimers.set(handler, {
       type,
       handler,
       delay,
-      isEval,
       traceId: callstack.traceId,
       trace: callstack.trace,
       traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
@@ -145,26 +154,39 @@ export class TimerWrapper {
     callstack: TCallstack,
     isEval: boolean,
   ) {
+    let facts = <TFact> 0;
     const existing = history.get(callstack.traceId);
-    const hasError = !validTimerDelay(delay);
-    delay = hasError ? TAG_EXCEPTION(delay) : trim2microsecond(delay);
+
+    if (validTimerDelay(delay)) {
+      delay = trim2microsecond(delay);
+    } else {
+      delay = TAG_BAD_DELAY(delay);
+      facts = Fact.assign(facts, SetTimerFact.BAD_DELAY);
+    }
+
+    if (isEval) {
+      facts = Fact.assign(facts, SetTimerFact.NOT_A_FUNCTION);
+    }
 
     if (existing) {
       existing.handler = handler;
       existing.delay = delay;
       existing.calls++;
-      existing.isEval = isEval;
       existing.online++;
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       history.set(callstack.traceId, {
         handler,
         calls: 1,
         delay,
-        isEval,
         online: 1,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        facts,
         canceledCounter: 0,
         canceledByTraceIds: null,
         selfTime: null,
@@ -178,22 +200,30 @@ export class TimerWrapper {
     callstack: TCallstack,
   ) {
     const existing = history.get(callstack.traceId);
-    const hasError = !validHandler(handler);
-    const onlineTimer = hasError
-      ? null
-      : this.onlineTimers.get(<number> handler);
-    const handlerDelay: string | number | undefined = onlineTimer
-      ? onlineTimer.delay
-      : TAG_MISFORTUNE;
+    let handlerDelay: string | number | undefined = TAG_DELAY_NOT_FOUND;
+    let facts = <TFact> 0;
 
-    if (hasError) {
-      handler = TAG_EXCEPTION(handler);
+    if (validHandler(handler)) {
+      const onlineTimer = this.onlineTimers.get(handler);
+
+      if (onlineTimer) {
+        handlerDelay = onlineTimer.delay;
+      } else {
+        facts = Fact.assign(facts, ClearTimerFact.NOT_FOUND);
+      }
+    } else {
+      handler = TAG_BAD_HANDLER(handler);
+      facts = Fact.assign(facts, ClearTimerFact.BAD_HANDLER);
     }
 
     if (existing) {
       existing.handler = <number | string> handler;
       existing.delay = handlerDelay;
       existing.calls++;
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       history.set(callstack.traceId, {
         handler: <number | string> handler,
@@ -202,6 +232,7 @@ export class TimerWrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        facts,
       });
     }
   }
@@ -227,7 +258,7 @@ export class TimerWrapper {
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, code);
-      const isEval = typeof code === 'string';
+      const isEval = typeof code !== 'function';
 
       this.callCounter.setTimeout++;
       const handler = this.native.setTimeout(
@@ -266,7 +297,7 @@ export class TimerWrapper {
         ...args,
       );
 
-      this.#timerOnline(ETimerType.TIMEOUT, handler, delay, callstack, isEval);
+      this.#timerOnline(ETimerType.TIMEOUT, handler, delay, callstack);
       this.#updateSetTimersHistory(
         this.setTimeoutHistory,
         handler,
@@ -326,7 +357,7 @@ export class TimerWrapper {
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = this.traceUtil.getCallstack(err, code);
-      const isEval = typeof code === 'string';
+      const isEval = typeof code !== 'function';
 
       this.callCounter.setInterval++;
 
@@ -365,7 +396,7 @@ export class TimerWrapper {
         ...args,
       );
 
-      this.#timerOnline(ETimerType.INTERVAL, handler, delay, callstack, isEval);
+      this.#timerOnline(ETimerType.INTERVAL, handler, delay, callstack);
       this.#updateSetTimersHistory(
         this.setIntervalHistory,
         handler,

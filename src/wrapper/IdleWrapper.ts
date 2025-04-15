@@ -1,5 +1,4 @@
 import type { TSettingsPanel } from '../api/settings.ts';
-import { TAG_EXCEPTION } from '../api/clone.ts';
 import { trim2microsecond } from '../api/time.ts';
 import {
   type ETraceDomain,
@@ -8,11 +7,14 @@ import {
   type TTrace,
 } from './TraceUtil.ts';
 import { validHandler, validTimerDelay } from './util.ts';
+import { Fact, type TFact } from './Fact.ts';
+import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../api/const.ts';
 
 export type TRequestIdleCallbackHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   handler: number | undefined | string;
   delay: number | undefined | string;
@@ -26,6 +28,7 @@ export type TCancelIdleCallbackHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   handler: number | undefined | string;
 };
@@ -36,6 +39,13 @@ const requestIdleCallback = /*@__PURE__*/ globalThis.requestIdleCallback.bind(
 const cancelIdleCallback = /*@__PURE__*/ globalThis.cancelIdleCallback.bind(
   globalThis,
 );
+export const RicFact = {
+  BAD_DELAY: Fact.define(1 << 0),
+} as const;
+export const CicFact = {
+  NOT_FOUND: Fact.define(1 << 0),
+  BAD_HANDLER: Fact.define(1 << 1),
+} as const;
 
 export class IdleWrapper {
   traceUtil: TraceUtil;
@@ -82,8 +92,14 @@ export class IdleWrapper {
     callstack: TCallstack,
   ) {
     const existing = this.ricHistory.get(callstack.traceId);
-    const hasError = !validTimerDelay(delay);
-    delay = hasError ? TAG_EXCEPTION(delay) : trim2microsecond(delay);
+    let facts = <TFact> 0;
+
+    if (validTimerDelay(delay)) {
+      delay = trim2microsecond(delay);
+    } else {
+      delay = TAG_BAD_DELAY(delay);
+      facts = Fact.assign(facts, RicFact.BAD_DELAY);
+    }
 
     if (existing) {
       existing.calls++;
@@ -91,11 +107,16 @@ export class IdleWrapper {
       existing.didTimeout = undefined;
       existing.delay = delay;
       existing.online++;
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       this.ricHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        facts,
         calls: 1,
         handler,
         didTimeout: undefined,
@@ -112,39 +133,51 @@ export class IdleWrapper {
 
   #updateCicHistory(handler: number | string, callstack: TCallstack) {
     const existing = this.cicHistory.get(callstack.traceId);
-    const hasError = !validHandler(handler);
+    let facts = <TFact> 0;
+    let ricTraceId;
 
-    if (hasError) {
-      handler = TAG_EXCEPTION(handler);
+    if (validHandler(handler)) {
+      ricTraceId = this.onlineIdleCallbackLookup.get(handler);
+
+      if (ricTraceId) {
+        this.onlineIdleCallbackLookup.delete(handler);
+      } else {
+        facts = Fact.assign(facts, CicFact.NOT_FOUND);
+      }
+    } else {
+      handler = TAG_BAD_HANDLER(handler);
+      facts = Fact.assign(facts, CicFact.BAD_HANDLER);
     }
 
     if (existing) {
       existing.calls++;
       existing.handler = handler;
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       this.cicHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        facts,
         calls: 1,
         handler,
       });
     }
 
-    const ricTraceId = this.onlineIdleCallbackLookup.get(Number(handler));
     const ricRecord = ricTraceId && this.ricHistory.get(ricTraceId);
     if (ricRecord) {
-      this.onlineIdleCallbackLookup.delete(Number(handler));
-
       ricRecord.online--;
       ricRecord.didTimeout = undefined;
+      ricRecord.canceledCounter++;
 
       if (ricRecord.canceledByTraceIds === null) {
         ricRecord.canceledByTraceIds = [callstack.traceId];
       } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
         ricRecord.canceledByTraceIds.push(callstack.traceId);
       }
-      ricRecord.canceledCounter++;
     }
   }
 

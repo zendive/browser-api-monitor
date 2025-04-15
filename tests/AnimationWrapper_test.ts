@@ -2,9 +2,10 @@ import './browserPolyfill.ts';
 import { wait } from './util.ts';
 import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { AnimationWrapper } from '../src/wrapper/AnimationWrapper.ts';
+import { AnimationWrapper, CafFact } from '../src/wrapper/AnimationWrapper.ts';
 import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
-import { TAG_EXCEPTION } from '../src/api/clone.ts';
+import { TAG_BAD_HANDLER } from '../src/api/const.ts';
+import { Fact } from '../src/wrapper/Fact.ts';
 
 describe('AnimationWrapper', () => {
   const traceUtil = new TraceUtil();
@@ -70,8 +71,17 @@ describe('AnimationWrapper', () => {
 
     const rec = Array.from(apiAnimation.cafHistory?.values())[0];
 
-    expect(rec.handler).toBe(TAG_EXCEPTION(0));
+    expect(rec.handler).toBe(TAG_BAD_HANDLER(0));
+    expect(Fact.check(rec.facts, CafFact.BAD_HANDLER)).toBe(true);
+  });
+
+  test('cafHistory - raf not found', () => {
+    cancelAnimationFrame(404);
+
+    const rec = Array.from(apiAnimation.cafHistory?.values())[0];
+
+    expect(Fact.check(rec.facts, CafFact.NOT_FOUND)).toBe(true);
   });
 });
 
-await wait(1e3);
+await wait(1e1);
