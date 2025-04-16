@@ -110,12 +110,11 @@
 </Alert>
 
 <table data-navigation-tag={caption}>
-  <caption class="bc-invert ta-l">
-    {caption} <Variable value={ricHistory.length} />
-  </caption>
-  <tbody>
+  <thead class="sticky-header">
     <tr>
-      <th class="w-full">Callstack</th>
+      <th class="w-full">
+        {caption} Callstack [<Variable value={ricHistory.length} />]
+      </th>
       <th class="ta-c">didTimeout</th>
       <th class="ta-r">
         <SortableColumn
@@ -168,7 +167,9 @@
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
+  </thead>
 
+  <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
