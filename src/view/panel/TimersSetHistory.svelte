@@ -1,38 +1,47 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../wrapper/TimerWrapper.ts';
+  import type {
+    TClearTimerHistory,
+    TSetTimerHistory,
+  } from '../../wrapper/TimerWrapper.ts';
   import {
-    DEFAULT_SORT_CLEAR_TIMERS,
-    type ESortOrder,
+    DEFAULT_SORT_SET_TIMERS,
+    ESortOrder,
     getSettings,
     setSettings,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
-  import Variable from './Variable.svelte';
-  import SortableColumn from './SortableColumn.svelte';
-  import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
+  import Variable from '../components/Variable.svelte';
+  import SortableColumn from './components/SortableColumn.svelte';
+  import TimersSetHistoryMetric from './components/TimersSetHistoryMetric.svelte';
 
   let {
-    clearTimerHistory,
+    setTimerHistory,
+    clearTimeoutHistory,
+    clearIntervalHistory,
     caption,
-  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } =
-    $props();
-  let sortField = $state(DEFAULT_SORT_CLEAR_TIMERS.field);
-  let sortOrder = $state(DEFAULT_SORT_CLEAR_TIMERS.order);
+  }: {
+    setTimerHistory: TSetTimerHistory[];
+    clearTimeoutHistory: TClearTimerHistory[] | null;
+    clearIntervalHistory: TClearTimerHistory[] | null;
+    caption?: string;
+  } = $props();
+  let sortField = $state(DEFAULT_SORT_SET_TIMERS.field);
+  let sortOrder = $state(DEFAULT_SORT_SET_TIMERS.order);
   let sortedMetrics = $derived.by(() =>
-    clearTimerHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+    setTimerHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
 
   getSettings().then((settings) => {
-    sortField = settings.sortClearTimers.field;
-    sortOrder = settings.sortClearTimers.order;
+    sortField = settings.sortSetTimers.field;
+    sortOrder = settings.sortSetTimers.order;
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TClearTimerHistory> _field;
+    sortField = <keyof TSetTimerHistory> _field;
     sortOrder = _order;
 
     setSettings({
-      sortClearTimers: {
+      sortSetTimers: {
         field: $state.snapshot(sortField),
         order: $state.snapshot(sortOrder),
       },
@@ -44,7 +53,15 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={clearTimerHistory.length} />]
+        {caption} Callstack [<Variable value={setTimerHistory.length} />]
+      </th>
+      <th class="ta-r">
+        <SortableColumn
+          field="selfTime"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        >Self</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
@@ -78,6 +95,14 @@
           eventChangeSorting={onChangeSort}
         >Delay</SortableColumn>
       </th>
+      <th>
+        <SortableColumn
+          field="online"
+          currentField={sortField}
+          currentFieldOrder={sortOrder}
+          eventChangeSorting={onChangeSort}
+        >Set</SortableColumn>
+      </th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
@@ -85,7 +110,11 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersClearHistoryMetric {metric} />
+      <TimersSetHistoryMetric
+        {metric}
+        {clearTimeoutHistory}
+        {clearIntervalHistory}
+      />
     {/each}
   </tbody>
 </table>

@@ -1,71 +1,61 @@
 <script lang="ts">
+  import type {
+    TCancelAnimationFrameHistory,
+    TRequestAnimationFrameHistory,
+  } from '../../wrapper/AnimationWrapper.ts';
   import {
-    RicFact,
-    type TCancelIdleCallbackHistory,
-    type TRequestIdleCallbackHistory,
-  } from '../../wrapper/IdleWrapper.ts';
-  import {
-    DEFAULT_SORT_RIC,
+    DEFAULT_SORT_RAF,
     ESortOrder,
     getSettings,
     setSettings,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
-  import { msToHms } from '../../api/time.ts';
-  import Variable from './Variable.svelte';
-  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
-  import Dialog from './Dialog.svelte';
-  import Alert from './Alert.svelte';
-  import SortableColumn from './SortableColumn.svelte';
-  import FrameSensitiveTime from './FrameSensitiveTime.svelte';
-  import TraceBreakpoint from './TraceBreakpoint.svelte';
-  import TraceBypass from './TraceBypass.svelte';
-  import CancelableCallMetric from './CancelableCallMetric.svelte';
-  import type { TFactsMap } from '../../wrapper/Fact.ts';
-  import FactsCell from './FactsCell.svelte';
-  import CallstackCell from './CallstackCell.svelte';
+  import Variable from '../components/Variable.svelte';
+  import SortableColumn from './components/SortableColumn.svelte';
+  import FrameSensitiveTime from './components/FrameSensitiveTime.svelte';
+  import TraceBreakpoint from './components/TraceBreakpoint.svelte';
+  import Dialog from '../components/Dialog.svelte';
+  import Alert from '../components/Alert.svelte';
+  import AnimationCancelHistory from './AnimationCancelHistory.svelte';
+  import TraceBypass from './components/TraceBypass.svelte';
+  import CancelableCallMetric from './components/CancelableCallMetric.svelte';
+  import CallstackCell from './components/CallstackCell.svelte';
 
   let {
-    ricHistory,
-    cicHistory = null,
+    rafHistory,
+    cafHistory,
     caption = '',
   }: {
-    ricHistory: TRequestIdleCallbackHistory[];
-    cicHistory: TCancelIdleCallbackHistory[] | null;
+    rafHistory: TRequestAnimationFrameHistory[];
+    cafHistory: TCancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
-  let sortField = $state(DEFAULT_SORT_RIC.field);
-  let sortOrder = $state(DEFAULT_SORT_RIC.order);
+  let sortField = $state(DEFAULT_SORT_RAF.field);
+  let sortOrder = $state(DEFAULT_SORT_RAF.order);
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    ricHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+    rafHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
   );
-  const RicFacts: TFactsMap = new Map([
-    [RicFact.BAD_DELAY, {
-      tag: 'D',
-      details: 'Delay is not a positive number or undefined',
-    }],
-  ]);
 
   getSettings().then((settings) => {
-    sortField = settings.sortRequestIdleCallback.field;
-    sortOrder = settings.sortRequestIdleCallback.order;
+    sortField = settings.sortRequestAnimationFrame.field;
+    sortOrder = settings.sortRequestAnimationFrame.order;
   });
 
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TRequestIdleCallbackHistory> _field;
+    sortField = <keyof TRequestAnimationFrameHistory> _field;
     sortOrder = _order;
 
     setSettings({
-      sortRequestIdleCallback: {
+      sortRequestAnimationFrame: {
         field: $state.snapshot(sortField),
         order: $state.snapshot(sortOrder),
       },
     });
   }
 
-  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = $state([]);
+  let cafHistoryMetrics: TCancelAnimationFrameHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
     if (!dialogEl || !alertEl || !regressors?.length) {
@@ -74,13 +64,13 @@
 
     for (let n = regressors.length - 1; n >= 0; n--) {
       const traceId = regressors[n];
-      let record = cicHistory?.find((r) => r.traceId === traceId);
+      let record = cafHistory?.find((r) => r.traceId === traceId);
       if (record) {
-        cicHistoryMetrics.push(record);
+        cafHistoryMetrics.push(record);
       }
     }
 
-    if (cicHistoryMetrics.length) {
+    if (cafHistoryMetrics.length) {
       dialogEl.show();
     } else {
       alertEl.show();
@@ -88,33 +78,32 @@
   }
 
   function onCloseDialog() {
-    cicHistoryMetrics.splice(0);
+    cafHistoryMetrics.splice(0);
   }
 </script>
 
 <Dialog
   bind:this={dialogEl}
   eventClose={onCloseDialog}
-  title="Places from which requestIdleCallback with current callstack was prematurely canceled"
-  description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
+  title="Places from which requestAnimationFrame with current callstack was prematurely canceled"
+  description="The information is actual only on time of demand. Requires cancelAnimationFrame panel enabled."
 >
-  <IdleCallbackCancelHistory
+  <AnimationCancelHistory
     caption="Canceled by"
-    cicHistory={$state.snapshot(cicHistoryMetrics)}
+    cafHistory={$state.snapshot(cafHistoryMetrics)}
   />
 </Dialog>
 
 <Alert bind:this={alertEl} title="Attention">
-  Requires cancelIdleCallback panel enabled
+  Requires cancelAnimationFrame panel enabled
 </Alert>
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={ricHistory.length} />]
+        {caption} Callstack [<Variable value={rafHistory.length} />]
       </th>
-      <th class="ta-c">didTimeout</th>
       <th class="ta-r">
         <SortableColumn
           field="selfTime"
@@ -123,14 +112,7 @@
           eventChangeSorting={onChangeSort}
         >Self</SortableColumn>
       </th>
-      <th class="ta-c">
-        <SortableColumn
-          field="facts"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}
-        ><span class="icon -facts"></span></SortableColumn>
-      </th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
@@ -146,14 +128,6 @@
           currentFieldOrder={sortOrder}
           eventChangeSorting={onChangeSort}
         >Handler</SortableColumn>
-      </th>
-      <th class="ta-r">
-        <SortableColumn
-          field="delay"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
-          eventChangeSorting={onChangeSort}
-        >Delay</SortableColumn>
       </th>
       <th>
         <SortableColumn
@@ -177,11 +151,8 @@
             traceDomain={metric.traceDomain}
           />
         </td>
-        <td class="ta-c">{metric.didTimeout}</td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
-        <td class="ta-c">
-          <FactsCell facts={metric.facts} factsMap={RicFacts} />
-        </td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
           <CancelableCallMetric
             calls={metric.calls}
@@ -191,7 +162,6 @@
           />
         </td>
         <td class="ta-c"><Variable value={metric.handler} /></td>
-        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
         <td class="ta-r">
           {#if metric.online}
             <Variable value={metric.online} />

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { SELF_TIME_MAX_GOOD } from '../../api/const.ts';
-  import { Stopper } from '../../api/time.ts';
+  import { SELF_TIME_MAX_GOOD } from '../../../api/const.ts';
+  import { Stopper } from '../../../api/time.ts';
 
   let { value }: { value: number | null } = $props();
   let isBad = $derived.by(() => {

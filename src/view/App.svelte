@@ -4,19 +4,19 @@
   import diff from '../api/diff.ts';
   import type { TTelemetry } from '../wrapper/Wrapper.ts';
   import { onMount } from 'svelte';
-  import Media from './components/Media.svelte';
-  import EvalMetrics from './components/EvalMetrics.svelte';
-  import Version from './components/Version.svelte';
-  import TogglePanels from './components/TogglePanels.svelte';
-  import InfoBar from './components/InfoBar.svelte';
-  import TickSpinner from './components/TickSpinner.svelte';
-  import OnlineTimers from './components/OnlineTimers.svelte';
-  import IdleCallbackRequestHistory from './components/IdleCallbackRequestHistory.svelte';
-  import IdleCallbackCancelHistory from './components/IdleCallbackCancelHistory.svelte';
-  import AnimationRequestHistory from './components/AnimationRequestHistory.svelte';
-  import AnimationCancelHistory from './components/AnimationCancelHistory.svelte';
-  import TimersSetHistory from './components/TimersSetHistory.svelte';
-  import TimersClearHistory from './components/TimersClearHistory.svelte';
+  import Media from './panel/Media.svelte';
+  import Eval from './panel/Eval.svelte';
+  import Version from './menu/Version.svelte';
+  import TogglePanels from './menu/TogglePanels.svelte';
+  import InfoBar from './menu/InfoBar.svelte';
+  import TickSpinner from './menu/TickSpinner.svelte';
+  import OnlineTimers from './panel/OnlineTimers.svelte';
+  import IdleCallbackRequestHistory from './panel/IdleCallbackRequestHistory.svelte';
+  import IdleCallbackCancelHistory from './panel/IdleCallbackCancelHistory.svelte';
+  import AnimationRequestHistory from './panel/AnimationRequestHistory.svelte';
+  import AnimationCancelHistory from './panel/AnimationCancelHistory.svelte';
+  import TimersSetHistory from './panel/TimersSetHistory.svelte';
+  import TimersClearHistory from './panel/TimersClearHistory.svelte';
 
   let spinnerEl: TickSpinner | null = $state.raw(null);
   let paused = $state.raw(false);
@@ -131,7 +131,7 @@
 
   <main>
     {#if telemetry}
-      <EvalMetrics evalHistory={telemetry.evalHistory} />
+      <Eval evalHistory={telemetry.evalHistory} />
       <Media media={telemetry.media} />
       <OnlineTimers onlineTimers={telemetry.onlineTimers} />
 

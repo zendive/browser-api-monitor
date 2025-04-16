@@ -3,8 +3,8 @@
     EMediaType,
     type TMediaTelemetry,
   } from '../../wrapper/MediaWrapper.ts';
-  import MediaMetrics from './MediaMetrics.svelte';
-  import Variable from './Variable.svelte';
+  import MediaMetrics from './components/MediaMetrics.svelte';
+  import Variable from '../components/Variable.svelte';
 
   let { media = { total: 0, collection: [] } }: { media: TMediaTelemetry } =
     $props();

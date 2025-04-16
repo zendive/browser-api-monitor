@@ -7,7 +7,7 @@
     type TSettingsPanel,
   } from '../../api/settings.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
-  import Alert from './Alert.svelte';
+  import Alert from '../components/Alert.svelte';
 
   const NON_WRAPPABLE = ['media', 'activeTimers'];
   let panels: TSettingsPanel[] = $state([]);

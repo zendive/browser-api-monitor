@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Variable from './Variable.svelte';
+  import Variable from '../../components/Variable.svelte';
 
   let {
     calls,

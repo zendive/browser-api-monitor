@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Fact, type TFact, type TFactsMap } from '../../wrapper/Fact.ts';
+  import {
+    Fact,
+    type TFact,
+    type TFactsMap,
+  } from '../../../wrapper/Fact.ts';
 
   let { facts, factsMap }: { facts: TFact; factsMap: TFactsMap } = $props();
 </script>

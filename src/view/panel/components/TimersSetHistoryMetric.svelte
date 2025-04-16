@@ -3,17 +3,17 @@
     SetTimerFact,
     type TClearTimerHistory,
     type TSetTimerHistory,
-  } from '../../wrapper/TimerWrapper.ts';
-  import { msToHms } from '../../api/time.ts';
+  } from '../../../wrapper/TimerWrapper.ts';
+  import { msToHms } from '../../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
-  import Variable from './Variable.svelte';
+  import Variable from '../../components/Variable.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
-  import Dialog from './Dialog.svelte';
-  import Alert from './Alert.svelte';
-  import TimersClearHistory from './TimersClearHistory.svelte';
+  import Dialog from '../../components/Dialog.svelte';
+  import Alert from '../../components/Alert.svelte';
+  import TimersClearHistory from '../TimersClearHistory.svelte';
   import CancelableCallMetric from './CancelableCallMetric.svelte';
-  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import type { TFactsMap } from '../../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
   import CallstackCell from './CallstackCell.svelte';
 
