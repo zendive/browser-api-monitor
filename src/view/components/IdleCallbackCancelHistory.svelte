@@ -8,14 +8,13 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import SortableColumn from './SortableColumn.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import { CafFact } from '../../wrapper/AnimationWrapper.ts';
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let {
     cicHistory,
@@ -92,8 +91,10 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
+          <CallstackCell
+            trace={metric.trace}
+            traceDomain={metric.traceDomain}
+          />
         </td>
         <td class="ta-c">
           <FactsCell facts={metric.facts} factsMap={CicFacts} />

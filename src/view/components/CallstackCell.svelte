@@ -1,7 +1,14 @@
 <script lang="ts">
-  import { ETraceDomain } from '../../wrapper/TraceUtil.ts';
+  import { ETraceDomain, type TTrace } from '../../wrapper/TraceUtil.ts';
+  import TraceLink from './TraceLink.svelte';
 
-  let { traceDomain }: { traceDomain: ETraceDomain } = $props();
+  let {
+    trace,
+    traceDomain,
+  }: {
+    trace: TTrace[];
+    traceDomain: ETraceDomain;
+  } = $props();
 </script>
 
 {#if traceDomain === ETraceDomain.SAME}
@@ -13,3 +20,9 @@
 {:else if traceDomain === ETraceDomain.UNKNOWN}
   <span title="Unknown domain">❓</span>
 {/if}
+
+{#each trace as { link, name }, index (index)}
+  {@const isLast = index === trace.length - 1}
+  <TraceLink {link} {name} />
+  {#if !isLast}•&nbsp;{/if}
+{/each}
