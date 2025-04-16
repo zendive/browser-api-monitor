@@ -4,13 +4,12 @@
     type TClearTimerHistory,
   } from '../../wrapper/TimerWrapper.ts';
   import { msToHms } from '../../api/time.ts';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import Variable from './Variable.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let { metric }: { metric: TClearTimerHistory } = $props();
   const ClearTimerFacts: TFactsMap = new Map([
@@ -24,8 +23,10 @@
 
 <tr class="t-zebra">
   <td class="wb-all">
-    <TraceDomain traceDomain={metric.traceDomain} />
-    <Trace trace={metric.trace} />
+    <CallstackCell
+      trace={metric.trace}
+      traceDomain={metric.traceDomain}
+    />
   </td>
   <td class="ta-c">
     <FactsCell facts={metric.facts} factsMap={ClearTimerFacts} />

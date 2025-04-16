@@ -11,8 +11,6 @@
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from './Variable.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import SortableColumn from './SortableColumn.svelte';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
@@ -21,6 +19,7 @@
   import AnimationCancelHistory from './AnimationCancelHistory.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import CancelableCallMetric from './CancelableCallMetric.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let {
     rafHistory,
@@ -147,8 +146,10 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
+          <CallstackCell
+            trace={metric.trace}
+            traceDomain={metric.traceDomain}
+          />
         </td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
         <td class="ta-c">{metric.cps || undefined}</td>

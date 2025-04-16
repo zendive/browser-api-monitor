@@ -6,8 +6,6 @@
   } from '../../wrapper/TimerWrapper.ts';
   import { msToHms } from '../../api/time.ts';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import Variable from './Variable.svelte';
   import TraceBypass from './TraceBypass.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
@@ -17,6 +15,7 @@
   import CancelableCallMetric from './CancelableCallMetric.svelte';
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let {
     metric,
@@ -90,8 +89,10 @@
 
 <tr class="t-zebra">
   <td class="wb-all">
-    <TraceDomain traceDomain={metric.traceDomain} />
-    <Trace trace={metric.trace} />
+    <CallstackCell
+      trace={metric.trace}
+      traceDomain={metric.traceDomain}
+    />
   </td>
   <td class="ta-r">
     <FrameSensitiveTime value={metric.selfTime} />

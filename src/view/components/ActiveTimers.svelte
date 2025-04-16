@@ -3,8 +3,7 @@
   import { EMsg, portPost } from '../../api/communication.ts';
   import { msToHms } from '../../api/time.ts';
   import Variable from './Variable.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let {
     metrics,
@@ -26,8 +25,8 @@
       <th class="w-full">
         {caption} Callstack [<Variable value={metrics.length} />]
       </th>
-      <th>Handler</th>
-      <th>Delay</th>
+      <th class="ta-c">Handler</th>
+      <th class="ta-r">Delay</th>
     </tr>
   </thead>
 
@@ -35,8 +34,10 @@
     {#each metrics as metric (metric.handler)}
       <tr class="t-zebra">
         <td class="wb-all w-full">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
+          <CallstackCell
+            trace={metric.trace}
+            traceDomain={metric.traceDomain}
+          />
         </td>
         <td class="ta-c handler-cell">
           <span class="handler-value">{metric.handler}</span>

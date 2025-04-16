@@ -1,11 +1,10 @@
 <script lang="ts">
   import type { TEvalHistory } from '../../wrapper/EvalWrapper.ts';
   import Variable from './Variable.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import FrameSensitiveTime from './FrameSensitiveTime.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let { evalHistory }: { evalHistory: TEvalHistory[] | null } = $props();
 
@@ -43,8 +42,10 @@
       {#each evalHistory as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">
-            <TraceDomain traceDomain={metric.traceDomain} />
-            <Trace trace={metric.trace} />
+            <CallstackCell
+              trace={metric.trace}
+              traceDomain={metric.traceDomain}
+            />
           </td>
           <td class="ta-r">
             <FrameSensitiveTime value={metric.selfTime} />

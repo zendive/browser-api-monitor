@@ -13,8 +13,6 @@
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { msToHms } from '../../api/time.ts';
   import Variable from './Variable.svelte';
-  import Trace from './Trace.svelte';
-  import TraceDomain from './TraceDomain.svelte';
   import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
   import Dialog from './Dialog.svelte';
   import Alert from './Alert.svelte';
@@ -25,6 +23,7 @@
   import CancelableCallMetric from './CancelableCallMetric.svelte';
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
+  import CallstackCell from './CallstackCell.svelte';
 
   let {
     ricHistory,
@@ -173,8 +172,10 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
+          <CallstackCell
+            trace={metric.trace}
+            traceDomain={metric.traceDomain}
+          />
         </td>
         <td class="ta-c">{metric.didTimeout}</td>
         <td class="ta-r"><FrameSensitiveTime value={metric.selfTime} /></td>
