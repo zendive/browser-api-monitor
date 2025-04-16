@@ -27,6 +27,8 @@
     "include": [
       "src/",
       "tests/",
+      "public/*.html",
+      "public/*.css",
       "build.ts",
       "*.json"
     ]

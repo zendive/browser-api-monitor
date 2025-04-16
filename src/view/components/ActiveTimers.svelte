@@ -21,19 +21,23 @@
 </script>
 
 <table data-navigation-tag={caption}>
-  <caption class="bc-invert ta-l">
-    {caption} <Variable value={metrics.length} />
-  </caption>
-  <tbody>
+  <thead class="sticky-header">
     <tr>
-      <th>Delay</th>
+      <th class="w-full">
+        {caption} Callstack [<Variable value={metrics.length} />]
+      </th>
       <th>Handler</th>
-      <th class="w-full">Callstack</th>
+      <th>Delay</th>
     </tr>
+  </thead>
 
+  <tbody>
     {#each metrics as metric (metric.handler)}
       <tr class="t-zebra">
-        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
+        <td class="wb-all w-full">
+          <TraceDomain traceDomain={metric.traceDomain} />
+          <Trace trace={metric.trace} />
+        </td>
         <td class="ta-c handler-cell">
           <span class="handler-value">{metric.handler}</span>
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -45,10 +49,7 @@
             onclick={() => void onRemoveHandler(metric)}
           ></span>
         </td>
-        <td class="wb-all w-full">
-          <TraceDomain traceDomain={metric.traceDomain} />
-          <Trace trace={metric.trace} />
-        </td>
+        <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
       </tr>
     {/each}
   </tbody>

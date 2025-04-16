@@ -50,12 +50,11 @@
 </script>
 
 <table data-navigation-tag={caption}>
-  <caption class="bc-invert ta-l">
-    {caption} <Variable value={setTimerHistory.length} />
-  </caption>
-  <tbody>
+  <thead class="sticky-header">
     <tr>
-      <th class="w-full">Callstack</th>
+      <th class="w-full">
+        {caption} Callstack [<Variable value={setTimerHistory.length} />]
+      </th>
       <th class="ta-r">
         <SortableColumn
           field="selfTime"
@@ -107,7 +106,9 @@
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
     </tr>
+  </thead>
 
+  <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
       <TimersSetHistoryMetric
         {metric}

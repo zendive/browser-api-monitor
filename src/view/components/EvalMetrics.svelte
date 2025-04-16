@@ -24,12 +24,11 @@
 
 {#if evalHistory?.length}
   <table data-navigation-tag="Eval History">
-    <caption class="ta-l bc-invert">
-      Eval History <Variable value={evalHistory.length} />
-    </caption>
-    <tbody>
+    <thead class="sticky-header">
       <tr>
-        <th class="w-full">Callstack</th>
+        <th class="w-full">
+          Eval History Callstack [<Variable value={evalHistory.length} />]
+        </th>
         <th class="ta-r">Self</th>
         <th>Called</th>
         <th>Code</th>
@@ -38,6 +37,9 @@
         <th title="Bypass"><span class="icon -bypass"></span></th>
         <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
       </tr>
+    </thead>
+
+    <tbody>
       {#each evalHistory as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">

@@ -19,7 +19,7 @@
 {#if media.collection.length}
   {#if videos.length}
     <section data-navigation-tag="Videos">
-      <div class="label bc-invert">
+      <div class="label bc-invert sticky-header">
         Videos: <Variable value={videos.length} />
       </div>
       <div class="list">
@@ -32,7 +32,7 @@
 
   {#if audios.length}
     <section data-navigation-tag="Audios">
-      <div class="label bc-invert">
+      <div class="label bc-invert sticky-header">
         Audios: <Variable value={audios.length} />
       </div>
       <div class="list">
