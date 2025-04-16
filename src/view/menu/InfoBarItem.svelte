@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { TSettingsPanel } from '../../api/settings.ts';
-  import Variable from './Variable.svelte';
+  import Variable from '../components/Variable.svelte';
 
   let {
     panel,

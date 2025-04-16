@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { TEvalHistory } from '../../wrapper/EvalWrapper.ts';
-  import Variable from './Variable.svelte';
-  import FrameSensitiveTime from './FrameSensitiveTime.svelte';
-  import TraceBreakpoint from './TraceBreakpoint.svelte';
-  import TraceBypass from './TraceBypass.svelte';
-  import CallstackCell from './CallstackCell.svelte';
+  import Variable from '../components/Variable.svelte';
+  import FrameSensitiveTime from './components/FrameSensitiveTime.svelte';
+  import TraceBreakpoint from './components/TraceBreakpoint.svelte';
+  import TraceBypass from './components/TraceBypass.svelte';
+  import CallstackCell from './components/CallstackCell.svelte';
 
   let { evalHistory }: { evalHistory: TEvalHistory[] | null } = $props();
 

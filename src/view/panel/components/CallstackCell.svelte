@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ETraceDomain, type TTrace } from '../../wrapper/TraceUtil.ts';
+  import { ETraceDomain, type TTrace } from '../../../wrapper/TraceUtil.ts';
   import TraceLink from './TraceLink.svelte';
 
   let {

@@ -3,7 +3,7 @@
     EMsg,
     portPost,
     type TMsgMediaCommand,
-  } from '../../api/communication.ts';
+  } from '../../../api/communication.ts';
 
   let { mediaId }: { mediaId: string } = $props();
 

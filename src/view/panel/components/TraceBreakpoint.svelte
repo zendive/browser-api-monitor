@@ -3,16 +3,16 @@
     getSettings,
     onSettingsChange,
     setSettings,
-  } from '../../api/settings.ts';
+  } from '../../../api/settings.ts';
 
   let { traceId }: { traceId: string } = $props();
-  let trace4Bypass: string | null = $state.raw(null);
+  let trace4Debug: string | null = $state.raw(null);
 
   getSettings().then((settings) => {
-    trace4Bypass = settings.trace4Bypass;
+    trace4Debug = settings.trace4Debug;
 
     onSettingsChange((settings) => {
-      trace4Bypass = settings.trace4Bypass;
+      trace4Debug = settings.trace4Debug;
     });
   });
 
@@ -20,7 +20,7 @@
     e.preventDefault();
 
     setSettings({
-      trace4Bypass: trace4Bypass === traceId
+      trace4Debug: trace4Debug === traceId
         ? null
         : $state.snapshot(traceId),
     });
@@ -30,11 +30,11 @@
 <div class="sensor">
   <a
     href="void(0)"
-    class:active={trace4Bypass === traceId}
-    aria-label="Place bypass"
+    class:active={trace4Debug === traceId}
+    aria-label="Place breakpoint"
     onclick={onToggle}
   >
-    <span class="icon -bypass"></span>
+    <span class="icon -breakpoint"></span>
   </a>
 </div>
 

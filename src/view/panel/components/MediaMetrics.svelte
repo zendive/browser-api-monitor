@@ -2,9 +2,9 @@
   import {
     isToggableMediaProp,
     type TMediaMetrics,
-  } from '../../wrapper/MediaWrapper.ts';
-  import { EMsg, portPost } from '../../api/communication.ts';
-  import Variable from './Variable.svelte';
+  } from '../../../wrapper/MediaWrapper.ts';
+  import { EMsg, portPost } from '../../../api/communication.ts';
+  import Variable from '../../components/Variable.svelte';
   import MediaCommands from './MediaCommands.svelte';
 
   let { metrics }: { metrics: TMediaMetrics } = $props();

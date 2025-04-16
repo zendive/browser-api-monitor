@@ -2,12 +2,12 @@
   import {
     ClearTimerFact,
     type TClearTimerHistory,
-  } from '../../wrapper/TimerWrapper.ts';
-  import { msToHms } from '../../api/time.ts';
-  import Variable from './Variable.svelte';
+  } from '../../../wrapper/TimerWrapper.ts';
+  import { msToHms } from '../../../api/time.ts';
+  import Variable from '../../components/Variable.svelte';
   import TraceBreakpoint from './TraceBreakpoint.svelte';
   import TraceBypass from './TraceBypass.svelte';
-  import type { TFactsMap } from '../../wrapper/Fact.ts';
+  import type { TFactsMap } from '../../../wrapper/Fact.ts';
   import FactsCell from './FactsCell.svelte';
   import CallstackCell from './CallstackCell.svelte';
 

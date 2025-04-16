@@ -7,14 +7,14 @@
     setSettings,
   } from '../../api/settings.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
-  import Variable from './Variable.svelte';
-  import SortableColumn from './SortableColumn.svelte';
-  import TraceBreakpoint from './TraceBreakpoint.svelte';
-  import TraceBypass from './TraceBypass.svelte';
+  import Variable from '../components/Variable.svelte';
+  import SortableColumn from './components/SortableColumn.svelte';
+  import TraceBreakpoint from './components/TraceBreakpoint.svelte';
+  import TraceBypass from './components/TraceBypass.svelte';
   import { CafFact } from '../../wrapper/AnimationWrapper.ts';
   import type { TFactsMap } from '../../wrapper/Fact.ts';
-  import FactsCell from './FactsCell.svelte';
-  import CallstackCell from './CallstackCell.svelte';
+  import FactsCell from './components/FactsCell.svelte';
+  import CallstackCell from './components/CallstackCell.svelte';
 
   let {
     cicHistory,

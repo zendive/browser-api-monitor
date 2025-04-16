@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '../../wrapper/TimerWrapper.ts';
-  import { EMsg, portPost } from '../../api/communication.ts';
-  import { msToHms } from '../../api/time.ts';
-  import Variable from './Variable.svelte';
+  import type { TOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+  import { EMsg, portPost } from '../../../api/communication.ts';
+  import { msToHms } from '../../../api/time.ts';
+  import Variable from '../../components/Variable.svelte';
   import CallstackCell from './CallstackCell.svelte';
 
   let {

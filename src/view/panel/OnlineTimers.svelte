@@ -4,7 +4,7 @@
     type TOnlineTimerMetrics,
   } from '../../wrapper/TimerWrapper.ts';
   import { compareByDelayThenHandlerDescending } from '../../api/comparator.ts';
-  import ActiveTimers from './ActiveTimers.svelte';
+  import ActiveTimers from './components/ActiveTimers.svelte';
 
   let { onlineTimers }: { onlineTimers: TOnlineTimerMetrics[] | null } =
     $props();
