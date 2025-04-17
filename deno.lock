@@ -17,7 +17,7 @@
     "npm:@types/chrome@*": "0.0.313",
     "npm:@types/chrome@0.0.313": "0.0.313",
     "npm:@types/deno@2.2.0": "2.2.0",
-    "npm:esbuild-svelte@0.9.0": "0.9.0_esbuild@0.25.2_svelte@5.25.7__acorn@8.14.1",
+    "npm:esbuild-svelte@0.9.2": "0.9.2_esbuild@0.25.2_svelte@5.25.7__acorn@8.14.1",
     "npm:happy-dom@17.4.4": "17.4.4",
     "npm:jsondiffpatch@0.7.3": "0.7.3",
     "npm:sass@1.86.3": "1.86.3",
@@ -317,8 +317,8 @@
     "detect-libc@1.0.3": {
       "integrity": "sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg=="
     },
-    "esbuild-svelte@0.9.0_esbuild@0.25.2_svelte@5.25.7__acorn@8.14.1": {
-      "integrity": "sha512-ebGQYTuM4U1Tfx9HdkNtfBjaxY7t7LirlD1yylpSIkhRW+zLzff1wOK1jhuM7ZCnBVCGpt6sGZqiPb5c99KzJg==",
+    "esbuild-svelte@0.9.2_esbuild@0.25.2_svelte@5.25.7__acorn@8.14.1": {
+      "integrity": "sha512-8Jq6+rh+g1E2mkBOZKdYZ8JtlbtDq2Fydwvn+/cBvUX9S0cdKv6AISZcEbErKQ0TpLC/Cv04l1vKaqXOBO8+VQ==",
       "dependencies": [
         "@jridgewell/trace-mapping",
         "esbuild",
@@ -529,7 +529,7 @@
       "jsr:@std/expect@^1.0.15",
       "jsr:@std/testing@^1.0.11",
       "npm:@types/chrome@*",
-      "npm:esbuild-svelte@0.9.0",
+      "npm:esbuild-svelte@0.9.2",
       "npm:happy-dom@17.4.4",
       "npm:svelte-preprocess@6.0.3"
     ],

@@ -1,5 +1,6 @@
 import { EMsg, portPost } from './api/communication.ts';
 import { getSettings, setSettings } from './api/settings.ts';
+import { enableSessionInContentScript } from './api/session.ts';
 
 // tabId may be null if user opened the devtools of the devtools
 if (chrome.devtools.inspectedWindow.tabId !== null) {
@@ -21,4 +22,6 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
       });
     },
   );
+
+  enableSessionInContentScript();
 }

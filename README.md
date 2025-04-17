@@ -34,9 +34,8 @@ If you're web developer and want to assess implementation correctness - this too
 - requestIdleCallback
 - cancelIdleCallback
 
-##### Note:
-
-- while measuring performance of your code – consider disabling this extension as it may affect the results.
+> [!NOTE]
+> While measuring performance of your code – consider disabling this extension as it may affect the results.
 
 <details>
   <summary> <strong>Example</strong> </summary>

@@ -83,7 +83,7 @@ export class Stopper {
   }
 }
 
-interface TimerOptions {
+interface ITimerOptions {
   /** a delay of setTimeout or setInterval (default: 0); irrelevant if `animation` is true */
   delay?: number;
   /** act as setInterval by repeating setTimeout (default: false) */
@@ -103,8 +103,8 @@ interface TimerOptions {
  * - `measurable: true` - measure the callback's execution time.
  */
 export class Timer {
-  readonly options: TimerOptions;
-  readonly #defaultOptions: TimerOptions = {
+  readonly options: ITimerOptions;
+  readonly #defaultOptions: ITimerOptions = {
     delay: 0,
     repetitive: false,
     animation: false,
@@ -117,7 +117,7 @@ export class Timer {
   #handler: number = 0;
   readonly #stopper?: Stopper;
 
-  constructor(o: TimerOptions, fn: (...args: unknown[]) => void) {
+  constructor(o: ITimerOptions, fn: (...args: unknown[]) => void) {
     this.options = Object.assign(this.#defaultOptions, o);
     this.#fn = fn;
     this.delay = this.options.delay || 0;
