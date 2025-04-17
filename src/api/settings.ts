@@ -35,7 +35,7 @@ export type TSettingsPanel = {
 export type TSettings = typeof DEFAULT_SETTINGS;
 export type TSettingsProperty = Partial<TSettings>;
 
-const SETTINGS_VERSION = '1.0.7';
+const SETTINGS_VERSION = '1.2.0';
 export const DEFAULT_PANELS: TSettingsPanel[] = [
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
@@ -129,8 +129,6 @@ export const DEFAULT_SETTINGS = {
   sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
-  trace4Debug: <string | null> null,
-  trace4Bypass: <string | null> null,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
 };
 

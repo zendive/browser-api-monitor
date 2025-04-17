@@ -24,6 +24,7 @@ import {
   type TRequestIdleCallbackHistory,
 } from './IdleWrapper.ts';
 import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
+import type { TSession } from '../api/session.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -77,10 +78,13 @@ const wrapApis = callingOnce(() => {
 
 export function setSettings(settings: TSettings) {
   panels = panelsArray2Map(settings.panels);
-  traceUtil.trace4Debug = settings.trace4Debug;
-  traceUtil.trace4Bypass = settings.trace4Bypass;
   setCallstackType(settings.wrapperCallstackType);
   wrapApis();
+}
+
+export function setTracePoints(session: TSession) {
+  traceUtil.debug = new Set(session.debug);
+  traceUtil.bypass = new Set(session.bypass);
 }
 
 export function onEachSecond() {

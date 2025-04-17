@@ -8,6 +8,7 @@ import {
   runMediaCommand,
   runTimerCommand,
   setSettings,
+  setTracePoints,
   type TTelemetry,
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
@@ -72,7 +73,9 @@ windowListen((o) => {
     runTimerCommand(o.type, o.handler);
   } else if (o.msg === EMsg.MEDIA_COMMAND) {
     runMediaCommand(o.mediaId, o.cmd, o.property);
+  } else if (o.msg === EMsg.SESSION) {
+    setTracePoints(o.session);
   }
 });
 
-__development__ && console.debug('cs-main.ts');
+__development__ && console.debug('api-monitor-cs-main.ts');

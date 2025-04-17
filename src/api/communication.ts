@@ -17,6 +17,7 @@ import type { TTelemetry } from '../wrapper/Wrapper.ts';
 import type { TSettings } from './settings.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 import type { Delta } from 'jsondiffpatch';
+import type { TSession } from './session.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
@@ -101,57 +102,63 @@ export enum EMsg {
   MEDIA_COMMAND,
   RESET_WRAPPER_HISTORY,
   TIMER_COMMAND,
+  SESSION,
 }
 
-export interface TMsgStartObserve {
+export interface IMsgStartObserve {
   msg: EMsg.START_OBSERVE;
 }
-export interface TMsgStopObserve {
+export interface IMsgStopObserve {
   msg: EMsg.STOP_OBSERVE;
 }
-export interface TMsgResetHistory {
+export interface IMsgResetHistory {
   msg: EMsg.RESET_WRAPPER_HISTORY;
 }
-export interface TMsgTimerCommand {
+export interface IMsgTimerCommand {
   msg: EMsg.TIMER_COMMAND;
   type: ETimerType;
   handler: number;
 }
-export interface TMsgLoaded {
+export interface IMsgLoaded {
   msg: EMsg.CONTENT_SCRIPT_LOADED;
 }
-export interface TMsgTelemetry {
+export interface IMsgTelemetry {
   msg: EMsg.TELEMETRY;
   timeOfCollection: number;
   telemetry: TTelemetry;
 }
-export interface TMsgTelemetryDelta {
+export interface IMsgTelemetryDelta {
   msg: EMsg.TELEMETRY_DELTA;
   timeOfCollection: number;
   telemetryDelta: Delta;
 }
-export interface TMsgTelemetryAcknowledged {
+export interface IMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
   timeOfCollection: number;
 }
-export interface TMsgSettings {
+export interface IMsgSettings {
   msg: EMsg.SETTINGS;
   settings: TSettings;
 }
-export interface TMsgMediaCommand {
+export interface IMsgMediaCommand {
   msg: EMsg.MEDIA_COMMAND;
   mediaId: string;
   cmd: TMediaCommand;
   property?: keyof HTMLMediaElement;
 }
+export interface IMsgSession {
+  msg: EMsg.SESSION;
+  session: TSession;
+}
 export type TMsgOptions =
-  | TMsgTelemetry
-  | TMsgTelemetryDelta
-  | TMsgTelemetryAcknowledged
-  | TMsgStartObserve
-  | TMsgStopObserve
-  | TMsgLoaded
-  | TMsgResetHistory
-  | TMsgTimerCommand
-  | TMsgSettings
-  | TMsgMediaCommand;
+  | IMsgTelemetry
+  | IMsgTelemetryDelta
+  | IMsgTelemetryAcknowledged
+  | IMsgStartObserve
+  | IMsgStopObserve
+  | IMsgLoaded
+  | IMsgResetHistory
+  | IMsgTimerCommand
+  | IMsgSettings
+  | IMsgMediaCommand
+  | IMsgSession;

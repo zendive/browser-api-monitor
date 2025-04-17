@@ -37,8 +37,8 @@ const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
 export class TraceUtil {
   selfTraceLink = '';
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
-  trace4Debug: string | null = null;
-  trace4Bypass: string | null = null;
+  debug: Set<string> = new Set();
+  bypass: Set<string> = new Set();
   #fullCallstackCacheTrace: Map</*traceId*/ string, TTrace[]> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
 
@@ -67,11 +67,11 @@ export class TraceUtil {
   }
 
   shouldPass(traceId: string) {
-    return this.trace4Bypass !== traceId;
+    return !this.bypass.has(traceId);
   }
 
   shouldPause(traceId: string) {
-    return this.trace4Debug === traceId;
+    return this.debug.has(traceId);
   }
 
   #getSelfTraceLink() {

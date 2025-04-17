@@ -1,36 +1,24 @@
 <script lang="ts">
   import {
-    getSettings,
-    onSettingsChange,
-    setSettings,
-  } from '../../../api/settings.ts';
+    sessionStore,
+    toggleDebug,
+  } from '../../store/session.store.svelte.ts';
 
   let { traceId }: { traceId: string } = $props();
-  let trace4Debug: string | null = $state.raw(null);
-
-  getSettings().then((settings) => {
-    trace4Debug = settings.trace4Debug;
-
-    onSettingsChange((settings) => {
-      trace4Debug = settings.trace4Debug;
-    });
+  let isDebugged = $derived.by(() => {
+    return sessionStore.debug.has(traceId);
   });
 
-  function onToggle(e: MouseEvent) {
+  async function onToggle(e: MouseEvent) {
     e.preventDefault();
-
-    setSettings({
-      trace4Debug: trace4Debug === traceId
-        ? null
-        : $state.snapshot(traceId),
-    });
+    await toggleDebug(traceId);
   }
 </script>
 
 <div class="sensor">
   <a
     href="void(0)"
-    class:active={trace4Debug === traceId}
+    class:active={isDebugged}
     aria-label="Place breakpoint"
     onclick={onToggle}
   >
