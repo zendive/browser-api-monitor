@@ -47,6 +47,7 @@
     });
 
     globalThis.addEventListener('beforeunload', () => {
+      chrome.power.releaseKeepAwake();
       portPost({ msg: EMsg.STOP_OBSERVE });
     });
   });

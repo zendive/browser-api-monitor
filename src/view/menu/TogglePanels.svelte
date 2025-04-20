@@ -20,10 +20,6 @@
     panels = state.panels;
     wrapperCallstackType = state.wrapperCallstackType;
     keepAwake = state.keepAwake;
-
-    if (keepAwake) {
-      chrome.power.requestKeepAwake('display');
-    }
   });
 
   runtimeListen(async (o) => {
@@ -49,6 +45,7 @@
       wrapperCallstackType === EWrapperCallstackType.FULL
         ? EWrapperCallstackType.SHORT
         : EWrapperCallstackType.FULL;
+
     setSettings({
       wrapperCallstackType: $state.snapshot(wrapperCallstackType),
     });
