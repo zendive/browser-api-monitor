@@ -33,7 +33,7 @@ export async function toggleDebug(traceId: string) {
 }
 
 const QUOTA_THRESHOLD = chrome.storage.session.QUOTA_BYTES;
-const MARGINAL_SIZE = 40;  // for ASCII string in an array
+const MARGINAL_SIZE = 40; // for ASCII string in an array
 async function toggleSet(set: Set<string>, traceId: string): Promise<boolean> {
   if (set.has(traceId)) {
     set.delete(traceId);

@@ -130,6 +130,7 @@ export const DEFAULT_SETTINGS = {
   paused: false,
   devtoolsPanelShown: false,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
+  keepAwake: false,
 };
 
 export function panelsArray2Map(panels: TSettingsPanel[]) {
