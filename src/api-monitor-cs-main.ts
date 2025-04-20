@@ -78,4 +78,4 @@ windowListen((o) => {
   }
 });
 
-__development__ && console.debug('api-monitor-cs-main.ts');
+__development__ && console.debug('api-monitor-cs-main.ts', performance.now());
