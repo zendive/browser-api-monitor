@@ -14,9 +14,13 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
         if (!settings.paused) {
           portPost({ msg: EMsg.START_OBSERVE });
         }
+        if (settings.keepAwake) {
+          chrome.power.requestKeepAwake('display');
+        }
         setSettings({ devtoolsPanelShown: true });
       });
       panel.onHidden.addListener(() => {
+        chrome.power.releaseKeepAwake();
         portPost({ msg: EMsg.STOP_OBSERVE });
         setSettings({ devtoolsPanelShown: false });
       });
