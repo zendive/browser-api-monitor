@@ -78,6 +78,7 @@
   function onDevReload() {
     console.clear();
     chrome.storage.local.clear();
+    chrome.storage.session.clear();
     location.reload();
   }
 </script>

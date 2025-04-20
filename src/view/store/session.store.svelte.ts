@@ -1,8 +1,6 @@
 import { getSession, setSession } from '../../api/session.ts';
 import { SvelteSet } from 'svelte/reactivity';
-import { HASH_STRING_LENGTH } from '../../api/hash.ts';
 
-const SIZE_LIMIT = chrome.storage.session.QUOTA_BYTES - HASH_STRING_LENGTH;
 export const sessionStore = $state({
   bypass: <Set<string>> new SvelteSet(),
   debug: <Set<string>> new SvelteSet(),
@@ -19,35 +17,36 @@ getSession().then((session) => {
 });
 
 export async function toggleBypass(traceId: string) {
-  const sessionStorageSize = await chrome.storage.session.getBytesInUse();
-  let dirty = false;
-
-  if (sessionStore.bypass.has(traceId)) {
-    sessionStore.bypass.delete(traceId);
-    dirty = true;
-  } else if (sessionStorageSize < SIZE_LIMIT) {
-    sessionStore.bypass.add(traceId);
-    dirty = true;
+  if (await toggleSet(sessionStore.bypass, traceId)) {
+    await setSession({
+      bypass: Array.from(sessionStore.bypass.values()),
+    });
   }
-
-  dirty && await setSession({
-    bypass: Array.from(sessionStore.bypass.values()),
-  });
 }
 
 export async function toggleDebug(traceId: string) {
-  const sessionStorageSize = await chrome.storage.session.getBytesInUse();
-  let dirty = false;
+  if (await toggleSet(sessionStore.debug, traceId)) {
+    await setSession({
+      debug: Array.from(sessionStore.debug.values()),
+    });
+  }
+}
 
-  if (sessionStore.debug.has(traceId)) {
-    sessionStore.debug.delete(traceId);
-    dirty = true;
-  } else if (sessionStorageSize < SIZE_LIMIT) {
-    sessionStore.debug.add(traceId);
-    dirty = true;
+const QUOTA_THRESHOLD = chrome.storage.session.QUOTA_BYTES;
+const MARGINAL_SIZE = 40;  // for ASCII string in an array
+async function toggleSet(set: Set<string>, traceId: string): Promise<boolean> {
+  if (set.has(traceId)) {
+    set.delete(traceId);
+    return true;
   }
 
-  dirty && await setSession({
-    debug: Array.from(sessionStore.debug.values()),
-  });
+  const freeSpace = QUOTA_THRESHOLD -
+    await chrome.storage.session.getBytesInUse();
+
+  if (freeSpace - traceId.length - MARGINAL_SIZE >= 0) {
+    set.add(traceId);
+    return true;
+  }
+
+  return false;
 }
