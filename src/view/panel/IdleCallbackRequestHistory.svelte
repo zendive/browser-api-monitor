@@ -4,12 +4,7 @@
     type TCancelIdleCallbackHistory,
     type TRequestIdleCallbackHistory,
   } from '../../wrapper/IdleWrapper.ts';
-  import {
-    DEFAULT_SORT_RIC,
-    ESortOrder,
-    getSettings,
-    setSettings,
-  } from '../../api/settings.ts';
+  import { ESortOrder, saveLocalStorage } from '../../api/storage.local.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import { msToHms } from '../../api/time.ts';
   import Variable from '../components/Variable.svelte';
@@ -24,6 +19,7 @@
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './components/FactsCell.svelte';
   import CallstackCell from './components/CallstackCell.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
 
   let {
     ricHistory,
@@ -34,12 +30,16 @@
     cicHistory: TCancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
-  let sortField = $state(DEFAULT_SORT_RIC.field);
-  let sortOrder = $state(DEFAULT_SORT_RIC.order);
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
+  const { sortRequestIdleCallback } = useConfigState();
   let sortedMetrics = $derived.by(() =>
-    ricHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+    ricHistory.toSorted(
+      compareByFieldOrder(
+        sortRequestIdleCallback.field,
+        sortRequestIdleCallback.order,
+      ),
+    )
   );
   const RicFacts: TFactsMap = new Map([
     [RicFact.BAD_DELAY, {
@@ -48,20 +48,13 @@
     }],
   ]);
 
-  getSettings().then((settings) => {
-    sortField = settings.sortRequestIdleCallback.field;
-    sortOrder = settings.sortRequestIdleCallback.order;
-  });
+  function onChangeSort(field: string, order: ESortOrder) {
+    sortRequestIdleCallback.field =
+      <keyof TRequestIdleCallbackHistory> field;
+    sortRequestIdleCallback.order = order;
 
-  function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TRequestIdleCallbackHistory> _field;
-    sortOrder = _order;
-
-    setSettings({
-      sortRequestIdleCallback: {
-        field: $state.snapshot(sortField),
-        order: $state.snapshot(sortOrder),
-      },
+    saveLocalStorage({
+      sortRequestIdleCallback: $state.snapshot(sortRequestIdleCallback),
     });
   }
 
@@ -118,48 +111,48 @@
       <th class="ta-r">
         <SortableColumn
           field="selfTime"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Self</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="facts"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         ><span class="icon -facts"></span></SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Handler</SortableColumn>
       </th>
       <th class="ta-r">
         <SortableColumn
           field="delay"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Delay</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Set</SortableColumn>
       </th>
@@ -190,7 +183,7 @@
             onClick={onFindRegressors}
           />
         </td>
-        <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td class="ta-c">{metric.handler}</td>
         <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
         <td class="ta-r">
           {#if metric.online}

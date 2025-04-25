@@ -1,12 +1,12 @@
 <script lang="ts">
   import {
-    sessionStore,
+    sessionState,
     toggleDebug,
-  } from '../../store/session.store.svelte.ts';
+  } from '../../../state/session.state.svelte.ts';
 
   let { traceId }: { traceId: string } = $props();
   let isDebugged = $derived.by(() => {
-    return sessionStore.debug.has(traceId);
+    return sessionState.debug.has(traceId);
   });
 
   async function onToggle(e: MouseEvent) {

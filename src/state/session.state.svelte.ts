@@ -1,33 +1,36 @@
-import { getSession, setSession } from '../../api/session.ts';
+import {
+  loadSessionStorage,
+  saveSessionStorage,
+} from '../api/storage.session.ts';
 import { SvelteSet } from 'svelte/reactivity';
 
-export const sessionStore = $state({
+export const sessionState = $state({
   bypass: <Set<string>> new SvelteSet(),
   debug: <Set<string>> new SvelteSet(),
 });
 
-getSession().then((session) => {
+loadSessionStorage().then((session) => {
   session.bypass.forEach((traceId) => {
-    sessionStore.bypass.add(traceId);
+    sessionState.bypass.add(traceId);
   });
 
   session.debug.forEach((traceId) => {
-    sessionStore.debug.add(traceId);
+    sessionState.debug.add(traceId);
   });
 });
 
 export async function toggleBypass(traceId: string) {
-  if (await toggleSet(sessionStore.bypass, traceId)) {
-    await setSession({
-      bypass: Array.from(sessionStore.bypass.values()),
+  if (await toggleSet(sessionState.bypass, traceId)) {
+    await saveSessionStorage({
+      bypass: Array.from(sessionState.bypass.values()),
     });
   }
 }
 
 export async function toggleDebug(traceId: string) {
-  if (await toggleSet(sessionStore.debug, traceId)) {
-    await setSession({
-      debug: Array.from(sessionStore.debug.values()),
+  if (await toggleSet(sessionState.debug, traceId)) {
+    await saveSessionStorage({
+      debug: Array.from(sessionState.debug.values()),
     });
   }
 }

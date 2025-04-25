@@ -12,6 +12,7 @@ import type {
 } from '../wrapper/TimerWrapper.ts';
 
 type TPanelKey =
+  | 'callsSummary'
   | 'eval'
   | 'media'
   | 'activeTimers'
@@ -24,19 +25,20 @@ type TPanelKey =
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
 export type TPanelMap = {
-  [K in TPanelKey]: TSettingsPanel;
+  [K in TPanelKey]: TPanel;
 };
-export type TSettingsPanel = {
+export type TPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
   wrap: boolean | null;
 };
-export type TSettings = typeof DEFAULT_SETTINGS;
-export type TSettingsProperty = Partial<TSettings>;
+export type TConfig = typeof DEFAULT_CONFIG;
+export type TConfigField = Partial<TConfig>;
 
-const SETTINGS_VERSION = '1.2.0';
-export const DEFAULT_PANELS: TSettingsPanel[] = [
+const CONFIG_VERSION = '2025-04-25';
+export const DEFAULT_PANELS: TPanel[] = [
+  { key: 'callsSummary', label: 'Calls Summary', visible: false, wrap: null },
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
@@ -97,29 +99,29 @@ export enum ESortOrder {
 export const DEFAULT_SORT_SET_TIMERS = {
   field: <keyof TSetTimerHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 export const DEFAULT_SORT_CLEAR_TIMERS = {
   field: <keyof TClearTimerHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 export const DEFAULT_SORT_RAF = {
   field: <keyof TRequestAnimationFrameHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 export const DEFAULT_SORT_CAF = {
   field: <keyof TCancelAnimationFrameHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 export const DEFAULT_SORT_RIC = {
   field: <keyof TRequestIdleCallbackHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 export const DEFAULT_SORT_CIC = {
   field: <keyof TCancelIdleCallbackHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
-} as const;
+};
 
-export const DEFAULT_SETTINGS = {
+export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
   sortSetTimers: DEFAULT_SORT_SET_TIMERS,
   sortClearTimers: DEFAULT_SORT_CLEAR_TIMERS,
@@ -133,44 +135,44 @@ export const DEFAULT_SETTINGS = {
   keepAwake: false,
 };
 
-export function panelsArray2Map(panels: TSettingsPanel[]) {
+export function panelsArray2Map(panels: TPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
     {} as TPanelMap,
   );
 }
 
-export async function getSettings(): Promise<TSettings> {
-  let store = await chrome.storage.local.get([SETTINGS_VERSION]);
+export async function loadLocalStorage(): Promise<TConfig> {
+  let store = await chrome.storage.local.get([CONFIG_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
   if (isEmpty) {
-    await chrome.storage.local.clear(); // rid off previous version settings
-    await chrome.storage.local.set({ [SETTINGS_VERSION]: DEFAULT_SETTINGS });
-    store = await chrome.storage.local.get([SETTINGS_VERSION]);
+    await chrome.storage.local.clear(); // reset previous version
+    await chrome.storage.local.set({ [CONFIG_VERSION]: DEFAULT_CONFIG });
+    store = await chrome.storage.local.get([CONFIG_VERSION]);
   }
 
-  return store[SETTINGS_VERSION];
+  return store[CONFIG_VERSION];
 }
 
-export async function setSettings(value: TSettingsProperty) {
-  const store = await chrome.storage.local.get([SETTINGS_VERSION]);
+export async function saveLocalStorage(value: TConfigField) {
+  const store = await chrome.storage.local.get([CONFIG_VERSION]);
 
-  Object.assign(store[SETTINGS_VERSION], value);
+  Object.assign(store[CONFIG_VERSION], value);
 
   return await chrome.storage.local.set(store);
 }
 
-export function onSettingsChange(
-  callback: (newValue: TSettings, oldValue: TSettings) => void,
+export function onLocalStorageChange(
+  callback: (newValue: TConfig, oldValue: TConfig) => void,
 ) {
   chrome.storage.local.onChanged.addListener((change) => {
     if (
-      change && change[SETTINGS_VERSION] && change[SETTINGS_VERSION].newValue
+      change && change[CONFIG_VERSION] && change[CONFIG_VERSION].newValue
     ) {
       callback(
-        change[SETTINGS_VERSION].newValue,
-        change[SETTINGS_VERSION].oldValue,
+        change[CONFIG_VERSION].newValue,
+        change[CONFIG_VERSION].oldValue,
       );
     }
   });

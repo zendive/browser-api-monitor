@@ -1,75 +1,42 @@
 <script lang="ts">
-  import {
-    DEFAULT_SETTINGS,
-    EWrapperCallstackType,
-    getSettings,
-    setSettings,
-    type TSettingsPanel,
-  } from '../../api/settings.ts';
+  import { EWrapperCallstackType } from '../../api/storage.local.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
   import Alert from '../components/Alert.svelte';
+  import {
+    toggleKeepAwake,
+    togglePanelVisibility,
+    togglePanelWrap,
+    toggleWrapperCallstackType,
+    useConfigState,
+  } from '../../state/config.state.svelte.ts';
 
-  const NON_WRAPPABLE = ['media', 'activeTimers'];
-  let panels: TSettingsPanel[] = $state([]);
-  let wrapperCallstackType = $state(DEFAULT_SETTINGS.wrapperCallstackType);
+  const config = useConfigState();
   let reloadMessageEl: Alert | null = null;
   let selfEl: HTMLElement | null = null;
-  let keepAwake = $state.raw(false);
 
-  getSettings().then((state) => {
-    panels = state.panels;
-    wrapperCallstackType = state.wrapperCallstackType;
-    keepAwake = state.keepAwake;
-  });
-
-  runtimeListen(async (o) => {
+  runtimeListen((o) => {
     if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
       reloadMessageEl?.hide();
       selfEl?.hidePopover();
     }
   });
 
-  function onTogglePanelVisibility(index: number) {
-    panels[index].visible = !panels[index].visible;
-    setSettings({ panels: $state.snapshot(panels) });
-  }
-
   function onTogglePanelWrap(index: number) {
-    panels[index].wrap = !panels[index].wrap;
-    setSettings({ panels: $state.snapshot(panels) });
+    togglePanelWrap(index);
     reloadMessageEl?.show();
   }
 
   function onToggleWrapperCallstackType() {
-    wrapperCallstackType =
-      wrapperCallstackType === EWrapperCallstackType.FULL
-        ? EWrapperCallstackType.SHORT
-        : EWrapperCallstackType.FULL;
-
-    setSettings({
-      wrapperCallstackType: $state.snapshot(wrapperCallstackType),
-    });
+    toggleWrapperCallstackType();
     reloadMessageEl?.show();
-  }
-
-  function onToggleKeepAwake() {
-    keepAwake = !keepAwake;
-
-    if (keepAwake) {
-      chrome.power.requestKeepAwake('display');
-    } else {
-      chrome.power.releaseKeepAwake();
-    }
-
-    setSettings({ keepAwake });
   }
 </script>
 
 <button
   popovertarget="toggle-panels-menu"
   class="toggle-menu-button"
-  title="Settings"
-  aria-label="Settings"
+  title="Control Panel"
+  aria-label="Control Panel"
 >
   <span class="icon -toggle-menu"></span>
 </button>
@@ -87,7 +54,7 @@
           >
             {
               `${
-                wrapperCallstackType ===
+                config.wrapperCallstackType ===
                     EWrapperCallstackType.FULL
                   ? 'full'
                   : 'short'
@@ -97,8 +64,8 @@
         </td>
       </tr>
 
-      {#each panels as panel, index (panel.key)}
-        <tr class="menu-item">
+      {#each config?.panels || [] as panel, index (panel.key)}
+        <tr class="menu-item" class:-dash-bottom={index === 2}>
           <td class="-left">
             <a
               href="void(0)"
@@ -107,12 +74,12 @@
               title="Toggle panel visibility"
               onclick={(e) => {
                 e.preventDefault();
-                onTogglePanelVisibility(index);
+                togglePanelVisibility(index);
               }}
             >{panel.label}</a>
           </td>
 
-          {#if !NON_WRAPPABLE.includes(panel.key)}
+          {#if panel.wrap !== null}
             <td class="-right">
               <button
                 class="btn-toggle"
@@ -128,14 +95,14 @@
 
       <tr class="menu-item -dash-top">
         <td class="-left">
-          Prevent the system from sleeping in response to user inactivity
+          Prevent system from going to Sleep state due to user inactivity
         </td>
         <td class="-right">
           <button
             class="btn-toggle"
-            onclick={onToggleKeepAwake}
+            onclick={toggleKeepAwake}
           >
-            {`${keepAwake ? 'on' : 'off'}`}
+            {`${config.keepAwake ? 'on' : 'off'}`}
           </button>
         </td>
       </tr>

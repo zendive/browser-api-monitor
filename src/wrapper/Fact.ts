@@ -27,12 +27,11 @@ export class Fact {
     return !!(data & fact);
   }
 
-  static getDetails(data: number, factsMap: TFactsMap): string {
+  static getDetails(factsMap: TFactsMap): string {
     const rv: string[] = [];
 
-    for (const [fact, descriptor] of factsMap) {
-      Fact.check(data, fact) &&
-        rv.push(`${descriptor.tag}: ${descriptor.details}`);
+    for (const [_fact, descriptor] of factsMap) {
+      rv.push(`${descriptor.tag}: ${descriptor.details}`);
     }
 
     return rv.join('\n');

@@ -1,5 +1,5 @@
 import { hashString } from '../api/hash.ts';
-import { EWrapperCallstackType } from '../api/settings.ts';
+import { EWrapperCallstackType } from '../api/storage.local.ts';
 
 export type TTrace = {
   name: string | 0;
@@ -13,6 +13,7 @@ export enum ETraceDomain {
   SAME,
   EXTERNAL,
   EXTENSION,
+  WEBPACK,
   UNKNOWN,
 }
 
@@ -61,6 +62,8 @@ export class TraceUtil {
       return ETraceDomain.EXTERNAL;
     } else if (trace.link.startsWith('chrome-extension://')) {
       return ETraceDomain.EXTENSION;
+    } else if (trace.link.startsWith('webpack://')) {
+      return ETraceDomain.WEBPACK;
     }
 
     return ETraceDomain.UNKNOWN;

@@ -1,4 +1,4 @@
-import type { TSettingsPanel } from '../api/settings.ts';
+import type { TPanel } from '../api/storage.local.ts';
 import {
   cancelAnimationFrame,
   requestAnimationFrame,
@@ -215,7 +215,7 @@ export class AnimationWrapper {
     globalThis.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
-  collectHistory(rafPanel: TSettingsPanel, cafPanel: TSettingsPanel) {
+  collectHistory(rafPanel: TPanel, cafPanel: TPanel) {
     return {
       rafHistory: rafPanel.wrap && rafPanel.visible
         ? Array.from(this.rafHistory.values())

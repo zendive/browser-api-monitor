@@ -3,16 +3,12 @@
     TClearTimerHistory,
     TSetTimerHistory,
   } from '../../wrapper/TimerWrapper.ts';
-  import {
-    DEFAULT_SORT_SET_TIMERS,
-    ESortOrder,
-    getSettings,
-    setSettings,
-  } from '../../api/settings.ts';
+  import { ESortOrder, saveLocalStorage } from '../../api/storage.local.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from '../components/Variable.svelte';
   import SortableColumn from './components/SortableColumn.svelte';
   import TimersSetHistoryMetric from './components/TimersSetHistoryMetric.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
 
   let {
     setTimerHistory,
@@ -25,26 +21,19 @@
     clearIntervalHistory: TClearTimerHistory[] | null;
     caption?: string;
   } = $props();
-  let sortField = $state(DEFAULT_SORT_SET_TIMERS.field);
-  let sortOrder = $state(DEFAULT_SORT_SET_TIMERS.order);
-  let sortedMetrics = $derived.by(() =>
-    setTimerHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+  let { sortSetTimers } = useConfigState();
+  const sortedMetrics = $derived.by(() =>
+    setTimerHistory.toSorted(
+      compareByFieldOrder(sortSetTimers.field, sortSetTimers.order),
+    )
   );
 
-  getSettings().then((settings) => {
-    sortField = settings.sortSetTimers.field;
-    sortOrder = settings.sortSetTimers.order;
-  });
+  function onChangeSort(field: string, order: ESortOrder) {
+    sortSetTimers.field = <keyof TSetTimerHistory> field;
+    sortSetTimers.order = order;
 
-  function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TSetTimerHistory> _field;
-    sortOrder = _order;
-
-    setSettings({
-      sortSetTimers: {
-        field: $state.snapshot(sortField),
-        order: $state.snapshot(sortOrder),
-      },
+    saveLocalStorage({
+      sortSetTimers: $state.snapshot(sortSetTimers),
     });
   }
 </script>
@@ -58,48 +47,48 @@
       <th class="ta-r">
         <SortableColumn
           field="selfTime"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         >Self</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="facts"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         ><span class="icon -facts"></span></SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         >Handler</SortableColumn>
       </th>
       <th class="ta-r">
         <SortableColumn
           field="delay"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         >Delay</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortSetTimers.field}
+          currentFieldOrder={sortSetTimers.order}
           eventChangeSorting={onChangeSort}
         >Set</SortableColumn>
       </th>

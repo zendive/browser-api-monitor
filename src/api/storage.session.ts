@@ -1,4 +1,4 @@
-const SESSION_VERSION = '1.2.0';
+const SESSION_VERSION = '2025-04-25';
 
 export type TSession = typeof DEFAULT_SESSION;
 type TSessionProperty = Partial<TSession>;
@@ -13,12 +13,12 @@ export function enableSessionInContentScript() {
   });
 }
 
-export async function getSession(): Promise<TSession> {
+export async function loadSessionStorage(): Promise<TSession> {
   let store = await chrome.storage.session.get([SESSION_VERSION]);
   const isEmpty = !Object.keys(store).length;
 
   if (isEmpty) {
-    await chrome.storage.session.clear(); // rid off previous version settings
+    await chrome.storage.session.clear(); // reset previous version
     await chrome.storage.session.set({ [SESSION_VERSION]: DEFAULT_SESSION });
     store = await chrome.storage.session.get([SESSION_VERSION]);
   }
@@ -26,7 +26,7 @@ export async function getSession(): Promise<TSession> {
   return store[SESSION_VERSION];
 }
 
-export async function setSession(value: TSessionProperty) {
+export async function saveSessionStorage(value: TSessionProperty) {
   const store = await chrome.storage.session.get([SESSION_VERSION]);
 
   Object.assign(store[SESSION_VERSION], value);
@@ -34,7 +34,7 @@ export async function setSession(value: TSessionProperty) {
   return await chrome.storage.session.set(store);
 }
 
-export function onSessionChange(
+export function onSessionStorageChange(
   callback: (newValue: TSession, oldValue: TSession) => void,
 ) {
   chrome.storage.session.onChanged.addListener((change) => {

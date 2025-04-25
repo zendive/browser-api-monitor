@@ -1,4 +1,4 @@
-import type { TSettingsPanel } from '../api/settings.ts';
+import type { TPanel } from '../api/storage.local.ts';
 import { trim2microsecond } from '../api/time.ts';
 import {
   type ETraceDomain,
@@ -240,7 +240,7 @@ export class IdleWrapper {
     globalThis.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
-  collectHistory(ricPanel: TSettingsPanel, cicPanel: TSettingsPanel) {
+  collectHistory(ricPanel: TPanel, cicPanel: TPanel) {
     return {
       ricHistory: ricPanel.wrap && ricPanel.visible
         ? Array.from(this.ricHistory.values())

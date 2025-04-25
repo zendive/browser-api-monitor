@@ -15,7 +15,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../api/const.ts';
-import type { TSettingsPanel } from '../api/settings.ts';
+import type { TPanel } from '../api/storage.local.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
 import { validHandler, validTimerDelay } from './util.ts';
 import { trim2microsecond } from '../api/time.ts';
@@ -463,11 +463,11 @@ export class TimerWrapper {
   }
 
   collectHistory(
-    activeTimers: TSettingsPanel,
-    setTimeout: TSettingsPanel,
-    clearTimeout: TSettingsPanel,
-    setInterval: TSettingsPanel,
-    clearInterval: TSettingsPanel,
+    activeTimers: TPanel,
+    setTimeout: TPanel,
+    clearTimeout: TPanel,
+    setInterval: TPanel,
+    clearInterval: TPanel,
   ) {
     return {
       onlineTimers: activeTimers.visible
