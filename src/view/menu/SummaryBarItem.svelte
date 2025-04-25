@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TSettingsPanel } from '../../api/settings.ts';
+  import type { TPanel } from '../../api/storage.local.ts';
   import Variable from '../components/Variable.svelte';
 
   let {
@@ -9,7 +9,7 @@
     navSelector,
     tooltip = '',
   }: {
-    panel: TSettingsPanel;
+    panel: TPanel;
     label: string;
     count: number;
     navSelector: string;
@@ -32,7 +32,7 @@
 
     if (el instanceof HTMLElement) {
       el.scrollIntoView({
-        behavior: 'smooth',
+        behavior: 'instant',
         block: 'start',
         inline: 'nearest',
       });

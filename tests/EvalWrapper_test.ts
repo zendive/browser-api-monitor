@@ -2,7 +2,7 @@ import './browserPolyfill.ts';
 import { wait } from './util.ts';
 import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
+import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
 import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
@@ -44,7 +44,8 @@ describe('EvalWrapper', () => {
     const rec = Array.from(apiEval.evalHistory.values())[0];
 
     expect(rec.calls).toBe(NUMBER_OF_INVOCATIONS);
-    expect(rec.usesLocalScope).toBe(false);
+    expect(Fact.check(rec.facts, EvalFact.USES_GLOBAL_SCOPE)).toBe(true);
+    expect(Fact.check(rec.facts, EvalFact.USES_LOCAL_SCOPE)).toBe(false);
     expect(rec.code).toBe(CODE);
     expect(rec.returnedValue).toBe(RESULT);
     expect(rec.trace.length).toBeGreaterThan(1);
@@ -60,7 +61,8 @@ describe('EvalWrapper', () => {
 
     expect(rec.calls).toBe(1);
     expect(local_variable).toBe(0);
-    expect(rec.usesLocalScope).toBe(true);
+    expect(Fact.check(rec.facts, EvalFact.USES_GLOBAL_SCOPE)).toBe(true);
+    expect(Fact.check(rec.facts, EvalFact.USES_LOCAL_SCOPE)).toBe(true);
     expect(rec.returnedValue).toBe(TAG_UNDEFINED);
   });
 

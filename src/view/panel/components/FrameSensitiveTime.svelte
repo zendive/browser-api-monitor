@@ -14,7 +14,7 @@
 
 <style lang="scss">
   .shouldMark {
-    color: var(--error);
+    color: var(--attention);
     font-weight: bold;
   }
 </style>

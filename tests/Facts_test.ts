@@ -39,7 +39,7 @@ describe('Facts', () => {
       data = Fact.assign(data, fact);
     }
 
-    const details = Fact.getDetails(data, factsMap);
+    const details = Fact.getDetails(factsMap);
 
     expect(details).toBe(`1: fact_1\n2: fact_2`);
   });

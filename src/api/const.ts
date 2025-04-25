@@ -10,7 +10,7 @@ export const FRAME_1of60 = 0.0166666666667; // ms
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
 export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
-// store native functions
+// state native functions
 export const setTimeout = /*@__PURE__*/ globalThis.setTimeout.bind(globalThis);
 export const clearTimeout = /*@__PURE__*/ globalThis.clearTimeout.bind(
   globalThis,

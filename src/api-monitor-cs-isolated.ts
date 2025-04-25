@@ -5,24 +5,34 @@ import {
   windowListen,
   windowPost,
 } from './api/communication.ts';
-import { getSettings, onSettingsChange } from './api/settings.ts';
-import { getSession, onSessionChange } from './api/session.ts';
+import { loadLocalStorage, onLocalStorageChange } from './api/storage.local.ts';
+import {
+  loadSessionStorage,
+  onSessionStorageChange,
+} from './api/storage.session.ts';
 
-Promise.all([getSettings(), getSession()]).then(([settings, session]) => {
-  windowPost({ msg: EMsg.SETTINGS, settings });
-  windowPost({ msg: EMsg.SESSION, session });
+Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
+  ([config, session]) => {
+    windowPost({ msg: EMsg.CONFIG, config });
+    windowPost({ msg: EMsg.SESSION, session });
 
-  portListen(windowPost);
-  windowListen(runtimePost);
+    if (config.devtoolsPanelShown && !config.paused) {
+      windowPost({ msg: EMsg.START_OBSERVE });
+    }
 
-  onSettingsChange((newValue) => {
-    windowPost({ msg: EMsg.SETTINGS, settings: newValue });
-  });
-  onSessionChange((newValue) => {
-    windowPost({ msg: EMsg.SESSION, session: newValue });
-  });
+    portListen(windowPost);
+    windowListen(runtimePost);
 
-  runtimePost({ msg: EMsg.CONTENT_SCRIPT_LOADED });
+    onLocalStorageChange((newValue) => {
+      windowPost({ msg: EMsg.CONFIG, config: newValue });
+    });
+    onSessionStorageChange((newValue) => {
+      windowPost({ msg: EMsg.SESSION, session: newValue });
+    });
 
-  __development__ && console.log('api-monitor-cs-isolated.ts', performance.now());
-});
+    runtimePost({ msg: EMsg.CONTENT_SCRIPT_LOADED });
+
+    __development__ &&
+      console.log('api-monitor-cs-isolated.ts', performance.now());
+  },
+);

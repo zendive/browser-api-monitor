@@ -108,7 +108,7 @@
       onClick={onFindRegressors}
     />
   </td>
-  <td class="ta-c"><Variable value={metric.handler} /></td>
+  <td class="ta-c">{metric.handler}</td>
   <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
   <td class="ta-r">
     {#if metric.online}

@@ -1,5 +1,5 @@
 import type { TOnlineTimerMetrics } from '../wrapper/TimerWrapper.ts';
-import { ESortOrder } from './settings.ts';
+import { ESortOrder } from './storage.local.ts';
 
 const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
 

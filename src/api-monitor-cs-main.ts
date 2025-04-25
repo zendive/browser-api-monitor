@@ -2,13 +2,13 @@ import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
 import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
+  applyConfig,
+  applySession,
   cleanHistory,
   collectMetrics,
   onEachSecond,
   runMediaCommand,
   runTimerCommand,
-  setSettings,
-  setTracePoints,
   type TTelemetry,
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
@@ -52,11 +52,9 @@ windowListen((o) => {
     originalMetrics = currentMetrics;
     eachSecond.isPending() && tick.start();
   } else if (
-    o.msg === EMsg.SETTINGS &&
-    o.settings &&
-    typeof o.settings === 'object'
+    o.msg === EMsg.CONFIG && o.config && typeof o.config === 'object'
   ) {
-    setSettings(o.settings);
+    applyConfig(o.config);
   } else if (o.msg === EMsg.START_OBSERVE) {
     originalMetrics = currentMetrics = null;
     tick.trigger();
@@ -74,7 +72,7 @@ windowListen((o) => {
   } else if (o.msg === EMsg.MEDIA_COMMAND) {
     runMediaCommand(o.mediaId, o.cmd, o.property);
   } else if (o.msg === EMsg.SESSION) {
-    setTracePoints(o.session);
+    applySession(o.session);
   }
 });
 

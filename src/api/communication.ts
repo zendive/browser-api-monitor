@@ -14,10 +14,10 @@ import { APPLICATION_NAME } from './env.ts';
 import { ERRORS_IGNORED } from './const.ts';
 import { ETimerType } from '../wrapper/TimerWrapper.ts';
 import type { TTelemetry } from '../wrapper/Wrapper.ts';
-import type { TSettings } from './settings.ts';
+import type { TConfig } from './storage.local.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 import type { Delta } from 'jsondiffpatch';
-import type { TSession } from './session.ts';
+import type { TSession } from './storage.session.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
@@ -92,7 +92,7 @@ function handleRuntimeMessageResponse(): void {
 }
 
 export enum EMsg {
-  SETTINGS,
+  CONFIG,
   CONTENT_SCRIPT_LOADED,
   START_OBSERVE,
   STOP_OBSERVE,
@@ -136,9 +136,9 @@ export interface IMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
   timeOfCollection: number;
 }
-export interface IMsgSettings {
-  msg: EMsg.SETTINGS;
-  settings: TSettings;
+export interface IMsgConfig {
+  msg: EMsg.CONFIG;
+  config: TConfig;
 }
 export interface IMsgMediaCommand {
   msg: EMsg.MEDIA_COMMAND;
@@ -159,6 +159,6 @@ export type TMsgOptions =
   | IMsgLoaded
   | IMsgResetHistory
   | IMsgTimerCommand
-  | IMsgSettings
+  | IMsgConfig
   | IMsgMediaCommand
   | IMsgSession;

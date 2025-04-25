@@ -10,7 +10,7 @@
 
 <span
   class="fact-cell"
-  title={Fact.getDetails(facts, factsMap)}
+  title={Fact.getDetails(factsMap)}
 >
   {Fact.getTags(facts, factsMap)}
 </span>
@@ -18,6 +18,6 @@
 <style>
   .fact-cell {
     font-weight: bold;
-    color: var(--error);
+    color: var(--attention);
   }
 </style>

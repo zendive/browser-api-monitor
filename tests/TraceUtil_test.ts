@@ -1,5 +1,5 @@
 import { wait } from './util.ts';
-import { EWrapperCallstackType } from '../src/api/settings.ts';
+import { EWrapperCallstackType } from '../src/api/storage.local.ts';
 import {
   TAG_INVALID_CALLSTACK_LINK,
   TraceUtil,

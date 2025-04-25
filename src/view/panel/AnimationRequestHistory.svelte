@@ -3,12 +3,7 @@
     TCancelAnimationFrameHistory,
     TRequestAnimationFrameHistory,
   } from '../../wrapper/AnimationWrapper.ts';
-  import {
-    DEFAULT_SORT_RAF,
-    ESortOrder,
-    getSettings,
-    setSettings,
-  } from '../../api/settings.ts';
+  import { ESortOrder, saveLocalStorage } from '../../api/storage.local.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from '../components/Variable.svelte';
   import SortableColumn from './components/SortableColumn.svelte';
@@ -20,6 +15,7 @@
   import TraceBypass from './components/TraceBypass.svelte';
   import CancelableCallMetric from './components/CancelableCallMetric.svelte';
   import CallstackCell from './components/CallstackCell.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
 
   let {
     rafHistory,
@@ -30,28 +26,25 @@
     cafHistory: TCancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
-  let sortField = $state(DEFAULT_SORT_RAF.field);
-  let sortOrder = $state(DEFAULT_SORT_RAF.order);
+  const { sortRequestAnimationFrame } = useConfigState();
   let dialogEl: Dialog | null = null;
   let alertEl: Alert | null = null;
   let sortedMetrics = $derived.by(() =>
-    rafHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+    rafHistory.toSorted(
+      compareByFieldOrder(
+        sortRequestAnimationFrame.field,
+        sortRequestAnimationFrame.order,
+      ),
+    )
   );
 
-  getSettings().then((settings) => {
-    sortField = settings.sortRequestAnimationFrame.field;
-    sortOrder = settings.sortRequestAnimationFrame.order;
-  });
-
   function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TRequestAnimationFrameHistory> _field;
-    sortOrder = _order;
+    sortRequestAnimationFrame.field =
+      <keyof TRequestAnimationFrameHistory> _field;
+    sortRequestAnimationFrame.order = _order;
 
-    setSettings({
-      sortRequestAnimationFrame: {
-        field: $state.snapshot(sortField),
-        order: $state.snapshot(sortOrder),
-      },
+    saveLocalStorage({
+      sortRequestAnimationFrame: $state.snapshot(sortRequestAnimationFrame),
     });
   }
 
@@ -107,8 +100,8 @@
       <th class="ta-r">
         <SortableColumn
           field="selfTime"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestAnimationFrame.field}
+          currentFieldOrder={sortRequestAnimationFrame.order}
           eventChangeSorting={onChangeSort}
         >Self</SortableColumn>
       </th>
@@ -116,24 +109,24 @@
       <th class="ta-c">
         <SortableColumn
           field="calls"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestAnimationFrame.field}
+          currentFieldOrder={sortRequestAnimationFrame.order}
           eventChangeSorting={onChangeSort}
         >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestAnimationFrame.field}
+          currentFieldOrder={sortRequestAnimationFrame.order}
           eventChangeSorting={onChangeSort}
         >Handler</SortableColumn>
       </th>
       <th>
         <SortableColumn
           field="online"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortRequestAnimationFrame.field}
+          currentFieldOrder={sortRequestAnimationFrame.order}
           eventChangeSorting={onChangeSort}
         >Set</SortableColumn>
       </th>
@@ -161,7 +154,7 @@
             onClick={onFindRegressors}
           />
         </td>
-        <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td class="ta-c">{metric.handler}</td>
         <td class="ta-r">
           {#if metric.online}
             <Variable value={metric.online} />

@@ -4,9 +4,9 @@ import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
   EWrapperCallstackType,
   panelsArray2Map,
+  type TConfig,
   type TPanelMap,
-  type TSettings,
-} from '../api/settings.ts';
+} from '../api/storage.local.ts';
 import {
   type TClearTimerHistory,
   TimerWrapper,
@@ -24,7 +24,7 @@ import {
   type TRequestIdleCallbackHistory,
 } from './IdleWrapper.ts';
 import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
-import type { TSession } from '../api/session.ts';
+import type { TSession } from '../api/storage.session.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -76,13 +76,13 @@ const wrapApis = callingOnce(() => {
   panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
 });
 
-export function setSettings(settings: TSettings) {
-  panels = panelsArray2Map(settings.panels);
-  setCallstackType(settings.wrapperCallstackType);
+export function applyConfig(config: TConfig) {
+  panels = panelsArray2Map(config.panels);
+  setCallstackType(config.wrapperCallstackType);
   wrapApis();
 }
 
-export function setTracePoints(session: TSession) {
+export function applySession(session: TSession) {
   traceUtil.debug = new Set(session.debug);
   traceUtil.bypass = new Set(session.bypass);
 }
@@ -117,12 +117,24 @@ export function collectMetrics(): TTelemetry {
       panels.cancelIdleCallback,
     ),
     activeTimers: apiTimer.onlineTimers.size,
-    callCounter: {
-      eval: apiEval.callCounter,
-      ...apiTimer.callCounter,
-      ...apiAnimation.callCounter,
-      ...apiIdle.callCounter,
-    },
+    callCounter: panels.callsSummary.visible
+      ? {
+        eval: apiEval.callCounter,
+        ...apiTimer.callCounter,
+        ...apiAnimation.callCounter,
+        ...apiIdle.callCounter,
+      }
+      : {
+        eval: 0,
+        setTimeout: 0,
+        clearTimeout: 0,
+        setInterval: 0,
+        clearInterval: 0,
+        requestAnimationFrame: 0,
+        cancelAnimationFrame: 0,
+        requestIdleCallback: 0,
+        cancelIdleCallback: 0,
+      },
   };
 }
 

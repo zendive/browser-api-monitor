@@ -32,7 +32,7 @@
     <FactsCell facts={metric.facts} factsMap={ClearTimerFacts} />
   </td>
   <td class="ta-c"><Variable value={metric.calls} /></td>
-  <td class="ta-c"><Variable value={metric.handler} /></td>
+  <td class="ta-c">{metric.handler}</td>
   <td class="ta-r" title={msToHms(metric.delay)}>{metric.delay}</td>
   <td><TraceBypass traceId={metric.traceId} /></td>
   <td><TraceBreakpoint traceId={metric.traceId} /></td>

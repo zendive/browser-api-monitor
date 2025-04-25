@@ -1,11 +1,9 @@
 <script lang="ts">
   import type { TCancelIdleCallbackHistory } from '../../wrapper/IdleWrapper.ts';
   import {
-    DEFAULT_SORT_CIC,
     type ESortOrder,
-    getSettings,
-    setSettings,
-  } from '../../api/settings.ts';
+    saveLocalStorage,
+  } from '../../api/storage.local.ts';
   import { compareByFieldOrder } from '../../api/comparator.ts';
   import Variable from '../components/Variable.svelte';
   import SortableColumn from './components/SortableColumn.svelte';
@@ -15,16 +13,21 @@
   import type { TFactsMap } from '../../wrapper/Fact.ts';
   import FactsCell from './components/FactsCell.svelte';
   import CallstackCell from './components/CallstackCell.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
 
   let {
     cicHistory,
     caption = '',
   }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } =
     $props();
-  let sortField = $state(DEFAULT_SORT_CIC.field);
-  let sortOrder = $state(DEFAULT_SORT_CIC.order);
+  const { sortCancelIdleCallback } = useConfigState();
   let sortedMetrics = $derived.by(() =>
-    cicHistory.toSorted(compareByFieldOrder(sortField, sortOrder))
+    cicHistory.toSorted(
+      compareByFieldOrder(
+        sortCancelIdleCallback.field,
+        sortCancelIdleCallback.order,
+      ),
+    )
   );
   const CicFacts: TFactsMap = new Map([
     [CafFact.NOT_FOUND, { tag: 'I', details: 'Idle Callback not found' }],
@@ -34,20 +37,12 @@
     }],
   ]);
 
-  getSettings().then((settings) => {
-    sortField = settings.sortCancelIdleCallback.field;
-    sortOrder = settings.sortCancelIdleCallback.order;
-  });
+  function onChangeSort(field: string, order: ESortOrder) {
+    sortCancelIdleCallback.field = <keyof TCancelIdleCallbackHistory> field;
+    sortCancelIdleCallback.order = order;
 
-  function onChangeSort(_field: string, _order: ESortOrder) {
-    sortField = <keyof TCancelIdleCallbackHistory> _field;
-    sortOrder = _order;
-
-    setSettings({
-      sortCancelIdleCallback: {
-        field: $state.snapshot(sortField),
-        order: $state.snapshot(sortOrder),
-      },
+    saveLocalStorage({
+      sortCancelIdleCallback: $state.snapshot(sortCancelIdleCallback),
     });
   }
 </script>
@@ -61,24 +56,24 @@
       <th class="ta-c">
         <SortableColumn
           field="facts"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortCancelIdleCallback.field}
+          currentFieldOrder={sortCancelIdleCallback.order}
           eventChangeSorting={onChangeSort}
         ><span class="icon -facts"></span></SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="calls"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortCancelIdleCallback.field}
+          currentFieldOrder={sortCancelIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Called</SortableColumn>
       </th>
       <th class="ta-c">
         <SortableColumn
           field="handler"
-          currentField={sortField}
-          currentFieldOrder={sortOrder}
+          currentField={sortCancelIdleCallback.field}
+          currentFieldOrder={sortCancelIdleCallback.order}
           eventChangeSorting={onChangeSort}
         >Handler</SortableColumn>
       </th>
@@ -100,7 +95,7 @@
           <FactsCell facts={metric.facts} factsMap={CicFacts} />
         </td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
-        <td class="ta-c"><Variable value={metric.handler} /></td>
+        <td class="ta-c">{metric.handler}</td>
         <td><TraceBypass traceId={metric.traceId} /></td>
         <td><TraceBreakpoint traceId={metric.traceId} /></td>
       </tr>

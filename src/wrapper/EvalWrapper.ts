@@ -6,21 +6,26 @@ import {
   type TTrace,
 } from './TraceUtil.ts';
 import { trim2microsecond } from '../api/time.ts';
-import type { TSettingsPanel } from '../api/settings.ts';
+import type { TPanel } from '../api/storage.local.ts';
+import { Fact, type TFact } from './Fact.ts';
 
 export type TEvalHistory = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  facts: TFact;
   calls: number;
   returnedValue: unknown;
   code: unknown;
-  usesLocalScope: boolean;
   selfTime: number | null;
 };
 
 // https://rollupjs.org/troubleshooting/#avoiding-eval
 const lesserEval = /*@__PURE__*/ globalThis.eval.bind(globalThis);
+export const EvalFact = /*@__PURE__*/ {
+  USES_GLOBAL_SCOPE: Fact.define(1 << 0),
+  USES_LOCAL_SCOPE: Fact.define(1 << 1),
+};
 
 export class EvalWrapper {
   traceUtil: TraceUtil;
@@ -40,19 +45,27 @@ export class EvalWrapper {
     selfTime: number | null,
   ) {
     const existing = this.evalHistory.get(callstack.traceId);
+    let facts = EvalFact.USES_GLOBAL_SCOPE;
+
+    if (usesLocalScope) {
+      facts = Fact.assign(facts, EvalFact.USES_LOCAL_SCOPE);
+    }
 
     if (existing) {
       existing.code = cloneObjectSafely(code);
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.calls++;
-      existing.usesLocalScope = usesLocalScope;
       existing.selfTime = trim2microsecond(selfTime);
+
+      if (facts) {
+        existing.facts = Fact.assign(existing.facts, facts);
+      }
     } else {
       this.evalHistory.set(callstack.traceId, {
         calls: 1,
         code: cloneObjectSafely(code),
         returnedValue: cloneObjectSafely(returnedValue),
-        usesLocalScope,
+        facts,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
@@ -109,7 +122,7 @@ export class EvalWrapper {
     // noop - it's impossible to restore native eval afterwards
   }
 
-  collectHistory(evalPanel: TSettingsPanel) {
+  collectHistory(evalPanel: TPanel) {
     return evalPanel.wrap && evalPanel.visible
       ? Array.from(this.evalHistory.values())
       : null;

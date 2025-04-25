@@ -1,6 +1,7 @@
 import { EMsg, portPost } from './api/communication.ts';
-import { getSettings, setSettings } from './api/settings.ts';
-import { enableSessionInContentScript } from './api/session.ts';
+import { loadLocalStorage, saveLocalStorage } from './api/storage.local.ts';
+import { enableSessionInContentScript } from './api/storage.session.ts';
+import { onHidePanel } from './devtoolsPanelUtil.ts';
 
 // tabId may be null if user opened the devtools of the devtools
 if (chrome.devtools.inspectedWindow.tabId !== null) {
@@ -10,20 +11,17 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
     '/public/api-monitor-devtools-panel.html',
     (panel) => {
       panel.onShown.addListener(async () => {
-        const settings = await getSettings();
-        if (!settings.paused) {
+        const config = await loadLocalStorage();
+        if (!config.paused) {
           portPost({ msg: EMsg.START_OBSERVE });
         }
-        if (settings.keepAwake) {
+        if (config.keepAwake) {
           chrome.power.requestKeepAwake('display');
         }
-        setSettings({ devtoolsPanelShown: true });
+        await saveLocalStorage({ devtoolsPanelShown: true });
       });
-      panel.onHidden.addListener(() => {
-        chrome.power.releaseKeepAwake();
-        portPost({ msg: EMsg.STOP_OBSERVE });
-        setSettings({ devtoolsPanelShown: false });
-      });
+
+      panel.onHidden.addListener(onHidePanel);
     },
   );
 
