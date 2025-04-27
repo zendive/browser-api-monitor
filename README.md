@@ -48,8 +48,8 @@ If you're web developer and want to assess implementation correctness - this too
 ### Build requirements
 
 - OS: Linux
-- Node: 22.12.0 (LTS)
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.2.8
+- Node: 22.14.0 (LTS)
+- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.2.12
 
 ### Build instructions
 
