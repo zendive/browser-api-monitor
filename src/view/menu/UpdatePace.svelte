@@ -34,8 +34,8 @@
     canvas {
       border-radius: 50%;
       // downscaled
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 20px;
+      height: 20px;
     }
   }
 </style>
