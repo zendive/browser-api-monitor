@@ -1,35 +1,41 @@
 <script lang="ts">
-  import { Fps } from '../../api/time.ts';
-  import { useConfigState } from '../../state/config.state.svelte.ts';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
-  import UpdatePaceAnime from './UpdatePaceAnime.svelte';
+  import { startAnimation, update } from './UpdatePaceTimeMap.ts';
+  import { onMount } from 'svelte';
 
-  let upsValue = $state.raw(0);
-  let animeEl: UpdatePaceAnime | null = null;
-  const ups = new Fps((value) => (upsValue = value)).start();
-  const config = useConfigState();
+  let canvasEl: HTMLCanvasElement | null = null;
+  let ctx: CanvasRenderingContext2D | null = null;
   const ts = useTelemetryState();
 
+  onMount(() => {
+    ctx = canvasEl && canvasEl.getContext('2d');
+    return ctx && startAnimation(ctx);
+  });
+
   ts.timeOfCollection.subscribe(() => {
-    ups.tick();
-    animeEl?.tick();
+    update();
   });
 </script>
 
 <div
-  class="spinner"
-  title="Pace of update"
-  class:tc-attention={config.paused}
+  class="time-map"
+  title="Time map"
 >
-  <div>{upsValue} u/s</div>
-  <UpdatePaceAnime bind:this={animeEl} />
+  <canvas bind:this={canvasEl}></canvas>
 </div>
 
 <style lang="scss">
-  .spinner {
+  .time-map {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     line-height: 1;
+
+    canvas {
+      border-radius: 50%;
+      // downscaled
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 </style>
