@@ -1,4 +1,4 @@
-import { deg2rad, Point, Vector } from '../../api/canvas.ts';
+import { deg2rad, PI2, Point, Vector } from '../../api/canvas.ts';
 
 interface IMemo {
   when: number;
@@ -8,8 +8,10 @@ interface IMemo {
 
 let raf = 0;
 let ctx: CanvasRenderingContext2D;
-const R = 40;
+const R = 20;
 const D = 2 * R;
+const LINE_WIDTH = 4;
+const SHADOW_WIDTH = 4;
 const pRotationAxis = new Point(R, R);
 const WHITE = 'rgb(100% 100% 100%)';
 const BLACK = 'rgb(0% 0% 0%)';
@@ -47,8 +49,8 @@ function initContext(_ctx: CanvasRenderingContext2D) {
   ctx.canvas.width = D;
   ctx.canvas.height = D;
   ctx.lineCap = 'round';
-  ctx.lineWidth = 4;
-  ctx.shadowBlur = 4;
+  ctx.lineWidth = LINE_WIDTH;
+  ctx.shadowBlur = SHADOW_WIDTH;
 
   onColourSchemeChange((scheme) => {
     primaryColour = scheme === 'dark' ? WHITE : BLACK;
@@ -62,22 +64,35 @@ function draw() {
   const drawTime = Date.now();
   ctx.clearRect(0, 0, D, D);
 
-  for (let n = 0, N = memory.length; n < N; n++) {
-    const memo = memory[n];
-    memo.age = drawTime - memo.when;
-    drawLine(memo);
-  }
-
-  let n = memory.length;
-  while (n--) {
-    if (memory[n].age >= ANIMATION_DURATION) {
-      memory.pop();
-    } else {
-      break;
+  if (memory.length) {
+    for (let n = 0, N = memory.length; n < N; n++) {
+      const memo = memory[n];
+      memo.age = drawTime - memo.when;
+      drawLine(memo);
     }
+
+    let n = memory.length;
+    while (n--) {
+      if (memory[n].age >= ANIMATION_DURATION) {
+        memory.pop();
+      } else {
+        break;
+      }
+    }
+  } else {
+    drawCenter();
   }
 
   raf = requestAnimationFrame(draw);
+}
+
+function drawCenter() {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(pRotationAxis.x, pRotationAxis.y, 0.5, 0, PI2);
+  ctx.stroke();
+  ctx.closePath();
+  ctx.restore();
 }
 
 function drawLine(memo: IMemo) {
@@ -95,9 +110,6 @@ function drawLine(memo: IMemo) {
 
 type TColourScheme = 'light' | 'dark';
 
-/**
- * NOTE: if OS is dark but devtools is default - then scheme is dark
- */
 export function onColourSchemeChange(
   callback: (scheme: TColourScheme) => void,
 ) {
