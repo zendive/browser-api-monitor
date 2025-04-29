@@ -1,9 +1,11 @@
 import { deg2rad, PI2, Point, Vector } from '../../api/canvas.ts';
 
 interface IMemo {
-  when: number;
-  vector: Vector;
+  whenOccurred: number;
+  whenAdded: number;
   age: number;
+  timePoint: Point;
+  vector: Vector;
 }
 
 let raf = 0;
@@ -15,7 +17,8 @@ const SHADOW_WIDTH = 4;
 const pRotationAxis = new Point(R, R);
 const WHITE = 'rgb(100% 100% 100%)';
 const BLACK = 'rgb(0% 0% 0%)';
-const ANIMATION_DURATION = 2e3;
+const ANIMATION_DURATION = 1.5e3;
+const ANIMATION_DELTA_PX = R / ANIMATION_DURATION;
 let primaryColour: string = BLACK;
 let shadowColour: string = WHITE;
 const memory: IMemo[] = [];
@@ -32,15 +35,21 @@ export function startAnimation(ctx: CanvasRenderingContext2D) {
   };
 }
 
-export function update() {
-  const when = Date.now();
-  const angle = -(when % 1000) * 360 / 1000;
-  const vector = new Vector(R, 0).rotate(deg2rad(angle));
+export function update(timeOfCollection: number) {
+  const whenAdded = Date.now();
+  const angle = (timeOfCollection % 1000) * 360 / 1000;
+  const vector = new Vector(R, 0)
+    .rotate(deg2rad(-angle))
+    // rotate left to adjust zero angle to point at {0,-1} (north)
+    .rotateLeft();
+  const timePoint = vector.atBase(pRotationAxis);
 
   memory.unshift({
-    when,
-    vector,
+    whenOccurred: timeOfCollection,
+    whenAdded,
     age: 0,
+    timePoint,
+    vector: vector.rotateBack(),
   });
 }
 
@@ -63,24 +72,21 @@ function initContext(_ctx: CanvasRenderingContext2D) {
 function draw() {
   const drawTime = Date.now();
   ctx.clearRect(0, 0, D, D);
+  drawCenter();
 
-  if (memory.length) {
-    for (let n = 0, N = memory.length; n < N; n++) {
-      const memo = memory[n];
-      memo.age = drawTime - memo.when;
-      drawLine(memo);
-    }
+  for (let n = 0, N = memory.length; n < N; n++) {
+    const memo = memory[n];
+    memo.age = drawTime - memo.whenAdded;
+    drawLine(memo);
+  }
 
-    let n = memory.length;
-    while (n--) {
-      if (memory[n].age >= ANIMATION_DURATION) {
-        memory.pop();
-      } else {
-        break;
-      }
+  let n = memory.length;
+  while (n--) {
+    if (memory[n].age >= ANIMATION_DURATION) {
+      memory.pop();
+    } else {
+      break;
     }
-  } else {
-    drawCenter();
   }
 
   raf = requestAnimationFrame(draw);
@@ -96,13 +102,13 @@ function drawCenter() {
 }
 
 function drawLine(memo: IMemo) {
-  const length = R - memo.age * R / ANIMATION_DURATION;
-  const p = memo.vector.setLength(length).toPoint(pRotationAxis);
+  const length = R - memo.age * ANIMATION_DELTA_PX;
+  const p = memo.vector.setLength(length).atBase(memo.timePoint);
 
   ctx.save();
   ctx.beginPath();
-  ctx.moveTo(pRotationAxis.x, pRotationAxis.y);
-  ctx.lineTo(p.x, p.y);
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(memo.timePoint.x, memo.timePoint.y);
   ctx.stroke();
   ctx.closePath();
   ctx.restore();
