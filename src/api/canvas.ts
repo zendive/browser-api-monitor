@@ -1,3 +1,8 @@
+/**
+ * Module assumption:
+ * - Coordinate system of canvas html element
+ */
+
 export const PI = Math.PI;
 export const PI2 = 2 * PI;
 export const PId2 = PI / 2;
@@ -24,7 +29,7 @@ export function rad2deg(rad: number) {
   return ((rad % PI2) / PI2) * 360;
 }
 
-class Coordinate<T extends typeof Coordinate = typeof Coordinate> {
+class XY {
   x: number = 0;
   y: number = 0;
 
@@ -36,6 +41,10 @@ class Coordinate<T extends typeof Coordinate = typeof Coordinate> {
     this.x = x;
     this.y = y;
     return this;
+  }
+
+  clone() {
+    return new XY(this.x, this.y);
   }
 
   toString() {
@@ -58,12 +67,12 @@ class Coordinate<T extends typeof Coordinate = typeof Coordinate> {
     return this;
   }
 
-  equalXY(x: number, y: number) {
+  hasSameXY(x: number, y: number) {
     return (x === this.x && y === this.y);
   }
 
-  equal(c: Coordinate) {
-    return this.equalXY(c.x, c.y);
+  isEqualTo(xy: XY) {
+    return this.hasSameXY(xy.x, xy.y);
   }
 
   round(precision?: number) {
@@ -74,10 +83,7 @@ class Coordinate<T extends typeof Coordinate = typeof Coordinate> {
   }
 }
 
-/**
- * Point {x,y}
- */
-export class Point extends Coordinate {
+export class Point extends XY {
   constructor(x: number, y: number) {
     super(x, y);
   }
@@ -90,7 +96,7 @@ export class Point extends Coordinate {
    * Get distance between two points
    */
   proximity(p: Point) {
-    return this.toVector(p).length();
+    return this.vectorTo(p).length;
   }
 
   /**
@@ -98,25 +104,24 @@ export class Point extends Coordinate {
    * Assuming this(x,y) is a v(0,0)
    * @note this(0,0) is at top left corner
    */
-  toVector(to: Point) {
-    return new Vector(to.x - this.x, this.y - to.y);
+  vectorTo(to: XY) {
+    return new Vector(to.x - this.x, to.y - this.y);
   }
 
   /**
    * Rotate point over center `axis` point by an angle
-   * @note: positive angle value means counterclockwise
+   * @note: positive `radAngle` means counterclockwise
    */
-  rotate(angle: number, axis: Point) {
-    return axis.toVector(this).rotate(angle).toPoint(axis);
+  rotate(radAngle: number, axis: Point) {
+    const p = axis.vectorTo(this).rotate(radAngle).atBase(axis);
+    return this.set(p.x, p.y);
   }
 }
 
 /**
- * Vector with virtual base of {0,0}
- * and assumed position at top-left corner
- * that points to {this.x, this.y}
+ * Vector with virtual base of {0,0} that points to {x,y}
  */
-export class Vector extends Coordinate {
+export class Vector extends XY {
   constructor(x: number, y: number) {
     super(x, y);
   }
@@ -126,81 +131,77 @@ export class Vector extends Coordinate {
   }
 
   /**
-   * Convert vector to point
-   * Assuming pBase(x,y) refers to v(0,0)
-   * @note: base(0,0) is at top left corner
+   * Get point where vector points from `base` point of view
+   * Assuming base(x,y) refers to v(0,0) of `this` vector
    */
-  toPoint(base: Point) {
-    return new Point(base.x + this.x, base.y - this.y);
+  atBase(base: Point) {
+    return new Point(base.x + this.x, base.y + this.y);
   }
 
   /**
-   * Create vector rotated on specific angle
+   * Rotate at specific angle
    * produced vector may contain float epsilon errors
-   * @note: Positive angle means counterclockwise
+   * @note: positive `radAngle` means counterclockwise
    */
-  rotate(angle: number) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-    return new Vector(
+  rotate(radAngle: number) {
+    const cos = Math.cos(-radAngle);
+    const sin = Math.sin(-radAngle);
+
+    return this.set(
       this.x * cos - this.y * sin,
       this.x * sin + this.y * cos,
     );
   }
 
-  /**
-   * Create vector rotated to left
-   */
   rotateLeft() {
-    return new Vector(-this.y, this.x);
+    return this.set(-this.y, this.x);
   }
 
-  /**
-   * Create vector rotated to right
-   */
   rotateRight() {
-    return new Vector(this.y, -this.x);
+    return this.set(this.y, -this.x);
   }
 
-  /**
-   * Create vector rotated backwards
-   */
   rotateBack() {
-    return new Vector(-this.x, -this.y);
+    return this.set(-this.x, -this.y);
   }
 
-  /**
-   * Return new vector mirrored over another vector interpreted as rotation axis
-   */
-  mirror(axis: Vector) {
-    const delta = this.xAxisAngle() - axis.xAxisAngle();
+  mirrorOver(axis: Vector) {
+    const delta = this.angleWithX - axis.angleWithX;
     const k = delta >= 0 ? -2 : 2;
     return this.rotate(k * this.angle(axis));
   }
 
-  length() {
+  get length() {
     return Math.sqrt(this.dot(this));
   }
 
-  /**
-   * Return new vector with new vector length
-   */
   setLength(newLength: number) {
-    return (new Vector(newLength, 0)).rotate(this.xAxisAngle());
+    const v = new Vector(newLength, 0).rotate(this.angleWithX);
+    return this.set(v.x, v.y);
   }
 
-  /**
-   * Return new vector halved in length
-   */
   half() {
-    return new Vector(this.x / 2, this.y / 2);
+    return this.set(this.x / 2, this.y / 2);
   }
 
   /**
-   * Vector normalization
+   * Get angle of vector relative to X axis in range [0 ... α ... PI2] counterclockwise
+   */
+  get angleWithX() {
+    const angle = Math.atan2(-this.y, this.x);
+
+    return (angle < 0) ? angle + PI2 : angle;
+  }
+
+  angle(v: Vector) {
+    return Math.acos(this.normalize().dot(v.normalize()));
+  }
+
+  /**
+   * Return normalized vector
    */
   normalize() {
-    const length = this.length();
+    const length = this.length;
     return new Vector(this.x / length, this.y / length);
   }
 
@@ -209,38 +210,6 @@ export class Vector extends Coordinate {
    */
   dot(v: Vector) {
     return (this.x * v.x + this.y * v.y);
-  }
-
-  angle(v: Vector) {
-    return Math.acos(this.normalize().dot(v.normalize()));
-  }
-
-  angleWithNorth() {
-    return this.angle(new Vector(0, 1));
-  }
-
-  angleWithEast() {
-    return this.angle(new Vector(1, 0));
-  }
-
-  angleWithSought() {
-    return this.angle(new Vector(0, -1));
-  }
-
-  angleWithWest() {
-    return this.angle(new Vector(-1, 0));
-  }
-
-  /**
-   * Get angle of vector relative to OX in range [0 ... α ... XY.PI2]
-   * @note produced angle will be always positive radian
-   */
-  xAxisAngle() {
-    let angle = Math.atan2(this.y, this.x);
-    if (angle < 0) {
-      angle += PI2;
-    }
-    return angle;
   }
 }
 
@@ -280,9 +249,10 @@ export class Box {
 
   toString() {
     return JSON.stringify({
-      tl: this.tl.toString(),
       w: this.w,
       h: this.h,
+      tl: this.tl.toString(),
+      c: this.c.toString(),
     });
   }
 

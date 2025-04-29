@@ -12,8 +12,8 @@
     return ctx && startAnimation(ctx);
   });
 
-  ts.timeOfCollection.subscribe(() => {
-    update();
+  ts.timeOfCollection.subscribe((v) => {
+    update(v);
   });
 </script>
 
