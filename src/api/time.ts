@@ -4,9 +4,10 @@ import {
   requestAnimationFrame,
   setTimeout,
   TELEMETRY_FREQUENCY_30PS,
+  TIME_60FPS_MS,
 } from './const.ts';
 
-export function callingOnce<
+export function callableOnce<
   T extends (...args: Parameters<T>) => ReturnType<T>,
 >(
   fn: T | null,
@@ -52,34 +53,30 @@ export class Stopper {
     return this.#finish - this.#start;
   }
 
+  toString() {
+    return Stopper.toString(this.value());
+  }
+
   static toString(msTime: number | unknown) {
     if (typeof msTime !== 'number' || !Number.isFinite(msTime)) {
       return;
     }
 
-    if (msTime < 1) {
-      return `${Math.trunc(msTime * 1e3)}μs`;
-    } else if (msTime < 3) {
+    if (msTime <= TIME_60FPS_MS) {
       const ms = Math.trunc(msTime);
-      return `${ms}.${Math.trunc((msTime - ms) * 1e2)}ms`;
+      return `${ms}.${
+        toPaddedString(Math.trunc((msTime - ms) * 1e2), 2)
+      }\u00a0ms`;
     } else if (msTime < 1e3) {
-      return `${Math.trunc(msTime)}ms`;
+      return `${Math.trunc(msTime)}\u00a0ms`;
     } else if (msTime < 60e3) {
       const s = Math.trunc(msTime / 1e3) % 60;
       const ms = Math.trunc(msTime % 1e3);
 
-      return `${s}.${ms.toString().padStart(3, '0')}s`;
+      return `${s}.${toPaddedString(ms, 3)}\u00a0s`;
     }
 
-    const h = Math.trunc(msTime / 3600e3);
-    const m = Math.trunc(msTime / 60e3) % 60;
-    const s = Math.trunc(msTime / 1e3) % 60;
-
-    return `${h.toString().padStart(2, '0')}:${
-      m
-        .toString()
-        .padStart(2, '0')
-    }:${s.toString().padStart(2, '0')}`;
+    return ms2HMS(msTime);
   }
 }
 
@@ -221,12 +218,24 @@ export class Fps {
   }
 }
 
-export function trim2microsecond<T>(ms: T) {
-  return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
+export function wait(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
 }
 
-export function msToHms(delay: number | unknown): string | undefined {
-  return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
+export function trim2ms<T>(ms: T) {
+  return typeof ms === 'number' ? Math.trunc(ms * 1e2) / 1e2 : ms;
+}
+
+export function ms2HMS(ms: number) {
+  return `${toPaddedString(Math.trunc(ms / 3600e3), 2)}:${
+    toPaddedString(Math.trunc(ms / 60e3) % 60, 2)
+  }:${toPaddedString(Math.trunc(ms / 1e3) % 60, 2)}`;
+}
+
+function toPaddedString(value: number, maxLen: number) {
+  return value.toString().padStart(maxLen, '0');
 }
 
 const TICK_TIME_LAG_SCALAR = 3;

@@ -1,12 +1,12 @@
-import { callingOnce } from '../api/time.ts';
-import { TraceUtil } from './TraceUtil.ts';
+import { callableOnce } from '../api/time.ts';
+import { TraceUtil } from './shared/TraceUtil.ts';
 import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
   EWrapperCallstackType,
   panelsArray2Map,
   type TConfig,
   type TPanelMap,
-} from '../api/storage.local.ts';
+} from '../api/storage/storage.local.ts';
 import {
   type TClearTimerHistory,
   TimerWrapper,
@@ -24,7 +24,7 @@ import {
   type TRequestIdleCallbackHistory,
 } from './IdleWrapper.ts';
 import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
-import type { TSession } from '../api/storage.session.ts';
+import type { TSession } from '../api/storage/storage.session.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -60,11 +60,11 @@ const apiTimer = new TimerWrapper(traceUtil, apiEval);
 const apiAnimation = new AnimationWrapper(traceUtil);
 const apiIdle = new IdleWrapper(traceUtil);
 
-const setCallstackType = callingOnce((type: EWrapperCallstackType) => {
+const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
   traceUtil.callstackType = type;
 });
 
-const wrapApis = callingOnce(() => {
+const wrapApis = callableOnce(() => {
   panels.eval.wrap && apiEval.wrap();
   panels.setTimeout.wrap && apiTimer.wrapSetTimeout();
   panels.clearTimeout.wrap && apiTimer.wrapClearTimeout();

@@ -1,11 +1,10 @@
-import { wait } from './util.ts';
-import { EWrapperCallstackType } from '../src/api/storage.local.ts';
+import { describe, test } from '@std/testing/bdd';
+import { expect } from '@std/expect';
+import { EWrapperCallstackType } from '../src/api/storage/storage.local.ts';
 import {
   TAG_INVALID_CALLSTACK_LINK,
   TraceUtil,
-} from '../src/wrapper/TraceUtil.ts';
-import { describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
+} from '../src/wrapper/shared/TraceUtil.ts';
 
 describe('TraceUtil', () => {
   const traceUtil = new TraceUtil();
@@ -74,5 +73,3 @@ describe('TraceUtil', () => {
     expect(trace[0].link).toBe(standard[0].link);
   });
 });
-
-await wait(1e1);

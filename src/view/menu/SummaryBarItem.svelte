@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { TPanel } from '../../api/storage.local.ts';
-  import Variable from '../components/Variable.svelte';
+  import type { TPanel } from '../../api/storage/storage.local.ts';
+  import Variable from '../shared/Variable.svelte';
 
   let {
     panel,

@@ -1,11 +1,11 @@
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
-  FRAME_1of60,
   MEDIA_ELEMENT_EVENTS,
   MEDIA_ELEMENT_PROPS,
   MEDIA_ELEMENT_TOGGABLE_PROPS,
   NETWORK_STATE,
   READY_STATE,
+  TIME_60FPS_SEC,
 } from '../api/const.ts';
 
 type TMediaElement = HTMLVideoElement | HTMLAudioElement;
@@ -198,9 +198,9 @@ export class MediaWrapper {
     } else if (cmd === 'play') {
       mediaModel.el.play().catch(() => {});
     } else if (cmd === 'frame-backward') {
-      mediaModel.el.currentTime -= FRAME_1of60;
+      mediaModel.el.currentTime -= TIME_60FPS_SEC;
     } else if (cmd === 'frame-forward') {
-      mediaModel.el.currentTime += FRAME_1of60;
+      mediaModel.el.currentTime += TIME_60FPS_SEC;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
       if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
         mediaModel.el[property] = !mediaModel.el[property];

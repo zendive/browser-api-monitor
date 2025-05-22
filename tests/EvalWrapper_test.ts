@@ -1,16 +1,16 @@
-import './browserPolyfill.ts';
-import { wait } from './util.ts';
 import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
+import './browserPolyfill.ts';
 import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
-import { TraceUtil } from '../src/wrapper/TraceUtil.ts';
+import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../src/api/const.ts';
-import { Fact } from '../src/wrapper/Fact.ts';
+import { Fact } from '../src/wrapper/shared/Fact.ts';
+import { wait } from '../src/api/time.ts';
 
 describe('EvalWrapper', () => {
   const traceUtil = new TraceUtil();

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { EWrapperCallstackType } from '../../api/storage.local.ts';
+  import { EWrapperCallstackType } from '../../api/storage/storage.local.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
-  import Alert from '../components/Alert.svelte';
+  import Alert from '../shared/Alert.svelte';
   import {
     toggleKeepAwake,
     togglePanelVisibility,
