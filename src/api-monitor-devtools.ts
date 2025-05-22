@@ -1,6 +1,9 @@
 import { EMsg, portPost } from './api/communication.ts';
-import { loadLocalStorage, saveLocalStorage } from './api/storage.local.ts';
-import { enableSessionInContentScript } from './api/storage.session.ts';
+import {
+  loadLocalStorage,
+  saveLocalStorage,
+} from './api/storage/storage.local.ts';
+import { enableSessionInContentScript } from './api/storage/storage.session.ts';
 import { onHidePanel } from './devtoolsPanelUtil.ts';
 
 // tabId may be null if user opened the devtools of the devtools

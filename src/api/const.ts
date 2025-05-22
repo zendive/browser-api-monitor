@@ -6,7 +6,8 @@ export const ERRORS_IGNORED = [
 ];
 export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
-export const FRAME_1of60 = 0.0166666666667; // ms
+export const TIME_60FPS_SEC = 0.0166666666667; // s
+export const TIME_60FPS_MS = 16.666666666666668;
 export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
 export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 

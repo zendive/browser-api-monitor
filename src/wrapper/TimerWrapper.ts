@@ -3,7 +3,7 @@ import {
   type TCallstack,
   TraceUtil,
   type TTrace,
-} from './TraceUtil.ts';
+} from './shared/TraceUtil.ts';
 import {
   clearInterval,
   clearTimeout,
@@ -15,11 +15,11 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../api/const.ts';
-import type { TPanel } from '../api/storage.local.ts';
+import type { TPanel } from '../api/storage/storage.local.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
-import { validHandler, validTimerDelay } from './util.ts';
-import { trim2microsecond } from '../api/time.ts';
-import { Fact, type TFact } from './Fact.ts';
+import { validHandler, validTimerDelay } from './shared/util.ts';
+import { trim2ms } from '../api/time.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
 
 export enum ETimerType {
   TIMEOUT,
@@ -56,14 +56,33 @@ export type TClearTimerHistory = {
   delay: number | undefined | string;
 };
 
-export const SetTimerFact = /*@__PURE__*/ {
+export const SetTimerFact = /*@__PURE__*/ (() => ({
   NOT_A_FUNCTION: Fact.define(1 << 0),
   BAD_DELAY: Fact.define(1 << 1),
-} as const;
-export const ClearTimerFact = /*@__PURE__*/ {
+} as const))();
+export const SetTimerFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [SetTimerFact.NOT_A_FUNCTION, {
+      tag: 'C',
+      details: 'Callback is not a function',
+    }],
+    [SetTimerFact.BAD_DELAY, {
+      tag: 'D',
+      details: 'Delay is not a positive number or undefined',
+    }],
+  ]))();
+export const ClearTimerFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
   BAD_HANDLER: Fact.define(1 << 1),
-} as const;
+} as const))();
+export const ClearTimerFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [ClearTimerFact.NOT_FOUND, { tag: 'T', details: 'Timer not found' }],
+    [ClearTimerFact.BAD_HANDLER, {
+      tag: 'H',
+      details: 'Handler is not a positive number',
+    }],
+  ]))();
 
 export class TimerWrapper {
   traceUtil: TraceUtil;
@@ -97,9 +116,7 @@ export class TimerWrapper {
     delay: number | undefined | string,
     callstack: TCallstack,
   ) {
-    delay = validTimerDelay(delay)
-      ? trim2microsecond(delay)
-      : TAG_BAD_DELAY(delay);
+    delay = validTimerDelay(delay) ? trim2ms(delay) : TAG_BAD_DELAY(delay);
 
     this.onlineTimers.set(handler, {
       type,
@@ -133,7 +150,7 @@ export class TimerWrapper {
     }
 
     setTimerRecord.online--;
-    setTimerRecord.selfTime = trim2microsecond(selfTime);
+    setTimerRecord.selfTime = trim2ms(selfTime);
 
     if (canceledByTraceId === null) {
       return;
@@ -158,7 +175,7 @@ export class TimerWrapper {
     const existing = history.get(callstack.traceId);
 
     if (validTimerDelay(delay)) {
-      delay = trim2microsecond(delay);
+      delay = trim2ms(delay);
     } else {
       delay = TAG_BAD_DELAY(delay);
       facts = Fact.assign(facts, SetTimerFact.BAD_DELAY);
@@ -245,7 +262,7 @@ export class TimerWrapper {
     const record = map.get(traceId);
 
     if (record) {
-      record.selfTime = trim2microsecond(selfTime);
+      record.selfTime = trim2ms(selfTime);
     }
   }
 

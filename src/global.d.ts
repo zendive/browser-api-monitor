@@ -1,5 +1,5 @@
-/// <reference types="svelte" />
 export {};
+
 declare global {
   let __development__: boolean;
   let __app_name__: string;

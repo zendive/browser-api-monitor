@@ -1,13 +1,13 @@
-import type { TPanel } from '../api/storage.local.ts';
-import { trim2microsecond } from '../api/time.ts';
+import type { TPanel } from '../api/storage/storage.local.ts';
+import { trim2ms } from '../api/time.ts';
 import {
   type ETraceDomain,
   type TCallstack,
   TraceUtil,
   type TTrace,
-} from './TraceUtil.ts';
-import { validHandler, validTimerDelay } from './util.ts';
-import { Fact, type TFact } from './Fact.ts';
+} from './shared/TraceUtil.ts';
+import { validHandler, validTimerDelay } from './shared/util.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
 import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../api/const.ts';
 
 export type TRequestIdleCallbackHistory = {
@@ -39,13 +39,28 @@ const requestIdleCallback = /*@__PURE__*/ globalThis.requestIdleCallback.bind(
 const cancelIdleCallback = /*@__PURE__*/ globalThis.cancelIdleCallback.bind(
   globalThis,
 );
-export const RicFact = {
+export const RicFact = /*@__PURE__*/ (() => ({
   BAD_DELAY: Fact.define(1 << 0),
-} as const;
-export const CicFact = {
+} as const))();
+export const RicFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [RicFact.BAD_DELAY, {
+      tag: 'D',
+      details: 'Delay is not a positive number or undefined',
+    }],
+  ]))();
+export const CicFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
   BAD_HANDLER: Fact.define(1 << 1),
-} as const;
+} as const))();
+export const CicFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [CicFact.NOT_FOUND, { tag: 'I', details: 'Idle Callback not found' }],
+    [CicFact.BAD_HANDLER, {
+      tag: 'H',
+      details: 'Handler is not a positive number',
+    }],
+  ]))();
 
 export class IdleWrapper {
   traceUtil: TraceUtil;
@@ -78,7 +93,7 @@ export class IdleWrapper {
     }
 
     ricRecord.didTimeout = deadline.didTimeout;
-    ricRecord.selfTime = trim2microsecond(selfTime);
+    ricRecord.selfTime = trim2ms(selfTime);
 
     if (this.onlineIdleCallbackLookup.get(handler)) {
       this.onlineIdleCallbackLookup.delete(handler);
@@ -95,7 +110,7 @@ export class IdleWrapper {
     let facts = <TFact> 0;
 
     if (validTimerDelay(delay)) {
-      delay = trim2microsecond(delay);
+      delay = trim2ms(delay);
     } else {
       delay = TAG_BAD_DELAY(delay);
       facts = Fact.assign(facts, RicFact.BAD_DELAY);

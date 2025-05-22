@@ -47,31 +47,29 @@ const tick = new Timer(
 );
 
 windowListen((o) => {
-  if (o.msg === EMsg.TELEMETRY_ACKNOWLEDGED) {
+  if (EMsg.TELEMETRY_ACKNOWLEDGED === o.msg) {
     tick.delay = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
     eachSecond.isPending() && tick.start();
-  } else if (
-    o.msg === EMsg.CONFIG && o.config && typeof o.config === 'object'
-  ) {
+  } else if (EMsg.CONFIG === o.msg) {
     applyConfig(o.config);
-  } else if (o.msg === EMsg.START_OBSERVE) {
+  } else if (EMsg.START_OBSERVE === o.msg) {
     originalMetrics = currentMetrics = null;
     tick.trigger();
     eachSecond.start();
-  } else if (o.msg === EMsg.STOP_OBSERVE) {
+  } else if (EMsg.STOP_OBSERVE === o.msg) {
     tick.stop();
     eachSecond.stop();
     originalMetrics = currentMetrics = null;
-  } else if (o.msg === EMsg.RESET_WRAPPER_HISTORY) {
+  } else if (EMsg.RESET_WRAPPER_HISTORY === o.msg) {
     originalMetrics = currentMetrics = null;
     cleanHistory();
     !tick.isPending() && tick.trigger();
-  } else if (o.msg === EMsg.TIMER_COMMAND) {
+  } else if (EMsg.TIMER_COMMAND === o.msg) {
     runTimerCommand(o.type, o.handler);
-  } else if (o.msg === EMsg.MEDIA_COMMAND) {
+  } else if (EMsg.MEDIA_COMMAND === o.msg) {
     runMediaCommand(o.mediaId, o.cmd, o.property);
-  } else if (o.msg === EMsg.SESSION) {
+  } else if (EMsg.SESSION === o.msg) {
     applySession(o.session);
   }
 });

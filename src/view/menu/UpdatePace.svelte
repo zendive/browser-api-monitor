@@ -1,19 +1,18 @@
 <script lang="ts">
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
-  import { startAnimation, update } from './UpdatePaceTimeMap.ts';
+  import { startAnimation, updateAnimation } from './UpdatePaceTimeMap.ts';
   import { onMount } from 'svelte';
 
   let canvasEl: HTMLCanvasElement | null = null;
-  let ctx: CanvasRenderingContext2D | null = null;
   const ts = useTelemetryState();
 
   onMount(() => {
-    ctx = canvasEl && canvasEl.getContext('2d');
-    return ctx && startAnimation(ctx);
-  });
+    const ctx = canvasEl && canvasEl.getContext('2d');
 
-  ts.timeOfCollection.subscribe((v) => {
-    update(v);
+    if (ctx) {
+      ts.timeOfCollection.subscribe(updateAnimation);
+      return startAnimation(ctx);
+    }
   });
 </script>
 
@@ -27,9 +26,6 @@
 <style lang="scss">
   .time-map {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    line-height: 1;
 
     canvas {
       border-radius: 50%;

@@ -17,6 +17,7 @@ const buildOptions: BuildOptions = {
     './src/api-monitor-cs-main.ts',
     './src/api-monitor-cs-isolated.ts',
     './src/api-monitor-devtools-panel.ts',
+    './src/mirror/mirror.ts',
   ],
   outdir: './public/build/',
   define: {

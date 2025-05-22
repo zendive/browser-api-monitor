@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { panelsArray2Map } from '../../api/storage.local.ts';
+  import { panelsArray2Map } from '../../api/storage/storage.local.ts';
   import SummaryBarItem from './SummaryBarItem.svelte';
   import { useConfigState } from '../../state/config.state.svelte.ts';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';

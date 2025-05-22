@@ -5,7 +5,7 @@ import {
   loadLocalStorage,
   saveLocalStorage,
   type TConfig,
-} from '../api/storage.local.ts';
+} from '../api/storage/storage.local.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);
 
@@ -33,9 +33,9 @@ export async function toggleKeepAwake() {
   await saveLocalStorage({ keepAwake: $state.snapshot(config.keepAwake) });
 
   if (config.keepAwake) {
-    chrome.power.requestKeepAwake('display');
+    chrome.power?.requestKeepAwake('display');
   } else {
-    chrome.power.releaseKeepAwake();
+    chrome.power?.releaseKeepAwake();
   }
 }
 
