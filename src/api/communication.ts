@@ -14,21 +14,26 @@ import { APPLICATION_NAME } from './env.ts';
 import { ERRORS_IGNORED } from './const.ts';
 import { ETimerType } from '../wrapper/TimerWrapper.ts';
 import type { TTelemetry } from '../wrapper/Wrapper.ts';
-import type { TConfig } from './storage.local.ts';
+import type { TConfig } from './storage/storage.local.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 import type { Delta } from 'jsondiffpatch';
-import type { TSession } from './storage.session.ts';
+import type { TSession } from './storage/storage.session.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
+  if (!chrome.runtime) {
+    windowPost(payload);
+    return;
+  }
+
   if (!port) {
     port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
       name: APPLICATION_NAME,
     });
-    port.onDisconnect.addListener(() => void (port = null));
+    port?.onDisconnect.addListener(() => void (port = null));
   }
 
-  port.postMessage(payload);
+  port?.postMessage(payload);
 }
 
 export function portListen(callback: (payload: TMsgOptions) => void) {
@@ -67,16 +72,20 @@ export function runtimePost(payload: TMsgOptions) {
 }
 
 export function runtimeListen(callback: (payload: TMsgOptions) => void) {
-  chrome.runtime.onMessage.addListener(
-    (payload, sender: chrome.runtime.MessageSender, sendResponse) => {
-      if (
-        sender.tab?.id === chrome.devtools.inspectedWindow.tabId
-      ) {
-        callback(payload);
-        sendResponse();
-      }
-    },
-  );
+  if (chrome?.runtime) {
+    chrome.runtime.onMessage.addListener(
+      (payload, sender: chrome.runtime.MessageSender, sendResponse) => {
+        if (
+          sender.tab?.id === chrome.devtools.inspectedWindow.tabId
+        ) {
+          callback(payload);
+          sendResponse();
+        }
+      },
+    );
+  } else {
+    windowListen(callback);
+  }
 }
 
 function handleRuntimeMessageResponse(): void {

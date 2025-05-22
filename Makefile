@@ -1,4 +1,4 @@
-.PHONY: clean install dev valid test prod
+.PHONY: clean install dev valid test prod serve_mirror
 .DEFAULT_GOAL := dev
 DENO_DEV = NODE_ENV=development deno run --watch
 DENO_PROD = NODE_ENV=production deno run
@@ -30,5 +30,13 @@ test: valid
 prod: test
 	rm -rf $(BUILD_DIR) $(CHROME_ZIP)
 	$(DENO_PROD) $(DENO_OPTIONS) $(BUILD_SCRIPT)
+
 	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json > /dev/null
-	tree -Dis $(BUILD_DIR) *.zip
+	zip --delete $(CHROME_ZIP) "$(OUTPUT_DIR)mirror.html" "$(BUILD_DIR)mirror/*" > /dev/null
+
+	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
+
+serve_mirror:
+	@echo "🎗 reminder to switch extension off"
+	@echo "served at: http://localhost:5555/mirror.html"
+	python3 -m http.server 5555 -d ./public/

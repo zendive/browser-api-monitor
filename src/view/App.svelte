@@ -1,36 +1,14 @@
 <script lang="ts">
-  import Version from './menu/Version.svelte';
-  import TogglePanels from './menu/TogglePanels.svelte';
-  import SummaryBar from './menu/SummaryBar.svelte';
-  import UpdatePace from './menu/UpdatePace.svelte';
-  import AppPanels from './panel/components/AppPanels.svelte';
-  import TogglePause from './menu/TogglePause.svelte';
-  import ResetHistory from './menu/ResetHistory.svelte';
-  import DevReload from './menu/DevReload.svelte';
+  import Panels from './panels/Panels.svelte';
+  import Menu from './menu/Menu.svelte';
 </script>
 
 <section>
   <header>
-    <TogglePanels />
-    <div class="divider -thin"></div>
-    {#if __development__}
-      <DevReload />
-      <div class="divider -thin"></div>
-    {/if}
-    <TogglePause />
-    <div class="divider -thin"></div>
-    <ResetHistory />
-    <div class="divider -thin"></div>
-    <SummaryBar />
-    <div class="divider"></div>
-    <UpdatePace />
-    <div class="divider"></div>
-    <Version />
-    <div class="divider -anchor-right"></div>
+    <Menu />
   </header>
-
   <main>
-    <AppPanels />
+    <Panels />
   </main>
 </section>
 

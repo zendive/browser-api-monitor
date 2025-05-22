@@ -10,7 +10,7 @@ import {
   Point,
   rad2deg,
   Vector,
-} from '../src/api/canvas.ts';
+} from '../src/view/shared/canvas.ts';
 
 describe('module exports', () => {
   test('fround', () => {
@@ -37,19 +37,19 @@ describe('module exports', () => {
 
 describe('Point', () => {
   test('clone', () => {
-    const v = new Point(Infinity, -Infinity);
-    const clone = v.clone();
+    const p = new Point(Infinity, -Infinity);
+    const clone = p.clone();
 
-    expect(clone).not.toBe(v);
-    expect(clone.isEqualTo(v)).toBe(true);
+    expect(clone).not.toBe(p);
+    expect(clone.isEqualTo(p)).toBe(true);
   });
 
   test('proximity', () => {
-    const v = new Point(0, 0);
+    const p = new Point(0, 0);
 
-    expect(v.proximity(new Point(0, 0))).toBe(0);
-    expect(v.proximity(new Point(1, 0))).toBe(1);
-    expect(v.proximity(new Point(0, 1))).toBe(1);
+    expect(p.proximity(new Point(0, 0))).toBe(0);
+    expect(p.proximity(new Point(1, 0))).toBe(1);
+    expect(p.proximity(new Point(0, 1))).toBe(1);
   });
 
   test('vectorTo', () => {

@@ -1,27 +1,34 @@
-import { deg2rad, PI2, Point, Vector } from '../../api/canvas.ts';
+import { deg2rad, PI2, Point, Vector } from '../shared/canvas.ts';
+import { onColourSchemeChange } from '../../devtoolsPanelUtil.ts';
 
-interface IMemo {
-  whenOccurred: number;
+interface IEvent {
   whenAdded: number;
   age: number;
   timePoint: Point;
   vector: Vector;
 }
 
-let raf = 0;
+let raf: number | void = 0;
 let ctx: CanvasRenderingContext2D;
 const R = 20;
 const D = 2 * R;
 const LINE_WIDTH = 4;
-const SHADOW_WIDTH = 4;
-const pRotationAxis = new Point(R, R);
-const WHITE = 'rgb(100% 100% 100%)';
-const BLACK = 'rgb(0% 0% 0%)';
+const SHADOW_WIDTH = 2;
+const pCenter = new Point(R, R);
+const WHITE = rgb(100, 100, 100);
+const BLACK = rgb(0, 0, 0);
 const ANIMATION_DURATION = 2e3;
 const ANIMATION_DELTA_PX = R / ANIMATION_DURATION;
-let primaryColour: string = BLACK;
-let shadowColour: string = WHITE;
-const memory: IMemo[] = [];
+let rgbPrimary = BLACK;
+let rgbShadow = WHITE;
+const queue: IEvent[] = [];
+
+function rgb(r: number, g: number, b: number) {
+  return function alpha(a?: number) {
+    a ??= 100;
+    return `rgb(${r}% ${g}% ${b}% / ${a}%)`;
+  };
+}
 
 export function startAnimation(ctx: CanvasRenderingContext2D) {
   initContext(ctx);
@@ -29,24 +36,21 @@ export function startAnimation(ctx: CanvasRenderingContext2D) {
 
   return function stopAnimation() {
     if (raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
+      raf = cancelAnimationFrame(raf);
     }
   };
 }
 
-export function update(timeOfCollection: number) {
-  const whenAdded = Date.now();
-  const angle = (timeOfCollection % 1000) * 360 / 1000;
+export function updateAnimation(timeOfCollection: number) {
+  const angle = -(timeOfCollection % 1000) * 360 / 1000;
   const vector = new Vector(R, 0)
-    .rotate(deg2rad(-angle))
+    .rotate(deg2rad(angle))
     // rotate left to adjust zero angle to point at {0,-1} (north)
     .rotateLeft();
-  const timePoint = vector.atBase(pRotationAxis);
+  const timePoint = vector.atBase(pCenter);
 
-  memory.unshift({
-    whenOccurred: timeOfCollection,
-    whenAdded,
+  queue.unshift({
+    whenAdded: Date.now(),
     age: 0,
     timePoint,
     vector: vector.rotateBack(),
@@ -62,73 +66,70 @@ function initContext(_ctx: CanvasRenderingContext2D) {
   ctx.shadowBlur = SHADOW_WIDTH;
 
   onColourSchemeChange((scheme) => {
-    primaryColour = scheme === 'dark' ? WHITE : BLACK;
-    shadowColour = scheme === 'dark' ? BLACK : WHITE;
-    ctx.strokeStyle = primaryColour;
-    ctx.shadowColor = shadowColour;
+    rgbPrimary = scheme === 'dark' ? WHITE : BLACK;
+    rgbShadow = scheme === 'dark' ? BLACK : WHITE;
+    ctx.strokeStyle = rgbPrimary();
+    ctx.shadowColor = rgbShadow();
   });
 }
 
-function draw() {
-  const drawTime = Date.now();
-  ctx.clearRect(0, 0, D, D);
-  drawCenter();
+let need2draw = true;
 
-  for (let n = 0, N = memory.length; n < N; n++) {
-    const memo = memory[n];
-    memo.age = drawTime - memo.whenAdded;
-    drawLine(memo);
+function draw() {
+  if (queue.length) {
+    need2draw = true;
+  } else if (need2draw) {
+    drawGrid();
+    need2draw = false;
   }
 
-  let n = memory.length;
-  while (n--) {
-    if (memory[n].age >= ANIMATION_DURATION) {
-      memory.pop();
-    } else {
-      break;
+  if (need2draw) {
+    drawGrid();
+
+    for (const e of queue) {
+      drawLine(e);
     }
+
+    deprecateEvents(queue);
   }
 
   raf = requestAnimationFrame(draw);
 }
 
-function drawCenter() {
+function drawGrid() {
+  ctx.clearRect(0, 0, D, D);
   ctx.save();
   ctx.beginPath();
-  ctx.arc(pRotationAxis.x, pRotationAxis.y, 0.5, 0, PI2);
+  ctx.arc(pCenter.x, pCenter.y, 0.5, 0, PI2);
   ctx.stroke();
   ctx.closePath();
   ctx.restore();
 }
 
-function drawLine(memo: IMemo) {
-  const length = R - memo.age * ANIMATION_DELTA_PX;
-  const p = memo.vector.setLength(length).atBase(memo.timePoint);
+function drawLine(e: IEvent) {
+  e.age = Date.now() - e.whenAdded;
+  const alpha = 20 + Math.min(80, 100 * (e.age / ANIMATION_DURATION));
+  const length = R - e.age * ANIMATION_DELTA_PX;
+  const p = e.vector.setLength(length).atBase(e.timePoint);
 
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(p.x, p.y);
-  ctx.lineTo(memo.timePoint.x, memo.timePoint.y);
+  ctx.lineTo(e.timePoint.x, e.timePoint.y);
+  ctx.strokeStyle = rgbPrimary(alpha);
   ctx.stroke();
   ctx.closePath();
   ctx.restore();
 }
 
-type TColourScheme = 'light' | 'dark';
+function deprecateEvents(queue: IEvent[]) {
+  let n = queue.length;
 
-export function onColourSchemeChange(
-  callback: (scheme: TColourScheme) => void,
-) {
-  const devtoolsScheme = chrome.devtools.panels.themeName;
-  const osDarkScheme = globalThis.matchMedia('(prefers-color-scheme: dark)');
-
-  if (devtoolsScheme === 'dark' || osDarkScheme.matches) {
-    callback('dark');
-  } else {
-    callback('light');
+  while (n--) {
+    if (queue[n].age >= ANIMATION_DURATION) {
+      queue.pop();
+    } else {
+      return;
+    }
   }
-
-  osDarkScheme.addEventListener('change', (e: MediaQueryListEvent) => {
-    callback(e.matches ? 'dark' : 'light');
-  });
 }

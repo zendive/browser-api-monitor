@@ -1,8 +1,9 @@
 import {
   loadSessionStorage,
   saveSessionStorage,
-} from '../api/storage.session.ts';
+} from '../api/storage/storage.session.ts';
 import { SvelteSet } from 'svelte/reactivity';
+import { session } from '../api/storage/storage.ts';
 
 export const sessionState = $state({
   bypass: <Set<string>> new SvelteSet(),
@@ -35,7 +36,7 @@ export async function toggleDebug(traceId: string) {
   }
 }
 
-const QUOTA_THRESHOLD = chrome.storage.session.QUOTA_BYTES;
+const QUOTA_THRESHOLD = session.QUOTA_BYTES;
 const MARGINAL_SIZE = 40; // for ASCII string in an array
 async function toggleSet(set: Set<string>, traceId: string): Promise<boolean> {
   if (set.has(traceId)) {
@@ -44,7 +45,7 @@ async function toggleSet(set: Set<string>, traceId: string): Promise<boolean> {
   }
 
   const freeSpace = QUOTA_THRESHOLD -
-    await chrome.storage.session.getBytesInUse();
+    await session.getBytesInUse();
 
   if (freeSpace - traceId.length - MARGINAL_SIZE >= 0) {
     set.add(traceId);

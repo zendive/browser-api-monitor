@@ -1,6 +1,6 @@
 import { describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { Fact } from '../src/wrapper/Fact.ts';
+import { Fact } from '../src/wrapper/shared/Fact.ts';
 
 const fact_1 = Fact.define(0b0001);
 const fact_2 = Fact.define(0b0010);
@@ -30,7 +30,7 @@ describe('Facts', () => {
 
   test('getDetails', () => {
     let data = 0;
-    const factsMap = new Map([
+    const factsMap = Fact.map([
       [fact_1, { tag: '1', details: 'fact_1' }],
       [fact_2, { tag: '2', details: 'fact_2' }],
     ]);

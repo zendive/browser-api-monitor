@@ -1,4 +1,4 @@
-import type { TPanel } from '../api/storage.local.ts';
+import type { TPanel } from '../api/storage/storage.local.ts';
 import {
   cancelAnimationFrame,
   requestAnimationFrame,
@@ -9,10 +9,10 @@ import {
   type TCallstack,
   TraceUtil,
   type TTrace,
-} from './TraceUtil.ts';
-import { trim2microsecond } from '../api/time.ts';
-import { validHandler } from './util.ts';
-import { Fact, type TFact } from './Fact.ts';
+} from './shared/TraceUtil.ts';
+import { trim2ms } from '../api/time.ts';
+import { validHandler } from './shared/util.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
 
 export type TRequestAnimationFrameHistory = {
   traceId: string;
@@ -35,10 +35,18 @@ export type TCancelAnimationFrameHistory = {
   handler: number | undefined | string;
 };
 
-export const CafFact = /*@__PURE__*/ {
+export const CafFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
   BAD_HANDLER: Fact.define(1 << 1),
-} as const;
+} as const))();
+export const CafFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [CafFact.NOT_FOUND, { tag: 'A', details: 'Animation not found' }],
+    [CafFact.BAD_HANDLER, {
+      tag: 'H',
+      details: 'Handler is not a positive number',
+    }],
+  ]))();
 
 export class AnimationWrapper {
   traceUtil: TraceUtil;
@@ -92,7 +100,7 @@ export class AnimationWrapper {
       return;
     }
 
-    rafRecord.selfTime = trim2microsecond(selfTime);
+    rafRecord.selfTime = trim2ms(selfTime);
 
     if (this.onlineAnimationFrameLookup.has(handler)) {
       this.onlineAnimationFrameLookup.delete(handler);
