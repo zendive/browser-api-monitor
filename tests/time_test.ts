@@ -1,13 +1,14 @@
-import './browserPolyfill.ts';
-import { wait } from './util.ts';
 import { beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
+import './browserPolyfill.ts';
 import {
-  callingOnce,
+  callableOnce,
   Fps,
+  ms2HMS,
   Stopper,
   Timer,
-  trim2microsecond,
+  trim2ms,
+  wait,
 } from '../src/api/time.ts';
 
 describe('Stopper', () => {
@@ -27,7 +28,9 @@ describe('Stopper', () => {
     const value2 = stopper.value();
 
     expect(value).toBe(value2);
-    expect(/\d+ms/.test(Stopper.toString(stopper.value()) || '')).toBe(true);
+    expect(/\d+\u00a0ms/.test(Stopper.toString(stopper.value()) || '')).toBe(
+      true,
+    );
   });
 
   test('elapsed continues counting after stop', async () => {
@@ -43,10 +46,10 @@ describe('Stopper', () => {
   });
 
   test('toString()', () => {
-    expect(Stopper.toString(0.000006)).toBe('0μs');
-    expect(Stopper.toString(0.123456)).toBe('123μs');
-    expect(Stopper.toString(999.123456)).toBe('999ms');
-    expect(Stopper.toString(5432.123456)).toBe('5.432s');
+    expect(Stopper.toString(0.00)).toBe('0.00\u00a0ms');
+    expect(Stopper.toString(0.123456)).toBe('0.12\u00a0ms');
+    expect(Stopper.toString(999.123456)).toBe('999\u00a0ms');
+    expect(Stopper.toString(5432.123456)).toBe('5.432\u00a0s');
     expect(Stopper.toString(5 * 60e3)).toBe('00:05:00');
     expect(Stopper.toString(987654321.0123456789)).toBe('274:20:54');
   });
@@ -118,7 +121,7 @@ describe('Timer - animation + measurable', () => {
 
     timer.stop();
     expect(timer.isPending()).toBe(false);
-    expect(timer.executionTime < 0.5).toBe(true);
+    expect(timer.callbackSelfTime < 0.5).toBe(true);
     expect(count).toBeLessThan(62);
   });
 });
@@ -141,16 +144,23 @@ describe('Fps', () => {
   });
 });
 
-describe('trim2microsecond', () => {
+describe('trim2ms', () => {
   test('trims to microsecond', () => {
-    expect(trim2microsecond(null)).toBe(null);
-    expect(trim2microsecond(1.111999)).toBe(1.111);
+    expect(trim2ms(null)).toBe(null);
+    expect(trim2ms(1.111999)).toBe(1.11);
   });
 });
 
-describe('callingOnce', () => {
+describe('ms2HMS', () => {
+  test('millisecond to hour minute second', () => {
+    expect(ms2HMS(0)).toBe('00:00:00');
+    expect(ms2HMS(3661000)).toBe('01:01:01');
+  });
+});
+
+describe('callableOnce', () => {
   let count = 0;
-  const fn = callingOnce(() => {
+  const fn = callableOnce(() => {
     return ++count;
   });
 

@@ -4,9 +4,10 @@ import {
   requestAnimationFrame,
   setTimeout,
   TELEMETRY_FREQUENCY_30PS,
+  TIME_60FPS_MS,
 } from './const.ts';
 
-export function callingOnce<
+export function callableOnce<
   T extends (...args: Parameters<T>) => ReturnType<T>,
 >(
   fn: T | null,
@@ -52,34 +53,30 @@ export class Stopper {
     return this.#finish - this.#start;
   }
 
+  toString() {
+    return Stopper.toString(this.value());
+  }
+
   static toString(msTime: number | unknown) {
     if (typeof msTime !== 'number' || !Number.isFinite(msTime)) {
       return;
     }
 
-    if (msTime < 1) {
-      return `${Math.trunc(msTime * 1e3)}μs`;
-    } else if (msTime < 3) {
+    if (msTime <= TIME_60FPS_MS) {
       const ms = Math.trunc(msTime);
-      return `${ms}.${Math.trunc((msTime - ms) * 1e2)}ms`;
+      return `${ms}.${
+        toPaddedString(Math.trunc((msTime - ms) * 1e2), 2)
+      }\u00a0ms`;
     } else if (msTime < 1e3) {
-      return `${Math.trunc(msTime)}ms`;
+      return `${Math.trunc(msTime)}\u00a0ms`;
     } else if (msTime < 60e3) {
       const s = Math.trunc(msTime / 1e3) % 60;
       const ms = Math.trunc(msTime % 1e3);
 
-      return `${s}.${ms.toString().padStart(3, '0')}s`;
+      return `${s}.${toPaddedString(ms, 3)}\u00a0s`;
     }
 
-    const h = Math.trunc(msTime / 3600e3);
-    const m = Math.trunc(msTime / 60e3) % 60;
-    const s = Math.trunc(msTime / 1e3) % 60;
-
-    return `${h.toString().padStart(2, '0')}:${
-      m
-        .toString()
-        .padStart(2, '0')
-    }:${s.toString().padStart(2, '0')}`;
+    return ms2HMS(msTime);
   }
 }
 
@@ -91,38 +88,38 @@ interface ITimerOptions {
   /** act as requestAnimationFrame called from another requestAnimationFrame (default: false);
   if true - `delay` is redundant */
   animation?: boolean;
-  /** populate `executionTime` with measured execution time of `callback` (default: false) */
+  /** populate `callbackSelfTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
 }
 
 /**
  * A unification of ways to delay a callback to another time in javascript event-loop
  * - `repetitive: false` - will call `setTimeout` with constant `delay`.
- * - `repetitive: true` - will call `setTimeout` but act as `setInterval` with changable `delay`.
+ * - `repetitive: true` - will call `setTimeout` but act as `setInterval` with changeable `delay`.
  * - `animation: true` - will call `requestAnimationFrame` in recursive way (means to follow the browser's frame-rate).
  * - `measurable: true` - measure the callback's execution time.
  */
 export class Timer {
-  readonly options: ITimerOptions;
-  readonly #defaultOptions: ITimerOptions = {
+  delay: number = 0;
+  /** callback's self-time in milliseconds */
+  callbackSelfTime: number = -1;
+  #handler: number = 0;
+  readonly #fn: (...args: unknown[]) => void;
+  readonly #stopper?: Stopper;
+  readonly #options: ITimerOptions;
+  static readonly DEFAULT_OPTIONS: ITimerOptions = {
     delay: 0,
     repetitive: false,
     animation: false,
     measurable: false,
   };
-  delay: number = 0;
-  /** callback's self-time in milliseconds */
-  executionTime: number = -1;
-  #fn: (...args: unknown[]) => void;
-  #handler: number = 0;
-  readonly #stopper?: Stopper;
 
   constructor(o: ITimerOptions, fn: (...args: unknown[]) => void) {
-    this.options = Object.assign(this.#defaultOptions, o);
+    this.#options = Object.assign({}, Timer.DEFAULT_OPTIONS, o);
     this.#fn = fn;
-    this.delay = this.options.delay || 0;
+    this.delay = this.#options.delay || 0;
 
-    if (this.options.measurable) {
+    if (this.#options.measurable) {
       this.#stopper = new Stopper();
     }
   }
@@ -132,12 +129,12 @@ export class Timer {
       this.stop();
     }
 
-    if (this.options.animation) {
+    if (this.#options.animation) {
       this.#handler = requestAnimationFrame(() => {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.repetitive) {
+        if (this.#options.repetitive) {
           this.start(...args);
         }
       });
@@ -146,7 +143,7 @@ export class Timer {
         this.trigger(...args);
         this.#handler = 0;
 
-        if (this.options.repetitive) {
+        if (this.#options.repetitive) {
           this.start(...args);
         }
       }, this.delay);
@@ -159,7 +156,7 @@ export class Timer {
     this.#stopper?.start();
     this.#fn(...args);
     if (this.#stopper) {
-      this.executionTime = this.#stopper.stop().value();
+      this.callbackSelfTime = this.#stopper.stop().value();
     }
 
     return this;
@@ -167,7 +164,7 @@ export class Timer {
 
   stop() {
     if (this.#handler) {
-      if (this.options.animation) {
+      if (this.#options.animation) {
         cancelAnimationFrame(this.#handler);
       } else {
         clearTimeout(this.#handler);
@@ -221,12 +218,24 @@ export class Fps {
   }
 }
 
-export function trim2microsecond<T>(ms: T) {
-  return typeof ms === 'number' ? Math.trunc(ms * 1e3) / 1e3 : ms;
+export function wait(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
 }
 
-export function msToHms(delay: number | unknown): string | undefined {
-  return delay && Number(delay) > 10e3 ? Stopper.toString(delay) : undefined;
+export function trim2ms<T>(ms: T) {
+  return typeof ms === 'number' ? Math.trunc(ms * 1e2) / 1e2 : ms;
+}
+
+export function ms2HMS(ms: number) {
+  return `${toPaddedString(Math.trunc(ms / 3600e3), 2)}:${
+    toPaddedString(Math.trunc(ms / 60e3) % 60, 2)
+  }:${toPaddedString(Math.trunc(ms / 1e3) % 60, 2)}`;
+}
+
+function toPaddedString(value: number, padding: number) {
+  return value.toString().padStart(padding, '0');
 }
 
 const TICK_TIME_LAG_SCALAR = 3;

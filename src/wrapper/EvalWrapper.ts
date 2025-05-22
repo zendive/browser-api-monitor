@@ -4,10 +4,10 @@ import {
   type TCallstack,
   TraceUtil,
   type TTrace,
-} from './TraceUtil.ts';
-import { trim2microsecond } from '../api/time.ts';
-import type { TPanel } from '../api/storage.local.ts';
-import { Fact, type TFact } from './Fact.ts';
+} from './shared/TraceUtil.ts';
+import { trim2ms } from '../api/time.ts';
+import type { TPanel } from '../api/storage/storage.local.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
 
 export type TEvalHistory = {
   traceId: string;
@@ -20,12 +20,31 @@ export type TEvalHistory = {
   selfTime: number | null;
 };
 
-// https://rollupjs.org/troubleshooting/#avoiding-eval
+/**
+ * @NOTE: a copy of `eval` here, - making it "indirect eval"
+ *  - making it able to detect local scope variables usage
+ *    on one side, and potentially breaking site functionality.
+ *  - any code that is based on access to a local scope will fail to acquire it.
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#direct_and_indirect_eval
+ */
 const lesserEval = /*@__PURE__*/ globalThis.eval.bind(globalThis);
-export const EvalFact = /*@__PURE__*/ {
+export const EvalFact = /*@__PURE__*/ (() => ({
   USES_GLOBAL_SCOPE: Fact.define(1 << 0),
   USES_LOCAL_SCOPE: Fact.define(1 << 1),
-};
+} as const))();
+export const EvalFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [EvalFact.USES_GLOBAL_SCOPE, {
+      tag: 'G',
+      details:
+        'Had access to global scope (local scope usage has not been detected)',
+    }],
+    [EvalFact.USES_LOCAL_SCOPE, {
+      tag: 'L',
+      details:
+        'Threw an error while trying to get value of local scope variable (return value is not available)',
+    }],
+  ]))();
 
 export class EvalWrapper {
   traceUtil: TraceUtil;
@@ -55,7 +74,7 @@ export class EvalWrapper {
       existing.code = cloneObjectSafely(code);
       existing.returnedValue = cloneObjectSafely(returnedValue);
       existing.calls++;
-      existing.selfTime = trim2microsecond(selfTime);
+      existing.selfTime = trim2ms(selfTime);
 
       if (facts) {
         existing.facts = Fact.assign(existing.facts, facts);

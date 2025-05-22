@@ -5,11 +5,14 @@ import {
   windowListen,
   windowPost,
 } from './api/communication.ts';
-import { loadLocalStorage, onLocalStorageChange } from './api/storage.local.ts';
+import {
+  loadLocalStorage,
+  onLocalStorageChange,
+} from './api/storage/storage.local.ts';
 import {
   loadSessionStorage,
   onSessionStorageChange,
-} from './api/storage.session.ts';
+} from './api/storage/storage.session.ts';
 
 Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
   ([config, session]) => {
@@ -23,11 +26,11 @@ Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
     portListen(windowPost);
     windowListen(runtimePost);
 
-    onLocalStorageChange((newValue) => {
-      windowPost({ msg: EMsg.CONFIG, config: newValue });
+    onLocalStorageChange((config) => {
+      windowPost({ msg: EMsg.CONFIG, config });
     });
-    onSessionStorageChange((newValue) => {
-      windowPost({ msg: EMsg.SESSION, session: newValue });
+    onSessionStorageChange((session) => {
+      windowPost({ msg: EMsg.SESSION, session });
     });
 
     runtimePost({ msg: EMsg.CONTENT_SCRIPT_LOADED });
