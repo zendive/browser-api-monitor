@@ -95,7 +95,7 @@
 
       <tr class="menu-item -dash-top">
         <td class="-left">
-          Prevent system from going to Sleep state due to user inactivity
+          Prevent the system from going to Sleep state due to user inactivity
         </td>
         <td class="-right">
           <button
