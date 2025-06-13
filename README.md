@@ -1,55 +1,82 @@
-# <img src="./public/img/icon.svg" width="32"/> Browser API Monitor
+# <img src="./public/img/icon.svg" width="32"/> API Monitor - Chrome Developer Tools extension
 
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
-If you're web developer and want to assess implementation correctness - this tool adds additional panel to the browser’s DevTool that enables to see scheduled timeouts and active intervals, as well as to review and navigate to initiators of: eval, setTimeout, setInterval, requestAnimationFrame, requestIdleCallback and their terminator functions.
+Chrome Developer Tools `API 🔎` panel tries to gather every bit of useful information from the usage of certain native functions that are prone to human errors, or are difficult to spot intuitively.
 
-#### Allows:
+#### Motivation
 
-- to measure callback execution self-time.
-- to see `requestAnimationFrame` callback request frame rate.
-- visit every function in the call stack (if available), bypass or pause while debugging.
-- detect `eval` function usage, see its argument and return value, same for `setTimeout` and `setInterval` when called with a string instead of a function.
-- for every mounted video or audio media element's to see it’s state and properties.
+To assess Web Application implementation correctness and expedite issues discovery. [See examples](./doc/issues.log.md).
 
-#### Helps to spot:
+#### Functionality
+ 
+- Gather callstack that is used to call every wrapped function:
+  - **short** - just the nearest initiator.
+  - **full** - from the root to the nearest initiator (from left to right).
 
-- incorrect timeout delay.
-- bad handler for terminator function.
-- terminating non-existing or elapsed timeout.
+- Aggregate information about currently scheduled timeouts and running active intervals.
 
-#### Motivation:
+- Gather details about which terminators are cancelling certain scheduled setters.
 
-- To expedite issues discovery.
+- Allow to initiate a debugging session by redirecting the code flow to a `debugger` breakpoint right before the callback invocation.
+  - Hit <kbd>F11</kbd> (step inside) **twice** in order to progress into the callback itself.
 
-#### Wrapped native functions:
+- Allow to bypass (skip) setter's callback, or terminator invocation function.
 
-- eval (by default off)
-- setTimeout
-- clearTimeout
-- setInterval
-- clearInterval
-- requestAnimationFrame
-- cancelAnimationFrame
-- requestIdleCallback
-- cancelIdleCallback
+- Detect anomalies in passed arguments such as:
+  - Passing incorrect timeout delay to `setTimeout`, `setInterval`, `requestIdleCallback`.
+    - Correct one is `undefined` or a number that is greater or equal to `0`.
+  - Invoking terminator function with handler that is non-positive integer, or of non-existent or already elapsed setter.
 
-> [!NOTE]
-> While measuring performance of your code – consider disabling this extension as it may affect the results.
+- Measure callback's execution self-time.
+  - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
+    - currently, there is no API to detect monitor refresh-rate at runtime due to browser security and privacy restrictions, hence hardcoded to 60 FPS. 
+
+- Count `requestAnimationFrame` calls per second (CPS).
+  - If requested recursively - it reflects animation FPS.
+
+- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
+
+- Scan DOM each second for mounted `video` or `audio` media elements.
+  - Present control panel with basic media functions.
+  - Show media events and number of times they have been fired.
+  - Show current state of properties.
+  - Allow to toggle the state of changeable boolean properties e.g. `controls`, `preservesPitch`...
+  
+- Prevent the system from going to Sleep state due to user inactivity for a better observational experience.
+  - By default `off`
 
 <details>
-  <summary> <strong>Example</strong> </summary>
+  <summary> <strong>Wrapped native functions</strong> </summary>
+
+- `eval`
+  - by default `off`, cause the fact of wrapping it, excludes the access to local scope variables from the eval script, and that, as a result, may brake the application if it does need it.
+- `setTimeout`
+  - `clearTimeout`
+- `setInterval`
+  - `clearInterval`
+- `requestAnimationFrame`
+  - `cancelAnimationFrame`
+- `requestIdleCallback`
+  - `cancelIdleCallback`
+
+</details>
+<details>
+  <summary> <strong>Screenshots</strong> </summary>
 
 ![screenshot](./doc/screenshot-02.png)
 ![screenshot](./doc/screenshot-04.png)
 
 </details>
 
+> [!NOTE]
+> While measuring performance of your code – consider disabling this extension as it may affect the results.
+
 ### Build requirements
 
 - OS: Linux
 - Node: 22.14.0 (LTS)
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.2.12
+- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.3.5
 
 ### Build instructions
 
