@@ -9,7 +9,7 @@
 
   - Code that uses `eval` with modern syntax to check if it's supported by browser (not throws exception).
 
-  - Dependency package that was bundled with webpack config's [devtool: 'eval'](https://webpack.js.org/configuration/devtool/) in production mode.
+  - Dependency package that was bundled with webpack's config option [`devtool: 'eval'`](https://webpack.js.org/configuration/devtool/) or [`mode: 'development'`](https://webpack.js.org/configuration/mode/).
 
 - A substantial number of hidden video elements in DOM stopped working, after Chrome unexpectedly limited them to 100 per domain (later the limit was lifted to 1000).
 
