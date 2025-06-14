@@ -30,27 +30,24 @@ To assess Web Application implementation correctness and expedite issues discove
 
 - Measure callback's execution self-time.
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
-    - currently, there is no API to detect monitor refresh-rate at runtime due to browser security and privacy restrictions, hence hardcoded to 60 FPS. 
 
 - Count `requestAnimationFrame` calls per second (CPS).
   - If requested recursively - it reflects animation FPS.
 
-- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
+- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`. By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may brake the application if it does need it.
 
-- Scan DOM each second for mounted `video` or `audio` media elements.
+- Monitor mounted `video` and `audio` media elements in DOM.
   - Present control panel with basic media functions.
   - Show media events and number of times they have been fired.
   - Show current state of properties.
   - Allow to toggle the state of changeable boolean properties e.g. `controls`, `preservesPitch`...
   
-- Prevent the system from going to Sleep state due to user inactivity for a better observational experience.
-  - By default `off`
+- Prevent the system from going to Sleep state due to user inactivity for a better observational experience. By default - `off`.
 
 <details>
-  <summary> <strong>Wrapped native functions</strong> </summary>
+  <summary> <strong>Wrappable native functions</strong> </summary>
 
 - `eval`
-  - by default `off`, cause the fact of wrapping it, excludes the access to local scope variables from the eval script, and that, as a result, may brake the application if it does need it.
 - `setTimeout`
   - `clearTimeout`
 - `setInterval`
