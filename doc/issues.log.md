@@ -15,12 +15,12 @@
 
 - Redundant duplicate `video` element, hidden under the actual video on a landing-page.
 
-- `setTimeout` used to animate instead of `requestAnimationFrame`.
+- `setTimeout`, `setInterval` are used to animate instead of `requestAnimationFrame`.
 
 - `setTimeout` with dynamically computed delay value ends to be called with `NaN`.
 
 - Hidden UI feature runs its logic in the background.
 
-  - Indirectly, discovered from the bursts of short timeouts, fired in loop, from ResizeObserver of an invisible feature that appears to be for a power user only (or partially deprecated).
+  - Indirectly, discovered from the bursts of short timeouts, fired from `ResizeObserver` handler of invisible feature that appears to be: or for a power user only, or just partially deprecated.
 
   - Animation still runs (plus network requests) in the background after a "paywall" fullscreen popup. Despite claiming "it's to conserve data bandwidth". CPU usage doesn't drop to 0%.
