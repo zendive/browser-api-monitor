@@ -3,7 +3,11 @@
 
 ### Issues, that could have been spotted during the development
 
-- A ~10ms delay interval, from an old third-party library, constantly consuming approximately 10% of CPU solely to check if the window was resized.
+- Timers with short delays unjustified for the use case, wasting CPU time.
+
+  - A ~10ms delay interval, from an old third-party library, constantly consuming approximately 10% of CPU solely to check if the window was resized.
+
+  - A 150ms delay interval, displaying time in `H:MM:SS` format (1 second precision); and displaying it via `innerHTML`.
 
 - A bundled dependency library that utilizes the `eval` function, thereby preventing the removal of `unsafe-eval` from the `Content-Security-Policy`  header.
 
