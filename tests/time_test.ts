@@ -11,6 +11,8 @@ import {
   wait,
 } from '../src/api/time.ts';
 
+const DELAY = 10;
+
 describe('Stopper', () => {
   let stopper: Stopper;
 
@@ -19,7 +21,6 @@ describe('Stopper', () => {
   });
 
   test('start/stop', async () => {
-    const DELAY = 10;
     stopper.start();
     await wait(DELAY);
     stopper.stop();
@@ -34,7 +35,6 @@ describe('Stopper', () => {
   });
 
   test('elapsed continues counting after stop', async () => {
-    const DELAY = 10;
     stopper.start();
     await wait(DELAY);
     stopper.stop();
@@ -58,7 +58,6 @@ describe('Stopper', () => {
 describe('Timer - default options', () => {
   test('start', async () => {
     let counter = 0;
-    const DELAY = 10;
     const timer = new Timer({ delay: DELAY }, () => {
       counter++;
     });
@@ -73,7 +72,6 @@ describe('Timer - default options', () => {
 
   test('stop before expected', async () => {
     let counter = 0;
-    const DELAY = 10;
     const timer = new Timer({ delay: 2 * DELAY }, () => {
       counter++;
     });
@@ -91,7 +89,6 @@ describe('Timer - default options', () => {
 describe('Timer - interval option', () => {
   test('start/stop', async () => {
     let counter = 0;
-    const DELAY = 10;
     const interval = new Timer({ delay: DELAY, repetitive: true }, () => {
       counter++;
     });
@@ -106,23 +103,27 @@ describe('Timer - interval option', () => {
 
 describe('Timer - animation + measurable', () => {
   test('start/stop', async () => {
-    const SECOND = 1e3;
     let count = 0;
-    const timer = new Timer({ animation: true, measurable: true }, () => {
+    const TIMESPAN = 100;
+    const timer = new Timer({
+      animation: true,
+      repetitive: true,
+      measurable: true,
+    }, () => {
       count++;
     });
 
     expect(timer.isPending()).toBe(false);
-
     timer.start();
-
     expect(timer.isPending()).toBe(true);
-    await wait(SECOND);
+
+    await wait(TIMESPAN);
 
     timer.stop();
     expect(timer.isPending()).toBe(false);
-    expect(timer.callbackSelfTime < 0.5).toBe(true);
-    expect(count).toBeLessThan(62);
+    expect(timer.callbackSelfTime).toBeLessThan(0.5);
+    expect(count).toBeGreaterThan(1);
+    expect(count).toBeLessThan(TIMESPAN / (1e3 / 60));
   });
 });
 
@@ -174,4 +175,4 @@ describe('callableOnce', () => {
   });
 });
 
-await wait(1e3);
+await wait(10);

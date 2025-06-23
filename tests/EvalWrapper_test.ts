@@ -91,4 +91,4 @@ describe('EvalWrapper', () => {
   });
 });
 
-await wait(1e1);
+await wait(10);

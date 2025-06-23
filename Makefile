@@ -25,7 +25,10 @@ valid:
 	pnpm exec svelte-check --no-tsconfig # only for *.svelte files
 
 test: valid
-	deno test --no-check --trace-leaks --reporter=dot
+	deno test --parallel --no-check --trace-leaks --reporter=dot
+
+test-dev:
+	deno test --watch --parallel --no-check --trace-leaks
 
 prod: test
 	rm -rf $(BUILD_DIR) $(CHROME_ZIP)

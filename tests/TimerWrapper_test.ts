@@ -266,7 +266,7 @@ describe('wrappers', () => {
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
   });
 
-  test('clearIntervalHistory - non existent handler', () => {
+  test('clearIntervalHistory - non-existent handler', () => {
     globalThis.clearInterval(1000);
 
     const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
@@ -287,4 +287,4 @@ describe('wrappers', () => {
   });
 });
 
-await wait(1e1);
+await wait(10);
