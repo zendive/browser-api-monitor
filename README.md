@@ -35,7 +35,7 @@ To assess Web Application implementation correctness and expedite issues discove
   - If requested recursively - it reflects animation FPS.
 
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
-  - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may brake the application if it does need it.
+  - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
 
 - Monitor Worker's instance behaviour, its methods and event handlers.
 
