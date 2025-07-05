@@ -2,17 +2,15 @@ import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import { CicFact, IdleWrapper, RicFact } from '../src/wrapper/IdleWrapper.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('IdleWrapper', () => {
-  const traceUtil = new TraceUtil();
   let apiIdle: IdleWrapper;
 
   beforeEach(() => {
-    apiIdle = new IdleWrapper(traceUtil);
+    apiIdle = new IdleWrapper();
     apiIdle.wrapRequestIdleCallback();
     apiIdle.wrapCancelIdleCallback();
   });

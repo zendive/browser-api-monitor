@@ -3,7 +3,6 @@ import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_INTERVAL,
@@ -13,14 +12,13 @@ import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('EvalWrapper', () => {
-  const traceUtil = new TraceUtil();
   let apiEval: EvalWrapper;
   let apiTimer: TimerWrapper;
 
   beforeEach(() => {
-    apiEval = new EvalWrapper(traceUtil);
+    apiEval = new EvalWrapper();
     apiEval.wrap();
-    apiTimer = new TimerWrapper(traceUtil, apiEval);
+    apiTimer = new TimerWrapper(apiEval);
     apiTimer.wrapSetTimeout();
     apiTimer.wrapSetInterval();
   });

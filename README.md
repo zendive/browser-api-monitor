@@ -34,7 +34,10 @@ To assess Web Application implementation correctness and expedite issues discove
 - Count `requestAnimationFrame` calls per second (CPS).
   - If requested recursively - it reflects animation FPS.
 
-- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`. By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may brake the application if it does need it.
+- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
+  - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may brake the application if it does need it.
+
+- Monitor Worker's instance behaviour, its methods and event handlers.
 
 - Monitor mounted `video` and `audio` media elements in DOM.
   - Present control panel with basic media functions.
@@ -56,6 +59,7 @@ To assess Web Application implementation correctness and expedite issues discove
   - `cancelAnimationFrame`
 - `requestIdleCallback`
   - `cancelIdleCallback`
+- `Worker`
 
 </details>
 <details>

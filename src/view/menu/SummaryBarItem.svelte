@@ -56,7 +56,9 @@
 <style lang="scss">
   a {
     padding: 0 0.4rem;
-    border-right: 1px solid var(--border);
+    &:not(:last-of-type) {
+      border-right: 1px solid var(--border);
+    }
 
     &.link-disabled {
       cursor: default;

@@ -12,17 +12,25 @@
 <div class="summary">
   {#if ts.telemetry && panels.callsSummary.visible}
     <SummaryBarItem
-      label="eval"
-      navSelector="Eval History"
-      panel={panels.eval}
-      count={ts.telemetry.callCounter.eval}
-    />
-
-    <SummaryBarItem
       label="Media"
       navSelector="Videos|Audios"
       panel={panels.media}
       count={ts.telemetry.media.total}
+    />
+
+    <SummaryBarItem
+      label="Worker"
+      tooltip="Worker"
+      navSelector="Worker History"
+      panel={panels.worker}
+      count={ts.telemetry.worker.totalOnline}
+    />
+
+    <SummaryBarItem
+      label="eval"
+      navSelector="Eval History"
+      panel={panels.eval}
+      count={ts.telemetry.callCounter.eval}
     />
 
     <SummaryBarItem

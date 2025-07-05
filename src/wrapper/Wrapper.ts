@@ -1,5 +1,4 @@
 import { callableOnce } from '../api/time.ts';
-import { TraceUtil } from './shared/TraceUtil.ts';
 import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
   EWrapperCallstackType,
@@ -25,6 +24,13 @@ import {
 } from './IdleWrapper.ts';
 import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
 import type { TSession } from '../api/storage/storage.session.ts';
+import {
+  collectWorkerHistory,
+  type IWorkerTelemetry,
+  updateWorkerFrameRateMetrics,
+  wrapWorker,
+} from './WorkerWrapper.ts';
+import { traceUtil } from './shared/util.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -39,6 +45,7 @@ export type TTelemetry = {
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
   activeTimers: number;
+  worker: IWorkerTelemetry;
   callCounter: {
     setTimeout: number;
     clearTimeout: number;
@@ -53,12 +60,11 @@ export type TTelemetry = {
 };
 
 let panels: TPanelMap;
-const traceUtil = new TraceUtil();
 const apiMedia = new MediaWrapper();
-const apiEval = new EvalWrapper(traceUtil);
-const apiTimer = new TimerWrapper(traceUtil, apiEval);
-const apiAnimation = new AnimationWrapper(traceUtil);
-const apiIdle = new IdleWrapper(traceUtil);
+const apiEval = new EvalWrapper();
+const apiTimer = new TimerWrapper(apiEval);
+const apiAnimation = new AnimationWrapper();
+const apiIdle = new IdleWrapper();
 
 const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
   traceUtil.callstackType = type;
@@ -74,6 +80,7 @@ const wrapApis = callableOnce(() => {
   panels.cancelAnimationFrame.wrap && apiAnimation.wrapCancelAnimationFrame();
   panels.requestIdleCallback.wrap && apiIdle.wrapRequestIdleCallback();
   panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
+  panels.worker.wrap && wrapWorker();
 });
 
 export function applyConfig(config: TConfig) {
@@ -88,13 +95,9 @@ export function applySession(session: TSession) {
 }
 
 export function onEachSecond() {
-  apiMedia.meetMedia();
-  if (
-    panels.requestAnimationFrame.wrap &&
-    panels.requestAnimationFrame.visible
-  ) {
-    apiAnimation.updateAnimationsFramerate();
-  }
+  apiMedia.meetMedia(panels.media);
+  apiAnimation.updateAnimationsFramerate(panels.requestAnimationFrame);
+  updateWorkerFrameRateMetrics(panels.worker);
 }
 
 export function collectMetrics(): TTelemetry {
@@ -117,6 +120,7 @@ export function collectMetrics(): TTelemetry {
       panels.cancelIdleCallback,
     ),
     activeTimers: apiTimer.onlineTimers.size,
+    worker: collectWorkerHistory(panels.worker),
     callCounter: panels.callsSummary.visible
       ? {
         eval: apiEval.callCounter,
