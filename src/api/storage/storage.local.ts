@@ -43,8 +43,8 @@ export type TConfigField = Partial<TConfig>;
 export const DEFAULT_PANELS: TPanel[] = [
   { key: 'callsSummary', label: 'Calls Summary', visible: false, wrap: null },
   { key: 'media', label: 'Media', visible: true, wrap: null },
-  { key: 'worker', label: 'Worker', visible: true, wrap: true },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
+  { key: 'worker', label: 'Worker', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
   { key: 'setTimeout', label: 'setTimeout History', visible: true, wrap: true },
   {
