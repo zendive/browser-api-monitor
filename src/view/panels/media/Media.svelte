@@ -51,7 +51,10 @@
   }
 
   .label {
+    display: flex;
+    align-items: center;
     font-weight: bold;
     width: 100%;
+    height: 1.125rem;
   }
 </style>

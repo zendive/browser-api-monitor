@@ -8,6 +8,7 @@ import {
 import { trim2ms } from '../api/time.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
+import { traceUtil } from './shared/util.ts';
 
 export type TEvalHistory = {
   traceId: string;
@@ -47,13 +48,11 @@ export const EvalFacts = /*@__PURE__*/ (() =>
   ]))();
 
 export class EvalWrapper {
-  traceUtil: TraceUtil;
   evalHistory: Map</*traceId*/ string, TEvalHistory> = new Map();
   callCounter = 0;
   nativeEval = lesserEval;
 
-  constructor(traceUtil: TraceUtil) {
-    this.traceUtil = traceUtil;
+  constructor() {
   }
 
   updateHistory(
@@ -87,7 +86,7 @@ export class EvalWrapper {
         facts,
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         selfTime,
       });
     }
@@ -99,7 +98,7 @@ export class EvalWrapper {
       code: string,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.getCallstack(err, code);
+      const callstack = traceUtil.getCallstack(err, code);
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;
@@ -109,8 +108,8 @@ export class EvalWrapper {
         this.callCounter++;
         const start = performance.now();
 
-        if (this.traceUtil.shouldPass(callstack.traceId)) {
-          if (this.traceUtil.shouldPause(callstack.traceId)) {
+        if (traceUtil.shouldPass(callstack.traceId)) {
+          if (traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
           rv = this.nativeEval(code);

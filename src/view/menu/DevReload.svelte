@@ -10,6 +10,10 @@
   }
 </script>
 
-<button onclick={onDevReload} title="Reload" aria-label="Reload">
+<button
+  onclick={onDevReload}
+  title="Reload & Clear Storages"
+  aria-label="Reload & Clear Storages"
+>
   <span class="icon -refresh"></span>
 </button>

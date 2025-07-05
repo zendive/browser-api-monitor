@@ -6,7 +6,6 @@ import {
   TAG_BAD_HANDLER,
   TAG_DELAY_NOT_FOUND,
 } from '../src/api/const.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import {
   ClearTimerFact,
   SetTimerFact,
@@ -17,12 +16,11 @@ import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('wrappers', () => {
-  const traceUtil = new TraceUtil();
-  const apiEval = new EvalWrapper(traceUtil);
+  const apiEval = new EvalWrapper();
   let apiTimer: TimerWrapper;
 
   beforeEach(() => {
-    apiTimer = new TimerWrapper(traceUtil, apiEval);
+    apiTimer = new TimerWrapper(apiEval);
     apiTimer.wrapSetTimeout();
     apiTimer.wrapClearTimeout();
     apiTimer.wrapSetInterval();

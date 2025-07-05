@@ -9,13 +9,15 @@
   import IdleCallbackRequestHistory from './idle/IdleCallbackRequestHistory.svelte';
   import Online from './online/Online.svelte';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
+  import Worker from './worker/Worker.svelte';
 
   const ts = useTelemetryState();
 </script>
 
 {#if ts.telemetry}
-  <Eval evalHistory={ts.telemetry.evalHistory} />
   <Media media={ts.telemetry.media} />
+  <Worker telemetry={ts.telemetry.worker} />
+  <Eval evalHistory={ts.telemetry.evalHistory} />
   <Online onlineTimers={ts.telemetry.onlineTimers} />
 
   {#if ts.telemetry.setTimeoutHistory?.length}

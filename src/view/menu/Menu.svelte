@@ -6,12 +6,15 @@
   import DevReload from './DevReload.svelte';
   import TogglePause from './TogglePause.svelte';
   import UpdatePace from './UpdatePace.svelte';
+  import DevDumpTelemetry from './DevDumpTelemetry.svelte';
 </script>
 
 <TogglePanels />
 <div class="divider -thin"></div>
 {#if __development__}
   <DevReload />
+  <div class="divider -thin"></div>
+  <DevDumpTelemetry />
   <div class="divider -thin"></div>
 {/if}
 <TogglePause />

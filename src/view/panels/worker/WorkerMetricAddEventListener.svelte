@@ -1,0 +1,57 @@
+<script lang="ts">
+  import CollapseExpand from './CollapseExpand.svelte';
+  import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import Variable from '../../shared/Variable.svelte';
+  import CellCallstack from '../shared/CellCallstack.svelte';
+  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
+  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+
+  let { metric }: { metric: IWorkerTelemetryMetric } = $props();
+  let isExpanded = $state(true);
+</script>
+
+{#if metric.ael.length}
+  <table>
+    <thead class="sticky-header">
+      <tr>
+        <th class="w-full">
+          <CollapseExpand
+            class="bc-invert"
+            {isExpanded}
+            onClick={() => void (isExpanded = !isExpanded)}
+          >
+            addEventListener [<Variable value={metric.ael.length} />]
+          </CollapseExpand>
+        </th>
+        <th class="ta-r">Self</th>
+        <th class="ta-c" title="Calls per second">CPS</th>
+        <th class="ta-c">Events</th>
+        <th class="ta-c">Called</th>
+        <th title="Bypass"><span class="icon -bypass"></span></th>
+        <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
+      </tr>
+    </thead>
+
+    <tbody class:d-none={!isExpanded}>
+      {#each metric.ael as ael (ael.traceId)}
+        <tr class="t-zebra">
+          <td class="wb-all">
+            <CellCallstack
+              trace={ael.trace}
+              traceDomain={ael.traceDomain}
+            />
+          </td>
+          <td class="ta-r">
+            <CellFrameTimeSensitive value={ael.eventSelfTime} />
+          </td>
+          <td class="ta-c">{ael.eventsCps || undefined}</td>
+          <td class="ta-c"><Variable value={ael.events} /></td>
+          <td class="ta-c"><Variable value={ael.calls} /></td>
+          <td><CellBypass traceId={ael.traceId} /></td>
+          <td><CellBreakpoint traceId={ael.traceId} /></td>
+        </tr>
+      {/each}
+    </tbody>
+  </table>
+{/if}
