@@ -1,13 +1,14 @@
 <script lang="ts">
   import Panels from './panels/Panels.svelte';
   import Menu from './menu/Menu.svelte';
+  import { SCROLLABLE_CLASSNAME } from './shared/const.ts';
 </script>
 
 <section>
   <header>
     <Menu />
   </header>
-  <main class="scrollable">
+  <main class={SCROLLABLE_CLASSNAME}>
     <Panels />
   </main>
 </section>

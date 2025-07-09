@@ -207,3 +207,17 @@ th .icon {
 .icon.-facts {
   mask-image: url(img/facts.svg);
 }
+.scrolled-to {
+  animation: scrolledTo 0.256s alternate infinite;
+}
+
+@keyframes scrolledTo {
+  0% {
+    outline: 1px solid var(--attention);
+    outline-offset: -1px;
+  }
+  100% {
+    outline: 5px solid var(--attention);
+    outline-offset: -5px;
+  }
+}
