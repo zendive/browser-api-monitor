@@ -263,13 +263,4 @@ export class IdleWrapper {
         : null,
     };
   }
-
-  cleanHistory() {
-    this.ricHistory.clear();
-    this.cicHistory.clear();
-    this.onlineIdleCallbackLookup.clear();
-
-    this.callCounter.requestIdleCallback = 0;
-    this.callCounter.cancelIdleCallback = 0;
-  }
 }

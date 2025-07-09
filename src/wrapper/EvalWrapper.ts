@@ -145,9 +145,4 @@ export class EvalWrapper {
       ? Array.from(this.evalHistory.values())
       : null;
   }
-
-  cleanHistory() {
-    this.evalHistory.clear();
-    this.callCounter = 0;
-  }
 }

@@ -510,17 +510,4 @@ export class TimerWrapper {
       globalThis.clearInterval(handler);
     }
   }
-
-  cleanHistory() {
-    this.setTimeoutHistory.clear();
-    this.clearTimeoutHistory.clear();
-    this.setIntervalHistory.clear();
-    this.clearIntervalHistory.clear();
-
-    this.callCounter.setTimeout =
-      this.callCounter.clearTimeout =
-      this.callCounter.setInterval =
-      this.callCounter.clearInterval =
-        0;
-  }
 }

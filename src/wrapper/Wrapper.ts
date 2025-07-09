@@ -153,10 +153,3 @@ export function runTimerCommand(
 ) {
   apiTimer.runCommand(...args);
 }
-
-export function cleanHistory() {
-  apiEval.cleanHistory();
-  apiTimer.cleanHistory();
-  apiAnimation.cleanHistory();
-  apiIdle.cleanHistory();
-}

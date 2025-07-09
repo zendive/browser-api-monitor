@@ -233,14 +233,4 @@ export class AnimationWrapper {
         : null,
     };
   }
-
-  cleanHistory() {
-    this.rafHistory.clear();
-    this.cafHistory.clear();
-    this.onlineAnimationFrameLookup.clear();
-    this.animationCallsMap.clear();
-
-    this.callCounter.requestAnimationFrame = 0;
-    this.callCounter.cancelAnimationFrame = 0;
-  }
 }

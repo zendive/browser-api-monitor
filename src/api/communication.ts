@@ -109,7 +109,6 @@ export enum EMsg {
   TELEMETRY_DELTA,
   TELEMETRY_ACKNOWLEDGED,
   MEDIA_COMMAND,
-  RESET_WRAPPER_HISTORY,
   TIMER_COMMAND,
   SESSION,
 }
@@ -119,9 +118,6 @@ export interface IMsgStartObserve {
 }
 export interface IMsgStopObserve {
   msg: EMsg.STOP_OBSERVE;
-}
-export interface IMsgResetHistory {
-  msg: EMsg.RESET_WRAPPER_HISTORY;
 }
 export interface IMsgTimerCommand {
   msg: EMsg.TIMER_COMMAND;
@@ -166,7 +162,6 @@ export type TMsgOptions =
   | IMsgStartObserve
   | IMsgStopObserve
   | IMsgLoaded
-  | IMsgResetHistory
   | IMsgTimerCommand
   | IMsgConfig
   | IMsgMediaCommand

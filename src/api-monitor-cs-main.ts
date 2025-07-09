@@ -4,7 +4,6 @@ import { adjustTelemetryDelay, Timer } from './api/time.ts';
 import {
   applyConfig,
   applySession,
-  cleanHistory,
   collectMetrics,
   onEachSecond,
   runMediaCommand,
@@ -61,10 +60,6 @@ windowListen((o) => {
     tick.stop();
     eachSecond.stop();
     originalMetrics = currentMetrics = null;
-  } else if (EMsg.RESET_WRAPPER_HISTORY === o.msg) {
-    originalMetrics = currentMetrics = null;
-    cleanHistory();
-    !tick.isPending() && tick.trigger();
   } else if (EMsg.TIMER_COMMAND === o.msg) {
     runTimerCommand(o.type, o.handler);
   } else if (EMsg.MEDIA_COMMAND === o.msg) {
