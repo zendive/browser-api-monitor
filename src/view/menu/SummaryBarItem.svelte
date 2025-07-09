@@ -29,13 +29,13 @@
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     ).singleNodeValue;
+    const main = document.querySelector('.scrollable');
 
-    if (el instanceof HTMLElement) {
-      el.scrollIntoView({
-        behavior: 'instant',
-        block: 'start',
-        inline: 'nearest',
-      });
+    if (main && el instanceof HTMLElement) {
+      const elBcr = el.getBoundingClientRect();
+      const mainBcr = main.getBoundingClientRect();
+
+      main.scrollBy(0, elBcr.y - mainBcr.y);
     }
   }
 </script>

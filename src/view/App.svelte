@@ -7,7 +7,7 @@
   <header>
     <Menu />
   </header>
-  <main>
+  <main class="scrollable">
     <Panels />
   </main>
 </section>
