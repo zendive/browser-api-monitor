@@ -111,6 +111,8 @@ export enum EMsg {
   MEDIA_COMMAND,
   TIMER_COMMAND,
   SESSION,
+  CONFIRM_INJECTION,
+  INJECTION_CONFIRMED,
 }
 
 export interface IMsgStartObserve {
@@ -155,6 +157,12 @@ export interface IMsgSession {
   msg: EMsg.SESSION;
   session: TSession;
 }
+export interface IMsgConfirmInjection {
+  msg: EMsg.CONFIRM_INJECTION;
+}
+export interface IMsgInjectionConfirmed {
+  msg: EMsg.INJECTION_CONFIRMED;
+}
 export type TMsgOptions =
   | IMsgTelemetry
   | IMsgTelemetryDelta
@@ -165,4 +173,6 @@ export type TMsgOptions =
   | IMsgTimerCommand
   | IMsgConfig
   | IMsgMediaCommand
-  | IMsgSession;
+  | IMsgSession
+  | IMsgConfirmInjection
+  | IMsgInjectionConfirmed;

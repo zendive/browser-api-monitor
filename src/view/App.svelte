@@ -2,6 +2,7 @@
   import Panels from './panels/Panels.svelte';
   import Menu from './menu/Menu.svelte';
   import { SCROLLABLE_CLASSNAME } from './shared/const.ts';
+  import ConnectionAlert from './ConnectionAlert.svelte';
 </script>
 
 <section>
@@ -11,6 +12,8 @@
   <main class={SCROLLABLE_CLASSNAME}>
     <Panels />
   </main>
+
+  <ConnectionAlert />
 </section>
 
 <style lang="scss">

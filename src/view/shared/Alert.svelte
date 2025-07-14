@@ -4,10 +4,12 @@
   let {
     title = '',
     dismissable = true,
+    class: className = '',
     children,
   }: {
     title: string;
     dismissable?: boolean;
+    class?: string;
     children?: Snippet;
   } = $props();
   let selfEl: HTMLElement | null = null;
@@ -53,7 +55,12 @@
   }
 </script>
 
-<div popover="manual" bind:this={selfEl} class="alert" ontoggle={onToggle}>
+<div
+  popover="manual"
+  bind:this={selfEl}
+  class="alert {className}"
+  ontoggle={onToggle}
+>
   <header>
     <div class="title">{title}</div>
     {#if dismissable}
@@ -81,6 +88,7 @@
     border: 1px solid var(--border);
     border-radius: 1rem;
     padding: 1rem;
+    max-width: 22rem;
 
     header {
       display: flex;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { VARIABLE_ANIMATION_THROTTLE } from '../../api/const.ts';
   import { Timer } from '../../api/time.ts';
+  import { VARIABLE_ANIMATION_THROTTLE } from './const.ts';
 
   let { value, title }: { value: unknown; title?: string } = $props();
   let isAnimated: boolean = $state(false);
