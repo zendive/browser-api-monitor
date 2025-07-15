@@ -62,7 +62,8 @@
 
 {#if panel.wrap !== false}
   <a
-    href="void(0)"
+    href="."
+    role="button"
     class:link-disabled={!enabled}
     onclick={(e) => {
       e.preventDefault();

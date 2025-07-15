@@ -15,10 +15,11 @@
 </script>
 
 <a
-  href="void(0)"
-  onclick={_onClick}
+  href="."
+  role="button"
   title={isExpanded ? 'Collapse' : 'Expand'}
   class={className}
+  onclick={_onClick}
 >
   {#if isExpanded}&#x25A1;{:else}&#x25A0;{/if}
   {@render children?.()}

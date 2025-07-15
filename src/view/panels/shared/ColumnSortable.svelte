@@ -31,7 +31,7 @@
 </script>
 
 <a
-  href="void(0)"
+  href="."
   role="cell"
   tabindex="0"
   onclick={changeSort}

@@ -17,7 +17,8 @@
 
 <div class="sensor">
   <a
-    href="void(0)"
+    href="."
+    role="button"
     class:active={isDebugged}
     aria-label="Place breakpoint"
     onclick={onToggle}

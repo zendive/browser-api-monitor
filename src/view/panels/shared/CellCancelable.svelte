@@ -17,8 +17,8 @@
 <Variable value={calls} />
 {#if canceledCounter}
   <a
+    href="."
     role="button"
-    href="void(0)"
     title="<called> [<aborted>/<abort-locations>]"
     onclick={(e) => {
       e.preventDefault();

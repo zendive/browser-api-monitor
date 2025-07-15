@@ -8,8 +8,9 @@
 </script>
 
 <a
-  href="void(0)"
-  onclick={openSpecifier}
+  href="."
   title="Open Specifier"
   aria-label="Open Specifier"
+  role="button"
+  onclick={openSpecifier}
 >{specifier}</a>

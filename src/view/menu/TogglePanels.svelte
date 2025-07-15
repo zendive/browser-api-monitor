@@ -68,7 +68,8 @@
         <tr class="menu-item" class:-dash-bottom={index === 2}>
           <td class="-left">
             <a
-              href="void(0)"
+              href="."
+              role="button"
               class="toggle-visibility"
               class:hidden={!panel.visible}
               title="Toggle panel visibility"
