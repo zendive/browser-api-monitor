@@ -4,7 +4,7 @@
   import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CollapseExpand from './CollapseExpand.svelte';
 
   let { metric }: { metric: IWorkerTelemetryMetric } = $props();
@@ -24,7 +24,7 @@
             postMessage [<Variable value={metric.postMessage.length} />]
           </CollapseExpand>
         </th>
-        <th class="ta-r">Self</th>
+        <th class="ta-c">Self</th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">Called</th>
         <th title="Bypass"><span class="icon -bypass"></span></th>
@@ -41,9 +41,7 @@
               traceDomain={postMessage.traceDomain}
             />
           </td>
-          <td class="ta-r">
-            <CellFrameTimeSensitive value={postMessage.selfTime} />
-          </td>
+          <td class="ta-r"><CellSelfTime time={postMessage.selfTime} /></td>
           <td class="ta-c">{postMessage.cps || undefined}</td>
           <td class="ta-c"><Variable value={postMessage.calls} /></td>
           <td><CellBypass traceId={postMessage.traceId} /></td>

@@ -2,11 +2,11 @@
   import { EMsg, portPost, runtimeListen } from '../api/communication.ts';
   import { Timer } from '../api/time.ts';
   import Alert from './shared/Alert.svelte';
-  import { INJECTION_ALERT_DELAY } from './shared/const.ts';
+  import { INJECTION_ALERT_TIMEOUT } from './shared/const.ts';
 
   let alertEl: Alert | null = null;
   const delayedAlert = new Timer(
-    { delay: INJECTION_ALERT_DELAY },
+    { delay: INJECTION_ALERT_TIMEOUT },
     () => void alertEl?.show(),
   );
 

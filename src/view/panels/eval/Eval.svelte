@@ -4,7 +4,7 @@
     type TEvalHistory,
   } from '../../../wrapper/EvalWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
@@ -32,7 +32,7 @@
         <th class="w-full">
           Eval History Callstack [<Variable value={evalHistory.length} />]
         </th>
-        <th class="ta-r">Self</th>
+        <th class="ta-c">Self</th>
         <th class="ta-c" title="Facts"><span class="icon -facts"></span></th>
         <th>Called</th>
         <th>Code</th>
@@ -52,7 +52,7 @@
             />
           </td>
           <td class="ta-r">
-            <CellFrameTimeSensitive value={metric.selfTime} />
+            <CellSelfTime time={metric.selfTime} />
           </td>
           <td class="ta-c">
             <CellFacts facts={metric.facts} factsMap={EvalFacts} />

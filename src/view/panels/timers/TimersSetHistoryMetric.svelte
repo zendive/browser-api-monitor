@@ -4,7 +4,7 @@
     type TClearTimerHistory,
     type TSetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
@@ -84,7 +84,7 @@
     />
   </td>
   <td class="ta-r">
-    <CellFrameTimeSensitive value={metric.selfTime} />
+    <CellSelfTime time={metric.selfTime} />
   </td>
   <td class="ta-c">
     <CellFacts facts={metric.facts} factsMap={SetTimerFacts} />

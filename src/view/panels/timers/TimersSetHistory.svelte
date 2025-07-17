@@ -47,7 +47,7 @@
       <th class="w-full">
         {caption} Callstack [<Variable value={setTimerHistory.length} />]
       </th>
-      <th class="ta-r">
+      <th class="ta-c">
         <ColumnSortable
           field="selfTime"
           currentField={sortSetTimers.field}

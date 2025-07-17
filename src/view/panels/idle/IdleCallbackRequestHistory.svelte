@@ -14,7 +14,7 @@
   import Dialog from '../../shared/Dialog.svelte';
   import Alert from '../../shared/Alert.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellCancelable from '../shared/CellCancelable.svelte';
@@ -104,7 +104,7 @@
         {caption} Callstack [<Variable value={ricHistory.length} />]
       </th>
       <th class="ta-c">didTimeout</th>
-      <th class="ta-r">
+      <th class="ta-c">
         <ColumnSortable
           field="selfTime"
           currentField={sortRequestIdleCallback.field}
@@ -167,7 +167,7 @@
           />
         </td>
         <td class="ta-c">{metric.didTimeout}</td>
-        <td class="ta-r"><CellFrameTimeSensitive value={metric.selfTime} /></td>
+        <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={RicFacts} />
         </td>

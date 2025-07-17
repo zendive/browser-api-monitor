@@ -1,6 +1,6 @@
 <script lang="ts">
   import CellBypass from '../shared/CellBypass.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
@@ -24,7 +24,7 @@
             set onerror [<Variable value={metric.onerror.length} />]
           </CollapseExpand>
         </th>
-        <th class="ta-r">Self</th>
+        <th class="ta-c">Self</th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">Events</th>
         <th class="ta-c">Called</th>
@@ -43,7 +43,7 @@
             />
           </td>
           <td class="ta-r">
-            <CellFrameTimeSensitive value={onerror.eventSelfTime} />
+            <CellSelfTime time={onerror.eventSelfTime} />
           </td>
           <td class="ta-c">{onerror.eventsCps || undefined}</td>
           <td class="ta-c"><Variable value={onerror.events} /></td>

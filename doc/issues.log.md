@@ -7,7 +7,7 @@
   - A ~10ms delay interval, from an old third-party library, constantly consuming approximately 10% of CPU solely to check if the window was resized.
   - A 150ms delay interval, displaying time in `H:MM:SS` format (1 second precision); and displaying it via `innerHTML`.
 
-- A bundled dependency library that utilizes the `eval` function, thereby preventing the removal of `unsafe-eval` from the `Content-Security-Policy`  header.
+- A bundled dependency library that utilizes the `eval` function, thereby preventing the removal of `unsafe-eval` from the `Content-Security-Policy` header.
   - Code that uses `eval` with modern syntax to check if it's supported by browser (not throws exception).
   - Dependency package that was bundled with webpack's config option [`devtool: 'eval'`](https://webpack.js.org/configuration/devtool/) or [`mode: 'development'`](https://webpack.js.org/configuration/mode/).
 
