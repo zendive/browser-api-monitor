@@ -2,8 +2,12 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.js';
+  import {
+    type IWorkerTelemetryMetric,
+    WorkerConstructorFacts,
+  } from '../../../wrapper/WorkerWrapper.js';
   import CollapseExpand from './CollapseExpand.svelte';
+  import CellFacts from '../shared/CellFacts.svelte';
 
   let { metric }: { metric: IWorkerTelemetryMetric } = $props();
   let isExpanded = $state(true);
@@ -22,6 +26,7 @@
             constructor [<Variable value={metric.konstruktor.length} />]
           </CollapseExpand>
         </th>
+        <th class="ta-c" title="Facts"><span class="icon -facts"></span></th>
         <th class="ta-c">Called</th>
         <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
       </tr>
@@ -34,6 +39,12 @@
             <CellCallstack
               trace={konstruktor.trace}
               traceDomain={konstruktor.traceDomain}
+            />
+          </td>
+          <td class="ta-c">
+            <CellFacts
+              facts={metric.facts}
+              factsMap={WorkerConstructorFacts}
             />
           </td>
           <td class="ta-c"><Variable value={konstruktor.calls} /></td>

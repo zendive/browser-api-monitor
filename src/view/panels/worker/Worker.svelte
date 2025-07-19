@@ -4,25 +4,12 @@
   import WorkerMetric from './WorkerMetric.svelte';
 
   let { telemetry }: { telemetry: IWorkerTelemetry } = $props();
-  const hardwareConcurrency = globalThis.navigator.hardwareConcurrency;
-  let showTotalOnlineWarning = $derived.by(() =>
-    telemetry.totalOnline > hardwareConcurrency
-  );
 </script>
 
 {#if telemetry.collection.length}
   <section data-navigation-tag="Worker History">
     <div class="label bc-invert sticky-header">
       Worker History [<Variable value={telemetry.collection.length} />]
-
-      {#if showTotalOnlineWarning}
-        <span class="divider"></span>
-        <span class="tc-attention">
-          Total number of running workers exceeds number of available CPUs [{
-            hardwareConcurrency
-          }]
-        </span>
-      {/if}
     </div>
 
     {#each telemetry.collection as metric (metric.specifier)}

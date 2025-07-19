@@ -2,6 +2,7 @@ import { ETraceDomain, TraceUtil, type TTrace } from './shared/TraceUtil.ts';
 import { traceUtil } from './shared/util.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IWorkerTelemetry {
   totalOnline: number;
@@ -10,6 +11,7 @@ export interface IWorkerTelemetry {
 export interface IWorkerTelemetryMetric {
   specifier: string;
   online: number;
+  facts: TFact;
   konstruktor: IConstructorMetric[];
   terminate: ITerminateMetric[];
   postMessage: IPostMessageMetric[];
@@ -22,6 +24,7 @@ export interface IWorkerTelemetryMetric {
 interface IWorkerMetric {
   specifier: string;
   online: number;
+  facts: TFact;
   callsPerSecond: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, IConstructorMetric>;
   terminate: Map</*traceId*/ string, ITerminateMetric>;
@@ -86,6 +89,18 @@ interface IRemoveEventListenerMetric {
 }
 
 const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
+const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
+export const WorkerFact = /*@__PURE__*/ (() => ({
+  MAX_ONLINE: Fact.define(1 << 0),
+} as const))();
+export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [WorkerFact.MAX_ONLINE, {
+      tag: 'N',
+      details:
+        `Number of online instances exceeds number of available CPUs [${HARDWARE_CONCURRENCY}]`,
+    }],
+  ]))();
 
 class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
@@ -113,6 +128,10 @@ class ApiMonitorWorkerWrapper extends Worker {
     if (workerMetric) {
       workerMetric.online++;
 
+      if (workerMetric.online > HARDWARE_CONCURRENCY) {
+        workerMetric.facts = Fact.assign(workerMetric.facts, WorkerFact.MAX_ONLINE);
+      }
+
       const rec = workerMetric.konstruktor.get(methodMetric.traceId);
       if (rec) {
         rec.calls++;
@@ -123,6 +142,7 @@ class ApiMonitorWorkerWrapper extends Worker {
       workerMap.set(this.#specifier, {
         specifier: this.#specifier,
         online: 1,
+        facts: <TFact> 0,
         callsPerSecond: new Map(),
         konstruktor: new Map([[methodMetric.traceId, methodMetric]]),
         terminate: new Map(),
@@ -443,6 +463,7 @@ export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
       rv.collection.push({
         specifier: metric.specifier,
         online: metric.online,
+        facts: metric.facts,
         konstruktor: Array.from(metric.konstruktor.values()),
         terminate: Array.from(metric.terminate.values()),
         postMessage: Array.from(metric.postMessage.values()),
