@@ -1,12 +1,16 @@
-.PHONY: clean install dev valid test prod serve_mirror
+.PHONY: clean install dev valid test test-dev prod serve_mirror
 .DEFAULT_GOAL := dev
-DENO_DEV = NODE_ENV=development deno run --watch
-DENO_PROD = NODE_ENV=production deno run
-DENO_OPTIONS = --allow-env --allow-read --allow-run
-CHROME_ZIP="extension.chrome.zip"
-OUTPUT_DIR = ./public/
-BUILD_DIR = ./public/build/
-BUILD_SCRIPT = ./build.ts
+DENO_DEV := NODE_ENV=development deno run --watch
+DENO_PROD := NODE_ENV=production deno run
+DENO_OPTIONS := --allow-env --allow-read --allow-run
+VERSION != deno eval "\
+	import m from './manifest.json' with {type:'json'};\
+	console.log(m.version);\
+	"
+CHROME_ZIP := "extension.chrome-$(VERSION).zip"
+OUTPUT_DIR := ./public/
+BUILD_DIR := ./public/build/
+BUILD_SCRIPT := ./build.ts
 
 clean:
 	rm -rf ./node_modules $(BUILD_DIR) $(CHROME_ZIP)
