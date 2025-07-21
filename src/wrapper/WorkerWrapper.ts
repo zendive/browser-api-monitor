@@ -129,7 +129,10 @@ class ApiMonitorWorkerWrapper extends Worker {
       workerMetric.online++;
 
       if (workerMetric.online > HARDWARE_CONCURRENCY) {
-        workerMetric.facts = Fact.assign(workerMetric.facts, WorkerFact.MAX_ONLINE);
+        workerMetric.facts = Fact.assign(
+          workerMetric.facts,
+          WorkerFact.MAX_ONLINE,
+        );
       }
 
       const rec = workerMetric.konstruktor.get(methodMetric.traceId);

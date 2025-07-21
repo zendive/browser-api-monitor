@@ -25,7 +25,6 @@
     { delay: 512 },
     (el: HTMLElement | unknown) => {
       if (el instanceof HTMLElement) {
-        console.log('NO');
         el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);
       }
     },
