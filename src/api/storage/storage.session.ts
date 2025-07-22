@@ -15,7 +15,8 @@ export function enableSessionInContentScript() {
 
 export async function loadSessionStorage(): Promise<TSession> {
   let store = await session.get([SESSION_VERSION]);
-  const isEmpty = !Object.keys(store).length;
+  const isEmpty = !store || !store[SESSION_VERSION] ||
+    !Object.keys(store).length;
 
   if (isEmpty) {
     await session.clear(); // reset previous version

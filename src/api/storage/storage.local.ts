@@ -148,7 +148,8 @@ export function panelsArray2Map(panels: TPanel[]) {
 
 export async function loadLocalStorage(): Promise<TConfig> {
   let store = await local.get([CONFIG_VERSION]);
-  const isEmpty = !Object.keys(store).length;
+  const isEmpty = !store || !store[CONFIG_VERSION] ||
+    !Object.keys(store[CONFIG_VERSION]).length;
 
   if (isEmpty) {
     await local.clear(); // reset previous version
