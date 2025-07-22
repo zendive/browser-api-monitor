@@ -35,8 +35,10 @@
   });
 
   onMount(() => {
-    pingContentScript();
-    extensionUpdateSensor.start();
+    if (chrome.runtime) {
+      pingContentScript();
+      extensionUpdateSensor.start();
+    }
 
     return () => {
       delayedAlert.stop();
