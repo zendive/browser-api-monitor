@@ -9,6 +9,11 @@ export type TCallstack = {
   traceId: string;
   trace: TTrace[];
 };
+export type TTraceable = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomain;
+};
 export enum ETraceDomain {
   SAME,
   EXTERNAL,

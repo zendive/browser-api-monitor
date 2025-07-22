@@ -1,8 +1,7 @@
 import {
-  ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
 import {
   clearInterval,
@@ -25,18 +24,12 @@ export enum ETimerType {
   TIMEOUT,
   INTERVAL,
 }
-export type TOnlineTimerMetrics = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TOnlineTimerMetrics = TTraceable & {
   type: ETimerType;
   delay: number | undefined | string;
   handler: number;
 };
-export type TSetTimerHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TSetTimerHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | string;
@@ -46,10 +39,7 @@ export type TSetTimerHistory = {
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
 };
-export type TClearTimerHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TClearTimerHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | string;

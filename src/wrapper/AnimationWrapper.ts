@@ -5,19 +5,15 @@ import {
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
 import {
-  ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
 import { traceUtil, validHandler } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
-export type TRequestAnimationFrameHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TRequestAnimationFrameHistory = TTraceable & {
   calls: number;
   handler: number | undefined | string;
   selfTime: number | null;
@@ -26,10 +22,7 @@ export type TRequestAnimationFrameHistory = {
   canceledByTraceIds: string[] | null;
   cps: number;
 };
-export type TCancelAnimationFrameHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TCancelAnimationFrameHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;

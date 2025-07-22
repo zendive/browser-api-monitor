@@ -1,19 +1,15 @@
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
-  type ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { traceUtil } from './shared/util.ts';
 
-export type TEvalHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TEvalHistory = TTraceable & {
   facts: TFact;
   calls: number;
   returnedValue: unknown;

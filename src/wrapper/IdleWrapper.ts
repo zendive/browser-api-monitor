@@ -1,19 +1,15 @@
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import {
-  type ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../api/const.ts';
 
-export type TRequestIdleCallbackHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TRequestIdleCallbackHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
@@ -24,10 +20,7 @@ export type TRequestIdleCallbackHistory = {
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
 };
-export type TCancelIdleCallbackHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TCancelIdleCallbackHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;

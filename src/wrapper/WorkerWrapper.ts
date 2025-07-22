@@ -1,4 +1,4 @@
-import { ETraceDomain, TraceUtil, type TTrace } from './shared/TraceUtil.ts';
+import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
 import { traceUtil } from './shared/util.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
@@ -34,57 +34,36 @@ interface IWorkerMetric {
   ael: Map</*traceId*/ string, IAddEventListenerMetric>;
   rel: Map</*traceId*/ string, IRemoveEventListenerMetric>;
 }
-interface IConstructorMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IConstructorMetric extends TTraceable {
   calls: number;
 }
-interface ITerminateMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface ITerminateMetric extends TTraceable {
   calls: number;
 }
-interface IPostMessageMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IPostMessageMetric extends TTraceable {
   calls: number;
   selfTime: number | null;
   cps: number;
 }
-interface IOnMessageMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IOnMessageMetric extends TTraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IOnErrorMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IOnErrorMetric extends TTraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IAddEventListenerMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IAddEventListenerMetric extends TTraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IRemoveEventListenerMetric {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+interface IRemoveEventListenerMetric extends TTraceable {
   calls: number;
 }
 
