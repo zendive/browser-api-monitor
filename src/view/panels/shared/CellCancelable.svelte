@@ -19,7 +19,7 @@
   <a
     href="."
     role="button"
-    title="<called> [<aborted>/<abort-locations>]"
+    title="&lt;called&gt; [&lt;aborted&gt;/&lt;abort-locations&gt;]"
     onclick={(e) => {
       e.preventDefault();
       onClick(canceledByTraceIds);

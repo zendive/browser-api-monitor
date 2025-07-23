@@ -62,14 +62,17 @@ interface IAddEventListenerMetric extends TTraceable {
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
+  canceledCounter: number;
+  facts: TFact;
 }
 interface IRemoveEventListenerMetric extends TTraceable {
   calls: number;
+  facts: TFact;
 }
 
 const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
 const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
-export const WorkerFact = /*@__PURE__*/ (() => ({
+const WorkerFact = /*@__PURE__*/ (() => ({
   MAX_ONLINE: Fact.define(1 << 0),
 } as const))();
 export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
@@ -80,12 +83,35 @@ export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
         `Number of online instances exceeds number of available CPUs [${HARDWARE_CONCURRENCY}]`,
     }],
   ]))();
+const WorkerAELFact = /*@__PURE__*/ (() => ({
+  DUPLICATE_ADDITION: Fact.define(1 << 0),
+} as const))();
+export const WorkerAELFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [WorkerAELFact.DUPLICATE_ADDITION, {
+      tag: 'A',
+      details: `Addition ignored - listener already in the list of events`,
+    }],
+  ]))();
+const WorkerRELFact = /*@__PURE__*/ (() => ({
+  NOT_FOUND: Fact.define(1 << 0),
+} as const))();
+export const WorkerRELFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [WorkerRELFact.NOT_FOUND, {
+      tag: 'N',
+      details: `Listener not found - nothing to remove`,
+    }],
+  ]))();
 
 class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
   #eventHandlerLink: WeakMap<
     /*authored handler*/ EventListenerOrEventListenerObject,
-    /*actual handler*/ EventListener
+    {
+      aelTraceId: string;
+      actualHandler: EventListener;
+    }
   > = new WeakMap();
 
   constructor(specifier: string | URL, options?: WorkerOptions) {
@@ -298,6 +324,8 @@ class ApiMonitorWorkerWrapper extends Worker {
         events: 0,
         eventSelfTime,
         eventsCps: 1,
+        canceledCounter: 0,
+        facts: <TFact> 0,
       };
       workerMetric!.ael.set(callstack.traceId, methodMetric);
     }
@@ -307,10 +335,18 @@ class ApiMonitorWorkerWrapper extends Worker {
      * the function or object is not added a second time.
      * -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
      */
-    if (this.#eventHandlerLink.get(<EventListener> listener)) return;
+    if (this.#eventHandlerLink.has(<EventListener> listener)) {
+      methodMetric.facts = Fact.assign(
+        methodMetric.facts,
+        WorkerAELFact.DUPLICATE_ADDITION,
+      );
+      return;
+    }
+
+    let selfHandler;
 
     if (typeof listener === 'function') {
-      const selfHandler = function (
+      selfHandler = function (
         this: ApiMonitorWorkerWrapper,
         e: Event,
       ) {
@@ -327,15 +363,11 @@ class ApiMonitorWorkerWrapper extends Worker {
 
         methodMetric.eventSelfTime = eventSelfTime;
       }.bind(this);
-
-      this.#eventHandlerLink.set(<EventListener> listener, selfHandler);
-      // @ts-expect-error: expects known types
-      super.addEventListener(type, selfHandler, options);
     } else if (
       listener && typeof listener === 'object' && 'handleEvent' in listener &&
       typeof listener.handleEvent === 'function'
     ) {
-      const selfHandler = function (e: Event) {
+      selfHandler = function (e: Event) {
         const start = performance.now();
 
         if (traceUtil.shouldPass(methodMetric.traceId)) {
@@ -349,8 +381,13 @@ class ApiMonitorWorkerWrapper extends Worker {
 
         methodMetric.eventSelfTime = eventSelfTime;
       };
+    }
 
-      this.#eventHandlerLink.set(<EventListenerObject> listener, selfHandler);
+    if (selfHandler) {
+      this.#eventHandlerLink.set(<EventListenerObject> listener, {
+        actualHandler: selfHandler,
+        aelTraceId: methodMetric.traceId,
+      });
       // @ts-expect-error: expects known types
       super.addEventListener(type, selfHandler, options);
     }
@@ -370,21 +407,36 @@ class ApiMonitorWorkerWrapper extends Worker {
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         calls: 1,
+        facts: <TFact> 0,
       };
       workerMetric!.rel.set(callstack.traceId, methodMetric);
     }
 
-    const selfHandler = this.#eventHandlerLink.get(
+    const aelRecord = this.#eventHandlerLink.get(
       <EventListenerOrEventListenerObject> listener,
     );
-    if (selfHandler) {
+
+    if (aelRecord) {
       if (traceUtil.shouldPass(methodMetric.traceId)) {
         if (traceUtil.shouldPause(methodMetric.traceId)) {
           debugger;
         }
         // @ts-expect-error: expects known types
-        super.removeEventListener(type, selfHandler, options);
+        super.removeEventListener(type, aelRecord.actualHandler, options);
+        this.#eventHandlerLink.delete(
+          <EventListenerOrEventListenerObject> listener,
+        );
+
+        const aelMethodMetric = workerMetric?.ael.get(aelRecord.aelTraceId);
+        if (aelMethodMetric) {
+          aelMethodMetric.canceledCounter++;
+        }
       }
+    } else {
+      methodMetric.facts = Fact.assign(
+        methodMetric.facts,
+        WorkerRELFact.NOT_FOUND,
+      );
     }
   }
 }

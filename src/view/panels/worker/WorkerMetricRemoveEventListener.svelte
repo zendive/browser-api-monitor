@@ -1,10 +1,14 @@
 <script lang="ts">
-  import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import {
+    type IWorkerTelemetryMetric,
+    WorkerRELFacts,
+  } from '../../../wrapper/WorkerWrapper.ts';
   import CollapseExpand from './CollapseExpand.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellFacts from '../shared/CellFacts.svelte';
 
   let { metric }: { metric: IWorkerTelemetryMetric } = $props();
   let isExpanded = $state(true);
@@ -23,6 +27,7 @@
             removeEventListener [<Variable value={metric.rel.length} />]
           </CollapseExpand>
         </th>
+        <th class="ta-c" title="Facts"><span class="icon -facts"></span></th>
         <th class="ta-c">Called</th>
         <th title="Bypass"><span class="icon -bypass"></span></th>
         <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
@@ -36,6 +41,12 @@
             <CellCallstack
               trace={rel.trace}
               traceDomain={rel.traceDomain}
+            />
+          </td>
+          <td class="ta-c">
+            <CellFacts
+              facts={rel.facts}
+              factsMap={WorkerRELFacts}
             />
           </td>
           <td class="ta-c"><Variable value={rel.calls} /></td>
