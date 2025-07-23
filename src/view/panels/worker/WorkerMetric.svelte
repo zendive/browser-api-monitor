@@ -19,7 +19,9 @@
   <legend class="ta-r">
     <WorkerSpecifier specifier={metric.specifier} />
     {#if metric.online}
-      [<Variable value={metric.online} />]
+      <span title="Active Workers">
+        [<Variable value={metric.online} />]
+      </span>
     {/if}
     <span class="divider"></span>
     <CollapseExpand

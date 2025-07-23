@@ -58,7 +58,7 @@
               factsMap={WorkerAELFacts}
             />
           </td>
-          <td class="ta-c" title="&lt;added&gt; [&lt;removed&gt;]">
+          <td class="ta-c" title="&lt;called&gt; [&lt;removed&gt;]">
             <Variable value={ael.calls} />
             {#if ael.canceledCounter}
               [<Variable value={ael.canceledCounter} />]

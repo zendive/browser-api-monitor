@@ -37,7 +37,12 @@ To assess Web Application implementation correctness and expedite issues discove
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
   - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
 
-- Monitor Worker's instance behaviour, its methods and event handlers.
+- Monitor Worker's methods and event handlers metrics.
+  - Warn if number of active workers exceeds number of available CPU cores.
+    - keep in mind: extension API can't wrap `self.close()` in worker global context (only `terminate()` in top context)
+  - Detect anomalies:
+    - attempt to add already added listener with `addEventListener`.
+    - attempt to remove unknown listener with `removeEventListener`.
 
 - Monitor mounted `video` and `audio` media elements in DOM.
   - Present control panel with basic media functions.
