@@ -26,11 +26,11 @@
 </script>
 
 {#if evalHistory?.length}
-  <table data-navigation-tag="Eval History">
+  <table data-navigation-tag="Eval">
     <thead class="sticky-header">
       <tr>
         <th class="w-full">
-          Eval History Callstack [<Variable value={evalHistory.length} />]
+          Eval Callstack [<Variable value={evalHistory.length} />]
         </th>
         <th class="ta-c">Self</th>
         <th class="ta-c" title="Facts"><span class="icon -facts"></span></th>

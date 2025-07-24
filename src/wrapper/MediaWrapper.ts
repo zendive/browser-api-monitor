@@ -149,13 +149,13 @@ export class MediaWrapper {
     }
   }
 
-  collectMetrics(includeCollection: boolean): TMediaTelemetry {
+  collectMetrics(panel: TPanel): TMediaTelemetry {
     const rv: TMediaTelemetry = {
       total: this.mediaCollection.length,
       collection: [],
     };
 
-    if (includeCollection) {
+    if (panel.visible) {
       rv.collection = this.mediaCollection.map((v) => {
         // refresh props metrics
         for (const prop of MEDIA_ELEMENT_PROPS) {

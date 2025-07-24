@@ -7,9 +7,9 @@
 </script>
 
 {#if telemetry.collection.length}
-  <section data-navigation-tag="Worker History">
+  <section data-navigation-tag="Worker">
     <div class="label bc-invert sticky-header">
-      Worker History [<Variable value={telemetry.collection.length} />]
+      Worker [<Variable value={telemetry.collection.length} />]
     </div>
 
     {#each telemetry.collection as metric (metric.specifier)}

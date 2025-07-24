@@ -102,7 +102,7 @@ export function onEachSecond() {
 
 export function collectMetrics(): TTelemetry {
   return {
-    media: apiMedia.collectMetrics(panels.media.visible),
+    media: apiMedia.collectMetrics(panels.media),
     evalHistory: apiEval.collectHistory(panels.eval),
     ...apiTimer.collectHistory(
       panels.activeTimers,

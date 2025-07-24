@@ -63,13 +63,14 @@
   <a
     href="."
     role="button"
+    title={tooltip}
     class:link-disabled={!enabled}
     onclick={(e) => {
       e.preventDefault();
       scrollTo();
     }}
   >
-    <strong title={tooltip}>{label}</strong>: <Variable value={count} />
+    <strong>{label}</strong>: <Variable value={count} />
   </a>
 {/if}
 
