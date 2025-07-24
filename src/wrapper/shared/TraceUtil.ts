@@ -18,6 +18,7 @@ export enum ETraceDomain {
   SAME,
   EXTERNAL,
   EXTENSION,
+  SNIPPET,
   WEBPACK,
   UNKNOWN,
 }
@@ -69,6 +70,8 @@ export class TraceUtil {
       return ETraceDomain.EXTERNAL;
     } else if (trace.link.startsWith('chrome-extension://')) {
       return ETraceDomain.EXTENSION;
+    } else if (trace.link.startsWith('snippet:///')) {
+      return ETraceDomain.SNIPPET;
     } else if (trace.link.startsWith('webpack://')) {
       return ETraceDomain.WEBPACK;
     }
