@@ -71,8 +71,8 @@ interface IRemoveEventListenerMetric extends TTraceable {
 }
 
 const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
-const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
-const WorkerFact = /*@__PURE__*/ (() => ({
+export const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
+export const WorkerFact = /*@__PURE__*/ (() => ({
   MAX_ONLINE: Fact.define(1 << 0),
 } as const))();
 export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
@@ -83,7 +83,7 @@ export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
         `Number of online instances exceeds number of available CPUs [${HARDWARE_CONCURRENCY}]`,
     }],
   ]))();
-const WorkerAELFact = /*@__PURE__*/ (() => ({
+export const WorkerAELFact = /*@__PURE__*/ (() => ({
   DUPLICATE_ADDITION: Fact.define(1 << 0),
 } as const))();
 export const WorkerAELFacts = /*@__PURE__*/ (() =>
@@ -93,7 +93,7 @@ export const WorkerAELFacts = /*@__PURE__*/ (() =>
       details: `Addition ignored - listener already in the list of events`,
     }],
   ]))();
-const WorkerRELFact = /*@__PURE__*/ (() => ({
+export const WorkerRELFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
 export const WorkerRELFacts = /*@__PURE__*/ (() =>
@@ -104,7 +104,7 @@ export const WorkerRELFacts = /*@__PURE__*/ (() =>
     }],
   ]))();
 
-class ApiMonitorWorkerWrapper extends Worker {
+export class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
   #eventHandlerLink: WeakMap<
     /*authored handler*/ EventListenerOrEventListenerObject,
@@ -510,4 +510,8 @@ export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
   }
 
   return rv;
+}
+
+export function forTest_clearWorkerHistory() {
+  workerMap.clear();
 }
