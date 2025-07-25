@@ -82,7 +82,7 @@ To assess Web Application implementation correctness and expedite issues discove
 
 - OS: Linux
 - Node: 22.14.0 (LTS)
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.3.5
+- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.4.2
 
 ### Build instructions
 
