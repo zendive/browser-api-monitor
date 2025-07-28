@@ -44,6 +44,9 @@ To assess Web Application implementation correctness and expedite issues discove
     - attempt to add already added listener with `addEventListener`.
     - attempt to remove unknown listener with `removeEventListener`.
 
+- Monitor `scheduler.yield` and `scheduler.postTask`.
+  - Calls, delay, priority, aborts, self-time metrics.
+
 - Monitor mounted `video` and `audio` media elements in DOM.
   - Present control panel with basic media functions.
   - Show media events and number of times they have been fired.
@@ -65,6 +68,9 @@ To assess Web Application implementation correctness and expedite issues discove
 - `requestIdleCallback`
   - `cancelIdleCallback`
 - `Worker`
+- `scheduler`
+  - 'postTask'
+  - `yield`
 
 </details>
 <details>

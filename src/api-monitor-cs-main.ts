@@ -52,6 +52,8 @@ windowListen((o) => {
     eachSecond.isPending() && tick.start();
   } else if (EMsg.CONFIG === o.msg) {
     applyConfig(o.config);
+    originalMetrics = currentMetrics = null;
+    tick.trigger();
   } else if (EMsg.START_OBSERVE === o.msg) {
     originalMetrics = currentMetrics = null;
     tick.trigger();

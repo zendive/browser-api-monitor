@@ -16,6 +16,7 @@ type TPanelKey =
   | 'callsSummary'
   | 'media'
   | 'worker'
+  | 'scheduler'
   | 'eval'
   | 'activeTimers'
   | 'setTimeout'
@@ -45,6 +46,7 @@ export const DEFAULT_PANELS: TPanel[] = [
   { key: 'media', label: 'Media', visible: true, wrap: null },
   { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
   { key: 'worker', label: 'Worker', visible: true, wrap: true },
+  { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
   { key: 'setTimeout', label: 'setTimeout', visible: true, wrap: true },
   {

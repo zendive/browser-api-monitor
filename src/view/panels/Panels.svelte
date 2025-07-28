@@ -10,6 +10,7 @@
   import Online from './online/Online.svelte';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
   import Worker from './worker/Worker.svelte';
+  import Scheduler from './scheduler/Scheduler.svelte';
 
   const ts = useTelemetryState();
 </script>
@@ -17,6 +18,7 @@
 {#if ts.telemetry}
   <Media media={ts.telemetry.media} />
   <Worker telemetry={ts.telemetry.worker} />
+  <Scheduler telemetry={ts.telemetry.scheduler} />
   <Eval evalHistory={ts.telemetry.evalHistory} />
   <Online onlineTimers={ts.telemetry.onlineTimers} />
 

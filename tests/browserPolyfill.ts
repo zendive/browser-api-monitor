@@ -1,4 +1,5 @@
 import { PropertySymbol, Window } from 'happy-dom';
+import 'scheduler-polyfill';
 
 const window = new Window();
 const document = window.document;

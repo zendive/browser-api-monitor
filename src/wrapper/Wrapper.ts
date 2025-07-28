@@ -31,6 +31,10 @@ import {
   wrapWorker,
 } from './WorkerWrapper.ts';
 import { traceUtil } from './shared/util.ts';
+import {
+  type ISchedulerTelemetry,
+  SchedulerWrapper,
+} from './SchedulerWrapper.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -46,6 +50,7 @@ export type TTelemetry = {
   cicHistory: TCancelIdleCallbackHistory[] | null;
   activeTimers: number;
   worker: IWorkerTelemetry;
+  scheduler: ISchedulerTelemetry;
   callCounter: {
     setTimeout: number;
     clearTimeout: number;
@@ -65,6 +70,7 @@ const apiEval = new EvalWrapper();
 const apiTimer = new TimerWrapper(apiEval);
 const apiAnimation = new AnimationWrapper();
 const apiIdle = new IdleWrapper();
+const apiScheduler = new SchedulerWrapper();
 
 const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
   traceUtil.callstackType = type;
@@ -81,6 +87,10 @@ const wrapApis = callableOnce(() => {
   panels.requestIdleCallback.wrap && apiIdle.wrapRequestIdleCallback();
   panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
   panels.worker.wrap && wrapWorker();
+  if (panels.scheduler.wrap) {
+    apiScheduler.wrapYield();
+    apiScheduler.wrapPostTask();
+  }
 });
 
 export function applyConfig(config: TConfig) {
@@ -121,6 +131,7 @@ export function collectMetrics(): TTelemetry {
     ),
     activeTimers: apiTimer.onlineTimers.size,
     worker: collectWorkerHistory(panels.worker),
+    scheduler: apiScheduler.collectHistory(panels.scheduler),
     callCounter: panels.callsSummary.visible
       ? {
         eval: apiEval.callCounter,

@@ -87,7 +87,7 @@
           eventChangeSorting={onChangeSort}
         >Delay</ColumnSortable>
       </th>
-      <th>
+      <th class="ta-c">
         <ColumnSortable
           field="online"
           currentField={sortSetTimers.field}

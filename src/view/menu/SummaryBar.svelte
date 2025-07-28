@@ -26,6 +26,22 @@
     />
 
     <SummaryBarItem
+      label="s.pT"
+      tooltip="scheduler.postTask"
+      navSelector="scheduler.postTask"
+      panel={panels.scheduler}
+      count={ts.telemetry.scheduler.postTask?.length || 0}
+    />
+
+    <SummaryBarItem
+      label="s.y"
+      tooltip="scheduler.yield"
+      navSelector="scheduler.yield"
+      panel={panels.scheduler}
+      count={ts.telemetry.scheduler.yield?.length || 0}
+    />
+
+    <SummaryBarItem
       label="eval"
       navSelector="Eval"
       panel={panels.eval}

@@ -125,7 +125,7 @@
           eventChangeSorting={onChangeSort}
         >Handler</ColumnSortable>
       </th>
-      <th>
+      <th class="ta-c">
         <ColumnSortable
           field="online"
           currentField={sortRequestAnimationFrame.field}
