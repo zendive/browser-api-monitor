@@ -1,6 +1,6 @@
 <script lang="ts">
   import { EMsg, portPost, runtimeListen } from '../api/communication.ts';
-  import { Timer } from '../api/time.ts';
+  import { ETimer, Timer } from '../api/time.ts';
   import Alert from './shared/Alert.svelte';
   import {
     INJECTION_ALERT_TIMEOUT,
@@ -12,16 +12,17 @@
   let tabReloadAlertEl: Alert | null = null;
   let devtoolsReloadAlertEl: Alert | null = null;
   const delayedAlert = new Timer(
-    { delay: INJECTION_ALERT_TIMEOUT },
+    { type: ETimer.TIMEOUT, delay: INJECTION_ALERT_TIMEOUT },
     () => void tabReloadAlertEl?.show(),
   );
   const extensionUpdateSensor = new Timer(
-    { delay: UPDATE_SENSOR_INTERVAL, repetitive: true },
+    { type: ETimer.TIMEOUT, delay: UPDATE_SENSOR_INTERVAL },
     () => {
       whenUpdateDetected(() => {
         devtoolsReloadAlertEl?.show();
         extensionUpdateSensor.stop();
       });
+      extensionUpdateSensor.start();
     },
   );
 

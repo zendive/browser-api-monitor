@@ -1,6 +1,8 @@
 import {
   cancelAnimationFrame,
   clearTimeout,
+  nativePostTask,
+  NOOP,
   requestAnimationFrame,
   setTimeout,
   TELEMETRY_FREQUENCY_30PS,
@@ -80,44 +82,61 @@ export class Stopper {
   }
 }
 
-interface ITimerOptions {
-  /** a delay of setTimeout or setInterval (default: 0); irrelevant if `animation` is true */
-  delay?: number;
-  /** act as setInterval by repeating setTimeout (default: false) */
-  repetitive?: boolean;
-  /** act as requestAnimationFrame called from another requestAnimationFrame (default: false);
-  if true - `delay` is redundant */
-  animation?: boolean;
+/** @link: https://developer.mozilla.org/en-US/docs/Web/API/Prioritized_Task_Scheduling_API#task_priorities */
+export type TTaskPriority =
+  | 'user-blocking'
+  | 'user-visible' // default
+  | 'background';
+export enum ETimer {
+  TIMEOUT,
+  ANIMATION,
+  TASK,
+}
+type TTimerMeasurable = {
   /** populate `callbackSelfTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
-}
+};
+type TTimerTimeout = TTimerMeasurable & {
+  type: ETimer.TIMEOUT;
+  delay: number;
+};
+type TTimerAnimation = TTimerMeasurable & {
+  type: ETimer.ANIMATION;
+};
+type TTimerTask = TTimerMeasurable & {
+  type: ETimer.TASK;
+  delay: number;
+  priority?: TTaskPriority;
+};
+type TTimerOptions =
+  | TTimerTimeout
+  | TTimerAnimation
+  | TTimerTask;
 
 /**
- * A unification of ways to delay a callback to another time in javascript event-loop
- * - `repetitive: false` - will call `setTimeout` with constant `delay`.
- * - `repetitive: true` - will call `setTimeout` but act as `setInterval` with changeable `delay`.
- * - `animation: true` - will call `requestAnimationFrame` in recursive way (means to follow the browser's frame-rate).
- * - `measurable: true` - measure the callback's execution time.
+ * A unification of ways to delay a callback execution
+ * in javascript event-loop
  */
 export class Timer {
   delay: number = 0;
   /** callback's self-time in milliseconds */
   callbackSelfTime: number = -1;
   #handler: number = 0;
+  #abortController: AbortController | null = null;
   readonly #fn: (...args: unknown[]) => void;
   readonly #stopper?: Stopper;
-  readonly #options: ITimerOptions;
-  static readonly DEFAULT_OPTIONS: ITimerOptions = {
-    delay: 0,
-    repetitive: false,
-    animation: false,
-    measurable: false,
-  };
+  readonly #options: TTimerOptions;
 
-  constructor(o: ITimerOptions, fn: (...args: unknown[]) => void) {
-    this.#options = Object.assign({}, Timer.DEFAULT_OPTIONS, o);
+  constructor(o: TTimerOptions, fn: (...args: unknown[]) => void) {
+    this.#options = Object.assign({}, o);
     this.#fn = fn;
-    this.delay = this.#options.delay || 0;
+
+    if (
+      this.#options.type === ETimer.TIMEOUT ||
+      this.#options.type === ETimer.TASK
+    ) {
+      this.delay = this.#options.delay;
+    }
 
     if (this.#options.measurable) {
       this.#stopper = new Stopper();
@@ -125,28 +144,34 @@ export class Timer {
   }
 
   start(...args: unknown[]) {
-    if (this.#handler) {
+    if (this.isPending()) {
       this.stop();
     }
 
-    if (this.#options.animation) {
-      this.#handler = requestAnimationFrame(() => {
-        this.trigger(...args);
-        this.#handler = 0;
-
-        if (this.#options.repetitive) {
-          this.start(...args);
-        }
-      });
-    } else {
+    if (
+      this.#options.type === ETimer.TIMEOUT
+    ) {
       this.#handler = setTimeout(() => {
-        this.trigger(...args);
         this.#handler = 0;
-
-        if (this.#options.repetitive) {
-          this.start(...args);
-        }
+        this.trigger(...args);
       }, this.delay);
+    } else if (
+      this.#options.type === ETimer.ANIMATION
+    ) {
+      this.#handler = requestAnimationFrame(() => {
+        this.#handler = 0;
+        this.trigger(...args);
+      });
+    } else if (this.#options.type === ETimer.TASK) {
+      this.#abortController = new AbortController();
+      nativePostTask(() => {
+        this.#abortController = null;
+        this.trigger(...args);
+      }, {
+        delay: this.delay,
+        signal: this.#abortController.signal,
+        priority: this.#options.priority,
+      }).catch(NOOP);
     }
 
     return this;
@@ -154,7 +179,9 @@ export class Timer {
 
   trigger(...args: unknown[]) {
     this.#stopper?.start();
+
     this.#fn(...args);
+
     if (this.#stopper) {
       this.callbackSelfTime = this.#stopper.stop().value();
     }
@@ -163,21 +190,30 @@ export class Timer {
   }
 
   stop() {
-    if (this.#handler) {
-      if (this.#options.animation) {
-        cancelAnimationFrame(this.#handler);
-      } else {
-        clearTimeout(this.#handler);
-      }
-
+    if (this.#options.type === ETimer.TIMEOUT) {
+      this.#handler && clearTimeout(this.#handler);
       this.#handler = 0;
+    } else if (this.#options.type === ETimer.ANIMATION) {
+      this.#handler && cancelAnimationFrame(this.#handler);
+      this.#handler = 0;
+    } else if (this.#options.type === ETimer.TASK) {
+      this.#abortController && this.#abortController.abort();
+      this.#abortController = null;
     }
 
     return this;
   }
 
-  /** Timer status: true | false => Pending | unstarted/finished/stopped */
-  isPending() {
+  /**
+   * Timer status:
+   *    true := scheduled, pending execution
+   *    false := unstarted or finished
+   */
+  isPending(): boolean {
+    if (this.#options.type === ETimer.TASK) {
+      return !!this.#abortController;
+    }
+
     return this.#handler !== 0;
   }
 }
@@ -190,20 +226,21 @@ export class Fps {
   /** registered number of calls */
   value = 0;
   #ticks = 0;
-  #interval: Timer;
+  #eachSecond: Timer;
 
   constructor(callback?: (value: number) => void) {
-    this.#interval = new Timer({ delay: 1e3, repetitive: true }, () => {
+    this.#eachSecond = new Timer({ type: ETimer.TIMEOUT, delay: 1e3 }, () => {
       this.value = this.#ticks;
       this.#ticks = 0;
       callback?.(this.value);
+      this.#eachSecond.start();
     });
   }
 
   start() {
     this.#ticks = 0;
     this.value = 0;
-    this.#interval.start();
+    this.#eachSecond.start();
     return this;
   }
 
@@ -213,7 +250,7 @@ export class Fps {
   }
 
   stop() {
-    this.#interval.stop();
+    this.#eachSecond.stop();
     return this;
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Timer } from '../../api/time.ts';
+  import { ETimer, Timer } from '../../api/time.ts';
   import { VARIABLE_ANIMATION_THROTTLE } from './const.ts';
 
   let { value, title }: { value: unknown; title?: string } = $props();
@@ -8,9 +8,12 @@
     typeof value === 'number' ? !(value & 1) : false
   );
   let lastUpdated: number = Date.now();
-  const timer = new Timer({ delay: 100 }, () => {
-    isAnimated = false;
-  });
+  const stopAnimate = new Timer(
+    { type: ETimer.TIMEOUT, delay: 100 },
+    () => {
+      isAnimated = false;
+    },
+  );
 
   function animateChange(_node: HTMLElement, _value: unknown) {
     return {
@@ -20,14 +23,14 @@
 
         if (startAnimation) {
           isAnimated = true;
-          timer.start();
+          stopAnimate.start();
         }
 
         lastUpdated = Date.now();
       },
 
       destroy() {
-        timer.stop();
+        stopAnimate.stop();
       },
     };
   }

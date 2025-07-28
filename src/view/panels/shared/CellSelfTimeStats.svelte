@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, type Snippet } from 'svelte';
-  import { Timer } from '../../../api/time.ts';
+  import { ETimer, Timer } from '../../../api/time.ts';
   import { Mean } from '../../../api/Mean.ts';
 
   let {
@@ -16,7 +16,7 @@
     mean: time,
     max: time,
   });
-  const eachSecond = new Timer({ delay: 1e3, repetitive: true }, () => {
+  const eachSecond = new Timer({ type: ETimer.TIMEOUT, delay: 1e3 }, () => {
     if (!mean.samples) {
       return;
     }
@@ -26,6 +26,7 @@
     vs.max = mean.max;
 
     mean.reset();
+    eachSecond.start();
   });
 
   $effect(() => void mean.add(time));

@@ -10,6 +10,7 @@ import {
   WorkerFact,
   WorkerRELFact,
 } from '../src/wrapper/WorkerWrapper.ts';
+import { NOOP } from '../src/api/const.ts';
 
 const codeBlob = URL.createObjectURL(
   new Blob([`
@@ -22,7 +23,6 @@ const codeBlob = URL.createObjectURL(
 function NewWorker() {
   return new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
 }
-function listener() {/*noop*/}
 function getMetric() {
   return collectWorkerHistory({
     visible: true,
@@ -57,7 +57,7 @@ describe('WorkerWrapper', () => {
     w = NewWorker();
 
     for (let n = 0, N = 2; n < N; n++) {
-      w.addEventListener('message', listener);
+      w.addEventListener('message', NOOP);
     }
 
     expect(getAELFact()).toBe(WorkerAELFact.DUPLICATE_ADDITION);
@@ -65,7 +65,7 @@ describe('WorkerWrapper', () => {
 
   test('rEL facts', () => {
     w = NewWorker();
-    w.removeEventListener('message', listener);
+    w.removeEventListener('message', NOOP);
 
     expect(getRELFact()).toBe(WorkerRELFact.NOT_FOUND);
   });

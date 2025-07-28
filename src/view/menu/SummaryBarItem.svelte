@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { TPanel } from '../../api/storage/storage.local.ts';
   import Variable from '../shared/Variable.svelte';
-  import { Timer } from '../../api/time.ts';
+  import { ETimer, Timer } from '../../api/time.ts';
   import {
     AFTER_SCROLL_ANIMATION_CLASSNAME,
     SCROLLABLE_CLASSNAME,
@@ -22,7 +22,7 @@
   } = $props();
   let enabled: boolean = $derived.by(() => panel.visible && count > 0);
   const stopAnimate = new Timer(
-    { delay: 512 },
+    { type: ETimer.TIMEOUT, delay: 512 },
     (el: HTMLElement | unknown) => {
       if (el instanceof HTMLElement) {
         el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);

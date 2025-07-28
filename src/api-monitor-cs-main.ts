@@ -1,6 +1,6 @@
 import { EMsg, windowListen, windowPost } from './api/communication.ts';
 import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
-import { adjustTelemetryDelay, Timer } from './api/time.ts';
+import { adjustTelemetryDelay, ETimer, Timer } from './api/time.ts';
 import {
   applyConfig,
   applySession,
@@ -14,36 +14,42 @@ import diff from './api/diff.ts';
 
 let originalMetrics: TTelemetry | null;
 let currentMetrics: TTelemetry | null;
-const eachSecond = new Timer({ delay: 1e3, repetitive: true }, onEachSecond);
-const tick = new Timer(
-  { delay: TELEMETRY_FREQUENCY_1PS, repetitive: false },
-  function apiMonitorTelemetryTick() {
-    const now = Date.now();
-    currentMetrics = structuredClone(collectMetrics());
-
-    if (!originalMetrics) {
-      originalMetrics = currentMetrics;
-
-      windowPost({
-        msg: EMsg.TELEMETRY,
-        timeOfCollection: now,
-        telemetry: originalMetrics,
-      });
-    } else {
-      const delta = diff.diff(originalMetrics, currentMetrics);
-
-      if (delta) {
-        windowPost({
-          msg: EMsg.TELEMETRY_DELTA,
-          timeOfCollection: now,
-          telemetryDelta: delta,
-        });
-      } else {
-        tick.start();
-      }
-    }
+const eachSecond = new Timer(
+  { type: ETimer.TIMEOUT, delay: 1e3 },
+  () => {
+    onEachSecond();
+    eachSecond.start();
   },
 );
+const tick = new Timer({
+  type: ETimer.TIMEOUT,
+  delay: TELEMETRY_FREQUENCY_1PS,
+}, function apiMonitorTelemetryTick() {
+  const now = Date.now();
+  currentMetrics = structuredClone(collectMetrics());
+
+  if (!originalMetrics) {
+    originalMetrics = currentMetrics;
+
+    windowPost({
+      msg: EMsg.TELEMETRY,
+      timeOfCollection: now,
+      telemetry: originalMetrics,
+    });
+  } else {
+    const delta = diff.diff(originalMetrics, currentMetrics);
+
+    if (delta) {
+      windowPost({
+        msg: EMsg.TELEMETRY_DELTA,
+        timeOfCollection: now,
+        telemetryDelta: delta,
+      });
+    } else {
+      tick.start();
+    }
+  }
+});
 
 windowListen((o) => {
   if (EMsg.TELEMETRY_ACKNOWLEDGED === o.msg) {

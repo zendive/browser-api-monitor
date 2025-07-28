@@ -1,5 +1,6 @@
 import type { TWritableBooleanKeys } from './generics.ts';
 
+export function NOOP() {}
 export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
@@ -24,6 +25,12 @@ export const requestAnimationFrame = /*@__PURE__*/ globalThis
   .requestAnimationFrame.bind(globalThis);
 export const cancelAnimationFrame = /*@__PURE__*/ globalThis
   .cancelAnimationFrame.bind(globalThis);
+export const nativeYield = /*@__PURE__*/ globalThis.scheduler.yield.bind(
+  globalThis.scheduler,
+);
+export const nativePostTask = /*@__PURE__*/ globalThis.scheduler.postTask.bind(
+  globalThis.scheduler,
+);
 
 export const TAG_DELAY_NOT_FOUND = '';
 export const TAG_BAD_DELAY = (x: unknown) => `${x}`;

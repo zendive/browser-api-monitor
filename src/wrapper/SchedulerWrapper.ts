@@ -1,9 +1,9 @@
 import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { traceUtil, validTimerDelay } from './shared/util.ts';
-import { trim2ms } from '../api/time.ts';
+import { trim2ms, type TTaskPriority } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { TAG_BAD_DELAY } from '../api/const.ts';
+import { nativePostTask, nativeYield, TAG_BAD_DELAY } from '../api/const.ts';
 
 export interface IYield extends TTraceable {
   calls: number;
@@ -18,7 +18,7 @@ export interface IPostTask extends TTraceable {
   online: number;
 }
 type TPostTaskOptions = {
-  priority?: 'user-blocking' | /*default*/ 'user-visible' | 'background';
+  priority?: TTaskPriority;
   signal?: AbortSignal /*| TaskSignal*/;
   delay?: number;
 };
@@ -28,12 +28,6 @@ export interface ISchedulerTelemetry {
   postTask: IPostTask[] | null;
 }
 
-const nativeYield = globalThis.scheduler.yield.bind(
-  globalThis.scheduler,
-);
-const nativePostTask = globalThis.scheduler.postTask.bind(
-  globalThis.scheduler,
-);
 export const PostTaskFact = /*@__PURE__*/ (() => ({
   BAD_DELAY: Fact.define(1 << 0),
 } as const))();
