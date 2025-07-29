@@ -7,9 +7,11 @@ import { nativePostTask, nativeYield, TAG_BAD_DELAY } from '../api/const.ts';
 
 export interface IYield extends TTraceable {
   calls: number;
+  cps: number;
 }
 export interface IPostTask extends TTraceable {
   calls: number;
+  eventsCps: number;
   delay: number | undefined | string;
   priority: undefined | string;
   facts: TFact;
@@ -42,6 +44,7 @@ export const PostTaskFacts = /*@__PURE__*/ (() =>
 export class SchedulerWrapper {
   #yieldMap: Map</*traceId*/ string, IYield> = new Map();
   #postTaskMap: Map</*traceId*/ string, IPostTask> = new Map();
+  #callsPerSecond: Map</*traceId*/ string, /*calls*/ number> = new Map();
 
   wrapYield() {
     globalThis.scheduler.yield = function (
@@ -60,6 +63,7 @@ export class SchedulerWrapper {
           trace: callstack.trace,
           traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
           calls: 1,
+          cps: 1,
         });
       }
 
@@ -89,7 +93,6 @@ export class SchedulerWrapper {
 
       if (methodMetric) {
         methodMetric.calls++;
-        methodMetric.delay = delay;
         methodMetric.priority = options?.priority;
         methodMetric.online++;
       } else {
@@ -98,6 +101,7 @@ export class SchedulerWrapper {
           trace: callstack.trace,
           traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
           calls: 1,
+          eventsCps: 1,
           delay,
           facts: <TFact> 0,
           selfTime: null,
@@ -155,6 +159,24 @@ export class SchedulerWrapper {
 
   unwrapPostTask() {
     globalThis.scheduler.postTask = nativePostTask;
+  }
+
+  updateCallsPerSecond(panel: TPanel) {
+    if (!panel.wrap || !panel.visible) return;
+
+    for (const [_, methodMetric] of this.#yieldMap) {
+      const prevCalls = this.#callsPerSecond.get(methodMetric.traceId) || 0;
+
+      methodMetric.cps = methodMetric.calls - prevCalls;
+      this.#callsPerSecond.set(methodMetric.traceId, methodMetric.calls);
+    }
+
+    for (const [_, methodMetric] of this.#postTaskMap) {
+      const prevCalls = this.#callsPerSecond.get(methodMetric.traceId) || 0;
+
+      methodMetric.eventsCps = methodMetric.calls - prevCalls;
+      this.#callsPerSecond.set(methodMetric.traceId, methodMetric.calls);
+    }
   }
 
   collectHistory(panel: TPanel): ISchedulerTelemetry {

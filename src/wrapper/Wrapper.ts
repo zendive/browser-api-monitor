@@ -27,7 +27,7 @@ import type { TSession } from '../api/storage/storage.session.ts';
 import {
   collectWorkerHistory,
   type IWorkerTelemetry,
-  updateWorkerFrameRateMetrics,
+  updateWorkerCallsPerSecond,
   wrapWorker,
 } from './WorkerWrapper.ts';
 import { traceUtil } from './shared/util.ts';
@@ -106,8 +106,9 @@ export function applySession(session: TSession) {
 
 export function onEachSecond() {
   apiMedia.meetMedia(panels.media);
-  apiAnimation.updateAnimationsFramerate(panels.requestAnimationFrame);
-  updateWorkerFrameRateMetrics(panels.worker);
+  apiAnimation.updateCallsPerSecond(panels.requestAnimationFrame);
+  updateWorkerCallsPerSecond(panels.worker);
+  apiScheduler.updateCallsPerSecond(panels.scheduler);
 }
 
 export function collectMetrics(): TTelemetry {

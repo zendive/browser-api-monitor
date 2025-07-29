@@ -14,6 +14,7 @@
       <th class="w-full">
         scheduler.yield Callstack [<Variable value={metrics.length} />]
       </th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">Called</th>
       <th title="Bypass"><span class="icon -bypass"></span></th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
@@ -28,6 +29,7 @@
             traceDomain={metric.traceDomain}
           />
         </td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td><CellBypass traceId={metric.traceId} /></td>
         <td><CellBreakpoint traceId={metric.traceId} /></td>

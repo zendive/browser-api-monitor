@@ -25,6 +25,7 @@
       <th class="ta-c">Self</th>
       <th class="ta-c">priority</th>
       <th class="ta-c"><span class="icon -facts"></span></th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">Called</th>
       <th class="ta-r">Delay</th>
       <th class="ta-c">Set</th>
@@ -48,6 +49,7 @@
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={PostTaskFacts} />
         </td>
+        <td class="ta-c">{metric.eventsCps || undefined}</td>
         <td class="ta-c" title="&lt;called&gt; [&lt;aborted&gt;]">
           <Variable value={metric.calls} />
           {#if metric.aborts}

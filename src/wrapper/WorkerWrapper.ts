@@ -441,7 +441,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   }
 }
 
-export function updateWorkerFrameRateMetrics(panel: TPanel) {
+export function updateWorkerCallsPerSecond(panel: TPanel) {
   if (!panel.wrap || !panel.visible) return;
 
   for (const [_, workerMetric] of workerMap) {

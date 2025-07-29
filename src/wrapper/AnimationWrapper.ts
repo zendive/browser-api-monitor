@@ -148,7 +148,7 @@ export class AnimationWrapper {
     }
   }
 
-  updateAnimationsFramerate(panel: TPanel) {
+  updateCallsPerSecond(panel: TPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     for (const [, rafRecord] of this.rafHistory) {
