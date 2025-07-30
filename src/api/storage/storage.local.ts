@@ -32,7 +32,7 @@ export type TPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
-  wrap: boolean | null;
+  wrap?: boolean;
 };
 export type TPanelMap = {
   [K in TPanelKey]: TPanel;
@@ -42,9 +42,9 @@ export type TConfig = typeof DEFAULT_CONFIG;
 export type TConfigField = Partial<TConfig>;
 
 export const DEFAULT_PANELS: TPanel[] = [
-  { key: 'callsSummary', label: 'Summary Bar', visible: false, wrap: null },
-  { key: 'media', label: 'Media', visible: true, wrap: null },
-  { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
+  { key: 'callsSummary', label: 'Summary Bar', visible: false },
+  { key: 'media', label: 'Media', visible: true },
+  { key: 'activeTimers', label: 'Active Timers', visible: true },
   { key: 'worker', label: 'Worker', visible: true, wrap: true },
   { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
@@ -70,25 +70,25 @@ export const DEFAULT_PANELS: TPanel[] = [
   {
     key: 'requestAnimationFrame',
     label: 'requestAnimationFrame',
-    visible: false,
+    visible: true,
     wrap: true,
   },
   {
     key: 'cancelAnimationFrame',
     label: 'cancelAnimationFrame',
-    visible: false,
+    visible: true,
     wrap: true,
   },
   {
     key: 'requestIdleCallback',
     label: 'requestIdleCallback',
-    visible: false,
+    visible: true,
     wrap: true,
   },
   {
     key: 'cancelIdleCallback',
     label: 'cancelIdleCallback',
-    visible: false,
+    visible: true,
     wrap: true,
   },
 ];

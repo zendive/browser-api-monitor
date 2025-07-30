@@ -80,7 +80,7 @@
             >{panel.label}</a>
           </td>
 
-          {#if panel.wrap !== null}
+          {#if panel.wrap !== undefined}
             <td class="-right">
               <button
                 class="btn-toggle"
