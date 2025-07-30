@@ -22,7 +22,8 @@ const eachSecond = new Timer(
   },
 );
 const tick = new Timer({
-  type: ETimer.TIMEOUT,
+  type: ETimer.TASK,
+  priority: 'background',
   delay: TELEMETRY_FREQUENCY_1PS,
 }, function apiMonitorTelemetryTick() {
   const now = Date.now();
