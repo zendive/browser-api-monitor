@@ -10,9 +10,7 @@
   let lastUpdated: number = Date.now();
   const stopAnimate = new Timer(
     { type: ETimer.TIMEOUT, delay: 100 },
-    () => {
-      isAnimated = false;
-    },
+    () => (isAnimated = false),
   );
 
   function animateChange(_node: HTMLElement, _value: unknown) {

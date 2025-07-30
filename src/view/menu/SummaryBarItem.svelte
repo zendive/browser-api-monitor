@@ -23,11 +23,12 @@
   let enabled: boolean = $derived.by(() => panel.visible && count > 0);
   const stopAnimate = new Timer(
     { type: ETimer.TIMEOUT, delay: 512 },
-    (el: HTMLElement | unknown) => {
-      if (el instanceof HTMLElement) {
-        el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);
-      }
-    },
+    (el: HTMLElement | unknown) =>
+      void requestAnimationFrame(() => {
+        if (el instanceof HTMLElement) {
+          el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);
+        }
+      }),
   );
 
   function scrollTo() {
