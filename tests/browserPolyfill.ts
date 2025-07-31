@@ -17,7 +17,7 @@ Object.assign(globalThis, {
   ) {
     return setTimeout(() => {
       callback(performance.now());
-    }, 1e3 / 60);
+    }, 0);
   },
 
   cancelAnimationFrame: function cancelAnimationFrameDumbStub(id: number) {

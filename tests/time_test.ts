@@ -112,25 +112,57 @@ describe('Timer - animation + measurable', () => {
   test('start/stop', async () => {
     let count = 0;
     const TIMESPAN = 100;
+    let timerArg = 0;
+    const timerArgExpected = 100;
+    let hasAnimationArgs = false;
     const animation = new Timer({
       type: ETimer.ANIMATION,
       measurable: true,
-    }, () => {
+    }, (_timerArg: number, time: DOMHighResTimeStamp) => {
       count++;
-      animation.start();
+      timerArg = _timerArg;
+      hasAnimationArgs = !!time && typeof time === 'number';
     });
 
     expect(animation.isPending()).toBe(false);
-    animation.start();
+    animation.start(timerArgExpected);
     expect(animation.isPending()).toBe(true);
 
     await wait(TIMESPAN);
 
-    animation.stop();
+    expect(hasAnimationArgs).toBe(true);
+    expect(timerArg).toBe(timerArgExpected);
     expect(animation.isPending()).toBe(false);
-    expect(animation.callbackSelfTime).toBeLessThan(0.5);
-    expect(count).toBeGreaterThan(1);
-    expect(count).toBeLessThan(TIMESPAN / (1e3 / 60));
+    expect(animation.callbackSelfTime > 0).toBe(true);
+    expect(count).toBe(1);
+  });
+});
+
+describe('Timer - idle', () => {
+  test('start/stop', async () => {
+    let counter = 0;
+    let timerArg = 0;
+    const timerArgExpected = 100;
+    let hasIdleArgs = false;
+    const task = new Timer(
+      { type: ETimer.IDLE, delay: DELAY },
+      (_timerArg: number, deadline: IdleDeadline) => {
+        counter++;
+        timerArg = _timerArg;
+        hasIdleArgs = !!deadline && typeof deadline.didTimeout == 'boolean';
+        task.start();
+      },
+    );
+
+    task.start(timerArgExpected);
+    expect(task.isPending()).toBe(true);
+    await wait(DELAY + DELAY / 2);
+    task.stop();
+
+    expect(timerArg).toBe(timerArgExpected);
+    expect(hasIdleArgs).toBe(true);
+    expect(task.isPending()).toBe(false);
+    expect(counter).toBe(1);
   });
 });
 

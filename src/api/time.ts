@@ -90,6 +90,7 @@ export type TTaskPriority =
 export enum ETimer {
   TIMEOUT,
   ANIMATION,
+  IDLE,
   TASK,
 }
 type TTimerMeasurable = {
@@ -103,6 +104,10 @@ type TTimerTimeout = TTimerMeasurable & {
 type TTimerAnimation = TTimerMeasurable & {
   type: ETimer.ANIMATION;
 };
+type TTimerIdle = TTimerMeasurable & {
+  type: ETimer.IDLE;
+  delay: number;
+};
 type TTimerTask = TTimerMeasurable & {
   type: ETimer.TASK;
   delay: number;
@@ -111,6 +116,7 @@ type TTimerTask = TTimerMeasurable & {
 type TTimerOptions =
   | TTimerTimeout
   | TTimerAnimation
+  | TTimerIdle
   | TTimerTask;
 
 /**
@@ -133,6 +139,7 @@ export class Timer {
 
     if (
       this.#options.type === ETimer.TIMEOUT ||
+      this.#options.type === ETimer.IDLE ||
       this.#options.type === ETimer.TASK
     ) {
       this.delay = this.#options.delay;
@@ -158,10 +165,15 @@ export class Timer {
     } else if (
       this.#options.type === ETimer.ANIMATION
     ) {
-      this.#handler = requestAnimationFrame(() => {
+      this.#handler = requestAnimationFrame((...argsAF) => {
         this.#handler = 0;
-        this.trigger(...args);
+        this.trigger(...[...args, ...argsAF]);
       });
+    } else if (this.#options.type === ETimer.IDLE) {
+      this.#handler = requestIdleCallback((...argsIC) => {
+        this.#handler = 0;
+        this.trigger(...[...args, ...argsIC]);
+      }, { timeout: this.delay });
     } else if (this.#options.type === ETimer.TASK) {
       this.#abortController = new AbortController();
       nativePostTask(() => {
@@ -195,6 +207,9 @@ export class Timer {
       this.#handler = 0;
     } else if (this.#options.type === ETimer.ANIMATION) {
       this.#handler && cancelAnimationFrame(this.#handler);
+      this.#handler = 0;
+    } else if (this.#options.type === ETimer.IDLE) {
+      this.#handler && cancelIdleCallback(this.#handler);
       this.#handler = 0;
     } else if (this.#options.type === ETimer.TASK) {
       this.#abortController && this.#abortController.abort();
