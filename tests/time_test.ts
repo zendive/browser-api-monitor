@@ -171,13 +171,12 @@ describe('Timer - task', () => {
     let counter = 0;
     const task = new Timer({ type: ETimer.TASK, delay: DELAY }, () => {
       counter++;
-      task.start();
     });
 
     task.start();
     expect(task.isPending()).toBe(true);
     await wait(DELAY + DELAY / 2);
-    task.stop();
+
     expect(task.isPending()).toBe(false);
     expect(counter).toBe(1);
   });
