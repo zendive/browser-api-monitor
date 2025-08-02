@@ -107,6 +107,7 @@ export function applySession(session: TSession) {
 export function onEachSecond() {
   apiMedia.meetMedia(panels.media);
   apiAnimation.updateCallsPerSecond(panels.requestAnimationFrame);
+  apiIdle.updateCallsPerSecond(panels.requestIdleCallback);
   updateWorkerCallsPerSecond(panels.worker);
   apiScheduler.updateCallsPerSecond(panels.scheduler);
 }

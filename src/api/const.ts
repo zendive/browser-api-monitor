@@ -25,6 +25,10 @@ export const requestAnimationFrame = /*@__PURE__*/ globalThis
   .requestAnimationFrame.bind(globalThis);
 export const cancelAnimationFrame = /*@__PURE__*/ globalThis
   .cancelAnimationFrame.bind(globalThis);
+export const requestIdleCallback = /*@__PURE__*/ globalThis
+  .requestIdleCallback.bind(globalThis);
+export const cancelIdleCallback = /*@__PURE__*/ globalThis
+  .cancelIdleCallback.bind(globalThis);
 export const nativeYield = /*@__PURE__*/ globalThis.scheduler.yield.bind(
   globalThis.scheduler,
 );

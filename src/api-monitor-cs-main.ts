@@ -16,7 +16,7 @@ let originalMetrics: TTelemetry | null;
 let currentMetrics: TTelemetry | null;
 const eachSecond = new Timer(
   { type: ETimer.TIMEOUT, delay: 1e3 },
-  () => {
+  function apiMonitorEachSecond() {
     onEachSecond();
     eachSecond.start();
   },
@@ -56,7 +56,8 @@ windowListen((o) => {
   if (EMsg.TELEMETRY_ACKNOWLEDGED === o.msg) {
     tick.delay = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
-    eachSecond.isPending() && tick.start();
+    const shouldRun = eachSecond.isPending() && !tick.isPending();
+    shouldRun && tick.start();
   } else if (EMsg.CONFIG === o.msg) {
     applyConfig(o.config);
     originalMetrics = currentMetrics = null;

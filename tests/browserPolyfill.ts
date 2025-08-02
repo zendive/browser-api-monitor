@@ -11,6 +11,7 @@ Object.assign(globalThis, {
   location: window.location,
   Element: browserWindow.Element,
   Document: browserWindow.Document,
+  __mirror__: false,
 
   requestAnimationFrame: function requestAnimationFrameDumbStub(
     callback: (delay: number) => void,

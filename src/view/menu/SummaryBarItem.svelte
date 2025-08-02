@@ -54,8 +54,10 @@
       if (stopAnimate.isPending()) {
         stopAnimate.stop();
       }
-      el.classList.add(AFTER_SCROLL_ANIMATION_CLASSNAME);
-      stopAnimate.start(el);
+      void requestAnimationFrame(() => {
+        el.classList.add(AFTER_SCROLL_ANIMATION_CLASSNAME);
+        stopAnimate.start(el);
+      });
     }
   }
 </script>

@@ -25,7 +25,7 @@ interface IWorkerMetric {
   specifier: string;
   online: number;
   facts: TFact;
-  callsPerSecond: Map</*traceId*/ string, /*calls*/ number>;
+  callsMap: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, IConstructorMetric>;
   terminate: Map</*traceId*/ string, ITerminateMetric>;
   postMessage: Map</*traceId*/ string, IPostMessageMetric>;
@@ -151,7 +151,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         specifier: this.#specifier,
         online: 1,
         facts: <TFact> 0,
-        callsPerSecond: new Map(),
+        callsMap: new Map(),
         konstruktor: new Map([[methodMetric.traceId, methodMetric]]),
         terminate: new Map(),
         postMessage: new Map(),
@@ -445,34 +445,32 @@ export function updateWorkerCallsPerSecond(panel: TPanel) {
   if (!panel.wrap || !panel.visible) return;
 
   for (const [_, workerMetric] of workerMap) {
-    const cpsMap = workerMetric.callsPerSecond;
-
     for (const [_, methodMetric] of workerMetric.postMessage) {
-      const prevCalls = cpsMap.get(methodMetric.traceId) || 0;
+      const prevCalls = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.cps = methodMetric.calls - prevCalls;
-      cpsMap.set(methodMetric.traceId, methodMetric.calls);
+      workerMetric.callsMap.set(methodMetric.traceId, methodMetric.calls);
     }
 
     for (const [_, methodMetric] of workerMetric.onmessage) {
-      const prevEvents = cpsMap.get(methodMetric.traceId) || 0;
+      const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
-      cpsMap.set(methodMetric.traceId, methodMetric.events);
+      workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     }
 
     for (const [_, methodMetric] of workerMetric.onerror) {
-      const prevEvents = cpsMap.get(methodMetric.traceId) || 0;
+      const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
-      cpsMap.set(methodMetric.traceId, methodMetric.events);
+      workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     }
 
     for (const [_, methodMetric] of workerMetric.ael) {
-      const prevEvents = cpsMap.get(methodMetric.traceId) || 0;
+      const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
-      cpsMap.set(methodMetric.traceId, methodMetric.events);
+      workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     }
   }
 }

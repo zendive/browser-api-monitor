@@ -8,3 +8,4 @@ export enum ESelfTimeDisplayMode {
   DEFAULT,
   STATS,
 }
+export const CONTEXT_ERROR = 'Extension context invalidated.';

@@ -3,6 +3,7 @@
   import { ETimer, Timer } from '../api/time.ts';
   import Alert from './shared/Alert.svelte';
   import {
+    CONTEXT_ERROR,
     INJECTION_ALERT_TIMEOUT,
     UPDATE_SENSOR_INTERVAL,
   } from './shared/const.ts';
@@ -36,7 +37,7 @@
   });
 
   onMount(() => {
-    if (chrome.runtime) {
+    if (!__mirror__) {
       pingContentScript();
       extensionUpdateSensor.start();
     }
@@ -60,7 +61,7 @@
    */
   function whenUpdateDetected(callback: () => void) {
     loadLocalStorage().catch((e: Error) => {
-      if (!e || e.message !== 'Extension context invalidated.') {
+      if (!e || e.message !== CONTEXT_ERROR) {
         return;
       }
       try {

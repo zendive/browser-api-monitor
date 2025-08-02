@@ -1,9 +1,11 @@
 import {
   cancelAnimationFrame,
+  cancelIdleCallback,
   clearTimeout,
   nativePostTask,
   NOOP,
   requestAnimationFrame,
+  requestIdleCallback,
   setTimeout,
   TELEMETRY_FREQUENCY_30PS,
   TIME_60FPS_MS,
@@ -119,6 +121,39 @@ type TTimerOptions =
   | TTimerIdle
   | TTimerTask;
 
+const timerApi = __mirror__
+  ? {
+    get setTimeout() {
+      return globalThis.setTimeout;
+    },
+    get clearTimeout() {
+      return globalThis.clearTimeout;
+    },
+    get requestAnimationFrame() {
+      return globalThis.requestAnimationFrame;
+    },
+    get cancelAnimationFrame() {
+      return globalThis.cancelAnimationFrame;
+    },
+    get requestIdleCallback() {
+      return globalThis.requestIdleCallback;
+    },
+    get cancelIdleCallback() {
+      return globalThis.cancelIdleCallback;
+    },
+    get postTask() {
+      return globalThis.scheduler.postTask;
+    },
+  }
+  : {
+    setTimeout,
+    clearTimeout,
+    requestAnimationFrame,
+    cancelAnimationFrame,
+    requestIdleCallback,
+    cancelIdleCallback,
+    postTask: nativePostTask,
+  } as const;
 /**
  * A unification of ways to delay a callback execution
  * in javascript event-loop
@@ -158,27 +193,28 @@ export class Timer {
     if (
       this.#options.type === ETimer.TIMEOUT
     ) {
-      this.#handler = setTimeout(() => {
+      this.#handler = timerApi.setTimeout(() => {
         this.#handler = 0;
         this.trigger(...args);
       }, this.delay);
     } else if (
       this.#options.type === ETimer.ANIMATION
     ) {
-      this.#handler = requestAnimationFrame((...argsAF) => {
+      this.#handler = timerApi.requestAnimationFrame((...argsAF) => {
         this.#handler = 0;
         this.trigger(...[...args, ...argsAF]);
       });
     } else if (this.#options.type === ETimer.IDLE) {
-      this.#handler = requestIdleCallback((...argsIC) => {
+      this.#handler = timerApi.requestIdleCallback((...argsIC) => {
         this.#handler = 0;
         this.trigger(...[...args, ...argsIC]);
       }, { timeout: this.delay });
     } else if (this.#options.type === ETimer.TASK) {
       this.#abortController = new AbortController();
-      nativePostTask(() => {
-        this.#abortController = null;
+      timerApi.postTask(() => {
         this.trigger(...args);
+        // nullifying AFTER the trigger to allow use-case when aborting from the callback
+        this.#abortController = null;
       }, {
         delay: this.delay,
         signal: this.#abortController.signal,
@@ -203,13 +239,13 @@ export class Timer {
 
   stop() {
     if (this.#options.type === ETimer.TIMEOUT) {
-      this.#handler && clearTimeout(this.#handler);
+      this.#handler && timerApi.clearTimeout(this.#handler);
       this.#handler = 0;
     } else if (this.#options.type === ETimer.ANIMATION) {
-      this.#handler && cancelAnimationFrame(this.#handler);
+      this.#handler && timerApi.cancelAnimationFrame(this.#handler);
       this.#handler = 0;
     } else if (this.#options.type === ETimer.IDLE) {
-      this.#handler && cancelIdleCallback(this.#handler);
+      this.#handler && timerApi.cancelIdleCallback(this.#handler);
       this.#handler = 0;
     } else if (this.#options.type === ETimer.TASK) {
       this.#abortController && this.#abortController.abort();

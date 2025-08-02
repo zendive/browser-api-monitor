@@ -46,7 +46,7 @@ export class AnimationWrapper {
     requestAnimationFrame: requestAnimationFrame,
     cancelAnimationFrame: cancelAnimationFrame,
   };
-  animationCallsMap = new Map</*traceId*/ string, /*calls*/ number>();
+  #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
   onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
   rafHistory: Map</*traceId*/ string, TRequestAnimationFrameHistory> =
@@ -152,10 +152,10 @@ export class AnimationWrapper {
     if (!panel.wrap || !panel.visible) return;
 
     for (const [, rafRecord] of this.rafHistory) {
-      const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
+      const prevCalls = this.#callsMap.get(rafRecord.traceId) || 0;
       rafRecord.cps = rafRecord.calls - prevCalls;
 
-      this.animationCallsMap.set(rafRecord.traceId, rafRecord.calls);
+      this.#callsMap.set(rafRecord.traceId, rafRecord.calls);
     }
   }
 

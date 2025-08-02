@@ -1,4 +1,4 @@
-.PHONY: clean install dev valid test test-dev prod serve_mirror
+.PHONY: clean install dev valid test test-dev prod mirror-dev mirror-serve
 .DEFAULT_GOAL := dev
 DENO_DEV := NODE_ENV=development deno run --watch
 DENO_PROD := NODE_ENV=production deno run
@@ -43,7 +43,12 @@ prod: test
 
 	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
 
-serve_mirror:
+mirror-dev:
+	@echo "🎗 reminder to stop \"make dev\""
+	rm -rf $(BUILD_DIR)
+	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT) --mirror
+
+mirror-serve:
 	@echo "🎗 reminder to switch extension off"
 	@echo "served at: http://localhost:5555/mirror.html"
 	python3 -m http.server 5555 -d ./public/

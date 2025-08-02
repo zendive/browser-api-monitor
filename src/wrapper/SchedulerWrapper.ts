@@ -44,7 +44,7 @@ export const PostTaskFacts = /*@__PURE__*/ (() =>
 export class SchedulerWrapper {
   #yieldMap: Map</*traceId*/ string, IYield> = new Map();
   #postTaskMap: Map</*traceId*/ string, IPostTask> = new Map();
-  #callsPerSecond: Map</*traceId*/ string, /*calls*/ number> = new Map();
+  #callsMap: Map</*traceId*/ string, /*calls*/ number> = new Map();
 
   wrapYield() {
     globalThis.scheduler.yield = function (
@@ -165,17 +165,17 @@ export class SchedulerWrapper {
     if (!panel.wrap || !panel.visible) return;
 
     for (const [_, methodMetric] of this.#yieldMap) {
-      const prevCalls = this.#callsPerSecond.get(methodMetric.traceId) || 0;
+      const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.cps = methodMetric.calls - prevCalls;
-      this.#callsPerSecond.set(methodMetric.traceId, methodMetric.calls);
+      this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
     }
 
     for (const [_, methodMetric] of this.#postTaskMap) {
-      const prevCalls = this.#callsPerSecond.get(methodMetric.traceId) || 0;
+      const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.calls - prevCalls;
-      this.#callsPerSecond.set(methodMetric.traceId, methodMetric.calls);
+      this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
     }
   }
 

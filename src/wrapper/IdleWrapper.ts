@@ -7,11 +7,17 @@ import {
 } from './shared/TraceUtil.ts';
 import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../api/const.ts';
+import {
+  cancelIdleCallback,
+  requestIdleCallback,
+  TAG_BAD_DELAY,
+  TAG_BAD_HANDLER,
+} from '../api/const.ts';
 
 export type TRequestIdleCallbackHistory = TTraceable & {
   facts: TFact;
   calls: number;
+  cps: number;
   handler: number | undefined | string;
   delay: number | undefined | string;
   didTimeout: undefined | boolean;
@@ -26,12 +32,6 @@ export type TCancelIdleCallbackHistory = TTraceable & {
   handler: number | undefined | string;
 };
 
-const requestIdleCallback = /*@__PURE__*/ globalThis.requestIdleCallback.bind(
-  globalThis,
-);
-const cancelIdleCallback = /*@__PURE__*/ globalThis.cancelIdleCallback.bind(
-  globalThis,
-);
 export const RicFact = /*@__PURE__*/ (() => ({
   BAD_DELAY: Fact.define(1 << 0),
 } as const))();
@@ -68,6 +68,7 @@ export class IdleWrapper {
     requestIdleCallback: requestIdleCallback,
     cancelIdleCallback: cancelIdleCallback,
   };
+  #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
 
   constructor() {
   }
@@ -124,6 +125,7 @@ export class IdleWrapper {
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         facts,
         calls: 1,
+        cps: 1,
         handler,
         didTimeout: undefined,
         delay,
@@ -184,6 +186,17 @@ export class IdleWrapper {
       } else if (!ricRecord.canceledByTraceIds.includes(callstack.traceId)) {
         ricRecord.canceledByTraceIds.push(callstack.traceId);
       }
+    }
+  }
+
+  updateCallsPerSecond(panel: TPanel) {
+    if (!panel.wrap || !panel.visible) return;
+
+    for (const [, ricRecord] of this.ricHistory) {
+      const prevCalls = this.#callsMap.get(ricRecord.traceId) || 0;
+      ricRecord.cps = ricRecord.calls - prevCalls;
+
+      this.#callsMap.set(ricRecord.traceId, ricRecord.calls);
     }
   }
 

@@ -120,6 +120,7 @@
           eventChangeSorting={onChangeSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
           field="calls"
@@ -142,7 +143,7 @@
           currentField={sortRequestIdleCallback.field}
           currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
-        >Delay</ColumnSortable>
+        >Timeout</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
@@ -171,6 +172,7 @@
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={RicFacts} />
         </td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
           <CellCancelable
             calls={metric.calls}

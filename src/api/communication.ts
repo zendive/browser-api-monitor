@@ -21,7 +21,7 @@ import type { TSession } from './storage/storage.session.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
-  if (!chrome.runtime) {
+  if (__mirror__) {
     windowPost(payload);
     return;
   }
@@ -72,7 +72,9 @@ export function runtimePost(payload: TMsgOptions) {
 }
 
 export function runtimeListen(callback: (payload: TMsgOptions) => void) {
-  if (chrome?.runtime) {
+  if (__mirror__) {
+    windowListen(callback);
+  } else {
     chrome.runtime.onMessage.addListener(
       (payload, sender: chrome.runtime.MessageSender, sendResponse) => {
         if (
@@ -83,8 +85,6 @@ export function runtimeListen(callback: (payload: TMsgOptions) => void) {
         }
       },
     );
-  } else {
-    windowListen(callback);
   }
 }
 

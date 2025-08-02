@@ -5,6 +5,7 @@ import manifest from './manifest.json' with { type: 'json' };
 
 const nodeEnv = Deno.env.get('NODE_ENV');
 const isProd = nodeEnv === 'production';
+const isMirror = Deno.args.includes('--mirror');
 const buildOptions: BuildOptions = {
   plugins: [
     esbuildSvelte({
@@ -25,6 +26,7 @@ const buildOptions: BuildOptions = {
     __app_name__: `"browser-api-monitor@${manifest.version}"`,
     __app_version__: `"${manifest.version}"`,
     __home_page__: `"${manifest.homepage_url}"`,
+    __mirror__: `${isMirror}`,
   },
   bundle: true,
   platform: 'browser',
