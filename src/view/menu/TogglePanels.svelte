@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EWrapperCallstackType } from '../../api/storage/storage.local.ts';
+  import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
   import Alert from '../shared/Alert.svelte';
   import {

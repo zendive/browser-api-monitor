@@ -1,7 +1,7 @@
 import { describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { EWrapperCallstackType } from '../src/api/storage/storage.local.ts';
 import {
+  EWrapperCallstackType,
   TAG_INVALID_CALLSTACK_LINK,
   TraceUtil,
 } from '../src/wrapper/shared/TraceUtil.ts';

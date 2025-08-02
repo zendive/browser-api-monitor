@@ -11,6 +11,7 @@ import type {
   TSetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
+import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -93,10 +94,6 @@ export const DEFAULT_PANELS: TPanel[] = [
   },
 ];
 
-export enum EWrapperCallstackType {
-  FULL,
-  SHORT,
-}
 export enum ESortOrder {
   ASCENDING,
   DESCENDING,

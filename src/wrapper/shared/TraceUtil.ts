@@ -1,5 +1,9 @@
 import { hashString } from '../../api/hash.ts';
-import { EWrapperCallstackType } from '../../api/storage/storage.local.ts';
+
+export enum EWrapperCallstackType {
+  FULL,
+  SHORT,
+}
 
 export type TTrace = {
   name: string | 0;

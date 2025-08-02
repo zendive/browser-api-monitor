@@ -1,7 +1,6 @@
 import { callableOnce } from '../api/time.ts';
 import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
-  EWrapperCallstackType,
   panelsArray2Map,
   type TConfig,
   type TPanelMap,
@@ -35,6 +34,7 @@ import {
   type ISchedulerTelemetry,
   SchedulerWrapper,
 } from './SchedulerWrapper.ts';
+import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
