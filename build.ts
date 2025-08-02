@@ -26,6 +26,8 @@ const buildOptions: BuildOptions = {
     __app_name__: `"browser-api-monitor@${manifest.version}"`,
     __app_version__: `"${manifest.version}"`,
     __home_page__: `"${manifest.homepage_url}"`,
+    __release_page__:
+      `"https://github.com/zendive/browser-api-monitor/releases"`,
     __mirror__: `${isMirror}`,
   },
   bundle: true,
