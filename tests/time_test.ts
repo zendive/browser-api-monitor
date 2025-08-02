@@ -145,7 +145,7 @@ describe('Timer - idle', () => {
     const timerArgExpected = 100;
     let hasIdleArgs = false;
     const task = new Timer(
-      { type: ETimer.IDLE, delay: DELAY },
+      { type: ETimer.IDLE, timeout: DELAY },
       (_timerArg: number, deadline: IdleDeadline) => {
         counter++;
         timerArg = _timerArg;

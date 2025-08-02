@@ -108,7 +108,7 @@ type TTimerAnimation = TTimerMeasurable & {
 };
 type TTimerIdle = TTimerMeasurable & {
   type: ETimer.IDLE;
-  delay: number;
+  timeout: number;
 };
 type TTimerTask = TTimerMeasurable & {
   type: ETimer.TASK;
@@ -160,6 +160,7 @@ const timerApi = __mirror__
  */
 export class Timer {
   delay: number = 0;
+  timeout: number = 0;
   /** callback's self-time in milliseconds */
   callbackSelfTime: number = -1;
   #handler: number = 0;
@@ -174,10 +175,11 @@ export class Timer {
 
     if (
       this.#options.type === ETimer.TIMEOUT ||
-      this.#options.type === ETimer.IDLE ||
       this.#options.type === ETimer.TASK
     ) {
       this.delay = this.#options.delay;
+    } else if (this.#options.type === ETimer.IDLE) {
+      this.timeout = this.#options.timeout;
     }
 
     if (this.#options.measurable) {
@@ -208,7 +210,7 @@ export class Timer {
       this.#handler = timerApi.requestIdleCallback((...argsIC) => {
         this.#handler = 0;
         this.trigger(...[...args, ...argsIC]);
-      }, { timeout: this.delay });
+      }, { timeout: this.timeout });
     } else if (this.#options.type === ETimer.TASK) {
       this.#abortController = new AbortController();
       timerApi.postTask(() => {
