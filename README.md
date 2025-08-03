@@ -31,7 +31,7 @@ To assess Web Application implementation correctness and expedite issues discove
 - Measure callback's execution self-time.
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
 
-- Count `requestAnimationFrame` calls per second (CPS).
+- Count calls per second (CPS) when applicable.
   - If requested recursively - it reflects animation FPS.
 
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
@@ -68,15 +68,24 @@ To assess Web Application implementation correctness and expedite issues discove
 - `requestIdleCallback`
   - `cancelIdleCallback`
 - `Worker`
+  - `constructor`
+  - `terminate`
+  - `onmessage`
+  - `onerror`
+  - `postMessage`
+  - `addEventListener`
+  - `removeEventListener`
 - `scheduler`
-  - 'postTask'
+  - `postTask`
   - `yield`
 
 </details>
 <details>
   <summary> <strong>Screenshots</strong> </summary>
 
+![screenshot](./doc/screenshot-01.png)
 ![screenshot](./doc/screenshot-02.png)
+![screenshot](./doc/screenshot-03.png)
 ![screenshot](./doc/screenshot-04.png)
 
 </details>
