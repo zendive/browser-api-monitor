@@ -22,7 +22,7 @@
   } = $props();
   let enabled: boolean = $derived.by(() => panel.visible && count > 0);
   const stopAnimate = new Timer(
-    { type: ETimer.TIMEOUT, delay: 512 },
+    { type: ETimer.TIMEOUT, timeout: 512 },
     (el: HTMLElement | unknown) =>
       void requestAnimationFrame(() => {
         if (el instanceof HTMLElement) {

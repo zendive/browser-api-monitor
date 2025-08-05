@@ -13,11 +13,11 @@
   let tabReloadAlertEl: Alert | null = null;
   let devtoolsReloadAlertEl: Alert | null = null;
   const delayedAlert = new Timer(
-    { type: ETimer.TIMEOUT, delay: INJECTION_ALERT_TIMEOUT },
+    { type: ETimer.TIMEOUT, timeout: INJECTION_ALERT_TIMEOUT },
     () => void tabReloadAlertEl?.show(),
   );
   const extensionUpdateSensor = new Timer(
-    { type: ETimer.TIMEOUT, delay: UPDATE_SENSOR_INTERVAL },
+    { type: ETimer.TIMEOUT, timeout: UPDATE_SENSOR_INTERVAL },
     () => {
       whenUpdateDetected(() => {
         devtoolsReloadAlertEl?.show();

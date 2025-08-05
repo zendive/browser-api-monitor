@@ -9,7 +9,7 @@
   );
   let lastUpdated: number = Date.now();
   const stopAnimate = new Timer(
-    { type: ETimer.TIMEOUT, delay: 100 },
+    { type: ETimer.TIMEOUT, timeout: 100 },
     () => (isAnimated = false),
   );
 

@@ -101,7 +101,7 @@ type TTimerMeasurable = {
 };
 type TTimerTimeout = TTimerMeasurable & {
   type: ETimer.TIMEOUT;
-  delay: number;
+  timeout: number;
 };
 type TTimerAnimation = TTimerMeasurable & {
   type: ETimer.ANIMATION;
@@ -112,7 +112,7 @@ type TTimerIdle = TTimerMeasurable & {
 };
 type TTimerTask = TTimerMeasurable & {
   type: ETimer.TASK;
-  delay: number;
+  timeout: number;
   priority?: TTaskPriority;
 };
 type TTimerOptions =
@@ -159,7 +159,6 @@ const timerApi = __mirror__
  * in javascript event-loop
  */
 export class Timer {
-  delay: number = 0;
   timeout: number = 0;
   /** callback's self-time in milliseconds */
   callbackSelfTime: number = -1;
@@ -175,10 +174,9 @@ export class Timer {
 
     if (
       this.#options.type === ETimer.TIMEOUT ||
+      this.#options.type === ETimer.IDLE ||
       this.#options.type === ETimer.TASK
     ) {
-      this.delay = this.#options.delay;
-    } else if (this.#options.type === ETimer.IDLE) {
       this.timeout = this.#options.timeout;
     }
 
@@ -198,7 +196,7 @@ export class Timer {
       this.#handler = timerApi.setTimeout(() => {
         this.#handler = 0;
         this.trigger(...args);
-      }, this.delay);
+      }, this.timeout);
     } else if (
       this.#options.type === ETimer.ANIMATION
     ) {
@@ -218,7 +216,7 @@ export class Timer {
         // nullifying AFTER the trigger to allow use-case when aborting from the callback
         this.#abortController = null;
       }, {
-        delay: this.delay,
+        delay: this.timeout,
         signal: this.#abortController.signal,
         priority: this.#options.priority,
       }).catch(NOOP);
@@ -282,7 +280,7 @@ export class Fps {
   #eachSecond: Timer;
 
   constructor(callback?: (value: number) => void) {
-    this.#eachSecond = new Timer({ type: ETimer.TIMEOUT, delay: 1e3 }, () => {
+    this.#eachSecond = new Timer({ type: ETimer.TIMEOUT, timeout: 1e3 }, () => {
       this.value = this.#ticks;
       this.#ticks = 0;
       callback?.(this.value);

@@ -60,7 +60,7 @@ describe('Stopper', () => {
 describe('Timer - default options', () => {
   test('start', async () => {
     let counter = 0;
-    const timeout = new Timer({ type: ETimer.TIMEOUT, delay: DELAY }, () => {
+    const timeout = new Timer({ type: ETimer.TIMEOUT, timeout: DELAY }, () => {
       counter++;
     });
 
@@ -75,7 +75,7 @@ describe('Timer - default options', () => {
   test('stop before expected', async () => {
     let counter = 0;
     const timeout = new Timer(
-      { type: ETimer.TIMEOUT, delay: 2 * DELAY },
+      { type: ETimer.TIMEOUT, timeout: 2 * DELAY },
       () => {
         counter++;
       },
@@ -94,7 +94,7 @@ describe('Timer - default options', () => {
 describe('Timer - repeatable', () => {
   test('start/stop', async () => {
     let counter = 0;
-    const interval = new Timer({ type: ETimer.TIMEOUT, delay: DELAY }, () => {
+    const interval = new Timer({ type: ETimer.TIMEOUT, timeout: DELAY }, () => {
       counter++;
       interval.start();
     });
@@ -169,7 +169,7 @@ describe('Timer - idle', () => {
 describe('Timer - task', () => {
   test('start/stop', async () => {
     let counter = 0;
-    const task = new Timer({ type: ETimer.TASK, delay: DELAY }, () => {
+    const task = new Timer({ type: ETimer.TASK, timeout: DELAY }, () => {
       counter++;
     });
 

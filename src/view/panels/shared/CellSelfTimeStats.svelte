@@ -16,18 +16,21 @@
     mean: time,
     max: time,
   });
-  const eachSecond = new Timer({ type: ETimer.TIMEOUT, delay: 1e3 }, () => {
-    if (!mean.samples) {
-      return;
-    }
+  const eachSecond = new Timer(
+    { type: ETimer.TIMEOUT, timeout: 1e3 },
+    () => {
+      if (!mean.samples) {
+        return;
+      }
 
-    vs.stdDev = mean.sampleStdDev().toFixed(1);
-    vs.mean = mean.mean;
-    vs.max = mean.max;
+      vs.stdDev = mean.sampleStdDev().toFixed(1);
+      vs.mean = mean.mean;
+      vs.max = mean.max;
 
-    mean.reset();
-    eachSecond.start();
-  });
+      mean.reset();
+      eachSecond.start();
+    },
+  );
 
   $effect(() => void mean.add(time));
 

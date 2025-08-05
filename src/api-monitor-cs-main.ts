@@ -15,7 +15,7 @@ import diff from './api/diff.ts';
 let originalMetrics: TTelemetry | null;
 let currentMetrics: TTelemetry | null;
 const eachSecond = new Timer(
-  { type: ETimer.TIMEOUT, delay: 1e3 },
+  { type: ETimer.TIMEOUT, timeout: 1e3 },
   function apiMonitorEachSecond() {
     onEachSecond();
     eachSecond.start();
@@ -24,7 +24,7 @@ const eachSecond = new Timer(
 const tick = new Timer({
   type: ETimer.TASK,
   priority: 'background',
-  delay: TELEMETRY_FREQUENCY_1PS,
+  timeout: TELEMETRY_FREQUENCY_1PS,
 }, function apiMonitorTelemetryTick() {
   const now = Date.now();
   currentMetrics = structuredClone(collectMetrics());
@@ -54,7 +54,7 @@ const tick = new Timer({
 
 windowListen((o) => {
   if (EMsg.TELEMETRY_ACKNOWLEDGED === o.msg) {
-    tick.delay = adjustTelemetryDelay(o.timeOfCollection);
+    tick.timeout = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
     const shouldRun = eachSecond.isPending() && !tick.isPending();
     shouldRun && tick.start();
