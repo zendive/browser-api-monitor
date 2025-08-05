@@ -62,10 +62,11 @@
     </div>
 
     <a
+      href="."
       title="Close"
       aria-label="Close"
+      role="button"
       class="close-icon"
-      href="void(0)"
       onclick={(e) => {
         e.preventDefault();
         hide();

@@ -1,4 +1,5 @@
 import { PropertySymbol, Window } from 'happy-dom';
+import 'scheduler-polyfill';
 
 const window = new Window();
 const document = window.document;
@@ -10,13 +11,14 @@ Object.assign(globalThis, {
   location: window.location,
   Element: browserWindow.Element,
   Document: browserWindow.Document,
+  __mirror__: false,
 
   requestAnimationFrame: function requestAnimationFrameDumbStub(
     callback: (delay: number) => void,
   ) {
     return setTimeout(() => {
       callback(performance.now());
-    }, 1e3 / 60);
+    }, 0);
   },
 
   cancelAnimationFrame: function cancelAnimationFrameDumbStub(id: number) {

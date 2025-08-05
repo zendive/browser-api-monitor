@@ -1,21 +1,23 @@
 import type { TPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import {
-  type ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
-import { validHandler, validTimerDelay } from './shared/util.ts';
+import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../api/const.ts';
+import {
+  cancelIdleCallback,
+  requestIdleCallback,
+  TAG_BAD_DELAY,
+  TAG_BAD_HANDLER,
+} from '../api/const.ts';
 
-export type TRequestIdleCallbackHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TRequestIdleCallbackHistory = TTraceable & {
   facts: TFact;
   calls: number;
+  cps: number;
   handler: number | undefined | string;
   delay: number | undefined | string;
   didTimeout: undefined | boolean;
@@ -24,21 +26,12 @@ export type TRequestIdleCallbackHistory = {
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
 };
-export type TCancelIdleCallbackHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TCancelIdleCallbackHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
 };
 
-const requestIdleCallback = /*@__PURE__*/ globalThis.requestIdleCallback.bind(
-  globalThis,
-);
-const cancelIdleCallback = /*@__PURE__*/ globalThis.cancelIdleCallback.bind(
-  globalThis,
-);
 export const RicFact = /*@__PURE__*/ (() => ({
   BAD_DELAY: Fact.define(1 << 0),
 } as const))();
@@ -63,7 +56,6 @@ export const CicFacts = /*@__PURE__*/ (() =>
   ]))();
 
 export class IdleWrapper {
-  traceUtil: TraceUtil;
   onlineIdleCallbackLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
   ricHistory: Map</*traceId*/ string, TRequestIdleCallbackHistory> = new Map();
@@ -76,9 +68,9 @@ export class IdleWrapper {
     requestIdleCallback: requestIdleCallback,
     cancelIdleCallback: cancelIdleCallback,
   };
+  #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
 
-  constructor(traceUtil: TraceUtil) {
-    this.traceUtil = traceUtil;
+  constructor() {
   }
 
   #ricFired(
@@ -130,9 +122,10 @@ export class IdleWrapper {
       this.ricHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         facts,
         calls: 1,
+        cps: 1,
         handler,
         didTimeout: undefined,
         delay,
@@ -175,7 +168,7 @@ export class IdleWrapper {
       this.cicHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         facts,
         calls: 1,
         handler,
@@ -196,6 +189,17 @@ export class IdleWrapper {
     }
   }
 
+  updateCallsPerSecond(panel: TPanel) {
+    if (!panel.wrap || !panel.visible) return;
+
+    for (const [, ricRecord] of this.ricHistory) {
+      const prevCalls = this.#callsMap.get(ricRecord.traceId) || 0;
+      ricRecord.cps = ricRecord.calls - prevCalls;
+
+      this.#callsMap.set(ricRecord.traceId, ricRecord.calls);
+    }
+  }
+
   wrapRequestIdleCallback() {
     globalThis.requestIdleCallback = function requestIdleCallback(
       this: IdleWrapper,
@@ -204,15 +208,15 @@ export class IdleWrapper {
     ) {
       const delay = options?.timeout;
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.getCallstack(err, fn);
+      const callstack = traceUtil.getCallstack(err, fn);
 
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
         const start = performance.now();
         let selfTime = null;
 
-        if (this.traceUtil.shouldPass(callstack.traceId)) {
-          if (this.traceUtil.shouldPause(callstack.traceId)) {
+        if (traceUtil.shouldPass(callstack.traceId)) {
+          if (traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(deadline);
@@ -233,13 +237,13 @@ export class IdleWrapper {
       handler: number,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.getCallstack(err);
+      const callstack = traceUtil.getCallstack(err);
 
       this.#updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
 
-      if (this.traceUtil.shouldPass(callstack.traceId)) {
-        if (this.traceUtil.shouldPause(callstack.traceId)) {
+      if (traceUtil.shouldPass(callstack.traceId)) {
+        if (traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelIdleCallback(handler);
@@ -264,14 +268,5 @@ export class IdleWrapper {
         ? Array.from(this.cicHistory.values())
         : null,
     };
-  }
-
-  cleanHistory() {
-    this.ricHistory.clear();
-    this.cicHistory.clear();
-    this.onlineIdleCallbackLookup.clear();
-
-    this.callCounter.requestIdleCallback = 0;
-    this.callCounter.cancelIdleCallback = 0;
   }
 }

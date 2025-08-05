@@ -7,6 +7,7 @@ import {
   READY_STATE,
   TIME_60FPS_SEC,
 } from '../api/const.ts';
+import type { TPanel } from '../api/storage/storage.local.ts';
 
 type TMediaElement = HTMLVideoElement | HTMLAudioElement;
 type TMediaModel = {
@@ -113,7 +114,9 @@ export class MediaWrapper {
     return rv;
   }
 
-  meetMedia() {
+  meetMedia(panel: TPanel) {
+    if (!panel.visible) return;
+
     const els: NodeListOf<TMediaElement> = document.querySelectorAll(
       'video,audio',
     );
@@ -146,13 +149,13 @@ export class MediaWrapper {
     }
   }
 
-  collectMetrics(includeCollection: boolean): TMediaTelemetry {
+  collectMetrics(panel: TPanel): TMediaTelemetry {
     const rv: TMediaTelemetry = {
       total: this.mediaCollection.length,
       collection: [],
     };
 
-    if (includeCollection) {
+    if (panel.visible) {
       rv.collection = this.mediaCollection.map((v) => {
         // refresh props metrics
         for (const prop of MEDIA_ELEMENT_PROPS) {

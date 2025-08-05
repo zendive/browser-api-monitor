@@ -14,7 +14,7 @@
   import Dialog from '../../shared/Dialog.svelte';
   import Alert from '../../shared/Alert.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellCancelable from '../shared/CellCancelable.svelte';
@@ -104,7 +104,7 @@
         {caption} Callstack [<Variable value={ricHistory.length} />]
       </th>
       <th class="ta-c">didTimeout</th>
-      <th class="ta-r">
+      <th class="ta-c">
         <ColumnSortable
           field="selfTime"
           currentField={sortRequestIdleCallback.field}
@@ -120,6 +120,7 @@
           eventChangeSorting={onChangeSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
+      <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
           field="calls"
@@ -142,9 +143,9 @@
           currentField={sortRequestIdleCallback.field}
           currentFieldOrder={sortRequestIdleCallback.order}
           eventChangeSorting={onChangeSort}
-        >Delay</ColumnSortable>
+        >Timeout</ColumnSortable>
       </th>
-      <th>
+      <th class="ta-c">
         <ColumnSortable
           field="online"
           currentField={sortRequestIdleCallback.field}
@@ -167,10 +168,11 @@
           />
         </td>
         <td class="ta-c">{metric.didTimeout}</td>
-        <td class="ta-r"><CellFrameTimeSensitive value={metric.selfTime} /></td>
+        <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={RicFacts} />
         </td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
           <CellCancelable
             calls={metric.calls}

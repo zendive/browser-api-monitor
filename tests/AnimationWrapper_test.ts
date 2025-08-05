@@ -2,17 +2,15 @@ import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import { AnimationWrapper, CafFact } from '../src/wrapper/AnimationWrapper.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_BAD_HANDLER } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('AnimationWrapper', () => {
-  const traceUtil = new TraceUtil();
   let apiAnimation: AnimationWrapper;
 
   beforeEach(() => {
-    apiAnimation = new AnimationWrapper(traceUtil);
+    apiAnimation = new AnimationWrapper();
     apiAnimation.wrapRequestAnimationFrame();
     apiAnimation.wrapCancelAnimationFrame();
   });
@@ -22,7 +20,7 @@ describe('AnimationWrapper', () => {
     apiAnimation.unwrapCancelAnimationFrame();
   });
 
-  test('rafHistory - recorded', async () => {
+  test('rAF - recorded', async () => {
     let typeOfArgument = '';
     const handler = await new Promise((resolve) => {
       const handler = requestAnimationFrame((time) => {
@@ -42,7 +40,7 @@ describe('AnimationWrapper', () => {
     expect(apiAnimation.callCounter.requestAnimationFrame).toBe(1);
   });
 
-  test('cafHistory - recorded', () => {
+  test('cAF - recorded', () => {
     const unchanged = 0,
       changed = 1;
     let changeable = unchanged;
@@ -66,7 +64,7 @@ describe('AnimationWrapper', () => {
     expect(rafRec.canceledCounter).toBe(1);
   });
 
-  test('cafHistory - invalid handler', () => {
+  test('cAF - invalid handler', () => {
     cancelAnimationFrame(0);
 
     const rec = Array.from(apiAnimation.cafHistory?.values())[0];
@@ -75,7 +73,7 @@ describe('AnimationWrapper', () => {
     expect(Fact.check(rec.facts, CafFact.BAD_HANDLER)).toBe(true);
   });
 
-  test('cafHistory - raf not found', () => {
+  test('cAF - rAF not found', () => {
     cancelAnimationFrame(404);
 
     const rec = Array.from(apiAnimation.cafHistory?.values())[0];

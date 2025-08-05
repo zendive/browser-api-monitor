@@ -4,15 +4,11 @@
 ### Issues, that could have been spotted during the development
 
 - Timers with short delays unjustified for the use case, wasting CPU time.
-
   - A ~10ms delay interval, from an old third-party library, constantly consuming approximately 10% of CPU solely to check if the window was resized.
-
   - A 150ms delay interval, displaying time in `H:MM:SS` format (1 second precision); and displaying it via `innerHTML`.
 
-- A bundled dependency library that utilizes the `eval` function, thereby preventing the removal of `unsafe-eval` from the `Content-Security-Policy`  header.
-
+- A bundled dependency library that utilizes the `eval` function, thereby preventing the removal of `unsafe-eval` from the `Content-Security-Policy` header.
   - Code that uses `eval` with modern syntax to check if it's supported by browser (not throws exception).
-
   - Dependency package that was bundled with webpack's config option [`devtool: 'eval'`](https://webpack.js.org/configuration/devtool/) or [`mode: 'development'`](https://webpack.js.org/configuration/mode/).
 
 - A substantial number of hidden video elements in DOM stopped working, after Chrome unexpectedly limited them to 100 per domain (later the limit was lifted to 1000).
@@ -21,10 +17,11 @@
 
 - `setTimeout`, `setInterval` are used to animate instead of `requestAnimationFrame`.
 
-- `setTimeout` with dynamically computed delay value ends to be called with `NaN`.
+- Observed on multiple sites `setTimeout` with dynamically computed delay value, ends to be called with `NaN`, `-Infinity`, `-31`...
 
 - Hidden UI feature runs its logic in the background.
-
   - Indirectly, discovered from the bursts of short timeouts, fired from `ResizeObserver` handler of invisible feature that appears to be: or for a power user only, or just partially deprecated.
-
   - Animation still runs (plus network requests) in the background after a "paywall" fullscreen popup. Despite claiming "it's to conserve data bandwidth". CPU usage doesn't drop to 0%.
+
+- Workers on loose.
+  - A Government Geo Science related site crashes under 2.25 hours, topping 4GB of RAM with 271 instances of the same Worker code.

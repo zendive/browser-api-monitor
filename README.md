@@ -31,10 +31,21 @@ To assess Web Application implementation correctness and expedite issues discove
 - Measure callback's execution self-time.
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
 
-- Count `requestAnimationFrame` calls per second (CPS).
+- Count calls per second (CPS) when applicable.
   - If requested recursively - it reflects animation FPS.
 
-- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`. By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may brake the application if it does need it.
+- Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
+  - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
+
+- Monitor Worker's methods and event handlers metrics.
+  - Warn if number of active workers exceeds number of available CPU cores.
+    - keep in mind: extension API can't wrap `self.close()` in worker global context (only `terminate()` in top context)
+  - Detect anomalies:
+    - attempt to add already added listener with `addEventListener`.
+    - attempt to remove unknown listener with `removeEventListener`.
+
+- Monitor `scheduler.yield` and `scheduler.postTask`.
+  - Calls, delay, priority, aborts, self-time metrics.
 
 - Monitor mounted `video` and `audio` media elements in DOM.
   - Present control panel with basic media functions.
@@ -56,12 +67,25 @@ To assess Web Application implementation correctness and expedite issues discove
   - `cancelAnimationFrame`
 - `requestIdleCallback`
   - `cancelIdleCallback`
+- `Worker`
+  - `constructor`
+  - `terminate`
+  - `onmessage`
+  - `onerror`
+  - `postMessage`
+  - `addEventListener`
+  - `removeEventListener`
+- `scheduler`
+  - `postTask`
+  - `yield`
 
 </details>
 <details>
   <summary> <strong>Screenshots</strong> </summary>
 
+![screenshot](./doc/screenshot-01.png)
 ![screenshot](./doc/screenshot-02.png)
+![screenshot](./doc/screenshot-03.png)
 ![screenshot](./doc/screenshot-04.png)
 
 </details>
@@ -73,7 +97,7 @@ To assess Web Application implementation correctness and expedite issues discove
 
 - OS: Linux
 - Node: 22.14.0 (LTS)
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.3.5
+- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.4.2
 
 ### Build instructions
 

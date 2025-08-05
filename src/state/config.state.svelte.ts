@@ -1,11 +1,11 @@
 import { EMsg, portPost } from '../api/communication.ts';
 import {
   DEFAULT_CONFIG,
-  EWrapperCallstackType,
   loadLocalStorage,
   saveLocalStorage,
   type TConfig,
 } from '../api/storage/storage.local.ts';
+import { EWrapperCallstackType } from '../wrapper/shared/TraceUtil.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);
 

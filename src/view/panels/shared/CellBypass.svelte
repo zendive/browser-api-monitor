@@ -17,9 +17,10 @@
 
 <div class="sensor">
   <a
-    href="void(0)"
-    class:active={isBypassed}
+    href="."
+    role="button"
     aria-label="Place bypass"
+    class:active={isBypassed}
     onclick={onToggle}
   >
     <span class="icon -bypass"></span>

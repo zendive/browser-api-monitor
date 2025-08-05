@@ -3,7 +3,6 @@ import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
 import {
   TAG_EVAL_RETURN_SET_INTERVAL,
@@ -13,14 +12,13 @@ import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('EvalWrapper', () => {
-  const traceUtil = new TraceUtil();
   let apiEval: EvalWrapper;
   let apiTimer: TimerWrapper;
 
   beforeEach(() => {
-    apiEval = new EvalWrapper(traceUtil);
+    apiEval = new EvalWrapper();
     apiEval.wrap();
-    apiTimer = new TimerWrapper(traceUtil, apiEval);
+    apiTimer = new TimerWrapper(apiEval);
     apiTimer.wrapSetTimeout();
     apiTimer.wrapSetInterval();
   });
@@ -31,7 +29,7 @@ describe('EvalWrapper', () => {
     apiTimer.unwrapSetInterval();
   });
 
-  test('evalHistory - recorded', () => {
+  test('eval - recorded', () => {
     const NUMBER_OF_INVOCATIONS = 2;
     const CODE = '(1+2)';
     const RESULT = 3;
@@ -53,7 +51,7 @@ describe('EvalWrapper', () => {
     expect(rec.selfTime).not.toBeNull();
   });
 
-  test('evalHistory - detects local scope usage', () => {
+  test('eval - detects local scope usage', () => {
     const local_variable = 0;
     globalThis.eval('(local_variable++)');
 
@@ -66,7 +64,7 @@ describe('EvalWrapper', () => {
     expect(rec.returnedValue).toBe(TAG_UNDEFINED);
   });
 
-  test('setTimeoutHistory - isEval recorded', () => {
+  test('setTimeout - isEval recorded', () => {
     const CODE = '(1+2)';
     setTimeout(CODE);
     const timerRec = Array.from(apiTimer.setTimeoutHistory.values())[0];
@@ -77,7 +75,7 @@ describe('EvalWrapper', () => {
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_TIMEOUT);
   });
 
-  test('setIntervalHistory - isEval recorded', () => {
+  test('setInterval - isEval recorded', () => {
     const CODE = '(1+2)';
     const handler = setInterval(CODE, 123);
     const timerRec = Array.from(apiTimer.setIntervalHistory.values())[0];

@@ -1,7 +1,7 @@
 import { describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
-import { EWrapperCallstackType } from '../src/api/storage/storage.local.ts';
 import {
+  EWrapperCallstackType,
   TAG_INVALID_CALLSTACK_LINK,
   TraceUtil,
 } from '../src/wrapper/shared/TraceUtil.ts';
@@ -13,6 +13,7 @@ describe('TraceUtil', () => {
   at async (<anonymous>:1:1)
   at call2 (async https://example2.com/bundle3.js:4:5)
   at call1 (https://example1.com/bundle2.js:3:4)
+  at async https://example1.com/bundle2.js:2:3
   at self (${traceUtil.selfTraceLink}:77:19)`;
   const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
     at self (${traceUtil.selfTraceLink}:77:19)
@@ -22,6 +23,7 @@ describe('TraceUtil', () => {
   test('createCallstack full', () => {
     traceUtil.callstackType = EWrapperCallstackType.FULL;
     const standard = [
+      { name: 0, link: 'https://example1.com/bundle2.js:2:3' },
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
@@ -30,11 +32,13 @@ describe('TraceUtil', () => {
       null,
     );
 
-    expect(trace.length).toBe(2);
+    expect(trace.length).toBe(3);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
     expect(trace[1].name).toBe(standard[1].name);
     expect(trace[1].link).toBe(standard[1].link);
+    expect(trace[2].name).toBe(standard[2].name);
+    expect(trace[2].link).toBe(standard[2].link);
   });
 
   test('createCallstack short', () => {

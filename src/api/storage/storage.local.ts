@@ -11,11 +11,14 @@ import type {
   TSetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
+import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
 
 type TPanelKey =
   | 'callsSummary'
-  | 'eval'
   | 'media'
+  | 'worker'
+  | 'scheduler'
+  | 'eval'
   | 'activeTimers'
   | 'setTimeout'
   | 'clearTimeout'
@@ -30,7 +33,7 @@ export type TPanel = {
   key: TPanelKey;
   label: string;
   visible: boolean;
-  wrap: boolean | null;
+  wrap?: boolean;
 };
 export type TPanelMap = {
   [K in TPanelKey]: TPanel;
@@ -40,59 +43,57 @@ export type TConfig = typeof DEFAULT_CONFIG;
 export type TConfigField = Partial<TConfig>;
 
 export const DEFAULT_PANELS: TPanel[] = [
-  { key: 'callsSummary', label: 'Calls Summary', visible: false, wrap: null },
-  { key: 'media', label: 'Media', visible: true, wrap: null },
-  { key: 'activeTimers', label: 'Active Timers', visible: true, wrap: null },
+  { key: 'callsSummary', label: 'Summary Bar', visible: false },
+  { key: 'media', label: 'Media', visible: true },
+  { key: 'activeTimers', label: 'Active Timers', visible: true },
+  { key: 'worker', label: 'Worker', visible: true, wrap: true },
+  { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
-  { key: 'setTimeout', label: 'setTimeout History', visible: true, wrap: true },
+  { key: 'setTimeout', label: 'setTimeout', visible: true, wrap: true },
   {
     key: 'clearTimeout',
-    label: 'clearTimeout History',
+    label: 'clearTimeout',
     visible: true,
     wrap: true,
   },
   {
     key: 'setInterval',
-    label: 'setInterval History',
+    label: 'setInterval',
     visible: true,
     wrap: true,
   },
   {
     key: 'clearInterval',
-    label: 'clearInterval History',
+    label: 'clearInterval',
     visible: true,
     wrap: true,
   },
   {
     key: 'requestAnimationFrame',
-    label: 'RAF History',
-    visible: false,
+    label: 'requestAnimationFrame',
+    visible: true,
     wrap: true,
   },
   {
     key: 'cancelAnimationFrame',
-    label: 'CAF History',
-    visible: false,
+    label: 'cancelAnimationFrame',
+    visible: true,
     wrap: true,
   },
   {
     key: 'requestIdleCallback',
-    label: 'RIC History',
-    visible: false,
+    label: 'requestIdleCallback',
+    visible: true,
     wrap: true,
   },
   {
     key: 'cancelIdleCallback',
-    label: 'CIC History',
-    visible: false,
+    label: 'cancelIdleCallback',
+    visible: true,
     wrap: true,
   },
 ];
 
-export enum EWrapperCallstackType {
-  FULL,
-  SHORT,
-}
 export enum ESortOrder {
   ASCENDING,
   DESCENDING,
@@ -146,7 +147,8 @@ export function panelsArray2Map(panels: TPanel[]) {
 
 export async function loadLocalStorage(): Promise<TConfig> {
   let store = await local.get([CONFIG_VERSION]);
-  const isEmpty = !Object.keys(store).length;
+  const isEmpty = !store || !store[CONFIG_VERSION] ||
+    !Object.keys(store[CONFIG_VERSION]).length;
 
   if (isEmpty) {
     await local.clear(); // reset previous version

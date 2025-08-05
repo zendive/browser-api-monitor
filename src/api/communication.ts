@@ -21,7 +21,7 @@ import type { TSession } from './storage/storage.session.ts';
 
 let port: chrome.runtime.Port | null = null;
 export function portPost(payload: TMsgOptions) {
-  if (!chrome.runtime) {
+  if (__mirror__) {
     windowPost(payload);
     return;
   }
@@ -72,7 +72,9 @@ export function runtimePost(payload: TMsgOptions) {
 }
 
 export function runtimeListen(callback: (payload: TMsgOptions) => void) {
-  if (chrome?.runtime) {
+  if (__mirror__) {
+    windowListen(callback);
+  } else {
     chrome.runtime.onMessage.addListener(
       (payload, sender: chrome.runtime.MessageSender, sendResponse) => {
         if (
@@ -83,8 +85,6 @@ export function runtimeListen(callback: (payload: TMsgOptions) => void) {
         }
       },
     );
-  } else {
-    windowListen(callback);
   }
 }
 
@@ -109,9 +109,10 @@ export enum EMsg {
   TELEMETRY_DELTA,
   TELEMETRY_ACKNOWLEDGED,
   MEDIA_COMMAND,
-  RESET_WRAPPER_HISTORY,
   TIMER_COMMAND,
   SESSION,
+  CONFIRM_INJECTION,
+  INJECTION_CONFIRMED,
 }
 
 export interface IMsgStartObserve {
@@ -119,9 +120,6 @@ export interface IMsgStartObserve {
 }
 export interface IMsgStopObserve {
   msg: EMsg.STOP_OBSERVE;
-}
-export interface IMsgResetHistory {
-  msg: EMsg.RESET_WRAPPER_HISTORY;
 }
 export interface IMsgTimerCommand {
   msg: EMsg.TIMER_COMMAND;
@@ -159,6 +157,12 @@ export interface IMsgSession {
   msg: EMsg.SESSION;
   session: TSession;
 }
+export interface IMsgConfirmInjection {
+  msg: EMsg.CONFIRM_INJECTION;
+}
+export interface IMsgInjectionConfirmed {
+  msg: EMsg.INJECTION_CONFIRMED;
+}
 export type TMsgOptions =
   | IMsgTelemetry
   | IMsgTelemetryDelta
@@ -166,8 +170,9 @@ export type TMsgOptions =
   | IMsgStartObserve
   | IMsgStopObserve
   | IMsgLoaded
-  | IMsgResetHistory
   | IMsgTimerCommand
   | IMsgConfig
   | IMsgMediaCommand
-  | IMsgSession;
+  | IMsgSession
+  | IMsgConfirmInjection
+  | IMsgInjectionConfirmed;

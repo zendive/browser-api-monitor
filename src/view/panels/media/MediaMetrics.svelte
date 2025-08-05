@@ -18,6 +18,10 @@
     });
   }
 
+  function isVariableMediaProp(label: string) {
+    return ['networkState', 'readyState'].includes(label);
+  }
+
   function propValueFilter(value: unknown) {
     if (value && typeof value === 'object') {
       return JSON.stringify(value);
@@ -68,9 +72,7 @@
                       }}
                       onclick={() => void onToggleBoolean(label)}
                     >{value}</i>
-                  {:else if ['networkState', 'readyState'].includes(
-                    label,
-                  )}
+                  {:else if isVariableMediaProp(label)}
                     <Variable {value} />
                   {:else}
                     {propValueFilter(value)}

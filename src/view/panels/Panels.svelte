@@ -9,18 +9,22 @@
   import IdleCallbackRequestHistory from './idle/IdleCallbackRequestHistory.svelte';
   import Online from './online/Online.svelte';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
+  import Worker from './worker/Worker.svelte';
+  import Scheduler from './scheduler/Scheduler.svelte';
 
   const ts = useTelemetryState();
 </script>
 
 {#if ts.telemetry}
-  <Eval evalHistory={ts.telemetry.evalHistory} />
   <Media media={ts.telemetry.media} />
+  <Worker telemetry={ts.telemetry.worker} />
+  <Scheduler telemetry={ts.telemetry.scheduler} />
+  <Eval evalHistory={ts.telemetry.evalHistory} />
   <Online onlineTimers={ts.telemetry.onlineTimers} />
 
   {#if ts.telemetry.setTimeoutHistory?.length}
     <TimersSetHistory
-      caption="setTimeout History"
+      caption="setTimeout"
       setTimerHistory={ts.telemetry.setTimeoutHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}
@@ -28,14 +32,14 @@
   {/if}
   {#if ts.telemetry.clearTimeoutHistory?.length}
     <TimersClearHistory
-      caption="clearTimeout History"
+      caption="clearTimeout"
       clearTimerHistory={ts.telemetry.clearTimeoutHistory}
     />
   {/if}
 
   {#if ts.telemetry.setIntervalHistory?.length}
     <TimersSetHistory
-      caption="setInterval History"
+      caption="setInterval"
       setTimerHistory={ts.telemetry.setIntervalHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}
@@ -43,35 +47,35 @@
   {/if}
   {#if ts.telemetry.clearIntervalHistory?.length}
     <TimersClearHistory
-      caption="clearInterval History"
+      caption="clearInterval"
       clearTimerHistory={ts.telemetry.clearIntervalHistory}
     />
   {/if}
 
   {#if ts.telemetry.rafHistory?.length}
     <AnimationRequestHistory
-      caption="requestAnimationFrame History"
+      caption="requestAnimationFrame"
       rafHistory={ts.telemetry.rafHistory}
       cafHistory={ts.telemetry.cafHistory}
     />
   {/if}
   {#if ts.telemetry.cafHistory?.length}
     <AnimationCancelHistory
-      caption="cancelAnimationFrame History"
+      caption="cancelAnimationFrame"
       cafHistory={ts.telemetry.cafHistory}
     />
   {/if}
 
   {#if ts.telemetry.ricHistory?.length}
     <IdleCallbackRequestHistory
-      caption="requestIdleCallback History"
+      caption="requestIdleCallback"
       ricHistory={ts.telemetry.ricHistory}
       cicHistory={ts.telemetry.cicHistory}
     />
   {/if}
   {#if ts.telemetry.cicHistory?.length}
     <IdleCallbackCancelHistory
-      caption="cancelIdleCallback History"
+      caption="cancelIdleCallback"
       cicHistory={ts.telemetry.cicHistory}
     />
   {/if}

@@ -23,7 +23,13 @@ Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
       windowPost({ msg: EMsg.START_OBSERVE });
     }
 
-    portListen(windowPost);
+    portListen((o) => {
+      if (o.msg === EMsg.CONFIRM_INJECTION) {
+        runtimePost({ msg: EMsg.INJECTION_CONFIRMED });
+      } else {
+        windowPost(o);
+      }
+    });
     windowListen(runtimePost);
 
     onLocalStorageChange((config) => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EWrapperCallstackType } from '../../api/storage/storage.local.ts';
+  import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
   import Alert from '../shared/Alert.svelte';
   import {
@@ -68,7 +68,8 @@
         <tr class="menu-item" class:-dash-bottom={index === 2}>
           <td class="-left">
             <a
-              href="void(0)"
+              href="."
+              role="button"
               class="toggle-visibility"
               class:hidden={!panel.visible}
               title="Toggle panel visibility"
@@ -79,7 +80,7 @@
             >{panel.label}</a>
           </td>
 
-          {#if panel.wrap !== null}
+          {#if panel.wrap !== undefined}
             <td class="-right">
               <button
                 class="btn-toggle"

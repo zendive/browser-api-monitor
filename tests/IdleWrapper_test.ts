@@ -2,17 +2,15 @@ import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import { CicFact, IdleWrapper, RicFact } from '../src/wrapper/IdleWrapper.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('IdleWrapper', () => {
-  const traceUtil = new TraceUtil();
   let apiIdle: IdleWrapper;
 
   beforeEach(() => {
-    apiIdle = new IdleWrapper(traceUtil);
+    apiIdle = new IdleWrapper();
     apiIdle.wrapRequestIdleCallback();
     apiIdle.wrapCancelIdleCallback();
   });
@@ -22,7 +20,7 @@ describe('IdleWrapper', () => {
     apiIdle.unwrapCancelIdleCallback();
   });
 
-  test('ricHistory - recorded', async () => {
+  test('rIC - recorded', async () => {
     let typeOfArgument = '';
     const handler = await new Promise((resolve) => {
       const handler = requestIdleCallback((o) => {
@@ -42,7 +40,7 @@ describe('IdleWrapper', () => {
     expect(apiIdle.callCounter.requestIdleCallback).toBe(1);
   });
 
-  test('cicHistory - recorded', () => {
+  test('cIC - recorded', () => {
     const unchanged = 0,
       changed = 1;
     let changeable = unchanged;
@@ -66,7 +64,7 @@ describe('IdleWrapper', () => {
     expect(ricRec.canceledCounter).toBe(1);
   });
 
-  test('ricHistory - invalid delay', () => {
+  test('rIC - invalid delay', () => {
     const BAD_DELAY = -1;
     const handler = requestIdleCallback(() => {}, { timeout: BAD_DELAY });
     cancelIdleCallback(handler);
@@ -77,7 +75,7 @@ describe('IdleWrapper', () => {
     expect(Fact.check(rec.facts, RicFact.BAD_DELAY)).toBe(true);
   });
 
-  test('cicHistory - invalid handler', () => {
+  test('cIC - invalid handler', () => {
     const BAD_HANDLER = 0;
     cancelIdleCallback(BAD_HANDLER);
 
@@ -87,7 +85,7 @@ describe('IdleWrapper', () => {
     expect(Fact.check(rec.facts, CicFact.BAD_HANDLER)).toBe(true);
   });
 
-  test('cicHistory - ric not found', () => {
+  test('cIC - rIC not found', () => {
     cancelIdleCallback(404);
 
     const rec = Array.from(apiIdle.cicHistory?.values())[0];

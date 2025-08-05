@@ -10,7 +10,7 @@
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import CellFrameTimeSensitive from '../shared/CellFrameTimeSensitive.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Dialog from '../../shared/Dialog.svelte';
   import Alert from '../../shared/Alert.svelte';
@@ -100,7 +100,7 @@
       <th class="w-full">
         {caption} Callstack [<Variable value={rafHistory.length} />]
       </th>
-      <th class="ta-r">
+      <th class="ta-c">
         <ColumnSortable
           field="selfTime"
           currentField={sortRequestAnimationFrame.field}
@@ -125,7 +125,7 @@
           eventChangeSorting={onChangeSort}
         >Handler</ColumnSortable>
       </th>
-      <th>
+      <th class="ta-c">
         <ColumnSortable
           field="online"
           currentField={sortRequestAnimationFrame.field}
@@ -147,7 +147,7 @@
             traceDomain={metric.traceDomain}
           />
         </td>
-        <td class="ta-r"><CellFrameTimeSensitive value={metric.selfTime} /></td>
+        <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
         <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c">
           <CellCancelable

@@ -1,12 +1,16 @@
-.PHONY: clean install dev valid test prod serve_mirror
+.PHONY: clean install dev valid test test-dev prod mirror-dev mirror-serve
 .DEFAULT_GOAL := dev
-DENO_DEV = NODE_ENV=development deno run --watch
-DENO_PROD = NODE_ENV=production deno run
-DENO_OPTIONS = --allow-env --allow-read --allow-run
-CHROME_ZIP="extension.chrome.zip"
-OUTPUT_DIR = ./public/
-BUILD_DIR = ./public/build/
-BUILD_SCRIPT = ./build.ts
+DENO_DEV := NODE_ENV=development deno run --watch
+DENO_PROD := NODE_ENV=production deno run
+DENO_OPTIONS := --allow-env --allow-read --allow-run
+VERSION != deno eval "\
+	import m from './manifest.json' with {type:'json'};\
+	console.log(m.version);\
+	"
+CHROME_ZIP := "extension.chrome-$(VERSION).zip"
+OUTPUT_DIR := ./public/
+BUILD_DIR := ./public/build/
+BUILD_SCRIPT := ./build.ts
 
 clean:
 	rm -rf ./node_modules $(BUILD_DIR) $(CHROME_ZIP)
@@ -39,7 +43,12 @@ prod: test
 
 	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
 
-serve_mirror:
+mirror-dev:
+	@echo "🎗 reminder to stop \"make dev\""
+	rm -rf $(BUILD_DIR)
+	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT) --mirror
+
+mirror-serve:
 	@echo "🎗 reminder to switch extension off"
 	@echo "served at: http://localhost:5555/mirror.html"
 	python3 -m http.server 5555 -d ./public/

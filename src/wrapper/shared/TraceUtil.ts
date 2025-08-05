@@ -1,5 +1,9 @@
 import { hashString } from '../../api/hash.ts';
-import { EWrapperCallstackType } from '../../api/storage/storage.local.ts';
+
+export enum EWrapperCallstackType {
+  FULL,
+  SHORT,
+}
 
 export type TTrace = {
   name: string | 0;
@@ -9,10 +13,16 @@ export type TCallstack = {
   traceId: string;
   trace: TTrace[];
 };
+export type TTraceable = {
+  traceId: string;
+  trace: TTrace[];
+  traceDomain: ETraceDomain;
+};
 export enum ETraceDomain {
   SAME,
   EXTERNAL,
   EXTENSION,
+  SNIPPET,
   WEBPACK,
   UNKNOWN,
 }
@@ -30,7 +40,9 @@ export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
 const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
+const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/\//);
 const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
+const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/async /);
 const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
   /http[s]?\:\/\//,
 );
@@ -62,6 +74,8 @@ export class TraceUtil {
       return ETraceDomain.EXTERNAL;
     } else if (trace.link.startsWith('chrome-extension://')) {
       return ETraceDomain.EXTENSION;
+    } else if (trace.link.startsWith('snippet:///')) {
+      return ETraceDomain.SNIPPET;
     } else if (trace.link.startsWith('webpack://')) {
       return ETraceDomain.WEBPACK;
     }
@@ -154,13 +168,16 @@ export class TraceUtil {
       return;
     }
 
-    const link = stackRow.replace(REGEX_STACKTRACE_LINK, '$2').trim();
+    const link = stackRow
+      .replace(REGEX_STACKTRACE_LINK, '$2')
+      .replace(REGEX_STACKTRACE_LINK_REMOVE, '')
+      .trim();
     if (link.indexOf('<anonymous>') >= 0) {
       return;
     }
 
     let name: string | 0 = stackRow.replace(REGEX_STACKTRACE_NAME, '$1').trim();
-    if (name === link) {
+    if (name === link || REGEX_STACKTRACE_HAS_LINK.test(name)) {
       name = 0;
     }
 

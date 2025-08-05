@@ -1,5 +1,6 @@
 import type { TWritableBooleanKeys } from './generics.ts';
 
+export function NOOP() {}
 export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
@@ -8,8 +9,6 @@ export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
 export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
 export const TIME_60FPS_SEC = 0.0166666666667; // s
 export const TIME_60FPS_MS = 16.666666666666668;
-export const VARIABLE_ANIMATION_THROTTLE = 3500; // eye blinking average frequency
-export const SELF_TIME_MAX_GOOD = 13.333333333333332; // ms
 
 // state native functions
 export const setTimeout = /*@__PURE__*/ globalThis.setTimeout.bind(globalThis);
@@ -26,6 +25,16 @@ export const requestAnimationFrame = /*@__PURE__*/ globalThis
   .requestAnimationFrame.bind(globalThis);
 export const cancelAnimationFrame = /*@__PURE__*/ globalThis
   .cancelAnimationFrame.bind(globalThis);
+export const requestIdleCallback = /*@__PURE__*/ globalThis
+  .requestIdleCallback.bind(globalThis);
+export const cancelIdleCallback = /*@__PURE__*/ globalThis
+  .cancelIdleCallback.bind(globalThis);
+export const nativeYield = /*@__PURE__*/ globalThis.scheduler.yield.bind(
+  globalThis.scheduler,
+);
+export const nativePostTask = /*@__PURE__*/ globalThis.scheduler.postTask.bind(
+  globalThis.scheduler,
+);
 
 export const TAG_DELAY_NOT_FOUND = '';
 export const TAG_BAD_DELAY = (x: unknown) => `${x}`;

@@ -6,7 +6,6 @@ import {
   TAG_BAD_HANDLER,
   TAG_DELAY_NOT_FOUND,
 } from '../src/api/const.ts';
-import { TraceUtil } from '../src/wrapper/shared/TraceUtil.ts';
 import {
   ClearTimerFact,
   SetTimerFact,
@@ -17,12 +16,11 @@ import { Fact } from '../src/wrapper/shared/Fact.ts';
 import { wait } from '../src/api/time.ts';
 
 describe('wrappers', () => {
-  const traceUtil = new TraceUtil();
-  const apiEval = new EvalWrapper(traceUtil);
+  const apiEval = new EvalWrapper();
   let apiTimer: TimerWrapper;
 
   beforeEach(() => {
-    apiTimer = new TimerWrapper(traceUtil, apiEval);
+    apiTimer = new TimerWrapper(apiEval);
     apiTimer.wrapSetTimeout();
     apiTimer.wrapClearTimeout();
     apiTimer.wrapSetInterval();
@@ -50,7 +48,7 @@ describe('wrappers', () => {
     expect(apiTimer.onlineTimers.size).toBe(0);
   });
 
-  test('setTimeoutHistory & clearTimeoutHistory - recorded', () => {
+  test('setTimeout & clearTimeout - recorded', () => {
     expect(apiTimer.setTimeoutHistory.size).toBe(0);
     expect(apiTimer.clearTimeoutHistory.size).toBe(0);
 
@@ -64,7 +62,7 @@ describe('wrappers', () => {
     expect(apiTimer.setTimeoutHistory.size).toBe(1);
   });
 
-  test('setTimeoutHistory - online/canceledByTraceId/selfTime handled after timer fired', async () => {
+  test('setTimeout - online/canceledByTraceId/selfTime handled after timer fired', async () => {
     const DELAY = 5;
     globalThis.setTimeout(() => {}, DELAY);
 
@@ -79,7 +77,7 @@ describe('wrappers', () => {
     expect(rec.selfTime).not.toBeNull();
   });
 
-  test('setTimeoutHistory - online/canceledByTraceId/selfTime handled after timer canceled', () => {
+  test('setTimeout - online/canceledByTraceId/selfTime handled after timer canceled', () => {
     function setTimeout_function(delay: number) {
       return Number(globalThis.setTimeout(() => {}, delay));
     }
@@ -115,7 +113,7 @@ describe('wrappers', () => {
     }
   });
 
-  test('setTimeoutHistory - valid delay', () => {
+  test('setTimeout - valid delay', () => {
     const DELAY = 123;
     const handler = globalThis.setTimeout(() => {}, DELAY);
     const rec = Array.from(apiTimer.setTimeoutHistory.values())[0];
@@ -131,7 +129,7 @@ describe('wrappers', () => {
     expect(rec.selfTime).toBeNull();
   });
 
-  test('setTimeoutHistory - invalid delay', () => {
+  test('setTimeout - invalid delay', () => {
     const BAD_DELAY = -1;
     globalThis.setTimeout(() => {}, BAD_DELAY);
 
@@ -168,7 +166,7 @@ describe('wrappers', () => {
     expect(recs[1].calls).toBe(2);
   }, 1e3);
 
-  test('clearTimeoutHistory - valid handler', () => {
+  test('clearTimeout - valid handler', () => {
     const handler = globalThis.setTimeout(() => {}, 1e3);
     globalThis.clearTimeout(handler);
 
@@ -180,7 +178,7 @@ describe('wrappers', () => {
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
   });
 
-  test('clearTimeoutHistory - non existent handler', () => {
+  test('clearTimeout - non existent handler', () => {
     globalThis.clearTimeout(Number.MAX_SAFE_INTEGER);
 
     const rec = Array.from(apiTimer.clearTimeoutHistory.values())[0];

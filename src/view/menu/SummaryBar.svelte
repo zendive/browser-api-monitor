@@ -12,17 +12,40 @@
 <div class="summary">
   {#if ts.telemetry && panels.callsSummary.visible}
     <SummaryBarItem
-      label="eval"
-      navSelector="Eval History"
-      panel={panels.eval}
-      count={ts.telemetry.callCounter.eval}
-    />
-
-    <SummaryBarItem
       label="Media"
       navSelector="Videos|Audios"
       panel={panels.media}
       count={ts.telemetry.media.total}
+    />
+
+    <SummaryBarItem
+      label="Worker"
+      navSelector="Worker"
+      panel={panels.worker}
+      count={ts.telemetry.worker.totalOnline}
+    />
+
+    <SummaryBarItem
+      label="s.pT"
+      tooltip="scheduler.postTask"
+      navSelector="scheduler.postTask"
+      panel={panels.scheduler}
+      count={ts.telemetry.scheduler.postTask?.length || 0}
+    />
+
+    <SummaryBarItem
+      label="s.y"
+      tooltip="scheduler.yield"
+      navSelector="scheduler.yield"
+      panel={panels.scheduler}
+      count={ts.telemetry.scheduler.yield?.length || 0}
+    />
+
+    <SummaryBarItem
+      label="eval"
+      navSelector="Eval"
+      panel={panels.eval}
+      count={ts.telemetry.callCounter.eval}
     />
 
     <SummaryBarItem
@@ -33,61 +56,65 @@
     />
 
     <SummaryBarItem
-      label="setTimeout"
-      navSelector="setTimeout History"
+      label="sT"
+      tooltip="setTimeout"
+      navSelector="setTimeout"
       panel={panels.setTimeout}
       count={ts.telemetry.callCounter.setTimeout}
     />
 
     <SummaryBarItem
-      label="clearTimeout"
-      navSelector="clearTimeout History"
+      label="cT"
+      tooltip="clearTimeout"
+      navSelector="clearTimeout"
       panel={panels.clearTimeout}
       count={ts.telemetry.callCounter.clearTimeout}
     />
 
     <SummaryBarItem
-      label="setInterval"
-      navSelector="setInterval History"
+      label="sI"
+      tooltip="setInterval"
+      navSelector="setInterval"
       panel={panels.setInterval}
       count={ts.telemetry.callCounter.setInterval}
     />
 
     <SummaryBarItem
-      label="clearInterval"
-      navSelector="clearInterval History"
+      label="cI"
+      tooltip="clearInterval"
+      navSelector="clearInterval"
       panel={panels.clearInterval}
       count={ts.telemetry.callCounter.clearInterval}
     />
 
     <SummaryBarItem
-      label="RAF"
+      label="rAF"
       tooltip="requestAnimationFrame"
-      navSelector="requestAnimationFrame History"
+      navSelector="requestAnimationFrame"
       panel={panels.requestAnimationFrame}
       count={ts.telemetry.callCounter.requestAnimationFrame}
     />
 
     <SummaryBarItem
-      label="CAF"
+      label="cAF"
       tooltip="cancelAnimationFrame"
-      navSelector="cancelAnimationFrame History"
+      navSelector="cancelAnimationFrame"
       panel={panels.cancelAnimationFrame}
       count={ts.telemetry.callCounter.cancelAnimationFrame}
     />
 
     <SummaryBarItem
-      label="RIC"
+      label="rIC"
       tooltip="requestIdleCallback"
-      navSelector="requestIdleCallback History"
+      navSelector="requestIdleCallback"
       panel={panels.requestIdleCallback}
       count={ts.telemetry.callCounter.requestIdleCallback}
     />
 
     <SummaryBarItem
-      label="CIC"
+      label="cIC"
       tooltip="cancelIdleCallback"
-      navSelector="cancelIdleCallback History"
+      navSelector="cancelIdleCallback"
       panel={panels.cancelIdleCallback}
       count={ts.telemetry.callCounter.cancelIdleCallback}
     />

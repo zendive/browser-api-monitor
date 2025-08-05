@@ -19,7 +19,7 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
           portPost({ msg: EMsg.START_OBSERVE });
         }
         if (config.keepAwake) {
-          chrome.power.requestKeepAwake('display');
+          chrome.power?.requestKeepAwake('display');
         }
         await saveLocalStorage({ devtoolsPanelShown: true });
       });

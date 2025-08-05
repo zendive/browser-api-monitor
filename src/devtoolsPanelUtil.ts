@@ -8,7 +8,7 @@ import { saveLocalStorage } from './api/storage/storage.local.ts';
 import { ms2HMS } from './api/time.ts';
 
 export async function onHidePanel() {
-  chrome.power.releaseKeepAwake();
+  chrome.power?.releaseKeepAwake();
   portPost({ msg: EMsg.STOP_OBSERVE });
   await saveLocalStorage({ devtoolsPanelShown: false });
 }

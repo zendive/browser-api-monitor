@@ -5,19 +5,15 @@ import {
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
 import {
-  ETraceDomain,
   type TCallstack,
   TraceUtil,
-  type TTrace,
+  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
-import { validHandler } from './shared/util.ts';
+import { traceUtil, validHandler } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
-export type TRequestAnimationFrameHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TRequestAnimationFrameHistory = TTraceable & {
   calls: number;
   handler: number | undefined | string;
   selfTime: number | null;
@@ -26,10 +22,7 @@ export type TRequestAnimationFrameHistory = {
   canceledByTraceIds: string[] | null;
   cps: number;
 };
-export type TCancelAnimationFrameHistory = {
-  traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
+export type TCancelAnimationFrameHistory = TTraceable & {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
@@ -49,12 +42,11 @@ export const CafFacts = /*@__PURE__*/ (() =>
   ]))();
 
 export class AnimationWrapper {
-  traceUtil: TraceUtil;
   native = {
     requestAnimationFrame: requestAnimationFrame,
     cancelAnimationFrame: cancelAnimationFrame,
   };
-  animationCallsMap = new Map</*traceId*/ string, /*calls*/ number>();
+  #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
   onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
   rafHistory: Map</*traceId*/ string, TRequestAnimationFrameHistory> =
@@ -65,8 +57,7 @@ export class AnimationWrapper {
     cancelAnimationFrame: 0,
   };
 
-  constructor(traceUtil: TraceUtil) {
-    this.traceUtil = traceUtil;
+  constructor() {
   }
 
   #updateRafHistory(handler: number, callstack: TCallstack) {
@@ -80,7 +71,7 @@ export class AnimationWrapper {
       this.rafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         calls: 1,
         handler,
         online: 1,
@@ -137,7 +128,7 @@ export class AnimationWrapper {
       this.cafHistory.set(callstack.traceId, {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: this.traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
         facts,
         calls: 1,
         handler,
@@ -157,12 +148,14 @@ export class AnimationWrapper {
     }
   }
 
-  updateAnimationsFramerate() {
+  updateCallsPerSecond(panel: TPanel) {
+    if (!panel.wrap || !panel.visible) return;
+
     for (const [, rafRecord] of this.rafHistory) {
-      const prevCalls = this.animationCallsMap.get(rafRecord.traceId) || 0;
+      const prevCalls = this.#callsMap.get(rafRecord.traceId) || 0;
       rafRecord.cps = rafRecord.calls - prevCalls;
 
-      this.animationCallsMap.set(rafRecord.traceId, rafRecord.calls);
+      this.#callsMap.set(rafRecord.traceId, rafRecord.calls);
     }
   }
 
@@ -172,15 +165,15 @@ export class AnimationWrapper {
       fn: FrameRequestCallback,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.getCallstack(err, fn);
+      const callstack = traceUtil.getCallstack(err, fn);
 
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
         const start = performance.now();
         let selfTime = null;
 
-        if (this.traceUtil.shouldPass(callstack.traceId)) {
-          if (this.traceUtil.shouldPause(callstack.traceId)) {
+        if (traceUtil.shouldPass(callstack.traceId)) {
+          if (traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(...args);
@@ -201,13 +194,13 @@ export class AnimationWrapper {
       handler: number,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = this.traceUtil.getCallstack(err);
+      const callstack = traceUtil.getCallstack(err);
 
       this.#updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
 
-      if (this.traceUtil.shouldPass(callstack.traceId)) {
-        if (this.traceUtil.shouldPause(callstack.traceId)) {
+      if (traceUtil.shouldPass(callstack.traceId)) {
+        if (traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelAnimationFrame(handler);
@@ -232,15 +225,5 @@ export class AnimationWrapper {
         ? Array.from(this.cafHistory.values())
         : null,
     };
-  }
-
-  cleanHistory() {
-    this.rafHistory.clear();
-    this.cafHistory.clear();
-    this.onlineAnimationFrameLookup.clear();
-    this.animationCallsMap.clear();
-
-    this.callCounter.requestAnimationFrame = 0;
-    this.callCounter.cancelAnimationFrame = 0;
   }
 }

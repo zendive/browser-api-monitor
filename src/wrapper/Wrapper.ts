@@ -1,8 +1,6 @@
 import { callableOnce } from '../api/time.ts';
-import { TraceUtil } from './shared/TraceUtil.ts';
 import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
 import {
-  EWrapperCallstackType,
   panelsArray2Map,
   type TConfig,
   type TPanelMap,
@@ -25,6 +23,18 @@ import {
 } from './IdleWrapper.ts';
 import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
 import type { TSession } from '../api/storage/storage.session.ts';
+import {
+  collectWorkerHistory,
+  type IWorkerTelemetry,
+  updateWorkerCallsPerSecond,
+  wrapWorker,
+} from './WorkerWrapper.ts';
+import { traceUtil } from './shared/util.ts';
+import {
+  type ISchedulerTelemetry,
+  SchedulerWrapper,
+} from './SchedulerWrapper.ts';
+import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
 
 export type TTelemetry = {
   media: TMediaTelemetry;
@@ -39,6 +49,8 @@ export type TTelemetry = {
   ricHistory: TRequestIdleCallbackHistory[] | null;
   cicHistory: TCancelIdleCallbackHistory[] | null;
   activeTimers: number;
+  worker: IWorkerTelemetry;
+  scheduler: ISchedulerTelemetry;
   callCounter: {
     setTimeout: number;
     clearTimeout: number;
@@ -53,12 +65,12 @@ export type TTelemetry = {
 };
 
 let panels: TPanelMap;
-const traceUtil = new TraceUtil();
 const apiMedia = new MediaWrapper();
-const apiEval = new EvalWrapper(traceUtil);
-const apiTimer = new TimerWrapper(traceUtil, apiEval);
-const apiAnimation = new AnimationWrapper(traceUtil);
-const apiIdle = new IdleWrapper(traceUtil);
+const apiEval = new EvalWrapper();
+const apiTimer = new TimerWrapper(apiEval);
+const apiAnimation = new AnimationWrapper();
+const apiIdle = new IdleWrapper();
+const apiScheduler = new SchedulerWrapper();
 
 const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
   traceUtil.callstackType = type;
@@ -74,6 +86,11 @@ const wrapApis = callableOnce(() => {
   panels.cancelAnimationFrame.wrap && apiAnimation.wrapCancelAnimationFrame();
   panels.requestIdleCallback.wrap && apiIdle.wrapRequestIdleCallback();
   panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
+  panels.worker.wrap && wrapWorker();
+  if (panels.scheduler.wrap) {
+    apiScheduler.wrapYield();
+    apiScheduler.wrapPostTask();
+  }
 });
 
 export function applyConfig(config: TConfig) {
@@ -88,18 +105,16 @@ export function applySession(session: TSession) {
 }
 
 export function onEachSecond() {
-  apiMedia.meetMedia();
-  if (
-    panels.requestAnimationFrame.wrap &&
-    panels.requestAnimationFrame.visible
-  ) {
-    apiAnimation.updateAnimationsFramerate();
-  }
+  apiMedia.meetMedia(panels.media);
+  apiAnimation.updateCallsPerSecond(panels.requestAnimationFrame);
+  apiIdle.updateCallsPerSecond(panels.requestIdleCallback);
+  updateWorkerCallsPerSecond(panels.worker);
+  apiScheduler.updateCallsPerSecond(panels.scheduler);
 }
 
 export function collectMetrics(): TTelemetry {
   return {
-    media: apiMedia.collectMetrics(panels.media.visible),
+    media: apiMedia.collectMetrics(panels.media),
     evalHistory: apiEval.collectHistory(panels.eval),
     ...apiTimer.collectHistory(
       panels.activeTimers,
@@ -117,6 +132,8 @@ export function collectMetrics(): TTelemetry {
       panels.cancelIdleCallback,
     ),
     activeTimers: apiTimer.onlineTimers.size,
+    worker: collectWorkerHistory(panels.worker),
+    scheduler: apiScheduler.collectHistory(panels.scheduler),
     callCounter: panels.callsSummary.visible
       ? {
         eval: apiEval.callCounter,
@@ -148,11 +165,4 @@ export function runTimerCommand(
   ...args: Parameters<TimerWrapper['runCommand']>
 ) {
   apiTimer.runCommand(...args);
-}
-
-export function cleanHistory() {
-  apiEval.cleanHistory();
-  apiTimer.cleanHistory();
-  apiAnimation.cleanHistory();
-  apiIdle.cleanHistory();
 }

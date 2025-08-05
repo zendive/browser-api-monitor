@@ -17,9 +17,9 @@
 <Variable value={calls} />
 {#if canceledCounter}
   <a
+    href="."
     role="button"
-    href="void(0)"
-    title="<called> [<aborted>/<abort-locations>]"
+    title="&lt;called&gt; [&lt;aborted&gt;/&lt;abort-locations&gt;]"
     onclick={(e) => {
       e.preventDefault();
       onClick(canceledByTraceIds);
