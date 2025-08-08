@@ -19,6 +19,8 @@
   const eachSecond = new Timer(
     { type: ETimer.TIMEOUT, timeout: 1e3 },
     () => {
+      eachSecond.start();
+
       if (!mean.samples) {
         return;
       }
@@ -28,7 +30,6 @@
       vs.max = mean.max;
 
       mean.reset();
-      eachSecond.start();
     },
   );
 

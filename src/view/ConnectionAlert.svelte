@@ -19,11 +19,11 @@
   const extensionUpdateSensor = new Timer(
     { type: ETimer.TIMEOUT, timeout: UPDATE_SENSOR_INTERVAL },
     () => {
+      extensionUpdateSensor.start();
       whenUpdateDetected(() => {
         devtoolsReloadAlertEl?.show();
         extensionUpdateSensor.stop();
       });
-      extensionUpdateSensor.start();
     },
   );
 

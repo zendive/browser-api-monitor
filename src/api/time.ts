@@ -281,10 +281,10 @@ export class Fps {
 
   constructor(callback?: (value: number) => void) {
     this.#eachSecond = new Timer({ type: ETimer.TIMEOUT, timeout: 1e3 }, () => {
+      this.#eachSecond.start();
       this.value = this.#ticks;
       this.#ticks = 0;
       callback?.(this.value);
-      this.#eachSecond.start();
     });
   }
 

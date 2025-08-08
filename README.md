@@ -32,7 +32,6 @@ To assess Web Application implementation correctness and expedite issues discove
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
 
 - Count calls per second (CPS) when applicable.
-  - If requested recursively - it reflects animation FPS.
 
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
   - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
