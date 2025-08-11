@@ -17,8 +17,8 @@ let currentMetrics: TTelemetry | null;
 const eachSecond = new Timer(
   { type: ETimer.TIMEOUT, timeout: 1e3 },
   function apiMonitorEachSecond() {
-    onEachSecond();
     eachSecond.start();
+    onEachSecond();
   },
 );
 const tick = new Timer({
