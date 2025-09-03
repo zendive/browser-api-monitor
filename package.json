@@ -1,13 +1,13 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/chrome": "0.1.1",
+    "@types/chrome": "0.1.4",
     "@types/deno": "2.3.0",
-    "sass": "1.89.2",
-    "sv": "0.8.19",
-    "svelte": "5.36.16",
-    "svelte-check": "4.3.0",
-    "typescript": "5.8.3"
+    "sass": "1.92.0",
+    "sv": "0.9.2",
+    "svelte": "5.38.6",
+    "svelte-check": "4.3.1",
+    "typescript": "5.9.2"
   },
   "dependencies": {
     "@noble/hashes": "2.0.0",
