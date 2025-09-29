@@ -328,7 +328,7 @@ function toPaddedString(value: number, padding: number) {
 
 const TICK_TIME_LAG_SCALAR = 3;
 export function adjustTelemetryDelay(timeOfCollection: number) {
-  const timeLag = Date.now() - timeOfCollection;
+  const timeLag = performance.now() - timeOfCollection;
   const newDelay = timeLag * TICK_TIME_LAG_SCALAR;
 
   return Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);

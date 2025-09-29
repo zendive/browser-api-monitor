@@ -17,7 +17,8 @@
 
 - `setTimeout`, `setInterval` are used to animate instead of `requestAnimationFrame`.
 
-- Observed on multiple sites `setTimeout` with dynamically computed delay value, ends to be called with `NaN`, `-Infinity`, `-31`...
+- Dynamically computed timeout argument evaluates to `NaN`, `-Infinity`, `-31`...
+  - See also usage of [`Date.now()` vs `performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now#performance.now_vs._date.now) for computation of elapsed time, resistant to Daylight Saving Time.
 
 - Hidden UI feature runs its logic in the background.
   - Indirectly, discovered from the bursts of short timeouts, fired from `ResizeObserver` handler of invisible feature that appears to be: or for a power user only, or just partially deprecated.

@@ -26,7 +26,7 @@ const tick = new Timer({
   priority: 'background',
   timeout: TELEMETRY_FREQUENCY_1PS,
 }, function apiMonitorTelemetryTick() {
-  const now = Date.now();
+  const now = performance.now();
   currentMetrics = structuredClone(collectMetrics());
 
   if (!originalMetrics) {

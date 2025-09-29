@@ -7,7 +7,7 @@
   let isEven = $derived.by(() =>
     typeof value === 'number' ? !(value & 1) : false
   );
-  let lastUpdated: number = Date.now();
+  let lastUpdated: number = performance.now();
   const stopAnimate = new Timer(
     { type: ETimer.TIMEOUT, timeout: 100 },
     () => (isAnimated = false),
@@ -17,14 +17,14 @@
     return {
       update(_value: unknown) {
         const startAnimation =
-          Date.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
+            performance.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
 
         if (startAnimation) {
           isAnimated = true;
           stopAnimate.start();
         }
 
-        lastUpdated = Date.now();
+        lastUpdated = performance.now();
       },
 
       destroy() {

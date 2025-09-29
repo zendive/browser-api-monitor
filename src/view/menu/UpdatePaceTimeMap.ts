@@ -50,7 +50,7 @@ export function updateAnimation(timeOfCollection: number) {
   const timePoint = vector.atBase(pCenter);
 
   queue.unshift({
-    whenAdded: Date.now(),
+    whenAdded: performance.now(),
     age: 0,
     timePoint,
     vector: vector.rotateBack(),
@@ -107,7 +107,7 @@ function drawGrid() {
 }
 
 function drawLine(e: IEvent) {
-  e.age = Date.now() - e.whenAdded;
+  e.age = performance.now() - e.whenAdded;
   const alpha = 20 + Math.min(80, 100 * (e.age / ANIMATION_DURATION));
   const length = R - e.age * ANIMATION_DELTA_PX;
   const p = e.vector.setLength(length).atBase(e.timePoint);
