@@ -164,19 +164,19 @@ export class SchedulerWrapper {
   updateCallsPerSecond(panel: TPanel) {
     if (!panel.wrap || !panel.visible) return;
 
-    for (const [_, methodMetric] of this.#yieldMap) {
+    this.#yieldMap.forEach((methodMetric) => {
       const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.cps = methodMetric.calls - prevCalls;
       this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
-    }
+    });
 
-    for (const [_, methodMetric] of this.#postTaskMap) {
+    this.#postTaskMap.forEach((methodMetric) => {
       const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.calls - prevCalls;
       this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
-    }
+    });
   }
 
   collectHistory(panel: TPanel): ISchedulerTelemetry {

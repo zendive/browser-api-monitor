@@ -86,8 +86,8 @@ function draw() {
   if (need2draw) {
     drawGrid();
 
-    for (const e of queue) {
-      drawLine(e);
+    for (let n = 0; n < queue.length; n++) {
+      drawLine(queue[n]);
     }
 
     deprecateEvents(queue);

@@ -34,9 +34,9 @@ export class Fact {
   static getDetails(factsMap: TFactsMap): string {
     const rv: string[] = [];
 
-    for (const [_fact, descriptor] of factsMap) {
+    factsMap.forEach((descriptor) => {
       rv.push(`${descriptor.tag}: ${descriptor.details}`);
-    }
+    });
 
     return rv.join('\n');
   }
@@ -44,11 +44,11 @@ export class Fact {
   static getTags(data: number, factsMap: TFactsMap): string {
     let rv = '';
 
-    for (const [fact, descriptor] of factsMap) {
+    factsMap.forEach((descriptor, fact) => {
       if (Fact.check(data, fact)) {
         rv += descriptor.tag;
       }
-    }
+    });
 
     return rv;
   }

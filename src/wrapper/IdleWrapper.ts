@@ -192,12 +192,12 @@ export class IdleWrapper {
   updateCallsPerSecond(panel: TPanel) {
     if (!panel.wrap || !panel.visible) return;
 
-    for (const [, ricRecord] of this.ricHistory) {
+    this.ricHistory.forEach((ricRecord) => {
       const prevCalls = this.#callsMap.get(ricRecord.traceId) || 0;
       ricRecord.cps = ricRecord.calls - prevCalls;
 
       this.#callsMap.set(ricRecord.traceId, ricRecord.calls);
-    }
+    });
   }
 
   wrapRequestIdleCallback() {

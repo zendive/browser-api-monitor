@@ -444,35 +444,35 @@ export class ApiMonitorWorkerWrapper extends Worker {
 export function updateWorkerCallsPerSecond(panel: TPanel) {
   if (!panel.wrap || !panel.visible) return;
 
-  for (const [_, workerMetric] of workerMap) {
-    for (const [_, methodMetric] of workerMetric.postMessage) {
+  workerMap.forEach((workerMetric) => {
+    workerMetric.postMessage.forEach((methodMetric) => {
       const prevCalls = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.cps = methodMetric.calls - prevCalls;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.calls);
-    }
+    });
 
-    for (const [_, methodMetric] of workerMetric.onmessage) {
+    workerMetric.onmessage.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
-    }
+    });
 
-    for (const [_, methodMetric] of workerMetric.onerror) {
+    workerMetric.onerror.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
-    }
+    });
 
-    for (const [_, methodMetric] of workerMetric.ael) {
+    workerMetric.ael.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
       methodMetric.eventsCps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
-    }
-  }
+    });
+  });
 }
 
 export function wrapWorker() {
@@ -486,12 +486,9 @@ export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
     collection: [],
   };
 
-  for (const [_, metric] of workerMap) {
-    rv.totalOnline += metric.online;
-  }
-
   if (panel.visible) {
-    for (const [_, metric] of workerMap) {
+    workerMap.forEach((metric) => {
+      rv.totalOnline += metric.online;
       rv.collection.push({
         specifier: metric.specifier,
         online: metric.online,
@@ -504,7 +501,11 @@ export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
         ael: Array.from(metric.ael.values()),
         rel: Array.from(metric.rel.values()),
       });
-    }
+    });
+  } else {
+    workerMap.forEach((metric) => {
+      rv.totalOnline += metric.online;
+    });
   }
 
   return rv;

@@ -151,12 +151,12 @@ export class AnimationWrapper {
   updateCallsPerSecond(panel: TPanel) {
     if (!panel.wrap || !panel.visible) return;
 
-    for (const [, rafRecord] of this.rafHistory) {
+    this.rafHistory.forEach((rafRecord) => {
       const prevCalls = this.#callsMap.get(rafRecord.traceId) || 0;
       rafRecord.cps = rafRecord.calls - prevCalls;
 
       this.#callsMap.set(rafRecord.traceId, rafRecord.calls);
-    }
+    });
   }
 
   wrapRequestAnimationFrame() {
