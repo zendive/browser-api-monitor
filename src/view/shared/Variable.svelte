@@ -17,7 +17,7 @@
     return {
       update(_value: unknown) {
         const startAnimation =
-            performance.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
+          performance.now() - lastUpdated > VARIABLE_ANIMATION_THROTTLE;
 
         if (startAnimation) {
           isAnimated = true;
