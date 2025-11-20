@@ -1,10 +1,10 @@
 <script lang="ts">
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
 
-  const tm = useTelemetryState();
+  const ts = useTelemetryState();
 
   function dump() {
-    console.log(tm.telemetry);
+    console.log(ts.telemetry);
   }
 </script>
 

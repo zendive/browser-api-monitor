@@ -38,7 +38,7 @@ To assess Web Application implementation correctness and expedite issues discove
 
 - Monitor Worker's methods and event handlers metrics.
   - Warn if number of active workers exceeds number of available CPU cores.
-    - keep in mind: thia extension can't wrap `self.close()` in worker global context (only `terminate()` in top context)
+    - keep in mind: this extension can't wrap `self.close()` in worker global context (only `terminate()` in top context)
   - Detect anomalies:
     - attempt to add already added listener with `addEventListener`.
     - attempt to remove unknown listener with `removeEventListener`.
