@@ -14,7 +14,7 @@
   import CellCancelable from '../shared/CellCancelable.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import { delayTooltip } from '../../../devtoolsPanelUtil.ts';
+  import { delayTooltip } from '../../shared/util.ts';
 
   let {
     metric,

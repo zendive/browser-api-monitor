@@ -6,13 +6,11 @@
   let canvasEl: HTMLCanvasElement | null = null;
   const ts = useTelemetryState();
 
-  onMount(() => {
-    const ctx = canvasEl && canvasEl.getContext('2d');
+  $effect(() => void updateAnimation(ts.timeOfCollection));
 
-    if (ctx) {
-      ts.timeOfCollection.subscribe(updateAnimation);
-      return startAnimation(ctx);
-    }
+  onMount(() => {
+    const ctx = canvasEl!.getContext('2d');
+    return startAnimation(ctx!);
   });
 </script>
 

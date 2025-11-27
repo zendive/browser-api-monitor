@@ -3,7 +3,7 @@
     type IPostTask,
     PostTaskFacts,
   } from '../../../wrapper/SchedulerWrapper.ts';
-  import { delayTooltip } from '../../../devtoolsPanelUtil.ts';
+  import { delayTooltip } from '../../shared/util.ts';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';

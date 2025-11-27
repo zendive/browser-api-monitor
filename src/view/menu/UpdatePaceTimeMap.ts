@@ -1,5 +1,5 @@
 import { deg2rad, PI2, Point, Vector } from '../shared/canvas.ts';
-import { onColourSchemeChange } from '../../devtoolsPanelUtil.ts';
+import { onColourSchemeChange } from '../shared/theme.ts';
 
 interface IEvent {
   whenAdded: number;
@@ -48,12 +48,13 @@ export function updateAnimation(timeOfCollection: number) {
     // rotate left to adjust zero angle to point at {0,-1} (north)
     .rotateLeft();
   const timePoint = vector.atBase(pCenter);
+  const vector2base = vector.rotateBack();
 
   queue.unshift({
     whenAdded: performance.now(),
     age: 0,
     timePoint,
-    vector: vector.rotateBack(),
+    vector: vector2base,
   });
 }
 

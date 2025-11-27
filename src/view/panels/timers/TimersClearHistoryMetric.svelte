@@ -8,7 +8,7 @@
   import CellBypass from '../shared/CellBypass.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import { delayTooltip } from '../../../devtoolsPanelUtil.ts';
+  import { delayTooltip } from '../../shared/util.ts';
 
   let { metric }: { metric: TClearTimerHistory } = $props();
 </script>

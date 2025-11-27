@@ -3,7 +3,7 @@
   import { EMsg, portPost } from '../../../api/communication.ts';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import { delayTooltip } from '../../../devtoolsPanelUtil.ts';
+  import { delayTooltip } from '../../shared/util.ts';
 
   let {
     metrics,

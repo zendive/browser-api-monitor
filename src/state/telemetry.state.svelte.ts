@@ -7,11 +7,11 @@ import {
   windowPost,
 } from '../api/communication.ts';
 import diff from '../api/diff.ts';
-import { type Writable, writable } from 'svelte/store';
 
 class TelemetryState {
   telemetry: TTelemetry | null = $state.raw(null);
-  timeOfCollection: Writable<number> = writable(0);
+  timeOfCollection: number = $state(0);
+  telemetrySize: number = $state(0);
 }
 const state = new TelemetryState();
 let telemetryProgressive: TTelemetry | null = null;
@@ -26,10 +26,18 @@ export function establishTelemetryReceiver() {
       telemetryProgressive = structuredClone(o.telemetry);
       state.telemetry = o.telemetry;
       acknowledgeTelemetry(o.timeOfCollection);
+
+      if (__development__) {
+        state.telemetrySize = objectInJsonLength(o.telemetry);
+      }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
       diff.patch(telemetryProgressive, o.telemetryDelta);
       state.telemetry = structuredClone(telemetryProgressive);
       acknowledgeTelemetry(o.timeOfCollection);
+
+      if (__development__) {
+        state.telemetrySize = objectInJsonLength(o.telemetryDelta);
+      }
     }
   });
 }
@@ -40,7 +48,7 @@ function acknowledgeTelemetry(timeOfCollection: number) {
     timeOfCollection,
   });
 
-  state.timeOfCollection.set(timeOfCollection);
+  state.timeOfCollection = timeOfCollection;
 }
 
 export function establishTelemetryReceiverMirror() {
@@ -49,10 +57,18 @@ export function establishTelemetryReceiverMirror() {
       telemetryProgressive = structuredClone(o.telemetry);
       state.telemetry = o.telemetry;
       acknowledgeTelemetryMirror(o.timeOfCollection);
+
+      if (__development__) {
+        state.telemetrySize = objectInJsonLength(o.telemetry);
+      }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
       diff.patch(telemetryProgressive, o.telemetryDelta);
       state.telemetry = structuredClone(telemetryProgressive);
       acknowledgeTelemetryMirror(o.timeOfCollection);
+
+      if (__development__) {
+        state.telemetrySize = objectInJsonLength(o.telemetryDelta);
+      }
     }
   });
 }
@@ -63,5 +79,9 @@ function acknowledgeTelemetryMirror(timeOfCollection: number) {
     timeOfCollection,
   });
 
-  state.timeOfCollection.set(timeOfCollection);
+  state.timeOfCollection = timeOfCollection;
+}
+
+function objectInJsonLength(obj: unknown): number {
+  return JSON.stringify(obj || {}).length;
 }

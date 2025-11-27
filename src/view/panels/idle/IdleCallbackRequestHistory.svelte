@@ -21,7 +21,7 @@
   import CellFacts from '../shared/CellFacts.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { delayTooltip } from '../../../devtoolsPanelUtil.ts';
+  import { delayTooltip } from '../../shared/util.ts';
 
   let {
     ricHistory,

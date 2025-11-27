@@ -6,6 +6,7 @@
   import TogglePause from './TogglePause.svelte';
   import UpdatePace from './UpdatePace.svelte';
   import DevDumpTelemetry from './DevDumpTelemetry.svelte';
+  import DevStats from './DevStats.svelte';
 </script>
 
 <TogglePanels />
@@ -20,6 +21,10 @@
 {/if}
 <SummaryBar />
 <div class="divider"></div>
+{#if __development__}
+  <DevStats />
+  <div class="divider"></div>
+{/if}
 <UpdatePace />
 <div class="divider"></div>
 <Version />
