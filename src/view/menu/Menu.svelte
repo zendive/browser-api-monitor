@@ -1,5 +1,4 @@
 <script lang="ts">
-  import SummaryBar from './SummaryBar.svelte';
   import Version from './Version.svelte';
   import TogglePanels from './TogglePanels.svelte';
   import DevReload from './DevReload.svelte';
@@ -9,23 +8,38 @@
   import DevStats from './DevStats.svelte';
 </script>
 
-<TogglePanels />
-<div class="divider -thin"></div>
-<TogglePause />
-<div class="divider -thin"></div>
-{#if __development__}
-  <DevReload />
+<div class="menu">
+  <TogglePanels />
   <div class="divider -thin"></div>
-  <DevDumpTelemetry />
+  <TogglePause />
   <div class="divider -thin"></div>
-{/if}
-<SummaryBar />
-<div class="divider"></div>
-{#if __development__}
-  <DevStats />
+  {#if __development__}
+    <DevReload />
+    <div class="divider -thin"></div>
+    <DevDumpTelemetry />
+    <div class="divider -thin"></div>
+  {/if}
+  <div class="-spring"></div>
   <div class="divider"></div>
-{/if}
-<UpdatePace />
-<div class="divider"></div>
-<Version />
-<div class="divider -anchor-right"></div>
+  {#if __development__}
+    <DevStats />
+    <div class="divider"></div>
+  {/if}
+  <UpdatePace />
+  <div class="divider"></div>
+  <Version />
+  <div class="divider -anchor-right"></div>
+</div>
+
+<style lang="scss">
+  .menu {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    height: 1.5rem;
+
+    .-spring {
+      flex-grow: 1;
+    }
+  }
+</style>

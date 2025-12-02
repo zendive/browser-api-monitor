@@ -9,8 +9,8 @@
   let panels = $derived.by(() => panelsArray2Map(config.panels));
 </script>
 
-<div class="summary">
-  {#if ts.telemetry && panels.callsSummary.visible}
+{#if ts.telemetry && panels.callsSummary.visible}
+  <nav class="summary">
     <SummaryBarItem
       label="Media"
       navSelector="Videos|Audios"
@@ -118,8 +118,8 @@
       panel={panels.cancelIdleCallback}
       count={ts.telemetry.callCounter.cancelIdleCallback}
     />
-  {/if}
-</div>
+  </nav>
+{/if}
 
 <style lang="scss">
   .summary {
@@ -127,5 +127,6 @@
     flex-wrap: wrap;
     flex-grow: 1;
     align-items: center;
+    border-bottom: 1px solid var(--border);
   }
 </style>

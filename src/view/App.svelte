@@ -1,6 +1,7 @@
 <script lang="ts">
   import Panels from './panels/Panels.svelte';
   import Menu from './menu/Menu.svelte';
+  import SummaryBar from './menu/SummaryBar.svelte';
   import { SCROLLABLE_CLASSNAME } from './shared/const.ts';
   import ConnectionAlert from './ConnectionAlert.svelte';
 </script>
@@ -8,6 +9,7 @@
 <section>
   <header>
     <Menu />
+    <SummaryBar />
   </header>
   <main class={SCROLLABLE_CLASSNAME}>
     <Panels />
@@ -23,10 +25,6 @@
     height: 100%;
 
     header {
-      display: flex;
-      align-items: center;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
       user-select: none;
     }
 
