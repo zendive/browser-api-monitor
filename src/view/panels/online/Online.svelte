@@ -8,30 +8,16 @@
 
   let { onlineTimers }: { onlineTimers: TOnlineTimerMetrics[] | null } =
     $props();
-  let {
-    timeouts,
-    intervals,
-  }: {
-    timeouts: TOnlineTimerMetrics[];
-    intervals: TOnlineTimerMetrics[];
-  } = $derived.by(() => {
-    const timeouts: TOnlineTimerMetrics[] = [];
-    const intervals: TOnlineTimerMetrics[] = [];
-
-    if (onlineTimers?.length) {
-      onlineTimers.sort(compareByDelayThenHandlerDescending);
-
-      for (const timer of onlineTimers) {
-        if (timer.type === ETimerType.TIMEOUT) {
-          timeouts.push(timer);
-        } else {
-          intervals.push(timer);
-        }
-      }
-    }
-
-    return { timeouts, intervals };
-  });
+  let timeouts = $derived.by(() =>
+    (onlineTimers || []).filter((o) => o.type === ETimerType.TIMEOUT).sort(
+      compareByDelayThenHandlerDescending,
+    )
+  );
+  let intervals = $derived.by(() =>
+    (onlineTimers || []).filter((o) => o.type === ETimerType.INTERVAL).sort(
+      compareByDelayThenHandlerDescending,
+    )
+  );
 </script>
 
 {#if intervals.length}
