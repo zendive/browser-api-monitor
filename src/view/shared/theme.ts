@@ -5,6 +5,9 @@ export function onColourSchemeChange(
 ) {
   const devtoolsScheme = chrome?.devtools?.panels.themeName;
   const osDarkScheme = globalThis.matchMedia('(prefers-color-scheme: dark)');
+  const onChange = function (e: MediaQueryListEvent) {
+    callback(e.matches ? 'dark' : 'light');
+  };
 
   if (devtoolsScheme === 'dark' || osDarkScheme.matches) {
     callback('dark');
@@ -12,7 +15,9 @@ export function onColourSchemeChange(
     callback('light');
   }
 
-  osDarkScheme.addEventListener('change', (e: MediaQueryListEvent) => {
-    callback(e.matches ? 'dark' : 'light');
-  });
+  osDarkScheme.addEventListener('change', onChange);
+
+  return function offColourSchemeChange() {
+    osDarkScheme.removeEventListener('change', onChange);
+  };
 }

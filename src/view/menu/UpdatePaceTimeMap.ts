@@ -1,5 +1,6 @@
 import { deg2rad, PI2, Point, Vector } from '../shared/canvas.ts';
 import { onColourSchemeChange } from '../shared/theme.ts';
+import { ETimer, Timer } from '../../api/time.ts';
 
 interface IEvent {
   whenAdded: number;
@@ -8,7 +9,6 @@ interface IEvent {
   vector: Vector;
 }
 
-let raf: number | void = 0;
 let ctx: CanvasRenderingContext2D;
 const R = 20;
 const D = 2 * R;
@@ -22,23 +22,45 @@ const ANIMATION_DELTA_PX = R / ANIMATION_DURATION;
 let rgbPrimary = BLACK;
 let rgbShadow = WHITE;
 const queue: IEvent[] = [];
+const animation = new Timer({ type: ETimer.ANIMATION }, () => {
+  drawGrid();
 
-function rgb(r: number, g: number, b: number) {
-  return function alpha(a?: number) {
-    a ??= 100;
-    return `rgb(${r}% ${g}% ${b}% / ${a}%)`;
-  };
-}
+  if (!queue.length) {
+    return;
+  }
+
+  for (let n = 0; n < queue.length; n++) {
+    drawLine(queue[n]);
+  }
+
+  deprecateEvents(queue);
+  animation.start();
+});
 
 export function startAnimation(ctx: CanvasRenderingContext2D) {
   initContext(ctx);
-  raf = requestAnimationFrame(draw);
+  animation.start();
+
+  const offColourSchemeChange = onColourSchemeChange((scheme) => {
+    rgbPrimary = scheme === 'dark' ? WHITE : BLACK;
+    rgbShadow = scheme === 'dark' ? BLACK : WHITE;
+    ctx.strokeStyle = rgbPrimary();
+    ctx.shadowColor = rgbShadow();
+  });
 
   return function stopAnimation() {
-    if (raf) {
-      raf = cancelAnimationFrame(raf);
-    }
+    animation.stop();
+    offColourSchemeChange();
   };
+}
+
+function initContext(_ctx: CanvasRenderingContext2D) {
+  ctx = _ctx;
+  ctx.canvas.width = D;
+  ctx.canvas.height = D;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = LINE_WIDTH;
+  ctx.shadowBlur = SHADOW_WIDTH;
 }
 
 export function updateAnimation(timeOfCollection: number) {
@@ -56,45 +78,22 @@ export function updateAnimation(timeOfCollection: number) {
     timePoint,
     vector: vector2base,
   });
-}
 
-function initContext(_ctx: CanvasRenderingContext2D) {
-  ctx = _ctx;
-  ctx.canvas.width = D;
-  ctx.canvas.height = D;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = LINE_WIDTH;
-  ctx.shadowBlur = SHADOW_WIDTH;
-
-  onColourSchemeChange((scheme) => {
-    rgbPrimary = scheme === 'dark' ? WHITE : BLACK;
-    rgbShadow = scheme === 'dark' ? BLACK : WHITE;
-    ctx.strokeStyle = rgbPrimary();
-    ctx.shadowColor = rgbShadow();
-  });
-}
-
-let need2draw = true;
-
-function draw() {
-  if (queue.length) {
-    need2draw = true;
-  } else if (need2draw) {
-    drawGrid();
-    need2draw = false;
+  if (ctx && !animation.isPending()) {
+    animation.start();
   }
+}
 
-  if (need2draw) {
-    drawGrid();
+function deprecateEvents(queue: IEvent[]) {
+  let n = queue.length;
 
-    for (let n = 0; n < queue.length; n++) {
-      drawLine(queue[n]);
+  while (n--) {
+    if (queue[n].age >= ANIMATION_DURATION) {
+      queue.pop();
+    } else {
+      return;
     }
-
-    deprecateEvents(queue);
   }
-
-  raf = requestAnimationFrame(draw);
 }
 
 function drawGrid() {
@@ -123,14 +122,9 @@ function drawLine(e: IEvent) {
   ctx.restore();
 }
 
-function deprecateEvents(queue: IEvent[]) {
-  let n = queue.length;
-
-  while (n--) {
-    if (queue[n].age >= ANIMATION_DURATION) {
-      queue.pop();
-    } else {
-      return;
-    }
-  }
+function rgb(r: number, g: number, b: number) {
+  return function alpha(a?: number) {
+    a ??= 100;
+    return `rgb(${r}% ${g}% ${b}% / ${a}%)`;
+  };
 }

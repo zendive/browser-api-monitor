@@ -124,27 +124,27 @@ type TTimerOptions =
 const timerApi = __mirror__
   ? {
     get setTimeout() {
-      return globalThis.setTimeout;
+      return globalThis.setTimeout.bind(globalThis);
     },
     get clearTimeout() {
-      return globalThis.clearTimeout;
+      return globalThis.clearTimeout.bind(globalThis);
     },
     get requestAnimationFrame() {
-      return globalThis.requestAnimationFrame;
+      return globalThis.requestAnimationFrame.bind(globalThis);
     },
     get cancelAnimationFrame() {
-      return globalThis.cancelAnimationFrame;
+      return globalThis.cancelAnimationFrame.bind(globalThis);
     },
     get requestIdleCallback() {
-      return globalThis.requestIdleCallback;
+      return globalThis.requestIdleCallback.bind(globalThis);
     },
     get cancelIdleCallback() {
-      return globalThis.cancelIdleCallback;
+      return globalThis.cancelIdleCallback.bind(globalThis);
     },
     get postTask() {
-      return globalThis.scheduler.postTask;
+      return globalThis.scheduler.postTask.bind(globalThis.scheduler);
     },
-  }
+  } as const
   : {
     setTimeout,
     clearTimeout,
@@ -154,6 +154,7 @@ const timerApi = __mirror__
     cancelIdleCallback,
     postTask: nativePostTask,
   } as const;
+
 /**
  * A unification of ways to delay a callback execution
  * in javascript event-loop
@@ -218,7 +219,7 @@ export class Timer {
       }, {
         delay: this.timeout,
         signal: this.#abortController.signal,
-        priority: this.#options.priority,
+        priority: this.#options.priority || 'user-visible',
       }).catch(NOOP);
     }
 
