@@ -12,7 +12,7 @@ BUILD_DIR := ./public/build/
 BUILD_SCRIPT := ./build.ts
 
 # Ensure environment dependencies exists
-REQUIRED_BINS := npm deno zip tree python3
+REQUIRED_BINS := deno zip tree python3
 $(foreach bin,$(REQUIRED_BINS),\
     $(if $(shell command -v $(bin) 2> /dev/null),,$(error Please install `$(bin)`)))
 
@@ -22,7 +22,7 @@ clean:
 
 .PHONY: install
 install:
-	deno install --allow-scripts
+	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher
 
 .PHONY: dev
 dev:
@@ -33,7 +33,7 @@ dev:
 valid:
 	deno fmt --unstable-component
 	deno lint
-	npx svelte-check --no-tsconfig # only for *.svelte files
+	deno $(DENO_OPTIONS) npm:svelte-check --no-tsconfig # only for *.svelte files
 
 .PHONY: test
 test: valid

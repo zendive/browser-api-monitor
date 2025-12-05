@@ -4,11 +4,11 @@
 
 Chrome Developer Tools `API 🔎` panel tries to gather every bit of useful information from the usage of certain native functions that are prone to human errors, or are difficult to spot intuitively.
 
-#### Motivation
+### Motivation
 
 To assess Web Application implementation correctness and expedite issues discovery. [See examples](./doc/issues.log.md).
 
-#### Functionality
+### Specification
  
 - Gather callstack that is used to call every wrapped function:
   - **short** - just the nearest initiator.
@@ -95,7 +95,6 @@ To assess Web Application implementation correctness and expedite issues discove
 ### Build requirements
 
 - OS: Linux
-- Node: 22.14.0 (LTS)
 - [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.5.2
 
 ### Build instructions
