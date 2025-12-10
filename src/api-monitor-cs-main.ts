@@ -14,6 +14,7 @@ import diff from './api/diff.ts';
 
 let originalMetrics: TTelemetry | null;
 let currentMetrics: TTelemetry | null;
+let startAfresh = true;
 const eachSecond = new Timer(
   { type: ETimer.TIMEOUT, timeout: 1e3 },
   function apiMonitorEachSecond() {
@@ -29,27 +30,30 @@ const tick = new Timer({
   const now = performance.now();
   currentMetrics = structuredClone(collectMetrics());
 
+  if (startAfresh) {
+    startAfresh = false;
+    originalMetrics = null;
+  }
+
   if (!originalMetrics) {
     originalMetrics = currentMetrics;
-
-    windowPost({
+    return void windowPost({
       msg: EMsg.TELEMETRY,
       timeOfCollection: now,
       telemetry: originalMetrics,
     });
-  } else {
-    const delta = diff.diff(originalMetrics, currentMetrics);
-
-    if (delta) {
-      windowPost({
-        msg: EMsg.TELEMETRY_DELTA,
-        timeOfCollection: now,
-        telemetryDelta: delta,
-      });
-    } else {
-      tick.start();
-    }
   }
+
+  const delta = diff.diff(originalMetrics, currentMetrics);
+  if (delta) {
+    return void windowPost({
+      msg: EMsg.TELEMETRY_DELTA,
+      timeOfCollection: now,
+      telemetryDelta: delta,
+    });
+  }
+
+  tick.start();
 });
 
 windowListen((o) => {
@@ -59,17 +63,16 @@ windowListen((o) => {
     const shouldRun = eachSecond.isPending() && !tick.isPending();
     shouldRun && tick.start();
   } else if (EMsg.CONFIG === o.msg) {
+    tick.stop();
     applyConfig(o.config);
-    originalMetrics = currentMetrics = null;
-    tick.trigger();
+    startAfresh = true;
+    tick.start();
   } else if (EMsg.START_OBSERVE === o.msg) {
-    originalMetrics = currentMetrics = null;
-    tick.trigger();
+    !tick.isPending() && tick.start();
     eachSecond.start();
   } else if (EMsg.STOP_OBSERVE === o.msg) {
     tick.stop();
     eachSecond.stop();
-    originalMetrics = currentMetrics = null;
   } else if (EMsg.TIMER_COMMAND === o.msg) {
     runTimerCommand(o.type, o.handler);
   } else if (EMsg.MEDIA_COMMAND === o.msg) {
