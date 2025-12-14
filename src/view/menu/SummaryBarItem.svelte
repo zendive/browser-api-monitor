@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { TPanel } from '../../api/storage/storage.local.ts';
   import Variable from '../shared/Variable.svelte';
   import { ETimer, Timer } from '../../api/time.ts';
   import {
@@ -8,19 +7,19 @@
   } from '../shared/const.ts';
 
   let {
-    panel,
+    visible,
     label,
     count,
     navSelector,
     tooltip = '',
   }: {
-    panel: TPanel;
+    visible: boolean;
     label: string;
     count: number;
     navSelector: string;
     tooltip?: string;
   } = $props();
-  let enabled: boolean = $derived.by(() => panel.visible && count > 0);
+  let hasShownData: boolean = $derived.by(() => visible && count > 0);
   const stopAnimate = new Timer(
     { type: ETimer.TIMEOUT, timeout: 512 },
     (el: HTMLElement | unknown) =>
@@ -62,20 +61,18 @@
   }
 </script>
 
-{#if panel.wrap !== false}
-  <a
-    href="."
-    role="button"
-    title={tooltip}
-    class:link-disabled={!enabled}
-    onclick={(e) => {
-      e.preventDefault();
-      scrollTo();
-    }}
-  >
-    <strong>{label}</strong>: <Variable value={count} />
-  </a>
-{/if}
+<a
+  href="."
+  role="button"
+  title={tooltip}
+  class:link-disabled={!hasShownData}
+  onclick={(e) => {
+    e.preventDefault();
+    scrollTo();
+  }}
+>
+  <strong>{label}</strong>: <Variable value={count} />
+</a>
 
 <style lang="scss">
   a {

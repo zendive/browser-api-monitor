@@ -7,117 +7,149 @@
   const ts = useTelemetryState();
   const config = useConfigState();
   let panels = $derived.by(() => panelsArray2Map(config.panels));
+  let showActiveTimers = $derived.by(() =>
+    (panels.setTimeout.wrap && panels.clearTimeout.wrap) ||
+    (panels.setInterval.wrap && panels.clearInterval.wrap)
+  );
 </script>
 
 {#if ts.telemetry && panels.callsSummary.visible}
   <nav class="summary">
-    <SummaryBarItem
-      label="Media"
-      navSelector="Videos|Audios"
-      panel={panels.media}
-      count={ts.telemetry.media.total}
-    />
+    {#if panels.media.visible}
+      <SummaryBarItem
+        label="Media"
+        navSelector="Videos|Audios"
+        visible={true}
+        count={ts.telemetry.media.total}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="Worker"
-      navSelector="Worker"
-      panel={panels.worker}
-      count={ts.telemetry.worker.totalOnline}
-    />
+    {#if showActiveTimers}
+      <SummaryBarItem
+        label="Active Timers"
+        navSelector="Active"
+        visible={panels.activeTimers.visible}
+        count={ts.telemetry.activeTimers}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="s.pT"
-      tooltip="scheduler.postTask"
-      navSelector="scheduler.postTask"
-      panel={panels.scheduler}
-      count={ts.telemetry.scheduler.postTask?.length || 0}
-    />
+    {#if panels.worker.wrap}
+      <SummaryBarItem
+        label="Worker"
+        navSelector="Worker"
+        visible={panels.worker.visible}
+        count={ts.telemetry.worker.totalOnline}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="s.y"
-      tooltip="scheduler.yield"
-      navSelector="scheduler.yield"
-      panel={panels.scheduler}
-      count={ts.telemetry.scheduler.yield?.length || 0}
-    />
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.pT"
+        tooltip="scheduler.postTask"
+        navSelector="scheduler.postTask"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.postTask?.length || 0}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="eval"
-      navSelector="Eval"
-      panel={panels.eval}
-      count={ts.telemetry.callCounter.eval}
-    />
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.y"
+        tooltip="scheduler.yield"
+        navSelector="scheduler.yield"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.yield?.length || 0}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="Active Timers"
-      navSelector="Active"
-      panel={panels.activeTimers}
-      count={ts.telemetry.activeTimers}
-    />
+    {#if panels.eval.wrap}
+      <SummaryBarItem
+        label="eval"
+        navSelector="Eval"
+        visible={panels.eval.visible}
+        count={ts.telemetry.callCounter.eval}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="sT"
-      tooltip="setTimeout"
-      navSelector="setTimeout"
-      panel={panels.setTimeout}
-      count={ts.telemetry.callCounter.setTimeout}
-    />
+    {#if panels.setTimeout.wrap}
+      <SummaryBarItem
+        label="sT"
+        tooltip="setTimeout"
+        navSelector="setTimeout"
+        visible={panels.setTimeout.visible}
+        count={ts.telemetry.callCounter.setTimeout}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="cT"
-      tooltip="clearTimeout"
-      navSelector="clearTimeout"
-      panel={panels.clearTimeout}
-      count={ts.telemetry.callCounter.clearTimeout}
-    />
+    {#if panels.clearTimeout.wrap}
+      <SummaryBarItem
+        label="cT"
+        tooltip="clearTimeout"
+        navSelector="clearTimeout"
+        visible={panels.clearTimeout.visible}
+        count={ts.telemetry.callCounter.clearTimeout}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="sI"
-      tooltip="setInterval"
-      navSelector="setInterval"
-      panel={panels.setInterval}
-      count={ts.telemetry.callCounter.setInterval}
-    />
+    {#if panels.setInterval.wrap}
+      <SummaryBarItem
+        label="sI"
+        tooltip="setInterval"
+        navSelector="setInterval"
+        visible={panels.setInterval.visible}
+        count={ts.telemetry.callCounter.setInterval}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="cI"
-      tooltip="clearInterval"
-      navSelector="clearInterval"
-      panel={panels.clearInterval}
-      count={ts.telemetry.callCounter.clearInterval}
-    />
+    {#if panels.clearInterval.wrap}
+      <SummaryBarItem
+        label="cI"
+        tooltip="clearInterval"
+        navSelector="clearInterval"
+        visible={panels.clearInterval.visible}
+        count={ts.telemetry.callCounter.clearInterval}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="rAF"
-      tooltip="requestAnimationFrame"
-      navSelector="requestAnimationFrame"
-      panel={panels.requestAnimationFrame}
-      count={ts.telemetry.callCounter.requestAnimationFrame}
-    />
+    {#if panels.requestAnimationFrame.wrap}
+      <SummaryBarItem
+        label="rAF"
+        tooltip="requestAnimationFrame"
+        navSelector="requestAnimationFrame"
+        visible={panels.requestAnimationFrame.visible}
+        count={ts.telemetry.callCounter.requestAnimationFrame}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="cAF"
-      tooltip="cancelAnimationFrame"
-      navSelector="cancelAnimationFrame"
-      panel={panels.cancelAnimationFrame}
-      count={ts.telemetry.callCounter.cancelAnimationFrame}
-    />
+    {#if panels.cancelAnimationFrame.wrap}
+      <SummaryBarItem
+        label="cAF"
+        tooltip="cancelAnimationFrame"
+        navSelector="cancelAnimationFrame"
+        visible={panels.cancelAnimationFrame.visible}
+        count={ts.telemetry.callCounter.cancelAnimationFrame}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="rIC"
-      tooltip="requestIdleCallback"
-      navSelector="requestIdleCallback"
-      panel={panels.requestIdleCallback}
-      count={ts.telemetry.callCounter.requestIdleCallback}
-    />
+    {#if panels.requestIdleCallback.wrap}
+      <SummaryBarItem
+        label="rIC"
+        tooltip="requestIdleCallback"
+        navSelector="requestIdleCallback"
+        visible={panels.requestIdleCallback.visible}
+        count={ts.telemetry.callCounter.requestIdleCallback}
+      />
+    {/if}
 
-    <SummaryBarItem
-      label="cIC"
-      tooltip="cancelIdleCallback"
-      navSelector="cancelIdleCallback"
-      panel={panels.cancelIdleCallback}
-      count={ts.telemetry.callCounter.cancelIdleCallback}
-    />
+    {#if panels.cancelIdleCallback.wrap}
+      <SummaryBarItem
+        label="cIC"
+        tooltip="cancelIdleCallback"
+        navSelector="cancelIdleCallback"
+        visible={panels.cancelIdleCallback.visible}
+        count={ts.telemetry.callCounter.cancelIdleCallback}
+      />
+    {/if}
   </nav>
 {/if}
 
