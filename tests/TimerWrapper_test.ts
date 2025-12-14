@@ -176,6 +176,20 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(1e3);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
+  });
+
+  test('setTimeout with clearInterval - IMPLICIT_USAGE', () => {
+    const handler = globalThis.setTimeout(() => {}, 1e3);
+    globalThis.clearInterval(handler);
+
+    const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
+
+    expect(rec.handler).toBe(handler);
+    expect(rec.delay).toBe(1e3);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(true);
   });
 
   test('clearTimeout - non existent handler', () => {
@@ -186,6 +200,7 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(true);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 
   test('clearTimeoutHistory - invalid handler', () => {
@@ -197,6 +212,7 @@ describe('wrappers', () => {
     expect(rec.handler).toBe(TAG_BAD_HANDLER(0));
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(true);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 
   test('setIntervalHistory & clearIntervalHistory - recorded', () => {
@@ -260,8 +276,24 @@ describe('wrappers', () => {
 
     const rec = Array.from(apiTimer.clearIntervalHistory.values())[0];
 
+    expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
+  });
+
+  test('setInterval with clearTimeout - IMPLICIT_USAGE', () => {
+    const handler = globalThis.setInterval(() => {}, 1e3);
+    globalThis.clearTimeout(handler);
+
+    const rec = Array.from(apiTimer.clearTimeoutHistory.values())[0];
+
+    expect(rec.handler).toBe(handler);
+    expect(rec.delay).toBe(1e3);
+    expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(true);
   });
 
   test('clearIntervalHistory - non-existent handler', () => {
@@ -272,6 +304,7 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(true);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 
   test('clearIntervalHistory - invalid handler', () => {
@@ -282,6 +315,7 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(TAG_DELAY_NOT_FOUND);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(true);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
+    expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 });
 

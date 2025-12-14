@@ -64,6 +64,7 @@ export const SetTimerFacts = /*@__PURE__*/ (() =>
 export const ClearTimerFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
   BAD_HANDLER: Fact.define(1 << 1),
+  IMPLICIT_USAGE: Fact.define(1 << 2),
 } as const))();
 export const ClearTimerFacts = /*@__PURE__*/ (() =>
   Fact.map([
@@ -71,6 +72,11 @@ export const ClearTimerFacts = /*@__PURE__*/ (() =>
     [ClearTimerFact.BAD_HANDLER, {
       tag: 'H',
       details: 'Handler is not a positive number',
+    }],
+    [ClearTimerFact.IMPLICIT_USAGE, {
+      tag: 'IU',
+      details:
+        'Implicit usage - clearTimeout canceled interval or clearInterval canceled timeout',
     }],
   ]))();
 
@@ -200,6 +206,7 @@ export class TimerWrapper {
   }
 
   #updateClearTimersHistory(
+    type: ETimerType,
     history: Map<string, TClearTimerHistory>,
     handler: unknown,
     callstack: TCallstack,
@@ -213,6 +220,10 @@ export class TimerWrapper {
 
       if (onlineTimer) {
         handlerDelay = onlineTimer.delay;
+
+        if (onlineTimer.type !== type) {
+          facts = Fact.assign(facts, ClearTimerFact.IMPLICIT_USAGE);
+        }
       } else {
         facts = Fact.assign(facts, ClearTimerFact.NOT_FOUND);
       }
@@ -333,6 +344,7 @@ export class TimerWrapper {
       const callstack = traceUtil.getCallstack(err);
 
       this.#updateClearTimersHistory(
+        ETimerType.TIMEOUT,
         this.clearTimeoutHistory,
         handler,
         callstack,
@@ -432,6 +444,7 @@ export class TimerWrapper {
       const callstack = traceUtil.getCallstack(err);
 
       this.#updateClearTimersHistory(
+        ETimerType.INTERVAL,
         this.clearIntervalHistory,
         handler,
         callstack,
