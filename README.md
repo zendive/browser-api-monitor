@@ -14,24 +14,26 @@ To assess Web Application implementation correctness and expedite issues discove
   - **short** - just the nearest initiator.
   - **full** - from the root to the nearest initiator (from left to right).
 
-- Aggregate information about currently scheduled timeouts and running active intervals.
+- Aggregate information about currently scheduled timeouts and intervals.
 
-- Gather details about which terminators are cancelling certain scheduled setters.
+- Gather details about which terminators are cancelling those scheduled setters:
+  - `setTimeout`, `setInterval`, `requestAnimationFrame`, `requestIdleCallback`.
 
 - Allow to initiate a debugging session by redirecting the code flow to a `debugger` breakpoint right before the callback invocation.
   - Hit <kbd>F11</kbd> (step inside) **twice** in order to progress into the callback itself.
 
 - Allow to bypass (skip) setter's callback, or terminator invocation function.
 
-- Detect anomalies in passed arguments such as:
-  - Passing incorrect timeout delay to `setTimeout`, `setInterval`, `requestIdleCallback`.
-    - Correct one is `undefined` or a number that is greater or equal to `0`.
-  - Invoking terminator function with handler that is non-positive integer, or of non-existent or already elapsed setter.
-
 - Measure callback's execution self-time.
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
 
 - Count calls per second (CPS) where applicable.
+
+- Detect incorrect timeout argument passed to `setTimeout`, `setInterval`, `requestIdleCallback`, `scheduler.postTask`.
+
+- Detect terminator function invocation with a handler that is non-positive integer, or of non-existent, or off an already elapsed setter.
+
+- Detect timeouts cleared with `clearInterval`, or intervals cleared with `clearTimeout`.
 
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
   - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
