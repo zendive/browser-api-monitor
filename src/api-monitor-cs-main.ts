@@ -63,13 +63,16 @@ windowListen((o) => {
     const shouldRun = eachSecond.isPending() && !tick.isPending();
     shouldRun && tick.start();
   } else if (EMsg.CONFIG === o.msg) {
-    tick.stop();
     applyConfig(o.config);
-    startAfresh = true;
-    tick.start();
+
+    if (o.config.devtoolsPanelShown && !eachSecond.isPending()) {
+      startAfresh = true;
+      tick.trigger();
+    }
   } else if (EMsg.START_OBSERVE === o.msg) {
-    !tick.isPending() && tick.start();
-    eachSecond.start();
+    eachSecond.trigger();
+    startAfresh = true;
+    !tick.isPending() && tick.trigger();
   } else if (EMsg.STOP_OBSERVE === o.msg) {
     tick.stop();
     eachSecond.stop();
