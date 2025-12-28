@@ -13,8 +13,8 @@
   const mean = new Mean();
   const vs = $state({
     stdDev: '0.0',
-    mean: time,
-    max: time,
+    mean: 0,
+    max: 0,
   });
   const eachSecond = new Timer(
     { type: ETimer.TIMEOUT, timeout: 1e3 },
@@ -36,6 +36,7 @@
   $effect(() => void mean.add(time));
 
   onMount(() => {
+    vs.mean = vs.max = time;
     eachSecond.start();
     return () => void eachSecond.stop();
   });
