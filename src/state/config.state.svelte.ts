@@ -9,12 +9,12 @@ import { EWrapperCallstackType } from '../wrapper/shared/TraceUtil.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);
 
-export function useConfigState() {
-  return config;
-}
-
 export async function initConfigState() {
   config = await loadLocalStorage();
+}
+
+export function useConfigState() {
+  return config;
 }
 
 export async function togglePause() {

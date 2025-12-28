@@ -137,6 +137,7 @@ export const DEFAULT_CONFIG = {
   wrapperCallstackType: EWrapperCallstackType.SHORT,
   keepAwake: false,
 };
+const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;
 
 export function panelsArray2Map(panels: TPanel[]) {
   return panels.reduce(
@@ -148,23 +149,23 @@ export function panelsArray2Map(panels: TPanel[]) {
 export async function loadLocalStorage(): Promise<TConfig> {
   let store = await local.get([CONFIG_VERSION]);
   const isEmpty = !store || !store[CONFIG_VERSION] ||
-    !Object.keys(store[CONFIG_VERSION]).length;
+    Object.keys(store[CONFIG_VERSION]).length !== DEFAULT_CONFIG_KEYS_LENGTH;
 
   if (isEmpty) {
     await local.clear(); // reset previous version
-    await local.set({ [CONFIG_VERSION]: DEFAULT_CONFIG });
-    store = await local.get([CONFIG_VERSION]);
+    store = { [CONFIG_VERSION]: DEFAULT_CONFIG };
+    await local.set(store);
   }
 
   return store[CONFIG_VERSION];
 }
 
 export async function saveLocalStorage(value: TConfigField) {
-  const store = await local.get([CONFIG_VERSION]);
+  const store = await loadLocalStorage();
 
-  Object.assign(store[CONFIG_VERSION], value);
+  Object.assign(store, value);
 
-  return await local.set(store);
+  return await local.set({ [CONFIG_VERSION]: store });
 }
 
 export function onLocalStorageChange(
@@ -173,15 +174,13 @@ export function onLocalStorageChange(
   local.onChanged.addListener((change: {
     [key: string]: chrome.storage.StorageChange;
   }) => {
-    if (
-      change &&
-      change[CONFIG_VERSION] &&
-      change[CONFIG_VERSION].newValue
-    ) {
-      callback(
-        change[CONFIG_VERSION].newValue,
-        change[CONFIG_VERSION].oldValue,
-      );
+    const newValue = change?.[CONFIG_VERSION]?.newValue;
+    const oldValue = change?.[CONFIG_VERSION]?.oldValue;
+
+    if (!newValue || Object.keys(newValue).length !== DEFAULT_CONFIG_KEYS_LENGTH) {
+      return;
     }
+
+    callback(newValue, oldValue);
   });
 }

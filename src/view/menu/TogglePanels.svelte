@@ -13,6 +13,14 @@
   const config = useConfigState();
   let reloadMessageEl: Alert | null = null;
   let selfEl: HTMLElement | null = null;
+  let wrapperCallstackTypeText = $derived.by(() => {
+    return config.wrapperCallstackType === EWrapperCallstackType.FULL
+      ? 'full'
+      : 'short';
+  });
+  let keepAwakeText = $derived.by(() => {
+    return config.keepAwake ? 'on' : 'off';
+  });
 
   runtimeListen((o) => {
     if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
@@ -52,14 +60,7 @@
             title="Toggle callstack type: full/short"
             onclick={onToggleWrapperCallstackType}
           >
-            {
-              `${
-                config.wrapperCallstackType ===
-                    EWrapperCallstackType.FULL
-                  ? 'full'
-                  : 'short'
-              }`
-            }
+            {wrapperCallstackTypeText}
           </button>
         </td>
       </tr>
@@ -103,7 +104,7 @@
             class="btn-toggle"
             onclick={toggleKeepAwake}
           >
-            {`${config.keepAwake ? 'on' : 'off'}`}
+            {keepAwakeText}
           </button>
         </td>
       </tr>
