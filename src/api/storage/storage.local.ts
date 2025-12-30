@@ -171,13 +171,13 @@ export async function saveLocalStorage(value: TConfigField) {
 export function onLocalStorageChange(
   callback: (newValue: TConfig, oldValue: TConfig) => void,
 ) {
-  local.onChanged.addListener((change: {
-    [key: string]: chrome.storage.StorageChange;
-  }) => {
+  local.onChanged.addListener((change) => {
     const newValue = change?.[CONFIG_VERSION]?.newValue;
     const oldValue = change?.[CONFIG_VERSION]?.oldValue;
 
-    if (!newValue || Object.keys(newValue).length !== DEFAULT_CONFIG_KEYS_LENGTH) {
+    if (
+      !newValue || Object.keys(newValue).length !== DEFAULT_CONFIG_KEYS_LENGTH
+    ) {
       return;
     }
 

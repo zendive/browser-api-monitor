@@ -6,7 +6,7 @@ const DEFAULT_SESSION = {
   debug: <string[]> [],
   bypass: <string[]> [],
 };
-
+const DEFAULT_SESSION_KEYS_LENGTH = Object.keys(DEFAULT_SESSION).length;
 export function enableSessionInContentScript() {
   return session.setAccessLevel({
     accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS',
@@ -16,36 +16,38 @@ export function enableSessionInContentScript() {
 export async function loadSessionStorage(): Promise<TSession> {
   let store = await session.get([SESSION_VERSION]);
   const isEmpty = !store || !store[SESSION_VERSION] ||
-    !Object.keys(store).length;
+    Object.keys(store[SESSION_VERSION]).length !== DEFAULT_SESSION_KEYS_LENGTH;
 
   if (isEmpty) {
     await session.clear(); // reset previous version
-    await session.set({ [SESSION_VERSION]: DEFAULT_SESSION });
-    store = await session.get([SESSION_VERSION]);
+    store = { [SESSION_VERSION]: DEFAULT_SESSION };
+    await session.set(store);
   }
 
   return store[SESSION_VERSION];
 }
 
 export async function saveSessionStorage(value: TSessionProperty) {
-  const store = await session.get([SESSION_VERSION]);
+  const store = await loadSessionStorage();
 
-  Object.assign(store[SESSION_VERSION], value);
+  Object.assign(store, value);
 
-  return await session.set(store);
+  return await session.set({ [SESSION_VERSION]: store });
 }
 
 export function onSessionStorageChange(
   callback: (newValue: TSession, oldValue: TSession) => void,
 ) {
   session.onChanged.addListener((change) => {
+    const newValue = change?.[SESSION_VERSION]?.newValue;
+    const oldValue = change?.[SESSION_VERSION]?.oldValue;
+
     if (
-      change && change[SESSION_VERSION] && change[SESSION_VERSION].newValue
+      !newValue || Object.keys(newValue).length !== DEFAULT_SESSION_KEYS_LENGTH
     ) {
-      callback(
-        change[SESSION_VERSION].newValue,
-        change[SESSION_VERSION].oldValue,
-      );
+      return;
     }
+
+    callback(newValue, oldValue);
   });
 }
