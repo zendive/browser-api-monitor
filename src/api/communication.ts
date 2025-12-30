@@ -142,6 +142,7 @@ export interface IMsgTelemetryDelta {
 export interface IMsgTelemetryAcknowledged {
   msg: EMsg.TELEMETRY_ACKNOWLEDGED;
   timeOfCollection: number;
+  startAfresh: boolean;
 }
 export interface IMsgConfig {
   msg: EMsg.CONFIG;

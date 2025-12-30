@@ -31,9 +31,14 @@ export function establishTelemetryReceiver() {
         state.telemetrySize = objectInJsonLength(o.telemetry);
       }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
-      diff.patch(telemetryProgressive, o.telemetryDelta);
-      state.telemetry = structuredClone(telemetryProgressive);
-      acknowledgeTelemetry(o.timeOfCollection);
+      try {
+        diff.patch(telemetryProgressive, o.telemetryDelta);
+        state.telemetry = structuredClone(telemetryProgressive);
+        acknowledgeTelemetry(o.timeOfCollection);
+      } catch (_) {
+        // if patching fails - request full telemetry
+        acknowledgeTelemetry(o.timeOfCollection, true);
+      }
 
       if (__development__) {
         state.telemetrySize = objectInJsonLength(o.telemetryDelta);
@@ -42,10 +47,14 @@ export function establishTelemetryReceiver() {
   });
 }
 
-function acknowledgeTelemetry(timeOfCollection: number) {
+function acknowledgeTelemetry(
+  timeOfCollection: number,
+  startAfresh: boolean = false,
+) {
   portPost({
     msg: EMsg.TELEMETRY_ACKNOWLEDGED,
     timeOfCollection,
+    startAfresh,
   });
 
   state.timeOfCollection = timeOfCollection;
@@ -62,9 +71,13 @@ export function establishTelemetryReceiverMirror() {
         state.telemetrySize = objectInJsonLength(o.telemetry);
       }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
-      diff.patch(telemetryProgressive, o.telemetryDelta);
-      state.telemetry = structuredClone(telemetryProgressive);
-      acknowledgeTelemetryMirror(o.timeOfCollection);
+      try {
+        diff.patch(telemetryProgressive, o.telemetryDelta);
+        state.telemetry = structuredClone(telemetryProgressive);
+        acknowledgeTelemetryMirror(o.timeOfCollection);
+      } catch (_) {
+        acknowledgeTelemetryMirror(o.timeOfCollection, true);
+      }
 
       if (__development__) {
         state.telemetrySize = objectInJsonLength(o.telemetryDelta);
@@ -73,10 +86,14 @@ export function establishTelemetryReceiverMirror() {
   });
 }
 
-function acknowledgeTelemetryMirror(timeOfCollection: number) {
+function acknowledgeTelemetryMirror(
+  timeOfCollection: number,
+  startAfresh: boolean = false,
+) {
   windowPost({
     msg: EMsg.TELEMETRY_ACKNOWLEDGED,
     timeOfCollection,
+    startAfresh,
   });
 
   state.timeOfCollection = timeOfCollection;

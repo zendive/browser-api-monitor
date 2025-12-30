@@ -58,6 +58,7 @@ const tick = new Timer({
 
 windowListen((o) => {
   if (EMsg.TELEMETRY_ACKNOWLEDGED === o.msg) {
+    startAfresh = o.startAfresh;
     tick.timeout = adjustTelemetryDelay(o.timeOfCollection);
     originalMetrics = currentMetrics;
     const shouldRun = eachSecond.isPending() && !tick.isPending();
