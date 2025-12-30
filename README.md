@@ -96,13 +96,12 @@ To assess Web Application implementation correctness and expedite issues discove
 
 ### Build requirements
 
-- OS: Linux
-- [Deno](https://docs.deno.com/runtime/getting_started/installation/) 2.5.2
+- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/) zip tree python3
 
 ### Build instructions
 
 ```bash
-make install  # install dependencies
-make dev      # build in development mode and watch for changes
-make prod     # build in production mode and make extension.chrome.zip
+make clean install  # install dependencies
+make dev            # build in development mode and watch for changes
+make prod           # build in production mode and make extension.chrome.zip
 ```
