@@ -12,6 +12,9 @@
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import Dialog from '../../shared/Dialog.svelte';
+  import Alert from '../../shared/Alert.svelte';
+  import TimersClearHistory from './TimersClearHistory.svelte';
 
   let {
     setTimerHistory,
@@ -30,6 +33,9 @@
       compareByFieldOrder(sortSetTimers.field, sortSetTimers.order),
     )
   );
+  let dialogEl: Dialog;
+  let alertEl: Alert;
+  let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
 
   function onChangeSort(field: string, order: ESortOrder) {
     sortSetTimers.field = <keyof TSetTimerHistory> field;
@@ -39,7 +45,53 @@
       sortSetTimers: $state.snapshot(sortSetTimers),
     });
   }
+
+  function onFindRegressors(regressors: string[] | null) {
+    if (!regressors?.length) {
+      return;
+    }
+
+    for (let n = regressors.length - 1; n >= 0; n--) {
+      const traceId = regressors[n];
+      let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
+
+      if (record) {
+        clearTimerHistoryMetrics.push(record);
+      }
+
+      record = clearIntervalHistory?.find((r) => r.traceId === traceId);
+      if (record) {
+        clearTimerHistoryMetrics.push(record);
+      }
+    }
+
+    if (clearTimerHistoryMetrics.length) {
+      dialogEl.show();
+    } else {
+      alertEl.show();
+    }
+  }
+
+  function onCloseDialog() {
+    clearTimerHistoryMetrics.splice(0);
+  }
 </script>
+
+<Dialog
+  bind:this={dialogEl}
+  eventClose={onCloseDialog}
+  title="Places from which timer with current callstack was prematurely canceled"
+  description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
+>
+  <TimersClearHistory
+    caption="Canceled by"
+    clearTimerHistory={$state.snapshot(clearTimerHistoryMetrics)}
+  />
+</Dialog>
+
+<Alert bind:this={alertEl} title="Attention">
+  Requires both clearTimeout and clearInterval panels enabled
+</Alert>
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -102,11 +154,7 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersSetHistoryMetric
-        {metric}
-        {clearTimeoutHistory}
-        {clearIntervalHistory}
-      />
+      <TimersSetHistoryMetric {metric} {onFindRegressors} />
     {/each}
   </tbody>
 </table>

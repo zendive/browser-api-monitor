@@ -1,80 +1,28 @@
 <script lang="ts">
   import {
     SetTimerFacts,
-    type TClearTimerHistory,
     type TSetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
-  import TimersClearHistory from './TimersClearHistory.svelte';
   import CellCancelable from '../shared/CellCancelable.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import { delayTooltip } from '../../shared/util.ts';
+  import {
+    delayTooltip,
+    type TFindRegressorCallback,
+  } from '../../shared/util.ts';
 
   let {
     metric,
-    clearTimeoutHistory,
-    clearIntervalHistory,
+    onFindRegressors,
   }: {
     metric: TSetTimerHistory;
-    clearTimeoutHistory: TClearTimerHistory[] | null;
-    clearIntervalHistory: TClearTimerHistory[] | null;
+    onFindRegressors: TFindRegressorCallback;
   } = $props();
-  let dialogEl: Dialog;
-  let alertEl: Alert;
-  let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
-
-      if (record) {
-        clearTimerHistoryMetrics.push(record);
-      }
-
-      record = clearIntervalHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        clearTimerHistoryMetrics.push(record);
-      }
-    }
-
-    if (clearTimerHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    clearTimerHistoryMetrics.splice(0);
-  }
 </script>
-
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which timer with current callstack was prematurely canceled"
-  description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
->
-  <TimersClearHistory
-    caption="Canceled by"
-    clearTimerHistory={$state.snapshot(clearTimerHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires both clearTimeout and clearInterval panels enabled
-</Alert>
 
 <tr class="t-zebra">
   <td class="wb-all">

@@ -1,5 +1,6 @@
 <script lang="ts">
   import Variable from '../../shared/Variable.svelte';
+  import type { TFindRegressorCallback } from '../../shared/util.ts';
 
   let {
     calls,
@@ -10,7 +11,7 @@
     calls: number;
     canceledCounter: number;
     canceledByTraceIds: string[] | null;
-    onClick: (canceledByTraceIds: string[] | null) => void;
+    onClick: TFindRegressorCallback;
   } = $props();
 </script>
 

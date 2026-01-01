@@ -13,3 +13,7 @@ export function inKilo(value: number) {
 
   return `${integer}.${fraction}k`;
 }
+
+export type TFindRegressorCallback = (
+  canceledByTraceIds: string[] | null,
+) => void;
