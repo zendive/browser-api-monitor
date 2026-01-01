@@ -13,19 +13,19 @@
     children?: Snippet;
   } = $props();
   let showContent: boolean = $state(false);
-  let selfEl: HTMLDialogElement | null = null;
+  let selfEl: HTMLDialogElement;
 
   export function show() {
-    selfEl?.showModal();
+    selfEl.showModal();
     document.addEventListener('keydown', onKeyboardEvent, {
       capture: true,
     });
-    selfEl?.addEventListener('click', onSelfClick);
+    selfEl.addEventListener('click', onSelfClick);
     showContent = true;
   }
 
   export function hide() {
-    selfEl?.close();
+    selfEl.close();
   }
 
   function onSelfClick(e: MouseEvent) {
@@ -46,7 +46,7 @@
     document.removeEventListener('keydown', onKeyboardEvent, {
       capture: true,
     });
-    selfEl?.removeEventListener('click', onSelfClick);
+    selfEl.removeEventListener('click', onSelfClick);
     showContent = false;
     closeEvent?.();
   }

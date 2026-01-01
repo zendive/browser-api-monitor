@@ -32,8 +32,8 @@
     cicHistory: TCancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
-  let dialogEl: Dialog | null = null;
-  let alertEl: Alert | null = null;
+  let dialogEl: Dialog;
+  let alertEl: Alert;
   const { sortRequestIdleCallback } = useConfigState();
   let sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(
@@ -57,7 +57,7 @@
   let cicHistoryMetrics: TCancelIdleCallbackHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
-    if (!dialogEl || !alertEl || !regressors?.length) {
+    if (!regressors?.length) {
       return;
     }
 

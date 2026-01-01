@@ -25,12 +25,12 @@
     clearTimeoutHistory: TClearTimerHistory[] | null;
     clearIntervalHistory: TClearTimerHistory[] | null;
   } = $props();
-  let dialogEl: Dialog | null = null;
-  let alertEl: Alert | null = null;
+  let dialogEl: Dialog;
+  let alertEl: Alert;
   let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
-    if (!dialogEl || !alertEl || !regressors?.length) {
+    if (!regressors?.length) {
       return;
     }
 

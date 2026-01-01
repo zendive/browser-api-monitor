@@ -12,14 +12,14 @@
     class?: string;
     children?: Snippet;
   } = $props();
-  let selfEl: HTMLElement | null = null;
+  let selfEl: HTMLElement;
 
   export function show() {
-    selfEl?.showPopover();
+    selfEl.showPopover();
   }
 
   export function hide() {
-    selfEl?.hidePopover();
+    selfEl.hidePopover();
   }
 
   function onToggle(e: ToggleEvent) {

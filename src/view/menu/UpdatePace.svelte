@@ -3,13 +3,13 @@
   import { startAnimation, updateAnimation } from './UpdatePaceTimeMap.ts';
   import { onMount } from 'svelte';
 
-  let canvasEl: HTMLCanvasElement | null = null;
+  let canvasEl: HTMLCanvasElement;
   const ts = useTelemetryState();
 
   $effect(() => void updateAnimation(ts.timeOfCollection));
 
   onMount(() => {
-    const ctx = canvasEl!.getContext('2d');
+    const ctx = canvasEl.getContext('2d');
     return startAnimation(ctx!);
   });
 </script>

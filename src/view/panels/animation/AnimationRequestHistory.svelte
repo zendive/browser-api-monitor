@@ -30,8 +30,8 @@
     caption: string;
   } = $props();
   const { sortRequestAnimationFrame } = useConfigState();
-  let dialogEl: Dialog | null = null;
-  let alertEl: Alert | null = null;
+  let dialogEl: Dialog;
+  let alertEl: Alert;
   let sortedMetrics = $derived.by(() =>
     rafHistory.toSorted(
       compareByFieldOrder(
@@ -54,7 +54,7 @@
   let cafHistoryMetrics: TCancelAnimationFrameHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
-    if (!dialogEl || !alertEl || !regressors?.length) {
+    if (!regressors?.length) {
       return;
     }
 

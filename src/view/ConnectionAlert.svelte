@@ -10,18 +10,18 @@
   import { onMount } from 'svelte';
   import { loadLocalStorage } from '../api/storage/storage.local.ts';
 
-  let tabReloadAlertEl: Alert | null = null;
-  let devtoolsReloadAlertEl: Alert | null = null;
+  let tabReloadAlertEl: Alert;
+  let devtoolsReloadAlertEl: Alert;
   const delayedAlert = new Timer(
     { type: ETimer.TIMEOUT, timeout: INJECTION_ALERT_TIMEOUT },
-    () => void tabReloadAlertEl?.show(),
+    () => void tabReloadAlertEl.show(),
   );
   const extensionUpdateSensor = new Timer(
     { type: ETimer.TIMEOUT, timeout: UPDATE_SENSOR_INTERVAL },
     () => {
       extensionUpdateSensor.start();
       whenUpdateDetected(() => {
-        devtoolsReloadAlertEl?.show();
+        devtoolsReloadAlertEl.show();
         extensionUpdateSensor.stop();
       });
     },
@@ -30,9 +30,9 @@
   runtimeListen((o) => {
     if (o.msg === EMsg.INJECTION_CONFIRMED) {
       delayedAlert.stop();
-      tabReloadAlertEl?.hide();
+      tabReloadAlertEl.hide();
     } else if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
-      tabReloadAlertEl?.hide();
+      tabReloadAlertEl.hide();
     }
   });
 

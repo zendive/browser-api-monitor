@@ -11,8 +11,8 @@
   } from '../../state/config.state.svelte.ts';
 
   const config = useConfigState();
-  let reloadMessageEl: Alert | null = null;
-  let selfEl: HTMLElement | null = null;
+  let reloadMessageEl: Alert;
+  let selfEl: HTMLElement;
   let wrapperCallstackTypeText = $derived.by(() => {
     return config.wrapperCallstackType === EWrapperCallstackType.FULL
       ? 'full'
@@ -24,19 +24,19 @@
 
   runtimeListen((o) => {
     if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
-      reloadMessageEl?.hide();
-      selfEl?.hidePopover();
+      reloadMessageEl.hide();
+      selfEl.hidePopover();
     }
   });
 
   function onTogglePanelWrap(index: number) {
     togglePanelWrap(index);
-    reloadMessageEl?.show();
+    reloadMessageEl.show();
   }
 
   function onToggleWrapperCallstackType() {
     toggleWrapperCallstackType();
-    reloadMessageEl?.show();
+    reloadMessageEl.show();
   }
 </script>
 
