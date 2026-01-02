@@ -1,17 +1,14 @@
 .DEFAULT_GOAL := dev
 
 # Ensure environment dependencies exist
-REQUIRED_BINS := deno zip tree python3
+REQUIRED_BINS := deno jq zip tree python3
 $(foreach bin,$(REQUIRED_BINS),\
     $(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
 
 DENO_DEV := NODE_ENV=development deno run --watch
 DENO_PROD := NODE_ENV=production deno run
 DENO_OPTIONS := --allow-env --allow-read --allow-run
-VERSION != deno eval "\
-	import m from './manifest.json' with {type:'json'};\
-	console.log(m.version);\
-	"
+VERSION != jq -j '.version' ./manifest.json
 CHROME_ZIP := "extension.chrome-$(VERSION).zip"
 OUTPUT_DIR := ./public/
 BUILD_DIR := ./public/build/
