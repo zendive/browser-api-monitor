@@ -81,11 +81,11 @@
 <Dialog
   bind:this={dialogEl}
   eventClose={onCloseDialog}
-  title="Places from which requestAnimationFrame with current callstack was prematurely canceled"
+  title="Places from which requestAnimationFrame with current callstack was prematurely cancelled"
   description="The information is actual only on time of demand. Requires cancelAnimationFrame panel enabled."
 >
   <AnimationCancelHistory
-    caption="Canceled by"
+    caption="Cancelled by"
     cafHistory={$state.snapshot(cafHistoryMetrics)}
   />
 </Dialog>

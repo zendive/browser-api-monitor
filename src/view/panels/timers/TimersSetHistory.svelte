@@ -80,11 +80,11 @@
 <Dialog
   bind:this={dialogEl}
   eventClose={onCloseDialog}
-  title="Places from which timer with current callstack was prematurely canceled"
+  title="Places from which timer with current callstack was prematurely cancelled"
   description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
 >
   <TimersClearHistory
-    caption="Canceled by"
+    caption="Cancelled by"
     clearTimerHistory={$state.snapshot(clearTimerHistoryMetrics)}
   />
 </Dialog>

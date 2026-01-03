@@ -76,7 +76,7 @@ export const ClearTimerFacts = /*@__PURE__*/ (() =>
     [ClearTimerFact.IMPLICIT_USAGE, {
       tag: 'IU',
       details:
-        'Implicit usage - clearTimeout canceled interval or clearInterval canceled timeout',
+        'cT cancelled interval or cI cancelled timeout',
     }],
   ]))();
 
