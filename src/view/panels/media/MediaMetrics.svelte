@@ -33,7 +33,10 @@
 
 <table class="group">
   <caption class="bc-invert ta-l">
-    <MediaCommands mediaId={metrics.mediaId} />
+    <MediaCommands
+      mediaId={metrics.mediaId}
+      paused={metrics.props.paused}
+    />
   </caption>
   <tbody>
     <tr>

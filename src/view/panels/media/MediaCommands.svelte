@@ -5,7 +5,13 @@
     portPost,
   } from '../../../api/communication.ts';
 
-  let { mediaId }: { mediaId: string } = $props();
+  let {
+    mediaId,
+    paused,
+  }: {
+    mediaId: string;
+    paused: unknown;
+  } = $props();
 
   function onMediaCommand(cmd: IMsgMediaCommand['cmd']) {
     portPost({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
@@ -34,20 +40,23 @@
   >
     <span class="icon -refresh"></span>
   </button>
-  <button
-    onclick={() => void onMediaCommand('play')}
-    title="media.play()"
-    aria-label="media.play()"
-  >
-    <span class="icon -play"></span>
-  </button>
-  <button
-    onclick={() => void onMediaCommand('pause')}
-    title="media.pause()"
-    aria-label="media.pause()"
-  >
-    <span class="icon -pause"></span>
-  </button>
+  {#if paused}
+    <button
+      onclick={() => void onMediaCommand('play')}
+      title="media.play()"
+      aria-label="media.play()"
+    >
+      <span class="icon -play"></span>
+    </button>
+  {:else}
+    <button
+      onclick={() => void onMediaCommand('pause')}
+      title="media.pause()"
+      aria-label="media.pause()"
+    >
+      <span class="icon -pause"></span>
+    </button>
+  {/if}
   <button
     onclick={() => void onMediaCommand('frame-backward')}
     title="Seek -16ms"
