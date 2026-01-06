@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    RicFacts,
     type TCancelIdleCallbackHistory,
     type TRequestIdleCallbackHistory,
   } from '../../../wrapper/IdleWrapper.ts';
@@ -14,14 +13,8 @@
   import Dialog from '../../shared/Dialog.svelte';
   import Alert from '../../shared/Alert.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { delayTooltip } from '../../shared/util.ts';
+  import IdleCallbackRequestHistoryMetric from './IdleCallbackRequestHistoryMetric.svelte';
 
   let {
     ricHistory,
@@ -84,7 +77,7 @@
 <Dialog
   bind:this={dialogEl}
   eventClose={onCloseDialog}
-  title="Places from which requestIdleCallback with current callstack was prematurely canceled"
+  title="Places from which requestIdleCallback with current callstack was prematurely cancelled"
   description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
 >
   <IdleCallbackCancelHistory
@@ -160,37 +153,10 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <tr class="t-zebra">
-        <td class="wb-all">
-          <CellCallstack
-            trace={metric.trace}
-            traceDomain={metric.traceDomain}
-          />
-        </td>
-        <td class="ta-c">{metric.didTimeout}</td>
-        <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
-        <td class="ta-c">
-          <CellFacts facts={metric.facts} factsMap={RicFacts} />
-        </td>
-        <td class="ta-c">{metric.cps || undefined}</td>
-        <td class="ta-c">
-          <CellCancelable
-            calls={metric.calls}
-            canceledCounter={metric.canceledCounter}
-            canceledByTraceIds={metric.canceledByTraceIds}
-            onClick={onFindRegressors}
-          />
-        </td>
-        <td class="ta-c">{metric.handler}</td>
-        <td class="ta-r" title={delayTooltip(metric.delay)}>{metric.delay}</td>
-        <td class="ta-r">
-          {#if metric.online}
-            <Variable value={metric.online} />
-          {/if}
-        </td>
-        <td><CellBypass traceId={metric.traceId} /></td>
-        <td><CellBreakpoint traceId={metric.traceId} /></td>
-      </tr>
+      <IdleCallbackRequestHistoryMetric
+        {metric}
+        {onFindRegressors}
+      />
     {/each}
   </tbody>
 </table>

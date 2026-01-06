@@ -10,15 +10,11 @@
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Dialog from '../../shared/Dialog.svelte';
   import Alert from '../../shared/Alert.svelte';
   import AnimationCancelHistory from './AnimationCancelHistory.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import AnimationRequestHistoryMetric from './AnimationRequestHistoryMetric.svelte';
 
   let {
     rafHistory,
@@ -140,32 +136,7 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <tr class="t-zebra">
-        <td class="wb-all">
-          <CellCallstack
-            trace={metric.trace}
-            traceDomain={metric.traceDomain}
-          />
-        </td>
-        <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
-        <td class="ta-c">{metric.cps || undefined}</td>
-        <td class="ta-c">
-          <CellCancelable
-            calls={metric.calls}
-            canceledCounter={metric.canceledCounter}
-            canceledByTraceIds={metric.canceledByTraceIds}
-            onClick={onFindRegressors}
-          />
-        </td>
-        <td class="ta-c">{metric.handler}</td>
-        <td class="ta-r">
-          {#if metric.online}
-            <Variable value={metric.online} />
-          {/if}
-        </td>
-        <td><CellBypass traceId={metric.traceId} /></td>
-        <td><CellBreakpoint traceId={metric.traceId} /></td>
-      </tr>
+      <AnimationRequestHistoryMetric {metric} {onFindRegressors} />
     {/each}
   </tbody>
 </table>

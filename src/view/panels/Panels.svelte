@@ -7,7 +7,7 @@
   import TimersSetHistory from './timers/TimersSetHistory.svelte';
   import Media from './media/Media.svelte';
   import IdleCallbackRequestHistory from './idle/IdleCallbackRequestHistory.svelte';
-  import Online from './online/Online.svelte';
+  import OnlineTimers from './online/OnlineTimers.svelte';
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
   import Worker from './worker/Worker.svelte';
   import Scheduler from './scheduler/Scheduler.svelte';
@@ -20,7 +20,7 @@
   <Worker telemetry={ts.telemetry.worker} />
   <Scheduler telemetry={ts.telemetry.scheduler} />
   <Eval evalHistory={ts.telemetry.evalHistory} />
-  <Online onlineTimers={ts.telemetry.onlineTimers} />
+  <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
 
   {#if ts.telemetry.setTimeoutHistory?.length}
     <TimersSetHistory

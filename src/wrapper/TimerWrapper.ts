@@ -75,8 +75,7 @@ export const ClearTimerFacts = /*@__PURE__*/ (() =>
     }],
     [ClearTimerFact.IMPLICIT_USAGE, {
       tag: 'IU',
-      details:
-        'cT cancelled interval or cI cancelled timeout',
+      details: 'cT cancelled interval or cI cancelled timeout',
     }],
   ]))();
 
