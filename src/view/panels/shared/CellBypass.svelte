@@ -15,33 +15,27 @@
   }
 </script>
 
-<div class="sensor">
-  <a
-    href="."
-    role="button"
-    aria-label="Place bypass"
-    class:active={isBypassed}
-    onclick={onToggle}
-  >
-    <span class="icon -bypass"></span>
-  </a>
-</div>
+<button
+  aria-label="Place bypass"
+  class:active={isBypassed}
+  onclick={onToggle}
+>
+  <span class="icon -bypass"></span>
+</button>
 
 <style lang="scss">
-  .sensor {
-    a {
-      visibility: hidden;
+  .icon {
+    visibility: hidden;
+  }
+  button:is(:hover, :focus) {
+    &:not(.active) .icon {
+      background-color: var(--text-passive);
     }
-    &:hover {
-      a {
-        visibility: visible;
-        &:not(.active) .icon {
-          background-color: var(--text-passive);
-        }
-      }
-    }
-    a.active {
+    .icon {
       visibility: visible;
     }
+  }
+  button.active .icon {
+    visibility: visible;
   }
 </style>

@@ -27,8 +27,10 @@
         <th class="ta-c">Self</th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">Called</th>
-        <th title="Bypass"><span class="icon -bypass"></span></th>
-        <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
+        <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
+        <th class="ta-c" title="Breakpoint">
+          <span class="icon -breakpoint"></span>
+        </th>
       </tr>
     </thead>
 

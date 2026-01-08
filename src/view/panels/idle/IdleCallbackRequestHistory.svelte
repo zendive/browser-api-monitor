@@ -81,7 +81,7 @@
   description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
 >
   <IdleCallbackCancelHistory
-    caption="Canceled by"
+    caption="Cancelled by"
     cicHistory={$state.snapshot(cicHistoryMetrics)}
   />
 </Dialog>
@@ -146,8 +146,10 @@
           eventChangeSorting={onChangeSort}
         >Set</ColumnSortable>
       </th>
-      <th title="Bypass"><span class="icon -bypass"></span></th>
-      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
+      <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
+      <th class="ta-c" title="Breakpoint">
+        <span class="icon -breakpoint"></span>
+      </th>
     </tr>
   </thead>
 

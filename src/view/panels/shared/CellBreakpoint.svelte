@@ -15,33 +15,27 @@
   }
 </script>
 
-<div class="sensor">
-  <a
-    href="."
-    role="button"
-    class:active={isDebugged}
-    aria-label="Place breakpoint"
-    onclick={onToggle}
-  >
-    <span class="icon -breakpoint"></span>
-  </a>
-</div>
+<button
+  aria-label="Place breakpoint"
+  class:active={isDebugged}
+  onclick={onToggle}
+>
+  <span class="icon -breakpoint"></span>
+</button>
 
 <style lang="scss">
-  .sensor {
-    a {
-      visibility: hidden;
+  .icon {
+    visibility: hidden;
+  }
+  button:is(:hover, :focus) {
+    &:not(.active) .icon {
+      background-color: var(--text-passive);
     }
-    &:hover {
-      a {
-        visibility: visible;
-        &:not(.active) .icon {
-          background-color: var(--text-passive);
-        }
-      }
-    }
-    a.active {
+    .icon {
       visibility: visible;
     }
+  }
+  button.active .icon {
+    visibility: visible;
   }
 </style>
