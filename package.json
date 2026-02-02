@@ -1,12 +1,12 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/chrome": "0.1.32",
+    "@types/chrome": "0.1.36",
     "@types/deno": "2.5.0",
-    "sass": "1.97.1",
-    "sv": "0.11.1",
-    "svelte": "5.46.1",
-    "svelte-check": "4.3.5",
+    "sass": "1.97.3",
+    "sv": "0.11.4",
+    "svelte": "5.49.1",
+    "svelte-check": "4.3.6",
     "typescript": "5.9.3"
   },
   "dependencies": {

@@ -20,7 +20,11 @@ clean:
 
 .PHONY: install
 install:
-	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher
+	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher,npm:esbuild
+
+.PHOONY: update
+update:
+	deno update --latest
 
 .PHONY: dev
 dev:
@@ -35,11 +39,11 @@ valid:
 
 .PHONY: test
 test: valid
-	deno test --parallel --no-check --trace-leaks --reporter=dot
+	deno test --parallel --no-check --trace-leaks --reporter=dot --allow-env=WS_NO_BUFFER_UTIL
 
 .PHONY: test-dev
 test-dev:
-	deno test --watch --parallel --no-check --trace-leaks
+	deno test --watch --parallel --no-check --trace-leaks --allow-env=WS_NO_BUFFER_UTIL
 
 .PHONY: prod
 prod: test

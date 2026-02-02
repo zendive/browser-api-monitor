@@ -3,9 +3,10 @@ import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
-const nodeEnv = Deno.env.get('NODE_ENV');
+const nodeEnv = Deno.env.get('NODE_ENV') || 'development';
 const isProd = nodeEnv === 'production';
 const isMirror = Deno.args.includes('--mirror');
+const logLevel = isProd ? 'warning' : 'debug';
 const buildOptions: BuildOptions = {
   plugins: [
     esbuildSvelte({
@@ -34,11 +35,11 @@ const buildOptions: BuildOptions = {
   platform: 'browser',
   format: 'iife',
   target: 'esnext',
-  conditions: [`${nodeEnv}`],
+  conditions: [nodeEnv],
   minify: isProd,
   sourcemap: false,
   treeShaking: true,
-  logLevel: isProd ? 'warning' : 'debug',
+  logLevel,
 };
 
 if (isProd) {

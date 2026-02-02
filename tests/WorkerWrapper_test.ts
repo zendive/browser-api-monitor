@@ -11,6 +11,7 @@ import {
   WorkerRELFact,
 } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
+import { wait } from '../src/api/time.ts';
 
 const codeBlob = URL.createObjectURL(
   new Blob([`
@@ -70,3 +71,5 @@ describe('WorkerWrapper', () => {
     expect(getRELFact()).toBe(WorkerRELFact.NOT_FOUND);
   });
 });
+
+await wait(10);
