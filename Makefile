@@ -5,8 +5,8 @@ REQUIRED_BINS := deno jq zip tree python3
 $(foreach bin,$(REQUIRED_BINS),\
     $(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
 
-DENO_DEV := NODE_ENV=development deno run --watch
-DENO_PROD := NODE_ENV=production deno run
+DENO_DEV := APP_MODE=development deno run --watch
+DENO_PROD := APP_MODE=production deno run
 DENO_OPTIONS := --allow-env --allow-read --allow-run
 VERSION != jq -j '.version' ./manifest.json
 CHROME_ZIP := "extension.chrome-$(VERSION).zip"
@@ -59,7 +59,7 @@ prod: test
 mirror-dev:
 	@echo "🎗 reminder to stop \"make dev\""
 	rm -rf $(BUILD_DIR)
-	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT) --mirror
+	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT) --x-mirror
 
 .PHONY: mirror-serve
 mirror-serve:
