@@ -100,6 +100,8 @@ To assess Web Application implementation correctness and expedite issues discove
 
 ### Build instructions
 
+Here is a short list to help you get started, for a full set of make commands refer to [./Makefile](./Makefile):
+
 ```bash
 make clean install  # install dependencies
 make dev            # build in development mode and watch for changes
