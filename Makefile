@@ -2,12 +2,10 @@
 
 # Ensure environment dependencies exist
 REQUIRED_BINS := deno jq zip tree python3
-$(foreach bin,$(REQUIRED_BINS),\
-    $(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
+$(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
 
-DENO_DEV := APP_MODE=development deno run --watch
-DENO_PROD := APP_MODE=production deno run
-DENO_OPTIONS := --allow-env --allow-read --allow-run
+BUILD_DEV := APP_MODE=development deno run --watch --allow-env --allow-read --allow-run
+BUILD_PROD := APP_MODE=production deno run --allow-env --allow-read --allow-run
 VERSION != jq -j '.version' ./manifest.json
 CHROME_ZIP := "extension.chrome-$(VERSION).zip"
 OUTPUT_DIR := ./public/
@@ -22,33 +20,33 @@ clean:
 install:
 	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher,npm:esbuild
 
-.PHOONY: update
+.PHONY: update
 update:
 	deno update --latest
 
 .PHONY: dev
 dev:
 	rm -rf $(BUILD_DIR)
-	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT)
+	$(BUILD_DEV) $(BUILD_SCRIPT)
 
 .PHONY: valid
 valid:
 	deno fmt --unstable-component
 	deno lint
-	deno $(DENO_OPTIONS) npm:svelte-check --no-tsconfig # only for *.svelte files
+	deno run --allow-read --allow-env npm:svelte-check -- --no-tsconfig
 
 .PHONY: test
 test: valid
-	deno test --parallel --no-check --trace-leaks --reporter=dot --allow-env=WS_NO_BUFFER_UTIL
+	deno test --allow-env=WS_NO_BUFFER_UTIL --parallel --no-check --trace-leaks --reporter=dot
 
 .PHONY: test-dev
 test-dev:
-	deno test --watch --parallel --no-check --trace-leaks --allow-env=WS_NO_BUFFER_UTIL
+	deno test --allow-env=WS_NO_BUFFER_UTIL --watch --parallel --no-check --trace-leaks
 
 .PHONY: prod
 prod: test
 	rm -rf $(BUILD_DIR) $(CHROME_ZIP)
-	$(DENO_PROD) $(DENO_OPTIONS) $(BUILD_SCRIPT)
+	$(BUILD_PROD) $(BUILD_SCRIPT)
 
 	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json > /dev/null
 	zip --delete $(CHROME_ZIP) "$(OUTPUT_DIR)mirror.html" "$(BUILD_DIR)mirror/*" > /dev/null
@@ -59,7 +57,7 @@ prod: test
 mirror-dev:
 	@echo "🎗 reminder to stop \"make dev\""
 	rm -rf $(BUILD_DIR)
-	$(DENO_DEV) $(DENO_OPTIONS) $(BUILD_SCRIPT) --x-mirror
+	$(BUILD_DEV) $(BUILD_SCRIPT) -- --x-mirror
 
 .PHONY: mirror-serve
 mirror-serve:
