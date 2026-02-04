@@ -62,19 +62,13 @@
                 <td class="item-label">{label}</td>
                 <td class="item-value">
                   {#if isToggableMediaProp(label)}
-                    <i
+                    <button
+                      aria-label="Toggle state"
                       class="is-toggable"
-                      role="button"
-                      tabindex="0"
-                      onkeydown={(e) => {
-                        if (
-                          e.key !== 'Enter' && e.key !== ' '
-                        ) return;
-                        e.preventDefault();
-                        onToggleBoolean(label);
-                      }}
                       onclick={() => void onToggleBoolean(label)}
-                    >{value}</i>
+                    >
+                      {value}
+                    </button>
                   {:else if isVariableMediaProp(label)}
                     <Variable {value} />
                   {:else}
