@@ -6,8 +6,9 @@
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from '../../shared/Variable.svelte';
 
-  let { media = { total: 0, collection: [] } }: { media: TMediaTelemetry } =
-    $props();
+  let {
+    media = { total: 0, collection: [] },
+  }: { media: TMediaTelemetry } = $props();
   let videos = $derived.by(() =>
     media.collection.filter((v) => v.type === EMediaType.VIDEO)
   );
@@ -24,7 +25,11 @@
       </div>
       <div class="list">
         {#each videos as videoMetrics (videoMetrics.mediaId)}
-          <MediaMetrics metrics={videoMetrics} />
+          <MediaMetrics
+            mediaId={videoMetrics.mediaId}
+            events={videoMetrics.events}
+            props={videoMetrics.props}
+          />
         {/each}
       </div>
     </section>
@@ -37,7 +42,11 @@
       </div>
       <div class="list">
         {#each audios as audioMetrics (audioMetrics.mediaId)}
-          <MediaMetrics metrics={audioMetrics} />
+          <MediaMetrics
+            mediaId={audioMetrics.mediaId}
+            events={audioMetrics.events}
+            props={audioMetrics.props}
+          />
         {/each}
       </div>
     </section>

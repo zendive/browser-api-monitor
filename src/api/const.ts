@@ -75,10 +75,10 @@ export const MEDIA_ELEMENT_EVENTS = [
 ];
 
 export const MEDIA_ELEMENT_PROPS = [
-  'poster',
   'currentSrc',
   'src',
   'srcObject',
+  'poster',
   'error',
   'preload',
   'networkState',

@@ -1,41 +1,32 @@
 <script lang="ts">
-  import {
-    isToggableMediaProp,
-    type TMediaMetrics,
-  } from '../../../wrapper/MediaWrapper.ts';
-  import { EMsg, portPost } from '../../../api/communication.ts';
-  import Variable from '../../shared/Variable.svelte';
+  import { type TMediaMetrics } from '../../../wrapper/MediaWrapper.ts';
   import MediaCommands from './MediaCommands.svelte';
+  import MediaEvent from './MediaEvent.svelte';
+  import MediaProp from './MediaProp.svelte';
 
-  let { metrics }: { metrics: TMediaMetrics } = $props();
+  let { mediaId, events, props }: {
+    mediaId: string;
+    events: TMediaMetrics['events'];
+    props: TMediaMetrics['props'];
+  } = $props();
+  let isSameSource = $derived.by(() => props.src === props.currentSrc);
+  const duplicateSrc = ['currentSrc', 'src'];
+  let filteredProps = $derived.by(() => {
+    let rv = Object.entries(props);
 
-  function onToggleBoolean(property: string) {
-    portPost({
-      msg: EMsg.MEDIA_COMMAND,
-      mediaId: metrics.mediaId,
-      cmd: 'toggle-boolean',
-      property: property as keyof HTMLMediaElement,
-    });
-  }
-
-  function isVariableMediaProp(label: string) {
-    return ['networkState', 'readyState'].includes(label);
-  }
-
-  function propValueFilter(value: unknown) {
-    if (value && typeof value === 'object') {
-      return JSON.stringify(value);
+    if (isSameSource) {
+      rv = rv.filter(([name]) => !duplicateSrc.includes(name));
     }
 
-    return value;
-  }
+    return rv;
+  });
 </script>
 
 <table class="group">
   <caption class="bc-invert ta-l">
     <MediaCommands
-      mediaId={metrics.mediaId}
-      paused={metrics.props.paused}
+      {mediaId}
+      paused={props.paused}
     />
   </caption>
   <tbody>
@@ -44,11 +35,8 @@
         <table class="w-full">
           <caption class="bc-invert ta-l">Events</caption>
           <tbody>
-            {#each Object.entries(metrics.events) as [label, value] (label)}
-              <tr class:isPassive={0 === value} class:isActive={0 !== value}>
-                <td class="item-label">{label}</td>
-                <td class="item-value"><Variable {value} /></td>
-              </tr>
+            {#each Object.entries(events) as [name, value] (name)}
+              <MediaEvent {name} {value} />
             {/each}
           </tbody>
         </table>
@@ -57,25 +45,15 @@
         <table class="w-full">
           <caption class="bc-invert ta-l">Properties</caption>
           <tbody>
-            {#each Object.entries(metrics.props) as [label, value] (label)}
-              <tr class:isPassive={!value} class:isActive={true === value}>
-                <td class="item-label">{label}</td>
-                <td class="item-value">
-                  {#if isToggableMediaProp(label)}
-                    <button
-                      aria-label="Toggle state"
-                      class="is-toggable"
-                      onclick={() => void onToggleBoolean(label)}
-                    >
-                      {value}
-                    </button>
-                  {:else if isVariableMediaProp(label)}
-                    <Variable {value} />
-                  {:else}
-                    {propValueFilter(value)}
-                  {/if}
-                </td>
-              </tr>
+            {#if isSameSource}
+              <MediaProp
+                name="src/currentSrc"
+                value={props.src}
+                {mediaId}
+              />
+            {/if}
+            {#each filteredProps as [name, value] (name)}
+              <MediaProp {name} {value} {mediaId} />
             {/each}
           </tbody>
         </table>
@@ -95,25 +73,5 @@
   .events,
   .props {
     vertical-align: top;
-  }
-  .isPassive {
-    color: var(--text-passive);
-    font-weight: normal;
-  }
-  .is-toggable {
-    cursor: pointer;
-  }
-  .isActive {
-    font-weight: bold;
-  }
-  .item-label {
-    text-align: right;
-  }
-  .props .item-value {
-    word-break: break-all;
-  }
-  .item-value {
-    text-align: left;
-    margin-left: 1rem;
   }
 </style>
