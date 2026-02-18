@@ -4,8 +4,8 @@
 REQUIRED_BINS := deno jq zip tree python3
 $(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
 
-BUILD_DEV := APP_MODE=development deno run --watch --allow-env --allow-read --allow-run
-BUILD_PROD := APP_MODE=production deno run --allow-env --allow-read --allow-run
+BUILD_DEV := BUILD_MODE=development deno run --watch --allow-env --allow-read --allow-run
+BUILD_PROD := BUILD_MODE=production deno run --allow-env --allow-read --allow-run
 VERSION != jq -j '.version' ./manifest.json
 CHROME_ZIP := "extension.chrome-$(VERSION).zip"
 OUTPUT_DIR := ./public/

@@ -96,7 +96,7 @@ To assess Web Application implementation correctness and expedite issues discove
 
 ### Build requirements
 
-- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/) make jq zip tree python3
+- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/) `make`, `jq`, `zip`, `tree`, `python3`
 
 ### Build instructions
 

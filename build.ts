@@ -3,8 +3,8 @@ import esbuildSvelte from 'esbuild-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
-const buildMode = Deno.env.get('APP_MODE') || 'development';
-const isProd = buildMode === 'production';
+const isProd = Deno.env.get('BUILD_MODE') === 'production';
+const buildMode = isProd ? 'production' : 'development';
 const isMirror = Deno.args.includes('--x-mirror');
 const logLevel = isProd ? 'warning' : 'debug';
 const buildOptions: BuildOptions = {
