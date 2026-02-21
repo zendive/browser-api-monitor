@@ -78,7 +78,7 @@
       font-weight: 600;
     }
     &.visited {
-      background-color: var(--link-visited-bg);
+      color: var(--attention);
     }
   }
 
