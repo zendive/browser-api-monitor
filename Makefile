@@ -53,6 +53,8 @@ prod: test
 
 	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
 
+	deno audit
+
 .PHONY: mirror-dev
 mirror-dev:
 	@echo "🎗 reminder to stop \"make dev\""
