@@ -205,11 +205,9 @@ th .icon {
 
 @keyframes scrolledTo {
   0% {
-    outline: 1px solid var(--attention);
-    outline-offset: -1px;
+    background-color: rgb(from var(--attention) r g b / 0.1);
   }
-  100% {
-    outline: 5px solid var(--attention);
-    outline-offset: -5px;
+  50% {
+    background-color: rgb(from var(--attention) r g b / 0.5);
   }
 }
