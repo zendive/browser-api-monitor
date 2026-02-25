@@ -43,9 +43,9 @@ export type TConfig = typeof DEFAULT_CONFIG;
 export type TConfigField = Partial<TConfig>;
 
 export const DEFAULT_PANELS: TPanel[] = [
-  { key: 'callsSummary', label: 'Summary Bar', visible: false },
+  { key: 'callsSummary', label: 'Summary Bar', visible: true },
   { key: 'media', label: 'Media', visible: true },
-  { key: 'activeTimers', label: 'Active Timers', visible: true },
+  { key: 'activeTimers', label: 'Active Timers', visible: false },
   { key: 'worker', label: 'Worker', visible: true, wrap: true },
   { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
