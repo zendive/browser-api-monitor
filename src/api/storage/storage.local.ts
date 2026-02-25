@@ -160,6 +160,10 @@ export async function loadLocalStorage(): Promise<TConfig> {
   return store[CONFIG_VERSION];
 }
 
+/**
+ * @NOTE: vulnerable to "time of check / time of use" bug (TOC/TOU)
+ * @param value
+ */
 export async function saveLocalStorage(value: TConfigField) {
   const store = await loadLocalStorage();
 
@@ -169,7 +173,7 @@ export async function saveLocalStorage(value: TConfigField) {
 }
 
 export function onLocalStorageChange(
-  callback: (newValue: TConfig, oldValue: TConfig) => void,
+  callback: (newValue: TConfig, oldValue: TConfig | undefined) => void,
 ) {
   local.onChanged.addListener((change) => {
     const newValue = change?.[CONFIG_VERSION]?.newValue;

@@ -319,4 +319,5 @@ describe('wrappers', () => {
   });
 });
 
+// wait till `deno` internal pending timers drain
 await wait(10);

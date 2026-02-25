@@ -8,6 +8,7 @@
 </script>
 
 <button
+  type="button"
   onclick={togglePause}
   title="Toggle pause"
   aria-label="Toggle pause"

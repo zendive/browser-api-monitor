@@ -37,8 +37,8 @@ const animation = new Timer({ type: ETimer.ANIMATION }, () => {
   animation.start();
 });
 
-export function startAnimation(ctx: CanvasRenderingContext2D) {
-  initContext(ctx);
+export function startAnimation(crc2d: CanvasRenderingContext2D) {
+  ctx = initContext(crc2d);
   animation.start();
 
   const offColourSchemeChange = onColourSchemeChange((scheme) => {
@@ -54,13 +54,14 @@ export function startAnimation(ctx: CanvasRenderingContext2D) {
   };
 }
 
-function initContext(_ctx: CanvasRenderingContext2D) {
-  ctx = _ctx;
-  ctx.canvas.width = D;
-  ctx.canvas.height = D;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = LINE_WIDTH;
-  ctx.shadowBlur = SHADOW_WIDTH;
+function initContext(crc2d: CanvasRenderingContext2D) {
+  crc2d.canvas.width = D;
+  crc2d.canvas.height = D;
+  crc2d.lineCap = 'round';
+  crc2d.lineWidth = LINE_WIDTH;
+  crc2d.shadowBlur = SHADOW_WIDTH;
+
+  return crc2d;
 }
 
 export function updateAnimation(timeOfCollection: number) {

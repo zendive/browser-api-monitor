@@ -16,6 +16,7 @@
 </script>
 
 <button
+  type="button"
   aria-label="Place bypass"
   class:active={isBypassed}
   onclick={onToggle}

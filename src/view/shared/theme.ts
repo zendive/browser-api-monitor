@@ -1,4 +1,4 @@
-type TColourScheme = 'light' | 'dark';
+export type TColourScheme = 'light' | 'dark';
 
 export function onColourSchemeChange(
   callback: (scheme: TColourScheme) => void,

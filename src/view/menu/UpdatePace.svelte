@@ -10,7 +10,7 @@
 
   onMount(() => {
     const ctx = canvasEl.getContext('2d');
-    return startAnimation(ctx!);
+    return ctx && startAnimation(ctx);
   });
 </script>
 

@@ -27,16 +27,16 @@
     },
   );
 
-  runtimeListen((o) => {
-    if (o.msg === EMsg.INJECTION_CONFIRMED) {
-      delayedAlert.stop();
-      tabReloadAlertEl.hide();
-    } else if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
-      tabReloadAlertEl.hide();
-    }
-  });
-
   onMount(() => {
+    runtimeListen((o) => {
+      if (o.msg === EMsg.INJECTION_CONFIRMED) {
+        delayedAlert.stop();
+        tabReloadAlertEl.hide();
+      } else if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
+        tabReloadAlertEl.hide();
+      }
+    });
+
     if (!__mirror__) {
       pingContentScript();
       extensionUpdateSensor.start();

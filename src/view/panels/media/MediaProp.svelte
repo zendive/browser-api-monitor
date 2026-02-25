@@ -36,6 +36,7 @@
   <td class="value">
     {#if isToggableMediaProp(name)}
       <button
+        type="button"
         aria-label="Toggle state"
         class="isToggable"
         onclick={() => void onToggleBoolean(name)}
@@ -67,6 +68,5 @@
   .value {
     word-break: break-all;
     text-align: left;
-    margin-left: 1rem;
   }
 </style>

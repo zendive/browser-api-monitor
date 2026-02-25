@@ -23,6 +23,7 @@
 
 {#if time !== null}
   <button
+    type="button"
     class="self-time"
     class:-stats={displayMode === ESelfTimeDisplayMode.STATS}
     onclick={(e) => {

@@ -66,6 +66,8 @@
   role="button"
   title={tooltip}
   class:link-disabled={!hasShownData}
+  aria-disabled={!hasShownData}
+  tabindex={hasShownData ? 0 : -1}
   onclick={(e) => {
     e.preventDefault();
     scrollTo();
@@ -77,6 +79,7 @@
 <style lang="scss">
   a {
     padding: 0 0.4rem;
+
     &:not(:last-of-type) {
       border-right: 1px solid var(--border);
     }

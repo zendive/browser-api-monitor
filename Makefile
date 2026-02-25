@@ -55,6 +55,9 @@ prod: test
 
 	deno audit
 
+.PHONY: all
+all: prod
+
 .PHONY: mirror-dev
 mirror-dev:
 	@echo "🎗 reminder to stop \"make dev\""

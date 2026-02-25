@@ -81,7 +81,7 @@
   bind:this={dialogEl}
   eventClose={onCloseDialog}
   title="Places from which timer with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. For full coverage - requires both clearTimeout and clearInterval panels enabled."
+  description="The information is actual only on time of demand. For full coverage - requires clearTimeout and/or clearInterval panels enabled."
 >
   <TimersClearHistory
     caption="Cancelled by"
@@ -90,7 +90,7 @@
 </Dialog>
 
 <Alert bind:this={alertEl} title="Attention">
-  Requires both clearTimeout and clearInterval panels enabled
+  Requires clearTimeout and/or clearInterval panels enabled
 </Alert>
 
 <table data-navigation-tag={caption}>

@@ -20,6 +20,7 @@
 
 <span class="media-commands">
   <button
+    type="button"
     onclick={() => void onMediaCommand('log')}
     title="console.log(media)"
     aria-label="console.log(media)"
@@ -27,6 +28,7 @@
     <span class="icon -console"></span>
   </button>
   <button
+    type="button"
     onclick={() => void onMediaCommand('locate')}
     title="media.scrollIntoView()"
     aria-label="media.scrollIntoView()"
@@ -34,6 +36,7 @@
     <span class="icon -locate"></span>
   </button>
   <button
+    type="button"
     onclick={() => void onMediaCommand('load')}
     title="media.load()"
     aria-label="media.load()"
@@ -42,6 +45,7 @@
   </button>
   {#if paused}
     <button
+      type="button"
       onclick={() => void onMediaCommand('play')}
       title="media.play()"
       aria-label="media.play()"
@@ -50,6 +54,7 @@
     </button>
   {:else}
     <button
+      type="button"
       onclick={() => void onMediaCommand('pause')}
       title="media.pause()"
       aria-label="media.pause()"
@@ -58,6 +63,7 @@
     </button>
   {/if}
   <button
+    type="button"
     onclick={() => void onMediaCommand('frame-backward')}
     title="Seek -16ms"
     aria-label="Seek -16ms"
@@ -65,6 +71,7 @@
     <span class="icon -frame-backward"></span>
   </button>
   <button
+    type="button"
     onclick={() => void onMediaCommand('frame-forward')}
     title="Seek +16ms"
     aria-label="Seek +16ms"
@@ -72,6 +79,7 @@
     <span class="icon -frame-forward"></span>
   </button>
   <button
+    type="button"
     onclick={() => void onMediaCommand('slower')}
     title="Speed -10%"
     aria-label="Speed -10%"
@@ -79,6 +87,7 @@
     <span class="icon -slower"></span>
   </button>
   <button
+    type="button"
     onclick={() => void onMediaCommand('faster')}
     title="Speed +10%"
     aria-label="Speed +10%"

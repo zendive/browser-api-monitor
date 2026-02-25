@@ -16,6 +16,7 @@
 </script>
 
 <button
+  type="button"
   aria-label="Place breakpoint"
   class:active={isDebugged}
   onclick={onToggle}

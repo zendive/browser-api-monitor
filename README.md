@@ -1,4 +1,4 @@
-# <img src="./public/img/icon.svg" width="32"/> API Monitor - Chrome Developer Tools extension
+## <img src="./public/img/icon.svg" style="width: 2.5rem; vertical-align: middle;"/> API Monitor - Chrome Developer Tools extension
 
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
@@ -96,9 +96,9 @@ To assess Web Application implementation correctness and expedite issues discove
 
 ### Build requirements
 
-- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/) `make`, `jq`, `zip`, `tree`, `python3`
+- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `python3`
 
-### Build instructions
+#### Build instructions
 
 Here is a short list to help you get started, for a full set of make commands refer to [./Makefile](./Makefile):
 

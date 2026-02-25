@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
   import { EMsg, runtimeListen } from '../../api/communication.ts';
   import Alert from '../shared/Alert.svelte';
@@ -22,11 +23,13 @@
     return config.keepAwake ? 'on' : 'off';
   });
 
-  runtimeListen((o) => {
-    if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
-      reloadMessageEl.hide();
-      selfEl.hidePopover();
-    }
+  onMount(() => {
+    runtimeListen((o) => {
+      if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
+        reloadMessageEl.hide();
+        selfEl.hidePopover();
+      }
+    });
   });
 
   function onTogglePanelWrap(index: number) {
@@ -41,6 +44,7 @@
 </script>
 
 <button
+  type="button"
   popovertarget="toggle-panels-menu"
   class="toggle-menu-button"
   title="Control Panel"
@@ -56,6 +60,7 @@
         <td class="-left">Callstack Type</td>
         <td class="-right">
           <button
+            type="button"
             class="btn-toggle"
             title="Toggle callstack type: full/short"
             onclick={onToggleWrapperCallstackType}
@@ -84,6 +89,7 @@
           {#if panel.wrap !== undefined}
             <td class="-right">
               <button
+                type="button"
                 class="btn-toggle"
                 title="Wrap/unwrap function to start/stop collect it's metrics"
                 onclick={() => void onTogglePanelWrap(index)}
@@ -101,6 +107,7 @@
         </td>
         <td class="-right">
           <button
+            type="button"
             class="btn-toggle"
             onclick={toggleKeepAwake}
           >

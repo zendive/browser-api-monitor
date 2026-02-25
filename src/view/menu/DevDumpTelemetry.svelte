@@ -9,6 +9,7 @@
 </script>
 
 <button
+  type="button"
   onclick={dump}
   title={`Dump telemetry\n(look in devtools of the devtools)`}
   aria-label="Dump telemetry"

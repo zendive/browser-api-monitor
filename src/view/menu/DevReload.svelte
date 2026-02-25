@@ -11,6 +11,7 @@
 </script>
 
 <button
+  type="button"
   onclick={onDevReload}
   title="Reload & Clear Storages"
   aria-label="Reload & Clear Storages"

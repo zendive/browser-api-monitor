@@ -27,6 +27,10 @@ export async function loadSessionStorage(): Promise<TSession> {
   return store[SESSION_VERSION];
 }
 
+/**
+ * @NOTE: vulnerable to "time of check / time of use" bug (TOC/TOU)
+ * @param value
+ */
 export async function saveSessionStorage(value: TSessionProperty) {
   const store = await loadSessionStorage();
 
@@ -36,7 +40,7 @@ export async function saveSessionStorage(value: TSessionProperty) {
 }
 
 export function onSessionStorageChange(
-  callback: (newValue: TSession, oldValue: TSession) => void,
+  callback: (newValue: TSession, oldValue: TSession | undefined) => void,
 ) {
   session.onChanged.addListener((change) => {
     const newValue = change?.[SESSION_VERSION]?.newValue;
