@@ -33,9 +33,10 @@
       cleanUrl,
       lineNumber - 1,
       columnNumber - 1,
+      () => {
+        visited = true;
+      },
     );
-
-    visited = true;
   }
 
   function onClick(e: MouseEvent) {
