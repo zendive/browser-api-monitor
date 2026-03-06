@@ -31,7 +31,7 @@ To assess Web Application implementation correctness and expedite issues discove
 
 - Detect incorrect timeout argument passed to `setTimeout`, `setInterval`, `requestIdleCallback`, `scheduler.postTask`.
 
-- Detect terminator function invocation with a handler that is non-positive integer, or of non-existent, or off an already elapsed setter.
+- Detect terminator function invocation with a handler that is non-positive integer, or of non-existent/elapsed setter.
 
 - Detect timeouts cleared with `clearInterval`, or intervals cleared with `clearTimeout`.
 
