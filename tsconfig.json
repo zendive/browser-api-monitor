@@ -7,7 +7,6 @@
     "skipLibCheck": true,
     "noUnusedLocals": true,
     "types": ["chrome"],
-    "baseUrl": ".",
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
