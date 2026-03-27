@@ -6,7 +6,7 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noUnusedLocals": true,
-    "types": ["chrome"],
+    "types": ["deno", "chrome"],
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
