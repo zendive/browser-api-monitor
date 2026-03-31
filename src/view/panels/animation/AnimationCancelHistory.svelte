@@ -28,8 +28,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelAnimationFrame.field =
-      <keyof TCancelAnimationFrameHistory> field;
+    sortCancelAnimationFrame.field = <keyof TCancelAnimationFrameHistory> field;
     sortCancelAnimationFrame.order = order;
 
     saveLocalStorage({

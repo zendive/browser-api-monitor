@@ -9,7 +9,7 @@
     events: TMediaMetrics['events'];
     props: TMediaMetrics['props'];
   } = $props();
-  let isSameSource = $derived.by(() => props.src === props.currentSrc);
+  let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
   const duplicateSrc = ['currentSrc', 'src'];
   let filteredProps = $derived.by(() => {
     let rv = Object.entries(props);
@@ -26,7 +26,7 @@
   <caption class="bc-invert ta-l">
     <MediaCommands
       {mediaId}
-      paused={props.paused}
+      paused={props['paused']}
     />
   </caption>
   <tbody>
@@ -48,7 +48,7 @@
             {#if isSameSource}
               <MediaProp
                 name="src/currentSrc"
-                value={props.src}
+                value={props['src']}
                 {mediaId}
               />
             {/if}

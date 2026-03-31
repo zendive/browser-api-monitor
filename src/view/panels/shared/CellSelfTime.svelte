@@ -7,13 +7,13 @@
   import CellSelfTimeStats from './CellSelfTimeStats.svelte';
 
   let { time }: { time: number | null } = $props();
-  let modeCycles: ESelfTimeDisplayMode[] = [
+  const modeCycles: ESelfTimeDisplayMode[] = [
     ESelfTimeDisplayMode.DEFAULT,
     ESelfTimeDisplayMode.STATS,
   ];
   let cycleIndex: number = $state(0);
   let displayMode: ESelfTimeDisplayMode = $derived.by(() =>
-    modeCycles[cycleIndex]
+    modeCycles[cycleIndex] ?? ESelfTimeDisplayMode.DEFAULT
   );
 
   function nextMode() {

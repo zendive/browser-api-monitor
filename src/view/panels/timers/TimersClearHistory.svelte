@@ -13,8 +13,10 @@
   let {
     clearTimerHistory,
     caption,
-  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } =
-    $props();
+  }: {
+    clearTimerHistory: TClearTimerHistory[];
+    caption: string;
+  } = $props();
   const { sortClearTimers } = useConfigState();
   let sortedMetrics = $derived.by(() =>
     clearTimerHistory.toSorted(

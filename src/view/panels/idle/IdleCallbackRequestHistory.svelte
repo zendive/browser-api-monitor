@@ -38,8 +38,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortRequestIdleCallback.field =
-      <keyof TRequestIdleCallbackHistory> field;
+    sortRequestIdleCallback.field = <keyof TRequestIdleCallbackHistory> field;
     sortRequestIdleCallback.order = order;
 
     saveLocalStorage({

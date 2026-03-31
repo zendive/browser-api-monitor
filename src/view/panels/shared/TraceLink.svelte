@@ -18,8 +18,7 @@
     parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
   );
   let isSourceLess = $derived.by(
-    () =>
-      !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
+    () => !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
   );
 
   function showStackTraceResource() {

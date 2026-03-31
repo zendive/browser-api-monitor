@@ -13,8 +13,10 @@
   let {
     cicHistory,
     caption = '',
-  }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } =
-    $props();
+  }: {
+    cicHistory: TCancelIdleCallbackHistory[];
+    caption?: string;
+  } = $props();
   const { sortCancelIdleCallback } = useConfigState();
   let sortedMetrics = $derived.by(() =>
     cicHistory.toSorted(
