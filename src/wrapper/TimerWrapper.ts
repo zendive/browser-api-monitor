@@ -165,7 +165,6 @@ export class TimerWrapper {
     isEval: boolean,
   ) {
     let facts = <TFact> 0;
-    const existing = history.get(callstack.traceId);
 
     if (validTimerDelay(delay)) {
       delay = trim2ms(delay);
@@ -178,21 +177,12 @@ export class TimerWrapper {
       facts = Fact.assign(facts, SetTimerFact.NOT_A_FUNCTION);
     }
 
-    if (existing) {
-      existing.handler = handler;
-      existing.delay = delay;
-      existing.calls++;
-      existing.online++;
-
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      history.set(callstack.traceId, {
+    const stRecord = history.getOrInsertComputed(callstack.traceId, () => {
+      return {
         handler,
-        calls: 1,
+        calls: 0,
         delay,
-        online: 1,
+        online: 0,
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
@@ -200,7 +190,16 @@ export class TimerWrapper {
         canceledCounter: 0,
         canceledByTraceIds: null,
         selfTime: null,
-      });
+      };
+    });
+
+    stRecord.handler = handler;
+    stRecord.delay = delay;
+    stRecord.calls++;
+    stRecord.online++;
+
+    if (facts) {
+      stRecord.facts = Fact.assign(stRecord.facts, facts);
     }
   }
 
@@ -210,7 +209,6 @@ export class TimerWrapper {
     handler: unknown,
     callstack: TCallstack,
   ) {
-    const existing = history.get(callstack.traceId);
     let handlerDelay: string | number | undefined = TAG_DELAY_NOT_FOUND;
     let facts = <TFact> 0;
 
@@ -231,33 +229,33 @@ export class TimerWrapper {
       facts = Fact.assign(facts, ClearTimerFact.BAD_HANDLER);
     }
 
-    if (existing) {
-      existing.handler = <number | string> handler;
-      existing.delay = handlerDelay;
-      existing.calls++;
-
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      history.set(callstack.traceId, {
-        handler: <number | string> handler,
-        calls: 1,
-        delay: handlerDelay,
+    const ctRecord = history.getOrInsertComputed(callstack.traceId, () => {
+      return {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        handler: <number | string> handler,
+        calls: 0,
+        delay: handlerDelay,
         facts,
-      });
+      };
+    });
+
+    ctRecord.handler = <number | string> handler;
+    ctRecord.delay = handlerDelay;
+    ctRecord.calls++;
+
+    if (facts) {
+      ctRecord.facts = Fact.assign(ctRecord.facts, facts);
     }
   }
 
   #updateTimersSelfTime(
-    map: Map<string, TSetTimerHistory>,
+    history: Map<string, TSetTimerHistory>,
     traceId: string,
     selfTime: number | null,
   ) {
-    const record = map.get(traceId);
+    const record = history.get(traceId);
 
     if (record) {
       record.selfTime = trim2ms(selfTime);

@@ -51,7 +51,7 @@
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={PostTaskFacts} />
         </td>
-        <td class="ta-c">{metric.eventsCps || undefined}</td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c" title="&lt;called&gt; [&lt;aborted&gt;]">
           <Variable value={metric.calls} />
           {#if metric.aborts}

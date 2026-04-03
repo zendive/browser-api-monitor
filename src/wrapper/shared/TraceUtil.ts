@@ -67,8 +67,10 @@ export class TraceUtil {
     }
   }
 
-  getTraceDomain(trace: TTrace) {
-    if (trace.link.startsWith(location.origin)) {
+  getTraceDomain(trace: TTrace | undefined) {
+    if (!trace) {
+      return ETraceDomain.UNKNOWN;
+    } else if (trace.link.startsWith(location.origin)) {
       return ETraceDomain.SAME;
     } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
       return ETraceDomain.EXTERNAL;
@@ -101,21 +103,15 @@ export class TraceUtil {
 
   #getFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
     const traceId = hashString(e.stack || String(uniqueTrait));
-    const cached = this.#fullCallstackCacheTrace.get(traceId);
-    let rv;
+    const trace = this.#fullCallstackCacheTrace.getOrInsertComputed(
+      traceId,
+      () => {
+        return this.#getFullTrace(e.stack || '') ||
+          [this.#getFallbackTrace(uniqueTrait)];
+      },
+    );
 
-    if (cached) {
-      rv = { traceId, trace: cached };
-    } else {
-      const trace = this.#getFullTrace(e.stack || '');
-      rv = {
-        traceId,
-        trace: trace || [this.#getInvalidTrace(uniqueTrait)],
-      };
-      this.#fullCallstackCacheTrace.set(traceId, rv.trace);
-    }
-
-    return rv;
+    return { traceId, trace };
   }
 
   #getFullTrace(stackString: string): TTrace[] | null {
@@ -142,7 +138,7 @@ export class TraceUtil {
       traceId = hashString(trace.link);
     } else {
       traceId = hashString(e.stack || String(uniqueTrait));
-      trace = this.#getInvalidTrace(uniqueTrait);
+      trace = this.#getFallbackTrace(uniqueTrait);
     }
 
     return { traceId, trace: [trace] };
@@ -184,7 +180,7 @@ export class TraceUtil {
     return { name, link };
   }
 
-  #getInvalidTrace(uniqueTrait?: unknown): TTrace {
+  #getFallbackTrace(uniqueTrait?: unknown): TTrace {
     return {
       name: typeof uniqueTrait === 'function' && uniqueTrait.name
         ? uniqueTrait.name

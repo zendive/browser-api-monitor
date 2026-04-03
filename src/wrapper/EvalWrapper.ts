@@ -58,34 +58,32 @@ export class EvalWrapper {
     usesLocalScope: boolean,
     selfTime: number | null,
   ) {
-    const existing = this.evalHistory.get(callstack.traceId);
     let facts = EvalFact.USES_GLOBAL_SCOPE;
-
     if (usesLocalScope) {
       facts = Fact.assign(facts, EvalFact.USES_LOCAL_SCOPE);
     }
 
-    if (existing) {
-      existing.code = cloneObjectSafely(code);
-      existing.returnedValue = cloneObjectSafely(returnedValue);
-      existing.calls++;
-      existing.selfTime = trim2ms(selfTime);
+    const evalRecord = this.evalHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          calls: 0,
+          code: null,
+          returnedValue: null,
+          facts: 0,
+          selfTime: null,
+        };
+      },
+    );
 
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      this.evalHistory.set(callstack.traceId, {
-        calls: 1,
-        code: cloneObjectSafely(code),
-        returnedValue: cloneObjectSafely(returnedValue),
-        facts,
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        selfTime,
-      });
-    }
+    evalRecord.calls++;
+    evalRecord.code = cloneObjectSafely(code);
+    evalRecord.returnedValue = cloneObjectSafely(returnedValue);
+    evalRecord.facts = Fact.assign(evalRecord.facts, facts);
+    evalRecord.selfTime = trim2ms(selfTime);
   }
 
   wrap() {

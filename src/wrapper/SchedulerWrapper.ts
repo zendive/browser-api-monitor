@@ -11,7 +11,7 @@ export interface IYield extends TTraceable {
 }
 export interface IPostTask extends TTraceable {
   calls: number;
-  eventsCps: number;
+  cps: number;
   delay: number | undefined | string;
   priority: undefined | string;
   facts: TFact;
@@ -53,19 +53,20 @@ export class SchedulerWrapper {
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err);
-      const methodMetric = this.#yieldMap.get(callstack.traceId);
+      const methodMetric = this.#yieldMap.getOrInsertComputed(
+        callstack.traceId,
+        () => {
+          return {
+            traceId: callstack.traceId,
+            trace: callstack.trace,
+            traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            calls: 0,
+            cps: 1,
+          };
+        },
+      );
 
-      if (methodMetric) {
-        methodMetric.calls++;
-      } else {
-        this.#yieldMap.set(callstack.traceId, {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-          calls: 1,
-          cps: 1,
-        });
-      }
+      methodMetric.calls++;
 
       if (traceUtil.shouldPass(callstack.traceId)) {
         if (traceUtil.shouldPause(callstack.traceId)) {
@@ -86,31 +87,31 @@ export class SchedulerWrapper {
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err, fn);
-      let methodMetric = this.#postTaskMap.get(callstack.traceId);
       const delay = options?.delay;
       let aborted = false;
       let finished = false;
+      const methodMetric = this.#postTaskMap.getOrInsertComputed(
+        callstack.traceId,
+        () => {
+          return {
+            traceId: callstack.traceId,
+            trace: callstack.trace,
+            traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            calls: 0,
+            cps: 1,
+            delay,
+            facts: <TFact> 0,
+            selfTime: null,
+            priority: undefined,
+            aborts: 0,
+            online: 0,
+          };
+        },
+      );
 
-      if (methodMetric) {
-        methodMetric.calls++;
-        methodMetric.priority = options?.priority;
-        methodMetric.online++;
-      } else {
-        methodMetric = {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-          calls: 1,
-          eventsCps: 1,
-          delay,
-          facts: <TFact> 0,
-          selfTime: null,
-          priority: options?.priority,
-          aborts: 0,
-          online: 1,
-        };
-        this.#postTaskMap.set(callstack.traceId, methodMetric);
-      }
+      methodMetric.calls++;
+      methodMetric.priority = options?.priority;
+      methodMetric.online++;
 
       if (validTimerDelay(methodMetric.delay)) {
         methodMetric.delay = trim2ms(delay);
@@ -149,6 +150,8 @@ export class SchedulerWrapper {
           }
           return rv;
         }
+
+        return Promise.resolve(); // in case of bypass
       }, options);
     }.bind(this);
   }
@@ -174,7 +177,7 @@ export class SchedulerWrapper {
     this.#postTaskMap.forEach((methodMetric) => {
       const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.calls - prevCalls;
+      methodMetric.cps = methodMetric.calls - prevCalls;
       this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
     });
   }

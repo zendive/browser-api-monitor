@@ -61,26 +61,27 @@ export class AnimationWrapper {
   }
 
   #updateRafHistory(handler: number, callstack: TCallstack) {
-    const existing = this.rafHistory.get(callstack.traceId);
+    const rafRecord = this.rafHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          calls: 0,
+          handler,
+          online: 0,
+          canceledCounter: 0,
+          canceledByTraceIds: null,
+          selfTime: null,
+          cps: 1,
+        };
+      },
+    );
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
-      existing.online++;
-    } else {
-      this.rafHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        handler,
-        online: 1,
-        canceledCounter: 0,
-        canceledByTraceIds: null,
-        selfTime: null,
-        cps: 1,
-      });
-    }
+    rafRecord.calls++;
+    rafRecord.handler = handler;
+    rafRecord.online++;
 
     this.onlineAnimationFrameLookup.set(handler, callstack.traceId);
   }
@@ -100,7 +101,6 @@ export class AnimationWrapper {
   }
 
   #updateCafHistory(handler: number | string, callstack: TCallstack) {
-    const existing = this.cafHistory.get(callstack.traceId);
     let facts = <TFact> 0;
     let rafTraceId;
 
@@ -117,22 +117,24 @@ export class AnimationWrapper {
       facts = Fact.assign(facts, CafFact.BAD_HANDLER);
     }
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
+    const cafRecord = this.cafHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          facts,
+          calls: 0,
+          handler,
+        };
+      },
+    );
 
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      this.cafHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        facts,
-        calls: 1,
-        handler,
-      });
+    cafRecord.calls++;
+    cafRecord.handler = handler;
+    if (facts) {
+      cafRecord.facts = Fact.assign(cafRecord.facts, facts);
     }
 
     const rafRecord = rafTraceId && this.rafHistory.get(rafTraceId);

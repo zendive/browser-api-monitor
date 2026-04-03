@@ -98,7 +98,6 @@ export class IdleWrapper {
     delay: number | undefined | string,
     callstack: TCallstack,
   ) {
-    const existing = this.ricHistory.get(callstack.traceId);
     let facts = <TFact> 0;
 
     if (validTimerDelay(delay)) {
@@ -108,39 +107,41 @@ export class IdleWrapper {
       facts = Fact.assign(facts, RicFact.BAD_DELAY);
     }
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
-      existing.didTimeout = undefined;
-      existing.delay = delay;
-      existing.online++;
+    const ricRecord = this.ricHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          facts,
+          calls: 0,
+          cps: 1,
+          handler,
+          didTimeout: undefined,
+          delay,
+          online: 0,
+          canceledCounter: 0,
+          canceledByTraceIds: null,
+          selfTime: null,
+        };
+      },
+    );
 
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      this.ricHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        facts,
-        calls: 1,
-        cps: 1,
-        handler,
-        didTimeout: undefined,
-        delay,
-        online: 1,
-        canceledCounter: 0,
-        canceledByTraceIds: null,
-        selfTime: null,
-      });
+    ricRecord.calls++;
+    ricRecord.handler = handler;
+    ricRecord.didTimeout = undefined;
+    ricRecord.delay = delay;
+    ricRecord.online++;
+
+    if (facts) {
+      ricRecord.facts = Fact.assign(ricRecord.facts, facts);
     }
 
     this.onlineIdleCallbackLookup.set(handler, callstack.traceId);
   }
 
   #updateCicHistory(handler: number | string, callstack: TCallstack) {
-    const existing = this.cicHistory.get(callstack.traceId);
     let facts = <TFact> 0;
     let ricTraceId;
 
@@ -157,22 +158,24 @@ export class IdleWrapper {
       facts = Fact.assign(facts, CicFact.BAD_HANDLER);
     }
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
+    const cicRecord = this.cicHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          calls: 0,
+          handler,
+          facts,
+        };
+      },
+    );
 
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      this.cicHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        facts,
-        calls: 1,
-        handler,
-      });
+    cicRecord.calls++;
+    cicRecord.handler = handler;
+    if (facts) {
+      cicRecord.facts = Fact.assign(cicRecord.facts, facts);
     }
 
     const ricRecord = ricTraceId && this.ricHistory.get(ricTraceId);

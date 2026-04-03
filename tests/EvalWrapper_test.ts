@@ -90,4 +90,4 @@ describe('EvalWrapper', () => {
 });
 
 // wait till `deno` internal pending timers drain
-await wait(10);
+await wait(20);
