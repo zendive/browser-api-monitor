@@ -66,9 +66,10 @@ describe('EvalWrapper', () => {
 
   test('setTimeout - isEval recorded', () => {
     const CODE = '(1+2)';
-    setTimeout(CODE);
+    const handler = globalThis.setTimeout(CODE, 10);
     const timerRec = Array.from(apiTimer.setTimeoutHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
+    globalThis.clearTimeout(handler);
 
     expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
@@ -77,17 +78,16 @@ describe('EvalWrapper', () => {
 
   test('setInterval - isEval recorded', () => {
     const CODE = '(1+2)';
-    const handler = setInterval(CODE, 123);
+    const handler = globalThis.setInterval(CODE, 10);
     const timerRec = Array.from(apiTimer.setIntervalHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
+    globalThis.clearInterval(handler);
 
     expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_INTERVAL);
-
-    clearInterval(handler);
   });
 });
 
 // wait till `deno` internal pending timers drain
-await wait(20);
+await wait(10);
