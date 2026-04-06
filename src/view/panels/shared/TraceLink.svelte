@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    REGEX_CUT_LINK_PROTOCOL,
     REGEX_STACKTRACE_CLEAN_URL,
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
@@ -20,6 +21,18 @@
   let isSourceLess = $derived.by(
     () => !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
   );
+  let linkFormatted = $derived.by(() => {
+    if (isSourceLess) {
+      return link;
+    }
+
+    try {
+      const url = new URL(link);
+      return url.pathname;
+    } catch (_e) {
+      return link.replace(REGEX_CUT_LINK_PROTOCOL, '');
+    }
+  });
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
@@ -55,7 +68,7 @@
     class:name={!!name}
     onclick={onClick}
   >
-    {name || link}
+    {name || linkFormatted}
   </a>
 {/if}
 

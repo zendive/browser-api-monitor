@@ -29,7 +29,6 @@
 {/if}
 
 {#each trace as { link, name }, index (index)}
-  {@const isLast = index === trace.length - 1}
+  {#if index !== 0}&nbsp;•{/if}
   <TraceLink {link} {name} />
-  {#if !isLast}•&nbsp;{/if}
 {/each}

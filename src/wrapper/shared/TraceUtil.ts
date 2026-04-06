@@ -36,15 +36,18 @@ export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
 export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
   /.*:\d+:(\d+)$/,
 );
+export const REGEX_CUT_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
+  /^[a-z\-]+:\/+/i,
+);
 export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
 const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
-const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/\//);
+const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/+/);
 const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
 const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/async /);
 const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?\:\/\//,
+  /http[s]?:\/+/i,
 );
 
 export class TraceUtil {
