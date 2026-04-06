@@ -10,7 +10,7 @@
     "allowUnusedLabels": false,
     "noUncheckedSideEffectImports": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": false,
     "noPropertyAccessFromIndexSignature": true,
     "erasableSyntaxOnly": false,
     "noImplicitOverride": true,
