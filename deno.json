@@ -36,7 +36,6 @@
   "imports": {
     "esbuild": "npm:esbuild@0.28.0",
     "esbuild-svelte": "npm:esbuild-svelte@0.9.4",
-    "svelte-preprocess": "npm:svelte-preprocess@6.0.3",
 
     "@std/expect": "jsr:@std/expect@1.0.18",
     "@std/testing": "jsr:@std/testing@1.0.17",

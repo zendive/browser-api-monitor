@@ -1,6 +1,5 @@
 import { build, type BuildOptions, context, stop } from 'esbuild';
 import esbuildSvelte from 'esbuild-svelte';
-import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
 const isProd = Deno.env.get('BUILD_MODE') === 'production';
@@ -10,7 +9,6 @@ const logLevel = isProd ? 'warning' : 'debug';
 const buildOptions: BuildOptions = {
   plugins: [
     esbuildSvelte({
-      preprocess: sveltePreprocess(),
       compilerOptions: { dev: !isProd },
     }),
   ],

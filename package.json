@@ -3,7 +3,6 @@
   "devDependencies": {
     "@types/chrome": "0.1.39",
     "@types/deno": "2.5.0",
-    "sass": "1.99.0",
     "sv": "0.14.1",
     "svelte": "5.55.2",
     "svelte-check": "4.4.6",
