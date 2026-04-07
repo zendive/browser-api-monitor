@@ -34,9 +34,11 @@
     ]
   },
   "imports": {
+    // bundler imports
     "esbuild": "npm:esbuild@0.28.0",
     "esbuild-svelte": "npm:esbuild-svelte@0.9.4",
 
+    // test imports
     "@std/expect": "jsr:@std/expect@1.0.18",
     "@std/testing": "jsr:@std/testing@1.0.17",
     "happy-dom": "npm:happy-dom@20.8.9",
