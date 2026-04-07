@@ -27,7 +27,7 @@
 
     canvas {
       border-radius: 50%;
-      // downscaled
+      /* downscaled */
       width: 1.25rem;
       height: 1.25rem;
     }
