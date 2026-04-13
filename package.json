@@ -1,15 +1,15 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/chrome": "0.1.39",
+    "@types/chrome": "0.1.40",
     "@types/deno": "2.5.0",
-    "sv": "0.14.1",
-    "svelte": "5.55.2",
+    "sv": "0.15.1",
+    "svelte": "5.55.3",
     "svelte-check": "4.4.6",
     "typescript": "6.0.2"
   },
   "dependencies": {
-    "@noble/hashes": "2.0.1",
+    "@noble/hashes": "2.2.0",
     "jsondiffpatch": "0.7.3"
   }
 }

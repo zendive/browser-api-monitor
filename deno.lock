@@ -10,18 +10,18 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/testing@1.0.17": "1.0.17",
-    "npm:@noble/hashes@2.0.1": "2.0.1",
-    "npm:@types/chrome@*": "0.1.39",
-    "npm:@types/chrome@0.1.39": "0.1.39",
+    "npm:@noble/hashes@2.2.0": "2.2.0",
+    "npm:@types/chrome@*": "0.1.40",
+    "npm:@types/chrome@0.1.40": "0.1.40",
     "npm:@types/deno@2.5.0": "2.5.0",
-    "npm:esbuild-svelte@0.9.4": "0.9.4_esbuild@0.28.0_svelte@5.55.2",
+    "npm:esbuild-svelte@0.9.4": "0.9.4_esbuild@0.28.0_svelte@5.55.3",
     "npm:esbuild@0.28.0": "0.28.0",
     "npm:happy-dom@20.8.9": "20.8.9",
     "npm:jsondiffpatch@0.7.3": "0.7.3",
     "npm:scheduler-polyfill@1.3.0": "1.3.0",
-    "npm:sv@0.14.1": "0.14.1",
-    "npm:svelte-check@4.4.6": "4.4.6_svelte@5.55.2_typescript@6.0.2",
-    "npm:svelte@5.55.2": "5.55.2",
+    "npm:sv@0.15.1": "0.15.1",
+    "npm:svelte-check@4.4.6": "4.4.6_svelte@5.55.3_typescript@6.0.2",
+    "npm:svelte@5.55.3": "5.55.3",
     "npm:typescript@6.0.2": "6.0.2"
   },
   "jsr": {
@@ -233,8 +233,8 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
-    "@noble/hashes@2.0.1": {
-      "integrity": "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="
+    "@noble/hashes@2.2.0": {
+      "integrity": "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg=="
     },
     "@sveltejs/acorn-typescript@1.0.8_acorn@8.16.0": {
       "integrity": "sha512-esgN+54+q0NjB0Y/4BomT9samII7jGwNy/2a3wNZbT2A2RpmXsXwUt24LvLhx6jUq2gVk4cWEvcRO6MFQbOfNA==",
@@ -242,11 +242,11 @@
         "acorn"
       ]
     },
-    "@sveltejs/sv-utils@0.1.0": {
-      "integrity": "sha512-/rMSqcMtET+BPgsnpfiEhbsOIpy5dQpqDeU9bIEhzMGe6xGAfxPd4OcCoUsO7sQeav0HkxZTQwIKchhwbFhpvg=="
+    "@sveltejs/sv-utils@0.2.0": {
+      "integrity": "sha512-//YXcXgqRRMaevBlU7H1QQG6IPg/FvJuMXyMzFDW4N9fBOzVvpa3ZOvKVdlt6jaje5AVl6y4WwkNsGZ2gLJBeA=="
     },
-    "@types/chrome@0.1.39": {
-      "integrity": "sha512-AttzlXiLx2TSqmuJy8baP7YrOb8yyIM6V02dePrK/n1wRlhnu7Obd7GqUUVhje0hhkU7BaJuQmoFXRd5hWqdjQ==",
+    "@types/chrome@0.1.40": {
+      "integrity": "sha512-UnfyRAe8ORu9HSuTH0EqyOEUin3JrWW9Nl/gDXezNfTUrfIoxw+WRZgKOxGz0t5BnjbfXBnS2eCYfW2PxH1wcA==",
       "dependencies": [
         "@types/filesystem",
         "@types/har-format"
@@ -316,7 +316,7 @@
     "entities@7.0.1": {
       "integrity": "sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA=="
     },
-    "esbuild-svelte@0.9.4_esbuild@0.28.0_svelte@5.55.2": {
+    "esbuild-svelte@0.9.4_esbuild@0.28.0_svelte@5.55.3": {
       "integrity": "sha512-v/a0GjkKN06nal2QLluxjk2GXsei3fdtjIuHRa6pVnri5rQBZ6pj4a2WwjLfRojgRsLwDHl4xSeZ1BeUHsqQrw==",
       "dependencies": [
         "@jridgewell/trace-mapping",
@@ -421,14 +421,14 @@
     "scheduler-polyfill@1.3.0": {
       "integrity": "sha512-bIjhi/KJqo08wrq+K2rlB6HNPh871KgREPpVti4zv0mSY1dCi3qr0rRCw+SGHc8/gtKceev29sN//lf6KiYa/g=="
     },
-    "sv@0.14.1": {
-      "integrity": "sha512-TKrBT/urRXmyHzwPjUCpU98/UitWmfNUU91Lcfsw6tdojfmNtrDRmPw5LIHUzxVXkfGtdZTlq9q+CWaIrmFVXw==",
+    "sv@0.15.1": {
+      "integrity": "sha512-cuOWSbxR5sCVxLFVCiR442V4P1zNl2tbFETp0hdm9gMISNDZcZiLkzm687dNlbOMJQGOwXifPsDBrkDlQXicMw==",
       "dependencies": [
         "@sveltejs/sv-utils"
       ],
       "bin": true
     },
-    "svelte-check@4.4.6_svelte@5.55.2_typescript@6.0.2": {
+    "svelte-check@4.4.6_svelte@5.55.3_typescript@6.0.2": {
       "integrity": "sha512-kP1zG81EWaFe9ZyTv4ZXv44Csi6Pkdpb7S3oj6m+K2ec/IcDg/a8LsFsnVLqm2nxtkSwsd5xPj/qFkTBgXHXjg==",
       "dependencies": [
         "@jridgewell/trace-mapping",
@@ -441,8 +441,8 @@
       ],
       "bin": true
     },
-    "svelte@5.55.2": {
-      "integrity": "sha512-z41M/hi0ZPTzrwVKLvB/R1/Oo08gL1uIib8HZ+FncqxxtY9MLb01emg2fqk+WLZ/lNrrtNDFh7BZLDxAHvMgLw==",
+    "svelte@5.55.3": {
+      "integrity": "sha512-dS1N+i3bA1v+c4UDb750MlN5vCO82G6vxh8HeTsPsTdJ1BLsN1zxSyDlIdBBqUjqZ/BxEwM8UrFf98aaoVnZFQ==",
       "dependencies": [
         "@jridgewell/remapping",
         "@jridgewell/sourcemap-codec",
@@ -498,13 +498,13 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@noble/hashes@2.0.1",
-        "npm:@types/chrome@0.1.39",
+        "npm:@noble/hashes@2.2.0",
+        "npm:@types/chrome@0.1.40",
         "npm:@types/deno@2.5.0",
         "npm:jsondiffpatch@0.7.3",
-        "npm:sv@0.14.1",
+        "npm:sv@0.15.1",
         "npm:svelte-check@4.4.6",
-        "npm:svelte@5.55.2",
+        "npm:svelte@5.55.3",
         "npm:typescript@6.0.2"
       ]
     }
