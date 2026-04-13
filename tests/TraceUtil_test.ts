@@ -15,10 +15,15 @@ describe('TraceUtil', () => {
   at call1 (https://example1.com/bundle2.js:3:4)
   at async https://example1.com/bundle2.js:2:3
   at self (${traceUtil.selfTraceLink}:77:19)`;
+  const TEST_STACK_SHORT_HASH = 'https://example2.com/bundle3.js:4:5';
+  const TEST_STACK_FULL_HASH =
+    '7ae55d6cd84840c3b4339d2aa43ee3d423cb43688fa2c12df672f82d9690c7b4';
   const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
     at self (${traceUtil.selfTraceLink}:77:19)
     at async (<anonymous>:1:1)
     at self (${traceUtil.selfTraceLink}:77:19)`;
+  const TEST_MISSING_STACK_SHORT_HASH =
+    '911cc185d5572085048389f7a399244f4f32c5138d903bdb12b05c3e87beb212';
 
   test('createCallstack full', () => {
     traceUtil.callstackType = EWrapperCallstackType.FULL;
@@ -27,11 +32,12 @@ describe('TraceUtil', () => {
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_STACK },
       null,
     );
 
+    expect(traceId).toBe(TEST_STACK_FULL_HASH);
     expect(trace.length).toBe(3);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
@@ -49,11 +55,12 @@ describe('TraceUtil', () => {
         link: 'https://example2.com/bundle3.js:4:5',
       },
     ];
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_STACK },
       null,
     );
 
+    expect(traceId).toBe(TEST_STACK_SHORT_HASH);
     expect(trace.length).toBe(1);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
@@ -68,11 +75,12 @@ describe('TraceUtil', () => {
       },
     ];
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_MISSING_STACK },
       functionTrace,
     );
 
+    expect(traceId).toBe(TEST_MISSING_STACK_SHORT_HASH);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
   });
