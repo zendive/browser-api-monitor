@@ -18,7 +18,7 @@ clean:
 
 .PHONY: install
 install:
-	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher,npm:esbuild
+	deno install
 
 .PHONY: update
 update:
