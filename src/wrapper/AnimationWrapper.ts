@@ -1,19 +1,19 @@
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import {
   cancelAnimationFrame,
   requestAnimationFrame,
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
 import { traceUtil, validHandler } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
-export type TRequestAnimationFrameHistory = TTraceable & {
+export interface IRequestAnimationFrameHistory extends ITraceable {
   calls: number;
   handler: number | undefined | string;
   selfTime: number | null;
@@ -21,12 +21,12 @@ export type TRequestAnimationFrameHistory = TTraceable & {
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   cps: number;
-};
-export type TCancelAnimationFrameHistory = TTraceable & {
+}
+export interface ICancelAnimationFrameHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
-};
+}
 
 export const CafFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
@@ -49,9 +49,9 @@ export class AnimationWrapper {
   #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
   onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
-  rafHistory: Map</*traceId*/ string, TRequestAnimationFrameHistory> =
+  rafHistory: Map</*traceId*/ string, IRequestAnimationFrameHistory> =
     new Map();
-  cafHistory: Map</*traceId*/ string, TCancelAnimationFrameHistory> = new Map();
+  cafHistory: Map</*traceId*/ string, ICancelAnimationFrameHistory> = new Map();
   callCounter = {
     requestAnimationFrame: 0,
     cancelAnimationFrame: 0,
@@ -60,7 +60,7 @@ export class AnimationWrapper {
   constructor() {
   }
 
-  #updateRafHistory(handler: number, callstack: TCallstack) {
+  #updateRafHistory(handler: number, callstack: ICallstack) {
     const rafRecord = this.rafHistory.getOrInsertComputed(
       callstack.traceId,
       () => {
@@ -101,7 +101,7 @@ export class AnimationWrapper {
     }
   }
 
-  #updateCafHistory(handler: number | string, callstack: TCallstack) {
+  #updateCafHistory(handler: number | string, callstack: ICallstack) {
     let facts = <TFact> 0;
     let rafTraceId;
 
@@ -152,7 +152,7 @@ export class AnimationWrapper {
     }
   }
 
-  updateCallsPerSecond(panel: TPanel) {
+  updateCallsPerSecond(panel: IPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     this.rafHistory.forEach((rafRecord) => {
@@ -220,7 +220,7 @@ export class AnimationWrapper {
     globalThis.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
-  collectHistory(rafPanel: TPanel, cafPanel: TPanel) {
+  collectHistory(rafPanel: IPanel, cafPanel: IPanel) {
     return {
       rafHistory: rafPanel.wrap && rafPanel.visible
         ? Array.from(this.rafHistory.values())

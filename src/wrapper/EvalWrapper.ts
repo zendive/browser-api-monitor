@@ -1,21 +1,21 @@
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { traceUtil } from './shared/util.ts';
 
-export type TEvalHistory = TTraceable & {
+export interface IEvalHistory extends ITraceable {
   facts: TFact;
   calls: number;
   returnedValue: unknown;
   code: unknown;
   selfTime: number | null;
-};
+}
 
 /**
  * @NOTE: a copy of `eval` here, - making it "indirect eval"
@@ -44,7 +44,7 @@ export const EvalFacts = /*@__PURE__*/ (() =>
   ]))();
 
 export class EvalWrapper {
-  evalHistory: Map</*traceId*/ string, TEvalHistory> = new Map();
+  evalHistory: Map</*traceId*/ string, IEvalHistory> = new Map();
   callCounter = 0;
   nativeEval = lesserEval;
 
@@ -54,7 +54,7 @@ export class EvalWrapper {
   updateHistory(
     code: string,
     returnedValue: unknown,
-    callstack: TCallstack,
+    callstack: ICallstack,
     usesLocalScope: boolean,
     selfTime: number | null,
   ) {
@@ -135,7 +135,7 @@ export class EvalWrapper {
     // noop - it's impossible to restore native eval afterwards
   }
 
-  collectHistory(evalPanel: TPanel) {
+  collectHistory(evalPanel: IPanel) {
     return evalPanel.wrap && evalPanel.visible
       ? Array.from(this.evalHistory.values())
       : null;

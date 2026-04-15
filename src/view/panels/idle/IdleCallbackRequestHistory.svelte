@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
-    type TCancelIdleCallbackHistory,
-    type TRequestIdleCallbackHistory,
+    type ICancelIdleCallbackHistory,
+    type IRequestIdleCallbackHistory,
   } from '../../../wrapper/IdleWrapper.ts';
   import {
     ESortOrder,
@@ -21,8 +21,8 @@
     cicHistory = null,
     caption = '',
   }: {
-    ricHistory: TRequestIdleCallbackHistory[];
-    cicHistory: TCancelIdleCallbackHistory[] | null;
+    ricHistory: IRequestIdleCallbackHistory[];
+    cicHistory: ICancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
   let dialogEl: Dialog;
@@ -38,7 +38,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortRequestIdleCallback.field = <keyof TRequestIdleCallbackHistory> field;
+    sortRequestIdleCallback.field = <keyof IRequestIdleCallbackHistory> field;
     sortRequestIdleCallback.order = order;
 
     saveLocalStorage({
@@ -46,7 +46,7 @@
     });
   }
 
-  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = $state([]);
+  let cicHistoryMetrics: ICancelIdleCallbackHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
     if (!regressors?.length) {

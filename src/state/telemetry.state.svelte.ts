@@ -1,4 +1,4 @@
-import type { TTelemetry } from '../wrapper/Wrapper.ts';
+import type { ITelemetry } from '../wrapper/Wrapper.ts';
 import {
   EMsg,
   portPost,
@@ -9,12 +9,12 @@ import {
 import diff from '../api/diff.ts';
 
 class TelemetryState {
-  telemetry: TTelemetry | null = $state.raw(null);
+  telemetry: ITelemetry | null = $state.raw(null);
   timeOfCollection: number = $state(0);
   telemetrySize: number = $state(0);
 }
 const state = new TelemetryState();
-let telemetryProgressive: TTelemetry | null = null;
+let telemetryProgressive: ITelemetry | null = null;
 
 export function useTelemetryState() {
   return state;

@@ -1,14 +1,14 @@
 <script lang="ts">
   import {
     EMediaType,
-    type TMediaTelemetry,
+    type IMediaTelemetry,
   } from '../../../wrapper/MediaWrapper.ts';
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from '../../shared/Variable.svelte';
 
   let {
     media = { total: 0, collection: [] },
-  }: { media: TMediaTelemetry } = $props();
+  }: { media: IMediaTelemetry } = $props();
   let videos = $derived.by(() =>
     media.collection.filter((v) => v.type === EMediaType.VIDEO)
   );

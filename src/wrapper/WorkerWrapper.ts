@@ -1,6 +1,6 @@
-import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
+import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
 import { traceUtil } from './shared/util.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
@@ -34,30 +34,30 @@ interface IWorkerMetric {
   ael: Map</*traceId*/ string, IAddEventListenerMetric>;
   rel: Map</*traceId*/ string, IRemoveEventListenerMetric>;
 }
-interface IConstructorMetric extends TTraceable {
+interface IConstructorMetric extends ITraceable {
   calls: number;
 }
-interface ITerminateMetric extends TTraceable {
+interface ITerminateMetric extends ITraceable {
   calls: number;
 }
-interface IPostMessageMetric extends TTraceable {
+interface IPostMessageMetric extends ITraceable {
   calls: number;
   selfTime: number | null;
   cps: number;
 }
-interface IOnMessageMetric extends TTraceable {
+interface IOnMessageMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IOnErrorMetric extends TTraceable {
+interface IOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IAddEventListenerMetric extends TTraceable {
+interface IAddEventListenerMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
@@ -65,7 +65,7 @@ interface IAddEventListenerMetric extends TTraceable {
   canceledCounter: number;
   facts: TFact;
 }
-interface IRemoveEventListenerMetric extends TTraceable {
+interface IRemoveEventListenerMetric extends ITraceable {
   calls: number;
   facts: TFact;
 }
@@ -464,7 +464,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   }
 }
 
-export function updateWorkerCallsPerSecond(panel: TPanel) {
+export function updateWorkerCallsPerSecond(panel: IPanel) {
   if (!panel.wrap || !panel.visible) return;
 
   workerMap.forEach((workerMetric) => {
@@ -503,7 +503,7 @@ export function wrapWorker() {
   globalThis.Worker = ApiMonitorWorkerWrapper;
 }
 
-export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
+export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
   const rv: IWorkerTelemetry = {
     totalOnline: 0,
     collection: [],

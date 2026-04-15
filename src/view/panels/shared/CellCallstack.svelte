@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     ETraceDomain,
-    type TTrace,
+    type ITrace,
   } from '../../../wrapper/shared/TraceUtil.ts';
   import TraceLink from './TraceLink.svelte';
 
@@ -9,7 +9,7 @@
     trace,
     traceDomain,
   }: {
-    trace: TTrace[];
+    trace: ITrace[];
     traceDomain: ETraceDomain;
   } = $props();
 </script>

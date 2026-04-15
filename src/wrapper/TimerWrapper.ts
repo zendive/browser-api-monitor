@@ -1,7 +1,7 @@
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import {
   clearInterval,
@@ -14,7 +14,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../api/const.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
 import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { trim2ms } from '../api/time.ts';
@@ -24,12 +24,12 @@ export enum ETimerType {
   TIMEOUT,
   INTERVAL,
 }
-export type TOnlineTimerMetrics = Omit<TTraceable, 'firstSeen'> & {
+export interface IOnlineTimerMetrics extends Omit<ITraceable, 'firstSeen'> {
   type: ETimerType;
   delay: number | undefined | string;
   handler: number;
-};
-export type TSetTimerHistory = TTraceable & {
+}
+export interface ISetTimerHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | string;
@@ -38,13 +38,13 @@ export type TSetTimerHistory = TTraceable & {
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
-};
-export type TClearTimerHistory = TTraceable & {
+}
+export interface IClearTimerHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
-};
+}
 
 export const SetTimerFact = /*@__PURE__*/ (() => ({
   NOT_A_FUNCTION: Fact.define(1 << 0),
@@ -81,11 +81,11 @@ export const ClearTimerFacts = /*@__PURE__*/ (() =>
 
 export class TimerWrapper {
   apiEval: EvalWrapper;
-  onlineTimers: Map</*handler*/ number, TOnlineTimerMetrics> = new Map();
-  setTimeoutHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
-  clearTimeoutHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
-  setIntervalHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
-  clearIntervalHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
+  onlineTimers: Map</*handler*/ number, IOnlineTimerMetrics> = new Map();
+  setTimeoutHistory: Map</*traceId*/ string, ISetTimerHistory> = new Map();
+  clearTimeoutHistory: Map</*traceId*/ string, IClearTimerHistory> = new Map();
+  setIntervalHistory: Map</*traceId*/ string, ISetTimerHistory> = new Map();
+  clearIntervalHistory: Map</*traceId*/ string, IClearTimerHistory> = new Map();
   native = {
     setTimeout: setTimeout,
     clearTimeout: clearTimeout,
@@ -107,7 +107,7 @@ export class TimerWrapper {
     type: ETimerType,
     handler: number,
     delay: number | undefined | string,
-    callstack: TCallstack,
+    callstack: ICallstack,
   ) {
     delay = validTimerDelay(delay) ? trim2ms(delay) : TAG_BAD_DELAY(delay);
 
@@ -158,10 +158,10 @@ export class TimerWrapper {
   }
 
   #updateSetTimersHistory(
-    history: Map<string, TSetTimerHistory>,
+    history: Map<string, ISetTimerHistory>,
     handler: number,
     delay: number | string | undefined,
-    callstack: TCallstack,
+    callstack: ICallstack,
     isEval: boolean,
   ) {
     let facts = <TFact> 0;
@@ -206,9 +206,9 @@ export class TimerWrapper {
 
   #updateClearTimersHistory(
     type: ETimerType,
-    history: Map<string, TClearTimerHistory>,
+    history: Map<string, IClearTimerHistory>,
     handler: unknown,
-    callstack: TCallstack,
+    callstack: ICallstack,
   ) {
     let handlerDelay: string | number | undefined = TAG_DELAY_NOT_FOUND;
     let facts = <TFact> 0;
@@ -253,7 +253,7 @@ export class TimerWrapper {
   }
 
   #updateTimersSelfTime(
-    history: Map<string, TSetTimerHistory>,
+    history: Map<string, ISetTimerHistory>,
     traceId: string,
     selfTime: number | null,
   ) {
@@ -480,11 +480,11 @@ export class TimerWrapper {
   }
 
   collectHistory(
-    activeTimers: TPanel,
-    setTimeout: TPanel,
-    clearTimeout: TPanel,
-    setInterval: TPanel,
-    clearInterval: TPanel,
+    activeTimers: IPanel,
+    setTimeout: IPanel,
+    clearTimeout: IPanel,
+    setInterval: IPanel,
+    clearInterval: IPanel,
   ) {
     return {
       onlineTimers: activeTimers.visible

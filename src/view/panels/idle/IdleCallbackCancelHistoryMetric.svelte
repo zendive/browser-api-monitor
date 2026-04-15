@@ -6,10 +6,10 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import {
     CicFacts,
-    type TCancelIdleCallbackHistory,
+    type ICancelIdleCallbackHistory,
   } from '../../../wrapper/IdleWrapper.ts';
 
-  let { metric }: { metric: TCancelIdleCallbackHistory } = $props();
+  let { metric }: { metric: ICancelIdleCallbackHistory } = $props();
 </script>
 
 <tr class="t-zebra">

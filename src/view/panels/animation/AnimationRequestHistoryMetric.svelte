@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TRequestAnimationFrameHistory } from '../../../wrapper/AnimationWrapper.ts';
+  import type { IRequestAnimationFrameHistory } from '../../../wrapper/AnimationWrapper.ts';
   import type { TFindRegressorCallback } from '../../shared/util.ts';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
@@ -12,7 +12,7 @@
     metric,
     onFindRegressors,
   }: {
-    metric: TRequestAnimationFrameHistory;
+    metric: IRequestAnimationFrameHistory;
     onFindRegressors: TFindRegressorCallback;
   } = $props();
 </script>

@@ -1,15 +1,15 @@
-import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import { traceUtil, validTimerDelay } from './shared/util.ts';
 import { trim2ms, type TTaskPriority } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { nativePostTask, nativeYield, TAG_BAD_DELAY } from '../api/const.ts';
 
-export interface IYield extends TTraceable {
+export interface IYield extends ITraceable {
   calls: number;
   cps: number;
 }
-export interface IPostTask extends TTraceable {
+export interface IPostTask extends ITraceable {
   calls: number;
   cps: number;
   delay: number | undefined | string;
@@ -19,11 +19,11 @@ export interface IPostTask extends TTraceable {
   aborts: number;
   online: number;
 }
-type TPostTaskOptions = {
+interface IPostTaskOptions {
   priority?: TTaskPriority;
   signal?: AbortSignal /*| TaskSignal*/;
   delay?: number;
-};
+}
 
 export interface ISchedulerTelemetry {
   yield: IYield[] | null;
@@ -81,7 +81,7 @@ export class SchedulerWrapper {
     globalThis.scheduler.postTask = function (
       this: SchedulerWrapper,
       fn: () => unknown,
-      options?: TPostTaskOptions,
+      options?: IPostTaskOptions,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err, fn);
@@ -163,7 +163,7 @@ export class SchedulerWrapper {
     globalThis.scheduler.postTask = nativePostTask;
   }
 
-  updateCallsPerSecond(panel: TPanel) {
+  updateCallsPerSecond(panel: IPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     this.#yieldMap.forEach((methodMetric) => {
@@ -181,7 +181,7 @@ export class SchedulerWrapper {
     });
   }
 
-  collectHistory(panel: TPanel): ISchedulerTelemetry {
+  collectHistory(panel: IPanel): ISchedulerTelemetry {
     return {
       yield: panel.visible ? Array.from(this.#yieldMap.values()) : null,
       postTask: panel.visible ? Array.from(this.#postTaskMap.values()) : null,

@@ -1,4 +1,4 @@
-import type { TOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
 import { ESortOrder } from '../../../api/storage/storage.local.ts';
 
 const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
@@ -35,7 +35,7 @@ export function compareByFieldOrder<T>(field: keyof T, order: ESortOrder) {
 }
 
 export function compareByDelayThenHandlerDescending<
-  T extends TOnlineTimerMetrics,
+  T extends IOnlineTimerMetrics,
 >(a: T, b: T) {
   const aDelay = a.delay ?? 0;
   const bDelay = b.delay ?? 0;

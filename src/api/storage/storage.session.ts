@@ -1,7 +1,8 @@
 import { session, SESSION_VERSION } from './storage.ts';
 
 export type TSession = typeof DEFAULT_SESSION;
-type TSessionProperty = Partial<TSession>;
+interface ISessionProperty extends Partial<TSession> {}
+
 const DEFAULT_SESSION = {
   debug: <string[]> [],
   bypass: <string[]> [],
@@ -31,7 +32,7 @@ export async function loadSessionStorage(): Promise<TSession> {
  * @NOTE: vulnerable to "time of check / time of use" bug (TOC/TOU)
  * @param value
  */
-export async function saveSessionStorage(value: TSessionProperty) {
+export async function saveSessionStorage(value: ISessionProperty) {
   const store = await loadSessionStorage();
 
   Object.assign(store, value);

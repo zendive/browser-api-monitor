@@ -5,20 +5,20 @@ export enum EWrapperCallstackType {
   SHORT,
 }
 
-export type TTrace = {
+export interface ITrace {
   name: string | 0;
   link: string;
-};
-export type TCallstack = {
+}
+export interface ICallstack {
   traceId: string;
-  trace: TTrace[];
-};
-export type TTraceable = {
+  trace: ITrace[];
+}
+export interface ITraceable {
   traceId: string;
-  trace: TTrace[];
+  trace: ITrace[];
   traceDomain: ETraceDomain;
   firstSeen: number;
-};
+}
 export enum ETraceDomain {
   SAME,
   EXTERNAL,
@@ -56,14 +56,14 @@ export class TraceUtil {
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   debug: Set<string> = new Set();
   bypass: Set<string> = new Set();
-  #fullCallstackCacheTrace: Map</*traceId*/ string, TTrace[]> = new Map();
+  #fullCallstackCacheTrace: Map</*traceId*/ string, ITrace[]> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
     this.selfTraceLink = this.#getSelfTraceLink();
   }
 
-  getCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  getCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     if (this.callstackType === EWrapperCallstackType.FULL) {
       return this.#getFullCallstack(e, uniqueTrait);
     } else {
@@ -71,7 +71,7 @@ export class TraceUtil {
     }
   }
 
-  getTraceDomain(trace: TTrace | undefined) {
+  getTraceDomain(trace: ITrace | undefined) {
     if (!trace) {
       return ETraceDomain.UNKNOWN;
     } else if (trace.link.startsWith(location.origin)) {
@@ -105,7 +105,7 @@ export class TraceUtil {
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
-  #getFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  #getFullCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     const traceId = hashString(e.stack || String(uniqueTrait));
     const trace = this.#fullCallstackCacheTrace.getOrInsertComputed(
       traceId,
@@ -118,9 +118,9 @@ export class TraceUtil {
     return { traceId, trace };
   }
 
-  #getFullTrace(stackString: string): TTrace[] | null {
+  #getFullTrace(stackString: string): ITrace[] | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
-    const rv: TTrace[] = [];
+    const rv: ITrace[] = [];
 
     // loop from the end, excluding error name at [0] and self trace at [1|n]
     for (let n = stack.length - 1; n > 1; n--) {
@@ -134,7 +134,7 @@ export class TraceUtil {
     return rv.length ? rv : null;
   }
 
-  #getShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  #getShortCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     let trace = this.#getShortTrace(e.stack || '');
     let traceId;
 
@@ -148,7 +148,7 @@ export class TraceUtil {
     return { traceId, trace: [trace] };
   }
 
-  #getShortTrace(stackString: string): TTrace | null {
+  #getShortTrace(stackString: string): ITrace | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
 
     // loop from the start, excluding error name at [0] and self trace at [1|n]
@@ -184,7 +184,7 @@ export class TraceUtil {
     return { name, link };
   }
 
-  #getFallbackTrace(uniqueTrait?: unknown): TTrace {
+  #getFallbackTrace(uniqueTrait?: unknown): ITrace {
     return {
       name: typeof uniqueTrait === 'function' && uniqueTrait.name
         ? uniqueTrait.name

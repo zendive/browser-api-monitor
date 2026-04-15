@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+  import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
   import { EMsg, portPost } from '../../../api/communication.ts';
   import { delayTooltip } from '../../shared/util.ts';
   import CellCallstack from '../shared/CellCallstack.svelte';
 
-  let { metric }: { metric: TOnlineTimerMetrics } = $props();
+  let { metric }: { metric: IOnlineTimerMetrics } = $props();
 
   function clearTimer() {
     portPost({

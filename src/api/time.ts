@@ -95,31 +95,31 @@ export enum ETimer {
   IDLE,
   TASK,
 }
-type TTimerMeasurable = {
+interface ITimerMeasurable {
   /** populate `callbackSelfTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
-};
-type TTimerTimeout = TTimerMeasurable & {
+}
+interface ITimerTimeout extends ITimerMeasurable {
   type: ETimer.TIMEOUT;
   timeout: number;
-};
-type TTimerAnimation = TTimerMeasurable & {
+}
+interface ITimerAnimation extends ITimerMeasurable {
   type: ETimer.ANIMATION;
-};
-type TTimerIdle = TTimerMeasurable & {
+}
+interface ITimerIdle extends ITimerMeasurable {
   type: ETimer.IDLE;
   timeout: number;
-};
-type TTimerTask = TTimerMeasurable & {
+}
+interface ITimerTask extends ITimerMeasurable {
   type: ETimer.TASK;
   timeout: number;
   priority?: TTaskPriority;
-};
+}
 type TTimerOptions =
-  | TTimerTimeout
-  | TTimerAnimation
-  | TTimerIdle
-  | TTimerTask;
+  | ITimerTimeout
+  | ITimerAnimation
+  | ITimerIdle
+  | ITimerTask;
 
 const timerApi = __mirror__
   ? {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    type TCancelAnimationFrameHistory,
+    type ICancelAnimationFrameHistory,
   } from '../../../wrapper/AnimationWrapper.ts';
   import {
     ESortOrder,
@@ -15,7 +15,7 @@
   let {
     cafHistory,
     caption = '',
-  }: { cafHistory: TCancelAnimationFrameHistory[]; caption?: string } =
+  }: { cafHistory: ICancelAnimationFrameHistory[]; caption?: string } =
     $props();
   const { sortCancelAnimationFrame } = useConfigState();
   let sortedMetrics = $derived.by(() =>
@@ -28,7 +28,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelAnimationFrame.field = <keyof TCancelAnimationFrameHistory> field;
+    sortCancelAnimationFrame.field = <keyof ICancelAnimationFrameHistory> field;
     sortCancelAnimationFrame.order = order;
 
     saveLocalStorage({

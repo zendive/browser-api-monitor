@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {
-    TCancelAnimationFrameHistory,
-    TRequestAnimationFrameHistory,
+    ICancelAnimationFrameHistory,
+    IRequestAnimationFrameHistory,
   } from '../../../wrapper/AnimationWrapper.ts';
   import {
     ESortOrder,
@@ -21,8 +21,8 @@
     cafHistory,
     caption = '',
   }: {
-    rafHistory: TRequestAnimationFrameHistory[];
-    cafHistory: TCancelAnimationFrameHistory[] | null;
+    rafHistory: IRequestAnimationFrameHistory[];
+    cafHistory: ICancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
   const { sortRequestAnimationFrame } = useConfigState();
@@ -39,7 +39,7 @@
 
   function onChangeSort(_field: string, _order: ESortOrder) {
     sortRequestAnimationFrame.field =
-      <keyof TRequestAnimationFrameHistory> _field;
+      <keyof IRequestAnimationFrameHistory> _field;
     sortRequestAnimationFrame.order = _order;
 
     saveLocalStorage({
@@ -47,7 +47,7 @@
     });
   }
 
-  let cafHistoryMetrics: TCancelAnimationFrameHistory[] = $state([]);
+  let cafHistoryMetrics: ICancelAnimationFrameHistory[] = $state([]);
 
   function onFindRegressors(regressors: string[] | null) {
     if (!regressors?.length) {

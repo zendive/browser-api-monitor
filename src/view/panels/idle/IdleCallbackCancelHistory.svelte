@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TCancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
+  import type { ICancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
   import {
     type ESortOrder,
     saveLocalStorage,
@@ -14,7 +14,7 @@
     cicHistory,
     caption = '',
   }: {
-    cicHistory: TCancelIdleCallbackHistory[];
+    cicHistory: ICancelIdleCallbackHistory[];
     caption?: string;
   } = $props();
   const { sortCancelIdleCallback } = useConfigState();
@@ -28,7 +28,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelIdleCallback.field = <keyof TCancelIdleCallbackHistory> field;
+    sortCancelIdleCallback.field = <keyof ICancelIdleCallbackHistory> field;
     sortCancelIdleCallback.order = order;
 
     saveLocalStorage({

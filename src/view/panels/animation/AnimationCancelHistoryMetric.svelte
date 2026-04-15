@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     CafFacts,
-    type TCancelAnimationFrameHistory,
+    type ICancelAnimationFrameHistory,
   } from '../../../wrapper/AnimationWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
@@ -9,7 +9,7 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
 
-  let { metric }: { metric: TCancelAnimationFrameHistory } = $props();
+  let { metric }: { metric: ICancelAnimationFrameHistory } = $props();
 </script>
 
 <tr class="t-zebra">

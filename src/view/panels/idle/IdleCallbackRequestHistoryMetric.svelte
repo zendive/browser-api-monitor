@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
+    type IRequestIdleCallbackHistory,
     RicFacts,
-    type TRequestIdleCallbackHistory,
   } from '../../../wrapper/IdleWrapper.ts';
   import {
     delayTooltip,
@@ -16,7 +16,7 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
 
   let { metric, onFindRegressors }: {
-    metric: TRequestIdleCallbackHistory;
+    metric: IRequestIdleCallbackHistory;
     onFindRegressors: TFindRegressorCallback;
   } = $props();
 </script>

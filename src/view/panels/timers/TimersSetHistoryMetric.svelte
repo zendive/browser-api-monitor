@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
+    type ISetTimerHistory,
     SetTimerFacts,
-    type TSetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
   import Variable from '../../shared/Variable.svelte';
@@ -19,7 +19,7 @@
     metric,
     onFindRegressors,
   }: {
-    metric: TSetTimerHistory;
+    metric: ISetTimerHistory;
     onFindRegressors: TFindRegressorCallback;
   } = $props();
 </script>

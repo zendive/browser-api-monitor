@@ -5,15 +5,15 @@ import {
   applyConfig,
   applySession,
   collectMetrics,
+  type ITelemetry,
   onEachSecond,
   runMediaCommand,
   runTimerCommand,
-  type TTelemetry,
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
 
-let originalMetrics: TTelemetry | null;
-let currentMetrics: TTelemetry | null;
+let originalMetrics: ITelemetry | null;
+let currentMetrics: ITelemetry | null;
 let startAfresh = true;
 const eachSecond = new Timer(
   { type: ETimer.TIMEOUT, timeout: 1e3 },

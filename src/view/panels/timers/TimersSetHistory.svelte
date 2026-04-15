@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {
-    TClearTimerHistory,
-    TSetTimerHistory,
+    IClearTimerHistory,
+    ISetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import {
     ESortOrder,
@@ -22,9 +22,9 @@
     clearIntervalHistory,
     caption,
   }: {
-    setTimerHistory: TSetTimerHistory[];
-    clearTimeoutHistory: TClearTimerHistory[] | null;
-    clearIntervalHistory: TClearTimerHistory[] | null;
+    setTimerHistory: ISetTimerHistory[];
+    clearTimeoutHistory: IClearTimerHistory[] | null;
+    clearIntervalHistory: IClearTimerHistory[] | null;
     caption?: string;
   } = $props();
   let { sortSetTimers } = useConfigState();
@@ -35,10 +35,10 @@
   );
   let dialogEl: Dialog;
   let alertEl: Alert;
-  let clearTimerHistoryMetrics: TClearTimerHistory[] = $state([]);
+  let clearTimerHistoryMetrics: IClearTimerHistory[] = $state([]);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortSetTimers.field = <keyof TSetTimerHistory> field;
+    sortSetTimers.field = <keyof ISetTimerHistory> field;
     sortSetTimers.order = order;
 
     saveLocalStorage({

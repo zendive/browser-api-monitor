@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     ClearTimerFacts,
-    type TClearTimerHistory,
+    type IClearTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
@@ -10,7 +10,7 @@
   import CellCallstack from '../shared/CellCallstack.svelte';
   import { delayTooltip } from '../../shared/util.ts';
 
-  let { metric }: { metric: TClearTimerHistory } = $props();
+  let { metric }: { metric: IClearTimerHistory } = $props();
 </script>
 
 <tr class="t-zebra">

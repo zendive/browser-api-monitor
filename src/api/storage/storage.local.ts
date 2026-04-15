@@ -1,14 +1,14 @@
 import type {
-  TCancelIdleCallbackHistory,
-  TRequestIdleCallbackHistory,
+  ICancelIdleCallbackHistory,
+  IRequestIdleCallbackHistory,
 } from '../../wrapper/IdleWrapper.ts';
 import type {
-  TCancelAnimationFrameHistory,
-  TRequestAnimationFrameHistory,
+  ICancelAnimationFrameHistory,
+  IRequestAnimationFrameHistory,
 } from '../../wrapper/AnimationWrapper.ts';
 import type {
-  TClearTimerHistory,
-  TSetTimerHistory,
+  IClearTimerHistory,
+  ISetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
@@ -29,20 +29,20 @@ type TPanelKey =
   | 'requestIdleCallback'
   | 'cancelIdleCallback';
 
-export type TPanel = {
+export interface IPanel {
   key: TPanelKey;
   label: string;
   visible: boolean;
   wrap?: boolean;
-};
+}
 export type TPanelMap = {
-  [K in TPanelKey]: TPanel;
+  [K in TPanelKey]: IPanel;
 };
 
 export type TConfig = typeof DEFAULT_CONFIG;
-export type TConfigField = Partial<TConfig>;
+export interface IConfigField extends Partial<TConfig> {}
 
-export const DEFAULT_PANELS: TPanel[] = [
+export const DEFAULT_PANELS: IPanel[] = [
   { key: 'callsSummary', label: 'Summary Bar', visible: true },
   { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: false },
@@ -100,27 +100,27 @@ export enum ESortOrder {
 }
 
 export const DEFAULT_SORT_SET_TIMERS = {
-  field: <keyof TSetTimerHistory> 'calls',
+  field: <keyof ISetTimerHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 export const DEFAULT_SORT_CLEAR_TIMERS = {
-  field: <keyof TClearTimerHistory> 'calls',
+  field: <keyof IClearTimerHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 export const DEFAULT_SORT_RAF = {
-  field: <keyof TRequestAnimationFrameHistory> 'calls',
+  field: <keyof IRequestAnimationFrameHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 export const DEFAULT_SORT_CAF = {
-  field: <keyof TCancelAnimationFrameHistory> 'calls',
+  field: <keyof ICancelAnimationFrameHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 export const DEFAULT_SORT_RIC = {
-  field: <keyof TRequestIdleCallbackHistory> 'calls',
+  field: <keyof IRequestIdleCallbackHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 export const DEFAULT_SORT_CIC = {
-  field: <keyof TCancelIdleCallbackHistory> 'calls',
+  field: <keyof ICancelIdleCallbackHistory> 'calls',
   order: <ESortOrder> ESortOrder.DESCENDING,
 };
 
@@ -139,7 +139,7 @@ export const DEFAULT_CONFIG = {
 };
 const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;
 
-export function panelsArray2Map(panels: TPanel[]) {
+export function panelsArray2Map(panels: IPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
     {} as TPanelMap,
@@ -164,7 +164,7 @@ export async function loadLocalStorage(): Promise<TConfig> {
  * @NOTE: vulnerable to "time of check / time of use" bug (TOC/TOU)
  * @param value
  */
-export async function saveLocalStorage(value: TConfigField) {
+export async function saveLocalStorage(value: IConfigField) {
   const store = await loadLocalStorage();
 
   Object.assign(store, value);

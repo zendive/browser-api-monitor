@@ -8,29 +8,29 @@ import {
   TIME_60FPS_SEC,
   type TToggableMediaProps,
 } from '../api/const.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 
 type TMediaElement = HTMLVideoElement | HTMLAudioElement;
-type TMediaModel = {
+interface IMediaModel {
   el: TMediaElement;
-  metrics: TMediaMetrics;
+  metrics: IMediaMetrics;
   eventListener: (e: Event) => void;
-};
+}
 
 export enum EMediaType {
   VIDEO,
   AUDIO,
 }
-export type TMediaMetrics = {
+export interface IMediaMetrics {
   mediaId: string;
   type: EMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
-};
-export type TMediaTelemetry = {
+}
+export interface IMediaTelemetry {
   total: number;
-  collection: TMediaMetrics[];
-};
+  collection: IMediaMetrics[];
+}
 export type TMediaCommand =
   | 'log'
   | 'frame-backward'
@@ -50,7 +50,7 @@ export function isToggableMediaProp(
 }
 
 export class MediaWrapper {
-  mediaCollection: TMediaModel[] = [];
+  mediaCollection: IMediaModel[] = [];
 
   #formatPropValue(prop: string, value: unknown): unknown {
     let rv: unknown = value;
@@ -85,15 +85,15 @@ export class MediaWrapper {
     return rv;
   }
 
-  #stopMonitorMedia(entry: TMediaModel) {
+  #stopMonitorMedia(entry: IMediaModel) {
     for (const eventType of MEDIA_ELEMENT_EVENTS) {
       entry.el.removeEventListener(eventType, entry.eventListener);
     }
   }
 
-  #startMonitorMedia(mediaId: string, el: TMediaElement): TMediaModel {
-    const events: TMediaMetrics['events'] = {};
-    const props: TMediaMetrics['props'] = {};
+  #startMonitorMedia(mediaId: string, el: TMediaElement): IMediaModel {
+    const events: IMediaMetrics['events'] = {};
+    const props: IMediaMetrics['props'] = {};
     const rv = {
       el,
       metrics: {
@@ -117,7 +117,7 @@ export class MediaWrapper {
     return rv;
   }
 
-  meetMedia(panel: TPanel) {
+  meetMedia(panel: IPanel) {
     if (!panel.visible) return;
 
     const els: NodeListOf<TMediaElement> = document.querySelectorAll(
@@ -152,8 +152,8 @@ export class MediaWrapper {
     }
   }
 
-  collectMetrics(panel: TPanel): TMediaTelemetry {
-    const rv: TMediaTelemetry = {
+  collectMetrics(panel: IPanel): IMediaTelemetry {
+    const rv: IMediaTelemetry = {
       total: this.mediaCollection.length,
       collection: [],
     };

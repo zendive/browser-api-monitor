@@ -1,9 +1,9 @@
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
@@ -14,7 +14,7 @@ import {
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
 
-export type TRequestIdleCallbackHistory = TTraceable & {
+export interface IRequestIdleCallbackHistory extends ITraceable {
   facts: TFact;
   calls: number;
   cps: number;
@@ -25,12 +25,12 @@ export type TRequestIdleCallbackHistory = TTraceable & {
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
-};
-export type TCancelIdleCallbackHistory = TTraceable & {
+}
+export interface ICancelIdleCallbackHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
-};
+}
 
 export const RicFact = /*@__PURE__*/ (() => ({
   BAD_DELAY: Fact.define(1 << 0),
@@ -58,8 +58,8 @@ export const CicFacts = /*@__PURE__*/ (() =>
 export class IdleWrapper {
   onlineIdleCallbackLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
-  ricHistory: Map</*traceId*/ string, TRequestIdleCallbackHistory> = new Map();
-  cicHistory: Map</*traceId*/ string, TCancelIdleCallbackHistory> = new Map();
+  ricHistory: Map</*traceId*/ string, IRequestIdleCallbackHistory> = new Map();
+  cicHistory: Map</*traceId*/ string, ICancelIdleCallbackHistory> = new Map();
   callCounter = {
     requestIdleCallback: 0,
     cancelIdleCallback: 0,
@@ -96,7 +96,7 @@ export class IdleWrapper {
   #updateRicHistory(
     handler: number,
     delay: number | undefined | string,
-    callstack: TCallstack,
+    callstack: ICallstack,
   ) {
     let facts = <TFact> 0;
 
@@ -142,7 +142,7 @@ export class IdleWrapper {
     this.onlineIdleCallbackLookup.set(handler, callstack.traceId);
   }
 
-  #updateCicHistory(handler: number | string, callstack: TCallstack) {
+  #updateCicHistory(handler: number | string, callstack: ICallstack) {
     let facts = <TFact> 0;
     let ricTraceId;
 
@@ -194,7 +194,7 @@ export class IdleWrapper {
     }
   }
 
-  updateCallsPerSecond(panel: TPanel) {
+  updateCallsPerSecond(panel: IPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     this.ricHistory.forEach((ricRecord) => {
@@ -264,7 +264,7 @@ export class IdleWrapper {
     globalThis.cancelIdleCallback = this.native.cancelIdleCallback;
   }
 
-  collectHistory(ricPanel: TPanel, cicPanel: TPanel) {
+  collectHistory(ricPanel: IPanel, cicPanel: IPanel) {
     return {
       ricHistory: ricPanel.wrap && ricPanel.visible
         ? Array.from(this.ricHistory.values())

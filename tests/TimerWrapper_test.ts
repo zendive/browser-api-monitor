@@ -101,9 +101,8 @@ describe('wrappers', () => {
     expect(rec.selfTime).toBeNull();
     expect(rec.canceledByTraceIds!.length).toBe(2);
     rec.canceledByTraceIds!.forEach((traceId) => {
-
-    const clearHistory = Array.from(apiTimer.clearTimeoutHistory.values());
-    const found = clearHistory.find((rec) => rec.traceId === traceId);
+      const clearHistory = Array.from(apiTimer.clearTimeoutHistory.values());
+      const found = clearHistory.find((rec) => rec.traceId === traceId);
       expect(found).toBeTruthy();
     });
   });

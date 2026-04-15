@@ -1,12 +1,12 @@
 <script lang="ts">
   import {
     ETimerType,
-    type TOnlineTimerMetrics,
+    type IOnlineTimerMetrics,
   } from '../../../wrapper/TimerWrapper.ts';
   import { compareByDelayThenHandlerDescending } from '../shared/comparator.ts';
   import OnlineTimer from './OnlineTimer.svelte';
 
-  let { onlineTimers }: { onlineTimers: TOnlineTimerMetrics[] | null } =
+  let { onlineTimers }: { onlineTimers: IOnlineTimerMetrics[] | null } =
     $props();
   let timeouts = $derived.by(() =>
     (onlineTimers || []).filter((o) => o.type === ETimerType.TIMEOUT).sort(

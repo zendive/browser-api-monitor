@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     EvalFacts,
-    type TEvalHistory,
+    type IEvalHistory,
   } from '../../../wrapper/EvalWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
@@ -10,7 +10,7 @@
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
 
-  let { evalHistory }: { evalHistory: TEvalHistory[] | null } = $props();
+  let { evalHistory }: { evalHistory: IEvalHistory[] | null } = $props();
 
   function dynamicValue(value: unknown): string {
     if (value === '⟪undefined⟫') {

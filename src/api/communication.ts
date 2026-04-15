@@ -13,7 +13,7 @@
 import { APPLICATION_NAME } from './env.ts';
 import { ERRORS_IGNORED } from './const.ts';
 import { ETimerType } from '../wrapper/TimerWrapper.ts';
-import type { TTelemetry } from '../wrapper/Wrapper.ts';
+import type { ITelemetry } from '../wrapper/Wrapper.ts';
 import type { TConfig } from './storage/storage.local.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 import type { Delta } from 'jsondiffpatch';
@@ -132,7 +132,7 @@ export interface IMsgLoaded {
 export interface IMsgTelemetry {
   msg: EMsg.TELEMETRY;
   timeOfCollection: number;
-  telemetry: TTelemetry;
+  telemetry: ITelemetry;
 }
 export interface IMsgTelemetryDelta {
   msg: EMsg.TELEMETRY_DELTA;

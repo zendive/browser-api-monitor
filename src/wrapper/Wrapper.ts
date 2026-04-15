@@ -1,27 +1,27 @@
 import { callableOnce } from '../api/time.ts';
-import { EvalWrapper, type TEvalHistory } from './EvalWrapper.ts';
+import { EvalWrapper, type IEvalHistory } from './EvalWrapper.ts';
 import {
   panelsArray2Map,
   type TConfig,
   type TPanelMap,
 } from '../api/storage/storage.local.ts';
 import {
-  type TClearTimerHistory,
+  type IClearTimerHistory,
+  type IOnlineTimerMetrics,
+  type ISetTimerHistory,
   TimerWrapper,
-  type TOnlineTimerMetrics,
-  type TSetTimerHistory,
 } from './TimerWrapper.ts';
 import {
   AnimationWrapper,
-  type TCancelAnimationFrameHistory,
-  type TRequestAnimationFrameHistory,
+  type ICancelAnimationFrameHistory,
+  type IRequestAnimationFrameHistory,
 } from './AnimationWrapper.ts';
 import {
+  type ICancelIdleCallbackHistory,
   IdleWrapper,
-  type TCancelIdleCallbackHistory,
-  type TRequestIdleCallbackHistory,
+  type IRequestIdleCallbackHistory,
 } from './IdleWrapper.ts';
-import { MediaWrapper, type TMediaTelemetry } from './MediaWrapper.ts';
+import { type IMediaTelemetry, MediaWrapper } from './MediaWrapper.ts';
 import type { TSession } from '../api/storage/storage.session.ts';
 import {
   collectWorkerHistory,
@@ -36,18 +36,18 @@ import {
 } from './SchedulerWrapper.ts';
 import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
 
-export type TTelemetry = {
-  media: TMediaTelemetry;
-  onlineTimers: TOnlineTimerMetrics[] | null;
-  setTimeoutHistory: TSetTimerHistory[] | null;
-  clearTimeoutHistory: TClearTimerHistory[] | null;
-  setIntervalHistory: TSetTimerHistory[] | null;
-  clearIntervalHistory: TClearTimerHistory[] | null;
-  evalHistory: TEvalHistory[] | null;
-  rafHistory: TRequestAnimationFrameHistory[] | null;
-  cafHistory: TCancelAnimationFrameHistory[] | null;
-  ricHistory: TRequestIdleCallbackHistory[] | null;
-  cicHistory: TCancelIdleCallbackHistory[] | null;
+export interface ITelemetry {
+  media: IMediaTelemetry;
+  onlineTimers: IOnlineTimerMetrics[] | null;
+  setTimeoutHistory: ISetTimerHistory[] | null;
+  clearTimeoutHistory: IClearTimerHistory[] | null;
+  setIntervalHistory: ISetTimerHistory[] | null;
+  clearIntervalHistory: IClearTimerHistory[] | null;
+  evalHistory: IEvalHistory[] | null;
+  rafHistory: IRequestAnimationFrameHistory[] | null;
+  cafHistory: ICancelAnimationFrameHistory[] | null;
+  ricHistory: IRequestIdleCallbackHistory[] | null;
+  cicHistory: ICancelIdleCallbackHistory[] | null;
   activeTimers: number;
   worker: IWorkerTelemetry;
   scheduler: ISchedulerTelemetry;
@@ -62,7 +62,7 @@ export type TTelemetry = {
     requestIdleCallback: number;
     cancelIdleCallback: number;
   };
-};
+}
 
 let panels: TPanelMap;
 const apiMedia = new MediaWrapper();
@@ -112,7 +112,7 @@ export function onEachSecond() {
   apiScheduler.updateCallsPerSecond(panels.scheduler);
 }
 
-export function collectMetrics(): TTelemetry {
+export function collectMetrics(): ITelemetry {
   return {
     media: apiMedia.collectMetrics(panels.media),
     evalHistory: apiEval.collectHistory(panels.eval),

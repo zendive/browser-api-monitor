@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
+  import type { IClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
   import {
     type ESortOrder,
     saveLocalStorage,
@@ -14,7 +14,7 @@
     clearTimerHistory,
     caption,
   }: {
-    clearTimerHistory: TClearTimerHistory[];
+    clearTimerHistory: IClearTimerHistory[];
     caption: string;
   } = $props();
   const { sortClearTimers } = useConfigState();
@@ -25,7 +25,7 @@
   );
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortClearTimers.field = <keyof TClearTimerHistory> field;
+    sortClearTimers.field = <keyof IClearTimerHistory> field;
     sortClearTimers.order = order;
 
     saveLocalStorage({

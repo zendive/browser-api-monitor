@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { type TMediaMetrics } from '../../../wrapper/MediaWrapper.ts';
+  import { type IMediaMetrics } from '../../../wrapper/MediaWrapper.ts';
   import MediaCommands from './MediaCommands.svelte';
   import MediaEvent from './MediaEvent.svelte';
   import MediaProp from './MediaProp.svelte';
 
   let { mediaId, events, props }: {
     mediaId: string;
-    events: TMediaMetrics['events'];
-    props: TMediaMetrics['props'];
+    events: IMediaMetrics['events'];
+    props: IMediaMetrics['props'];
   } = $props();
   let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
   const duplicateSrc = ['currentSrc', 'src'];
