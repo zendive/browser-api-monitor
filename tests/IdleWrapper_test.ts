@@ -36,6 +36,7 @@ describe('IdleWrapper', () => {
     expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
+    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(rec.selfTime).not.toBeNull();
     expect(apiIdle.callCounter.requestIdleCallback).toBe(1);
   });
@@ -59,6 +60,7 @@ describe('IdleWrapper', () => {
     expect(cicRec.calls).toBe(1);
     expect(cicRec.trace.length).toBeGreaterThan(1);
     expect(cicRec.traceId.length).toBeGreaterThan(1);
+    expect(cicRec.firstSeen).toBeGreaterThan(ricRec.firstSeen);
     expect(apiIdle.callCounter.cancelIdleCallback).toBe(1);
     expect(ricRec.canceledByTraceIds?.length).toBe(1);
     expect(ricRec.canceledCounter).toBe(1);

@@ -97,20 +97,15 @@ describe('wrappers', () => {
     );
 
     const rec = Array.from(apiTimer.setTimeoutHistory.values())[0];
-
     expect(rec.online).toBe(0);
     expect(rec.selfTime).toBeNull();
-    if (rec.canceledByTraceIds) {
-      expect(rec.canceledByTraceIds.length).toBe(2);
+    expect(rec.canceledByTraceIds!.length).toBe(2);
+    rec.canceledByTraceIds!.forEach((traceId) => {
 
-      const clearHistory = Array.from(apiTimer.clearTimeoutHistory.values());
-      rec.canceledByTraceIds.forEach((traceId) => {
-        const found = clearHistory.find((rec) => rec.traceId === traceId);
-        expect(found).toBeTruthy();
-      });
-    } else {
-      expect(true).toBe(false);
-    }
+    const clearHistory = Array.from(apiTimer.clearTimeoutHistory.values());
+    const found = clearHistory.find((rec) => rec.traceId === traceId);
+      expect(found).toBeTruthy();
+    });
   });
 
   test('setTimeout - valid delay', () => {
@@ -122,6 +117,7 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(DELAY);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(false);
     expect(Fact.check(rec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(false);
 
@@ -174,6 +170,7 @@ describe('wrappers', () => {
 
     expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
+    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
@@ -251,6 +248,7 @@ describe('wrappers', () => {
     expect(rec.delay).toBe(DELAY);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(rec.selfTime).not.toBeNull();
     expect(Fact.check(rec.facts, SetTimerFact.BAD_DELAY)).toBe(false);
     expect(Fact.check(rec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(false);
@@ -278,6 +276,9 @@ describe('wrappers', () => {
 
     expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
+    expect(rec.trace.length).toBeGreaterThan(1);
+    expect(rec.traceId.length).toBeGreaterThan(0);
+    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
