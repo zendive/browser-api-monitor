@@ -24,7 +24,7 @@ export async function loadSessionStorage(): Promise<TSession> {
     await session.set(store);
   }
 
-  return store[SESSION_VERSION];
+  return <TSession> store[SESSION_VERSION];
 }
 
 /**
@@ -43,8 +43,8 @@ export function onSessionStorageChange(
   callback: (newValue: TSession, oldValue: TSession | undefined) => void,
 ) {
   session.onChanged.addListener((change) => {
-    const newValue = change?.[SESSION_VERSION]?.newValue;
-    const oldValue = change?.[SESSION_VERSION]?.oldValue;
+    const newValue = <TSession | undefined> change?.[SESSION_VERSION]?.newValue;
+    const oldValue = <TSession | undefined> change?.[SESSION_VERSION]?.oldValue;
 
     if (
       !newValue || Object.keys(newValue).length !== DEFAULT_SESSION_KEYS_LENGTH

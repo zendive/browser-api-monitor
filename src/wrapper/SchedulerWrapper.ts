@@ -47,10 +47,7 @@ export class SchedulerWrapper {
   #callsMap: Map</*traceId*/ string, /*calls*/ number> = new Map();
 
   wrapYield() {
-    globalThis.scheduler.yield = function (
-      this: SchedulerWrapper,
-      ...args: unknown[] // reserved for future compatibility, currently no parameters accepted
-    ) {
+    globalThis.scheduler.yield = function (this: SchedulerWrapper) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err);
       const methodMetric = this.#yieldMap.getOrInsertComputed(
@@ -72,7 +69,7 @@ export class SchedulerWrapper {
         if (traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
-        return nativeYield(...args);
+        return nativeYield();
       }
 
       return Promise.resolve(); // in case of bypass

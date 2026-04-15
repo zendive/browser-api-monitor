@@ -1,5 +1,3 @@
-import type { TWritableBooleanKeys } from './generics.ts';
-
 export function NOOP() {}
 export const ERRORS_IGNORED = [
   'Could not establish connection. Receiving end does not exist.',
@@ -114,20 +112,19 @@ export const MEDIA_ELEMENT_PROPS = [
   'videoHeight',
 ];
 
-type TToggableMediaProps = TWritableBooleanKeys<
-  HTMLVideoElement & HTMLAudioElement
->;
-export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<TToggableMediaProps> =
-  /*@__PURE__*/ new Set([
-    'autoplay',
-    'playsInline',
-    'loop',
-    'defaultMuted',
-    'muted',
-    'preservesPitch',
-    'controls',
-    'disablePictureInPicture',
-  ]);
+const MEDIA_ELEMENT_TOGGABLE_PROPS = [
+  'autoplay',
+  'playsInline',
+  'loop',
+  'defaultMuted',
+  'muted',
+  'preservesPitch',
+  'controls',
+  'disablePictureInPicture',
+] as const;
+export type TToggableMediaProps = typeof MEDIA_ELEMENT_TOGGABLE_PROPS[number];
+export const MEDIA_ELEMENT_TOGGABLE_PROPS_SET: Set<string> =
+  /*@__PURE__*/ new Set(MEDIA_ELEMENT_TOGGABLE_PROPS);
 
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [
@@ -135,7 +132,7 @@ export const NETWORK_STATE = [
   'NETWORK_IDLE',
   'NETWORK_LOADING',
   'NETWORK_NO_SOURCE',
-];
+] as const;
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
 export const READY_STATE = [
   'HAVE_NOTHING',
@@ -143,4 +140,4 @@ export const READY_STATE = [
   'HAVE_CURRENT_DATA',
   'HAVE_FUTURE_DATA',
   'HAVE_ENOUGH_DATA',
-];
+] as const;

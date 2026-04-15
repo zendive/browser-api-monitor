@@ -33,7 +33,7 @@ dev:
 valid:
 	deno fmt --unstable-component
 	deno lint
-	deno run --allow-read --allow-env npm:svelte-check -- --no-tsconfig
+	deno run --allow-read --allow-env npm:svelte-check
 
 .PHONY: test
 test: valid

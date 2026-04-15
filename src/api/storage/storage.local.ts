@@ -157,7 +157,7 @@ export async function loadLocalStorage(): Promise<TConfig> {
     await local.set(store);
   }
 
-  return store[CONFIG_VERSION];
+  return <TConfig> store[CONFIG_VERSION];
 }
 
 /**
@@ -176,8 +176,8 @@ export function onLocalStorageChange(
   callback: (newValue: TConfig, oldValue: TConfig | undefined) => void,
 ) {
   local.onChanged.addListener((change) => {
-    const newValue = change?.[CONFIG_VERSION]?.newValue;
-    const oldValue = change?.[CONFIG_VERSION]?.oldValue;
+    const newValue = <TConfig | undefined> change?.[CONFIG_VERSION]?.newValue;
+    const oldValue = <TConfig | undefined> change?.[CONFIG_VERSION]?.oldValue;
 
     if (
       !newValue || Object.keys(newValue).length !== DEFAULT_CONFIG_KEYS_LENGTH

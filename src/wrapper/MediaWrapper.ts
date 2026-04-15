@@ -2,10 +2,11 @@ import { cloneObjectSafely } from '../api/clone.ts';
 import {
   MEDIA_ELEMENT_EVENTS,
   MEDIA_ELEMENT_PROPS,
-  MEDIA_ELEMENT_TOGGABLE_PROPS,
+  MEDIA_ELEMENT_TOGGABLE_PROPS_SET,
   NETWORK_STATE,
   READY_STATE,
   TIME_60FPS_SEC,
+  type TToggableMediaProps,
 } from '../api/const.ts';
 import type { TPanel } from '../api/storage/storage.local.ts';
 
@@ -42,8 +43,10 @@ export type TMediaCommand =
   | 'slower'
   | 'faster';
 
-export function isToggableMediaProp(property: string) {
-  return MEDIA_ELEMENT_TOGGABLE_PROPS.has(property);
+export function isToggableMediaProp(
+  property: string,
+): property is TToggableMediaProps {
+  return MEDIA_ELEMENT_TOGGABLE_PROPS_SET.has(property);
 }
 
 export class MediaWrapper {
@@ -141,9 +144,9 @@ export class MediaWrapper {
 
     // meet new
     for (let i = 0, I = els.length; i < I; i++) {
-      if (!els[i].dataset?.apiMon) {
+      if (!els[i].dataset?.['apiMon']) {
         const id = crypto.randomUUID();
-        els[i].dataset.apiMon = id;
+        els[i].dataset['apiMon'] = id;
         this.mediaCollection.push(this.#startMonitorMedia(id, els[i]));
       }
     }
@@ -205,7 +208,7 @@ export class MediaWrapper {
     } else if (cmd === 'frame-forward') {
       mediaModel.el.currentTime += TIME_60FPS_SEC;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
-      if (MEDIA_ELEMENT_TOGGABLE_PROPS.has(property)) {
+      if (isToggableMediaProp(property)) {
         mediaModel.el[property] = !mediaModel.el[property];
       }
     } else if (cmd === 'slower') {
