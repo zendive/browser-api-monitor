@@ -57,6 +57,7 @@ export class SchedulerWrapper {
             traceId: callstack.traceId,
             trace: callstack.trace,
             traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            firstSeen: performance.now(),
             calls: 0,
             cps: 1,
           };
@@ -94,6 +95,7 @@ export class SchedulerWrapper {
             traceId: callstack.traceId,
             trace: callstack.trace,
             traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            firstSeen: performance.now(),
             calls: 0,
             cps: 1,
             delay,

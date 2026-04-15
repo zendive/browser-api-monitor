@@ -70,6 +70,7 @@ export class EvalWrapper {
           traceId: callstack.traceId,
           trace: callstack.trace,
           traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          firstSeen: performance.now(),
           calls: 0,
           code: null,
           returnedValue: null,

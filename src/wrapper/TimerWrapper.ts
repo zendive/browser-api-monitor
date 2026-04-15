@@ -24,7 +24,7 @@ export enum ETimerType {
   TIMEOUT,
   INTERVAL,
 }
-export type TOnlineTimerMetrics = TTraceable & {
+export type TOnlineTimerMetrics = Omit<TTraceable, 'firstSeen'> & {
   type: ETimerType;
   delay: number | undefined | string;
   handler: number;
@@ -186,6 +186,7 @@ export class TimerWrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        firstSeen: performance.now(),
         facts,
         canceledCounter: 0,
         canceledByTraceIds: null,
@@ -234,6 +235,7 @@ export class TimerWrapper {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        firstSeen: performance.now(),
         handler: <number | string> handler,
         calls: 0,
         delay: handlerDelay,

@@ -17,6 +17,7 @@ export type TTraceable = {
   traceId: string;
   trace: TTrace[];
   traceDomain: ETraceDomain;
+  firstSeen: number;
 };
 export enum ETraceDomain {
   SAME,
