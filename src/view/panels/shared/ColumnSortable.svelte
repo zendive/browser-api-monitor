@@ -17,13 +17,13 @@
   } = $props();
 
   const ORDER_MAP = {
-    [ESortOrder.ASCENDING]: 'ascending',
-    [ESortOrder.DESCENDING]: 'descending',
+    [ESortOrder.ASCENDING]: ' ascending',
+    [ESortOrder.DESCENDING]: ' descending',
   };
   let tooltip = $derived.by(() => {
     let rv = `Sort by ${field}`;
     if (field === currentField) {
-      rv += ` ${ORDER_MAP[currentFieldOrder]}`;
+      rv += ORDER_MAP[currentFieldOrder];
     }
     return rv;
   });
