@@ -94,7 +94,14 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={rafHistory.length} />]
+        <ColumnSortable
+          field="firstSeen"
+          currentField={sortRequestAnimationFrame.field}
+          currentFieldOrder={sortRequestAnimationFrame.order}
+          eventChangeSorting={onChangeSort}
+        >
+          {caption} [<Variable value={rafHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable

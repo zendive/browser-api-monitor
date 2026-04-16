@@ -30,7 +30,7 @@
     <thead class="sticky-header">
       <tr>
         <th class="w-full">
-          Eval Callstack [<Variable value={evalHistory.length} />]
+          eval [<Variable value={evalHistory.length} />]
         </th>
         <th class="ta-c">Self</th>
         <th class="ta-c" title="Facts"><span class="icon -facts"></span></th>

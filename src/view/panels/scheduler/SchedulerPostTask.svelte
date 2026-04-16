@@ -20,7 +20,7 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        scheduler.postTask Callstack [<Variable value={metrics.length} />]
+        scheduler.postTask [<Variable value={metrics.length} />]
       </th>
       <th class="ta-c">Self</th>
       <th class="ta-c">priority</th>

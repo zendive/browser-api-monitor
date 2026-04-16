@@ -93,7 +93,14 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={ricHistory.length} />]
+        <ColumnSortable
+          field="firstSeen"
+          currentField={sortRequestIdleCallback.field}
+          currentFieldOrder={sortRequestIdleCallback.order}
+          eventChangeSorting={onChangeSort}
+        >
+          {caption} [<Variable value={ricHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">didTimeout</th>
       <th class="ta-c">

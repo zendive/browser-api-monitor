@@ -16,7 +16,7 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={metrics.length} />]
+        {caption} [<Variable value={metrics.length} />]
       </th>
       <th class="ta-c">Handler</th>
       <th class="ta-r">Delay</th>

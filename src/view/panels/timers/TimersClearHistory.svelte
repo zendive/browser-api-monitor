@@ -38,7 +38,14 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={clearTimerHistory.length} />]
+        <ColumnSortable
+          field="firstSeen"
+          currentField={sortClearTimers.field}
+          currentFieldOrder={sortClearTimers.order}
+          eventChangeSorting={onChangeSort}
+        >
+          {caption} [<Variable value={clearTimerHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable

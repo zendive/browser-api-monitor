@@ -12,7 +12,7 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        scheduler.yield Callstack [<Variable value={metrics.length} />]
+        scheduler.yield [<Variable value={metrics.length} />]
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">Called</th>

@@ -41,7 +41,14 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={cicHistory.length} />]
+        <ColumnSortable
+          field="firstSeen"
+          currentField={sortCancelIdleCallback.field}
+          currentFieldOrder={sortCancelIdleCallback.order}
+          eventChangeSorting={onChangeSort}
+        >
+          {caption} [<Variable value={cicHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
