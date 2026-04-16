@@ -1,12 +1,11 @@
 import { cloneObjectSafely } from '../api/clone.ts';
 import {
-  MEDIA_ELEMENT_EVENTS,
-  MEDIA_ELEMENT_PROPS,
-  MEDIA_ELEMENT_TOGGABLE_PROPS_SET,
+  isMediaFieldWritable,
+  MEDIA_EVENTS,
+  MEDIA_FIELDS,
   NETWORK_STATE,
   READY_STATE,
   TIME_60FPS_SEC,
-  type TToggableMediaProps,
 } from '../api/const.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 
@@ -42,12 +41,6 @@ export type TMediaCommand =
   | 'toggle-boolean'
   | 'slower'
   | 'faster';
-
-export function isToggableMediaProp(
-  property: string,
-): property is TToggableMediaProps {
-  return MEDIA_ELEMENT_TOGGABLE_PROPS_SET.has(property);
-}
 
 export class MediaWrapper {
   mediaCollection: IMediaModel[] = [];
@@ -86,7 +79,7 @@ export class MediaWrapper {
   }
 
   #stopMonitorMedia(entry: IMediaModel) {
-    for (const eventType of MEDIA_ELEMENT_EVENTS) {
+    for (const eventType of MEDIA_EVENTS) {
       entry.el.removeEventListener(eventType, entry.eventListener);
     }
   }
@@ -109,7 +102,7 @@ export class MediaWrapper {
       }.bind(events),
     };
 
-    for (const event of MEDIA_ELEMENT_EVENTS) {
+    for (const event of MEDIA_EVENTS) {
       events[event] = 0;
       el.addEventListener(event, rv.eventListener);
     }
@@ -161,7 +154,7 @@ export class MediaWrapper {
     if (panel.visible) {
       rv.collection = this.mediaCollection.map((v) => {
         // refresh props metrics
-        for (const prop of MEDIA_ELEMENT_PROPS) {
+        for (const prop of MEDIA_FIELDS) {
           if (prop in v.el) {
             v.metrics.props[prop] = this.#formatPropValue(
               prop,
@@ -208,7 +201,7 @@ export class MediaWrapper {
     } else if (cmd === 'frame-forward') {
       mediaModel.el.currentTime += TIME_60FPS_SEC;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
-      if (isToggableMediaProp(property)) {
+      if (isMediaFieldWritable(property)) {
         mediaModel.el[property] = !mediaModel.el[property];
       }
     } else if (cmd === 'slower') {

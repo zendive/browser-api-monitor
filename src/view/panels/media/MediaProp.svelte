@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isToggableMediaProp } from '../../../wrapper/MediaWrapper.ts';
+  import { isMediaFieldWritable } from '../../../api/const.ts';
   import Variable from '../../shared/Variable.svelte';
   import { EMsg, portPost } from '../../../api/communication.ts';
 
@@ -9,12 +9,12 @@
     mediaId: string;
   } = $props();
 
-  function onToggleBoolean(property: string) {
+  function onToggleMediaField(field: string) {
     portPost({
       msg: EMsg.MEDIA_COMMAND,
       mediaId: mediaId,
       cmd: 'toggle-boolean',
-      property: property as keyof HTMLMediaElement,
+      field: field as keyof HTMLMediaElement,
     });
   }
 
@@ -34,12 +34,12 @@
 <tr class:isPassive={!value} class:isActive={true === value}>
   <td class="name">{name}</td>
   <td class="value">
-    {#if isToggableMediaProp(name)}
+    {#if isMediaFieldWritable(name)}
       <button
         type="button"
         aria-label="Toggle state"
         class="isToggable"
-        onclick={() => void onToggleBoolean(name)}
+        onclick={() => void onToggleMediaField(name)}
       >
         {value}
       </button>

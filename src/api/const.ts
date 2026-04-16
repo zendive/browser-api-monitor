@@ -40,7 +40,7 @@ export const TAG_BAD_HANDLER = (x: unknown) => `${x}`;
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 
-export const MEDIA_ELEMENT_EVENTS = [
+export const MEDIA_EVENTS = [
   'abort',
   'canplay',
   'canplaythrough',
@@ -70,9 +70,8 @@ export const MEDIA_ELEMENT_EVENTS = [
   'volumechange',
   'waiting',
   'waitingforkey',
-];
-
-export const MEDIA_ELEMENT_PROPS = [
+] as const;
+export const MEDIA_FIELDS = [
   'currentSrc',
   'src',
   'srcObject',
@@ -110,9 +109,8 @@ export const MEDIA_ELEMENT_PROPS = [
   'height',
   'videoWidth',
   'videoHeight',
-];
-
-const MEDIA_ELEMENT_TOGGABLE_PROPS = [
+] as const;
+const MEDIA_FIELDS_WRITABLE = [
   'autoplay',
   'playsInline',
   'loop',
@@ -122,9 +120,15 @@ const MEDIA_ELEMENT_TOGGABLE_PROPS = [
   'controls',
   'disablePictureInPicture',
 ] as const;
-export type TToggableMediaProps = typeof MEDIA_ELEMENT_TOGGABLE_PROPS[number];
-export const MEDIA_ELEMENT_TOGGABLE_PROPS_SET: Set<string> =
-  /*@__PURE__*/ new Set(MEDIA_ELEMENT_TOGGABLE_PROPS);
+type TMediaFieldWritable = typeof MEDIA_FIELDS_WRITABLE[number];
+const MEDIA_FIELDS_WRITABLE_SET: Set<string> = /*@__PURE__*/ new Set(
+  MEDIA_FIELDS_WRITABLE,
+);
+export function isMediaFieldWritable(
+  field: string,
+): field is TMediaFieldWritable {
+  return MEDIA_FIELDS_WRITABLE_SET.has(field);
+}
 
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [

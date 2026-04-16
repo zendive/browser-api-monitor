@@ -80,7 +80,7 @@ windowListen((o) => {
   } else if (EMsg.TIMER_COMMAND === o.msg) {
     runTimerCommand(o.type, o.handler);
   } else if (EMsg.MEDIA_COMMAND === o.msg) {
-    runMediaCommand(o.mediaId, o.cmd, o.property);
+    runMediaCommand(o.mediaId, o.cmd, o.field);
   } else if (EMsg.SESSION === o.msg) {
     applySession(o.session);
   }

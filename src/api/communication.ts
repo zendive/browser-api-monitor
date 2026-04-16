@@ -152,7 +152,7 @@ export interface IMsgMediaCommand {
   msg: EMsg.MEDIA_COMMAND;
   mediaId: string;
   cmd: TMediaCommand;
-  property?: keyof HTMLMediaElement;
+  field?: keyof HTMLMediaElement;
 }
 export interface IMsgSession {
   msg: EMsg.SESSION;
