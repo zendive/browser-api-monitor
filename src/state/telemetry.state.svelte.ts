@@ -27,7 +27,7 @@ export function establishTelemetryReceiver() {
       state.telemetry = o.telemetry;
       acknowledgeTelemetry(o.timeOfCollection);
 
-      if (__development__) {
+      if (__feat_dev_stats__) {
         state.telemetrySize = objectInJsonLength(o.telemetry);
       }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
@@ -40,7 +40,7 @@ export function establishTelemetryReceiver() {
         acknowledgeTelemetry(o.timeOfCollection, true);
       }
 
-      if (__development__) {
+      if (__feat_dev_stats__) {
         state.telemetrySize = objectInJsonLength(o.telemetryDelta);
       }
     }
@@ -67,7 +67,7 @@ export function establishTelemetryReceiverMirror() {
       state.telemetry = o.telemetry;
       acknowledgeTelemetryMirror(o.timeOfCollection);
 
-      if (__development__) {
+      if (__feat_dev_stats__) {
         state.telemetrySize = objectInJsonLength(o.telemetry);
       }
     } else if (o.msg === EMsg.TELEMETRY_DELTA) {
@@ -79,7 +79,7 @@ export function establishTelemetryReceiverMirror() {
         acknowledgeTelemetryMirror(o.timeOfCollection, true);
       }
 
-      if (__development__) {
+      if (__feat_dev_stats__) {
         state.telemetrySize = objectInJsonLength(o.telemetryDelta);
       }
     }

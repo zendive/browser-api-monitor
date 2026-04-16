@@ -22,6 +22,7 @@ const buildOptions: BuildOptions = {
   outdir: './public/build/',
   define: {
     __development__: `${!isProd}`,
+    __feat_dev_stats__: `false`, // show telemetry statistics in devtools panel
     __app_name__: `"browser-api-monitor@${manifest.version}"`,
     __app_version__: `"${manifest.version}"`,
     __home_page__: `"${manifest.homepage_url}"`,
