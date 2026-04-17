@@ -90,6 +90,7 @@ export const MEDIA_FIELDS = [
   'ended',
   'autoplay',
   'playsInline',
+  'loading',
   'loop',
   'defaultMuted',
   'mediaKeys',
