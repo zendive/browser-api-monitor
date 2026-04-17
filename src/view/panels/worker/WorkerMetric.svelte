@@ -11,16 +11,16 @@
   import WorkerMetricOnError from './WorkerMetricOnError.svelte';
   import Variable from '../../shared/Variable.svelte';
 
-  let { metric }: { metric: IWorkerTelemetryMetric } = $props();
+  let { workerMetric }: { workerMetric: IWorkerTelemetryMetric } = $props();
   let isExpanded = $state(true);
 </script>
 
 <fieldset>
   <legend class="ta-r">
-    <WorkerSpecifier specifier={metric.specifier} />
-    {#if metric.online}
+    <WorkerSpecifier specifier={workerMetric.specifier} />
+    {#if workerMetric.online}
       <span title="Active Workers">
-        [<Variable value={metric.online} />]
+        [<Variable value={workerMetric.online} />]
       </span>
     {/if}
     <span class="divider"></span>
@@ -31,13 +31,13 @@
   </legend>
 
   <section class:d-none={!isExpanded}>
-    <WorkerMetricConstructor {metric} />
-    <WorkerMetricTerminate {metric} />
-    <WorkerMetricPostMessage {metric} />
-    <WorkerMetricOnMessage {metric} />
-    <WorkerMetricOnError {metric} />
-    <WorkerMetricAddEventListener {metric} />
-    <WorkerMetricRemoveEventListener {metric} />
+    <WorkerMetricConstructor {workerMetric} />
+    <WorkerMetricTerminate metrics={workerMetric.terminate} />
+    <WorkerMetricPostMessage metrics={workerMetric.postMessage} />
+    <WorkerMetricOnMessage metrics={workerMetric.onmessage} />
+    <WorkerMetricOnError metrics={workerMetric.onerror} />
+    <WorkerMetricAddEventListener metrics={workerMetric.ael} />
+    <WorkerMetricRemoveEventListener metrics={workerMetric.rel} />
   </section>
 </fieldset>
 

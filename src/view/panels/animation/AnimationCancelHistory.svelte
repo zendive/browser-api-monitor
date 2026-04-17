@@ -16,7 +16,7 @@
   }: { cafHistory: ICancelAnimationFrameHistory[]; caption?: string } =
     $props();
   const { sortCancelAnimationFrame } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     cafHistory.toSorted(
       compareByFieldOrder(
         sortCancelAnimationFrame.field,

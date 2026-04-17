@@ -13,7 +13,7 @@
     </div>
 
     {#each telemetry.collection as metric (metric.specifier)}
-      <WorkerMetric {metric} />
+      <WorkerMetric workerMetric={metric} />
     {/each}
   </section>
 {/if}

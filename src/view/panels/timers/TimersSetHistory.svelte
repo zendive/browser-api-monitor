@@ -25,7 +25,7 @@
     clearIntervalHistory: IClearTimerHistory[] | null;
     caption?: string;
   } = $props();
-  let { sortSetTimers } = useConfigState();
+  const { sortSetTimers } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     setTimerHistory.toSorted(
       compareByFieldOrder(sortSetTimers.field, sortSetTimers.order),

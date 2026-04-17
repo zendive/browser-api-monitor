@@ -19,7 +19,11 @@
   <Media media={ts.telemetry.media} />
   <Worker telemetry={ts.telemetry.worker} />
   <Scheduler telemetry={ts.telemetry.scheduler} />
-  <Eval evalHistory={ts.telemetry.evalHistory} />
+
+  {#if ts.telemetry.evalHistory?.length}
+    <Eval evalHistory={ts.telemetry.evalHistory} />
+  {/if}
+
   <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
 
   {#if ts.telemetry.setTimeoutHistory?.length}

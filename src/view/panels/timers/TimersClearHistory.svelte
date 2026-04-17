@@ -16,7 +16,7 @@
     caption: string;
   } = $props();
   const { sortClearTimers } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     clearTimerHistory.toSorted(
       compareByFieldOrder(sortClearTimers.field, sortClearTimers.order),
     )

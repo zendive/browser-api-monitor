@@ -26,7 +26,7 @@
   let dialogEl: Dialog;
   let alertEl: Alert;
   const { sortRequestIdleCallback } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(
       compareByFieldOrder(
         sortRequestIdleCallback.field,

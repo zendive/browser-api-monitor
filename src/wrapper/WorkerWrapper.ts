@@ -34,30 +34,30 @@ interface IWorkerMetric {
   ael: Map</*traceId*/ string, IAddEventListenerMetric>;
   rel: Map</*traceId*/ string, IRemoveEventListenerMetric>;
 }
-interface IConstructorMetric extends ITraceable {
+export interface IConstructorMetric extends ITraceable {
   calls: number;
 }
-interface ITerminateMetric extends ITraceable {
+export interface ITerminateMetric extends ITraceable {
   calls: number;
 }
-interface IPostMessageMetric extends ITraceable {
+export interface IPostMessageMetric extends ITraceable {
   calls: number;
   selfTime: number | null;
   cps: number;
 }
-interface IOnMessageMetric extends ITraceable {
+export interface IOnMessageMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IOnErrorMetric extends ITraceable {
+export interface IOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-interface IAddEventListenerMetric extends ITraceable {
+export interface IAddEventListenerMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
@@ -65,7 +65,7 @@ interface IAddEventListenerMetric extends ITraceable {
   canceledCounter: number;
   facts: TFact;
 }
-interface IRemoveEventListenerMetric extends ITraceable {
+export interface IRemoveEventListenerMetric extends ITraceable {
   calls: number;
   facts: TFact;
 }
@@ -124,7 +124,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     this.#specifier = String(specifier);
 
     const workerMetric = workerMap.getOrInsertComputed(this.#specifier, () => {
-      const konstructorMetric = {
+      const constructorMetric = {
         traceId: callstack.traceId,
         trace: callstack.trace,
         traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
@@ -137,7 +137,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         online: 0,
         facts: <TFact> 0,
         callsMap: new Map(),
-        konstruktor: new Map([[konstructorMetric.traceId, konstructorMetric]]),
+        konstruktor: new Map([[constructorMetric.traceId, constructorMetric]]),
         terminate: new Map(),
         postMessage: new Map(),
         onmessage: new Map(),

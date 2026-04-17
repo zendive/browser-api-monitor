@@ -1,3 +1,5 @@
+import type { IEvalHistory } from '../../wrapper/EvalWrapper.ts';
+import type { IPostTask, IYield } from '../../wrapper/SchedulerWrapper.ts';
 import type {
   ICancelIdleCallbackHistory,
   IRequestIdleCallbackHistory,
@@ -10,6 +12,15 @@ import type {
   IClearTimerHistory,
   ISetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
+import type {
+  IAddEventListenerMetric,
+  IConstructorMetric,
+  IOnErrorMetric,
+  IOnMessageMetric,
+  IPostMessageMetric,
+  IRemoveEventListenerMetric,
+  ITerminateMetric,
+} from '../../wrapper/WorkerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
 import { ESortOrder } from '../const.ts';
@@ -97,28 +108,68 @@ export const DEFAULT_PANELS: IPanel[] = [
 
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
+  sortWorkerConstructor: {
+    field: <keyof IConstructorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerTerminate: {
+    field: <keyof ITerminateMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerPostMessage: {
+    field: <keyof IPostMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerOnMessage: {
+    field: <keyof IOnMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerOnError: {
+    field: <keyof IOnErrorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerAEL: {
+    field: <keyof IAddEventListenerMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerREL: {
+    field: <keyof IRemoveEventListenerMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortPostTask: {
+    field: <keyof IPostTask> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortYield: {
+    field: <keyof IYield> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortEval: {
+    field: <keyof IEvalHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
   sortSetTimers: {
-    field: <keyof ISetTimerHistory> 'calls',
+    field: <keyof ISetTimerHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortClearTimers: {
-    field: <keyof IClearTimerHistory> 'calls',
+    field: <keyof IClearTimerHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortRequestAnimationFrame: {
-    field: <keyof IRequestAnimationFrameHistory> 'calls',
+    field: <keyof IRequestAnimationFrameHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortCancelAnimationFrame: {
-    field: <keyof ICancelAnimationFrameHistory> 'calls',
+    field: <keyof ICancelAnimationFrameHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortRequestIdleCallback: {
-    field: <keyof IRequestIdleCallbackHistory> 'calls',
+    field: <keyof IRequestIdleCallbackHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortCancelIdleCallback: {
-    field: <keyof ICancelIdleCallbackHistory> 'calls',
+    field: <keyof ICancelIdleCallbackHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   paused: false,

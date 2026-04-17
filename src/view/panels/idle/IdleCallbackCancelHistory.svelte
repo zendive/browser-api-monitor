@@ -16,7 +16,7 @@
     caption?: string;
   } = $props();
   const { sortCancelIdleCallback } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     cicHistory.toSorted(
       compareByFieldOrder(
         sortCancelIdleCallback.field,

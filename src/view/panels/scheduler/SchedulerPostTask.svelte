@@ -10,25 +10,92 @@
   import CellBypass from '../shared/CellBypass.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { metrics }: {
-    metrics: IPostTask[];
-  } = $props();
+  let { metrics }: { metrics: IPostTask[] } = $props();
+  const { sortPostTask } = useConfigState();
+  const sortedMetrics = $derived.by(() =>
+    metrics.toSorted(
+      compareByFieldOrder(sortPostTask.field, sortPostTask.order),
+    )
+  );
+
+  function onChangeSort(field: string, order: ESortOrder) {
+    sortPostTask.field = <keyof IPostTask> field;
+    sortPostTask.order = order;
+
+    saveLocalStorage({
+      sortPostTask: $state.snapshot(sortPostTask),
+    });
+  }
 </script>
 
 <table data-navigation-tag="scheduler.postTask">
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        scheduler.postTask [<Variable value={metrics.length} />]
+        <ColumnSortable
+          field="firstSeen"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >
+          scheduler.postTask [<Variable value={sortedMetrics.length} />]
+        </ColumnSortable>
       </th>
-      <th class="ta-c">Self</th>
-      <th class="ta-c">priority</th>
-      <th class="ta-c"><span class="icon -facts"></span></th>
+      <th class="ta-c">
+        <ColumnSortable
+          field="selfTime"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >Self</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          field="priority"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >Priority</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          field="facts"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        ><span class="icon -facts"></span></ColumnSortable>
+      </th>
       <th class="ta-c" title="Calls per second">CPS</th>
-      <th class="ta-c">Called</th>
-      <th class="ta-r">Delay</th>
-      <th class="ta-c">Set</th>
+      <th class="ta-c">
+        <ColumnSortable
+          field="calls"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >Called</ColumnSortable>
+      </th>
+      <th class="ta-r">
+        <ColumnSortable
+          field="delay"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >Delay</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          field="online"
+          currentField={sortPostTask.field}
+          currentFieldOrder={sortPostTask.order}
+          eventChangeSorting={onChangeSort}
+        >Set</ColumnSortable>
+      </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
       <th class="ta-c" title="Breakpoint">
         <span class="icon -breakpoint"></span>
@@ -36,7 +103,7 @@
     </tr>
   </thead>
   <tbody>
-    {#each metrics as metric (metric.traceId)}
+    {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
           <CellCallstack

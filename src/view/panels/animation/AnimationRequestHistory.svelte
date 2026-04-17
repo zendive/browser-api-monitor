@@ -26,7 +26,7 @@
   const { sortRequestAnimationFrame } = useConfigState();
   let dialogEl: Dialog;
   let alertEl: Alert;
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     rafHistory.toSorted(
       compareByFieldOrder(
         sortRequestAnimationFrame.field,
