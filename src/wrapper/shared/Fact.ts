@@ -9,13 +9,13 @@ export type TFactsMap = Map<TFact, IFactDescriptor>;
 
 export class Fact {
   /**
-   * @param(n): 53 bits number in range [0 ... Number.MAX_SAFE_INTEGER]
+   * @param(n): 53 bits number in range [1 ... Number.MAX_SAFE_INTEGER]
    */
   static define(n: number): TFact {
     if (Number.isInteger(n) && 0 < n && n <= Number.MAX_SAFE_INTEGER) {
       return n as TFact;
     } else {
-      throw new Error('Fact must be in range [0 .. Number.MAX_SAFE_INTEGER]');
+      throw new Error('Fact must be in range [1 ... Number.MAX_SAFE_INTEGER]');
     }
   }
 
