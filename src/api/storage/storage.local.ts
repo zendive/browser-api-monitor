@@ -12,6 +12,7 @@ import type {
 } from '../../wrapper/TimerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
+import { ESortOrder } from '../const.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -94,44 +95,32 @@ export const DEFAULT_PANELS: IPanel[] = [
   },
 ];
 
-export enum ESortOrder {
-  ASCENDING,
-  DESCENDING,
-}
-
-export const DEFAULT_SORT_SET_TIMERS = {
-  field: <keyof ISetTimerHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CLEAR_TIMERS = {
-  field: <keyof IClearTimerHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_RAF = {
-  field: <keyof IRequestAnimationFrameHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CAF = {
-  field: <keyof ICancelAnimationFrameHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_RIC = {
-  field: <keyof IRequestIdleCallbackHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CIC = {
-  field: <keyof ICancelIdleCallbackHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
-  sortSetTimers: DEFAULT_SORT_SET_TIMERS,
-  sortClearTimers: DEFAULT_SORT_CLEAR_TIMERS,
-  sortRequestAnimationFrame: DEFAULT_SORT_RAF,
-  sortCancelAnimationFrame: DEFAULT_SORT_CAF,
-  sortRequestIdleCallback: DEFAULT_SORT_RIC,
-  sortCancelIdleCallback: DEFAULT_SORT_CIC,
+  sortSetTimers: {
+    field: <keyof ISetTimerHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
+  sortClearTimers: {
+    field: <keyof IClearTimerHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
+  sortRequestAnimationFrame: {
+    field: <keyof IRequestAnimationFrameHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
+  sortCancelAnimationFrame: {
+    field: <keyof ICancelAnimationFrameHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
+  sortRequestIdleCallback: {
+    field: <keyof IRequestIdleCallbackHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
+  sortCancelIdleCallback: {
+    field: <keyof ICancelIdleCallbackHistory> 'calls',
+    order: ESortOrder.DESCENDING,
+  },
   paused: false,
   devtoolsPanelShown: false,
   wrapperCallstackType: EWrapperCallstackType.SHORT,

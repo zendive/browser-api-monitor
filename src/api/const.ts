@@ -145,3 +145,8 @@ export const READY_STATE = [
   'HAVE_FUTURE_DATA',
   'HAVE_ENOUGH_DATA',
 ] as const;
+
+export enum ESortOrder {
+  ASCENDING,
+  DESCENDING,
+}

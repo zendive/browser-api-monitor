@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { ESortOrder } from '../../../api/storage/storage.local.ts';
+  import { ESortOrder } from '../../../api/const.ts';
 
   let {
     field,

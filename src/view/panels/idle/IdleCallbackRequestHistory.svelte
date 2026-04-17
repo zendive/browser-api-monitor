@@ -3,10 +3,8 @@
     type ICancelIdleCallbackHistory,
     type IRequestIdleCallbackHistory,
   } from '../../../wrapper/IdleWrapper.ts';
-  import {
-    ESortOrder,
-    saveLocalStorage,
-  } from '../../../api/storage/storage.local.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';

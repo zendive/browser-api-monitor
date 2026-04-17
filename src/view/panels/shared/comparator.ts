@@ -1,5 +1,5 @@
 import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
-import { ESortOrder } from '../../../api/storage/storage.local.ts';
+import { ESortOrder } from '../../../api/const.ts';
 
 const SEMISORTING_FIELDS = ['calls', 'delay', 'online'];
 
@@ -14,8 +14,8 @@ function compareIfEqual<T>(field: keyof T, first: T, second: T) {
 
 export function compareByFieldOrder<T>(field: keyof T, order: ESortOrder) {
   return function (first: T, second: T) {
-    const a = first[field] || 0;
-    const b = second[field] || 0;
+    const a: unknown = first[field] || 0;
+    const b: unknown = second[field] || 0;
 
     if (
       (typeof a === 'number' && typeof b === 'number') ||
