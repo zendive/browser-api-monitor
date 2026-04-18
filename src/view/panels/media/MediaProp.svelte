@@ -31,14 +31,14 @@
   }
 </script>
 
-<tr class:isPassive={!value} class:isActive={true === value}>
+<tr class:isPassive={!value}>
   <td class="name">{name}</td>
   <td class="value">
     {#if isMediaFieldWritable(name)}
       <button
         type="button"
         aria-label="Toggle state"
-        class="isToggable"
+        class="isWritable"
         onclick={() => void onToggleMediaField(name)}
       >
         {value}
@@ -56,10 +56,7 @@
     color: var(--text-passive);
     font-weight: normal;
   }
-  .isActive {
-    font-weight: bold;
-  }
-  .isToggable {
+  .isWritable {
     cursor: pointer;
   }
   .name {
