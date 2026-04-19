@@ -1,3 +1,11 @@
+import 'svelte/elements';
+
+declare module 'svelte/elements' {
+  export interface HTMLAttributes<T> {
+    'interestfor'?: string;
+  }
+}
+
 export {};
 
 declare global {
