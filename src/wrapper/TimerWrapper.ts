@@ -480,16 +480,13 @@ export class TimerWrapper {
   }
 
   collectHistory(
-    activeTimers: IPanel,
     setTimeout: IPanel,
     clearTimeout: IPanel,
     setInterval: IPanel,
     clearInterval: IPanel,
   ) {
     return {
-      onlineTimers: activeTimers.visible
-        ? Array.from(this.onlineTimers.values())
-        : null,
+      onlineTimers: Array.from(this.onlineTimers.values()),
       setTimeoutHistory: setTimeout.wrap && setTimeout.visible
         ? Array.from(this.setTimeoutHistory.values())
         : null,

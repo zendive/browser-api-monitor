@@ -29,7 +29,7 @@
         label="Active Timers"
         navSelector="Active"
         visible={panels.activeTimers.visible}
-        count={ts.telemetry.activeTimers}
+        count={ts.telemetry.onlineTimers.length}
       />
     {/if}
 

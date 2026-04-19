@@ -38,7 +38,7 @@ import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
 
 export interface ITelemetry {
   media: IMediaTelemetry;
-  onlineTimers: IOnlineTimerMetrics[] | null;
+  onlineTimers: IOnlineTimerMetrics[];
   setTimeoutHistory: ISetTimerHistory[] | null;
   clearTimeoutHistory: IClearTimerHistory[] | null;
   setIntervalHistory: ISetTimerHistory[] | null;
@@ -48,7 +48,6 @@ export interface ITelemetry {
   cafHistory: ICancelAnimationFrameHistory[] | null;
   ricHistory: IRequestIdleCallbackHistory[] | null;
   cicHistory: ICancelIdleCallbackHistory[] | null;
-  activeTimers: number;
   worker: IWorkerTelemetry;
   scheduler: ISchedulerTelemetry;
   callCounter: {
@@ -117,7 +116,6 @@ export function collectMetrics(): ITelemetry {
     media: apiMedia.collectMetrics(panels.media),
     evalHistory: apiEval.collectHistory(panels.eval),
     ...apiTimer.collectHistory(
-      panels.activeTimers,
       panels.setTimeout,
       panels.clearTimeout,
       panels.setInterval,
@@ -131,7 +129,6 @@ export function collectMetrics(): ITelemetry {
       panels.requestIdleCallback,
       panels.cancelIdleCallback,
     ),
-    activeTimers: apiTimer.onlineTimers.size,
     worker: collectWorkerHistory(panels.worker),
     scheduler: apiScheduler.collectHistory(panels.scheduler),
     callCounter: panels.callsSummary.visible

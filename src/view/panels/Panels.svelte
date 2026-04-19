@@ -11,8 +11,12 @@
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
   import Worker from './worker/Worker.svelte';
   import Scheduler from './scheduler/Scheduler.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
+  import { panelsArray2Map } from '../../api/storage/storage.local.ts';
 
   const ts = useTelemetryState();
+  const config = useConfigState();
+  const panels = $derived.by(() => panelsArray2Map(config.panels));
 </script>
 
 {#if ts.telemetry}
@@ -24,7 +28,9 @@
     <Eval evalHistory={ts.telemetry.evalHistory} />
   {/if}
 
-  <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
+  {#if panels.activeTimers.visible}
+    <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
+  {/if}
 
   {#if ts.telemetry.setTimeoutHistory?.length}
     <TimersSetHistory
