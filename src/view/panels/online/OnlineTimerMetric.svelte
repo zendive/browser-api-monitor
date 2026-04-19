@@ -1,18 +1,10 @@
 <script lang="ts">
   import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
-  import { EMsg, portPost } from '../../../api/communication.ts';
   import { delayTooltip } from '../../shared/util.ts';
   import CellCallstack from '../shared/CellCallstack.svelte';
+  import { postTimerCommand } from '../../../state/config.state.svelte.ts';
 
   let { metric }: { metric: IOnlineTimerMetrics } = $props();
-
-  function clearTimer() {
-    portPost({
-      msg: EMsg.TIMER_COMMAND,
-      type: metric.type,
-      handler: metric.handler,
-    });
-  }
 </script>
 
 <tr class="t-zebra">
@@ -29,7 +21,7 @@
       title="Clear"
       onclick={(e) => {
         e.preventDefault();
-        clearTimer();
+        postTimerCommand(metric.type, metric.handler);
       }}
     >{metric.handler}</a>
   </td>

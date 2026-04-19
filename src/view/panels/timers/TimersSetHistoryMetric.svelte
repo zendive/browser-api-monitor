@@ -4,7 +4,6 @@
     SetTimerFacts,
   } from '../../../wrapper/TimerWrapper.ts';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import Variable from '../../shared/Variable.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellCancelable from '../shared/CellCancelable.svelte';
@@ -14,6 +13,7 @@
     delayTooltip,
     type TFindRegressorCallback,
   } from '../../shared/util.ts';
+  import CellOnline from './CellOnline.svelte';
 
   let {
     metric,
@@ -49,7 +49,7 @@
   <td class="ta-r" title={delayTooltip(metric.delay)}>{metric.delay}</td>
   <td class="ta-r">
     {#if metric.online}
-      <Variable value={metric.online} />
+      <CellOnline traceId={metric.traceId} online={metric.online} />
     {/if}
   </td>
   <td><CellBypass traceId={metric.traceId} /></td>
