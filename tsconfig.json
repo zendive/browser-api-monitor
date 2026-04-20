@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "noImplicitAny": true,
-    "strict": true,
-    "strictNullChecks": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM"],
+    "types": ["deno", "chrome"],
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "noUnusedLocals": true,
@@ -12,14 +14,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
     "noPropertyAccessFromIndexSignature": true,
-    "erasableSyntaxOnly": false,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
-    "types": ["deno", "chrome"],
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
