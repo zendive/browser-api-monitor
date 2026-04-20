@@ -11,28 +11,38 @@
   }
 </script>
 
-<button interestfor={popoverId} popovertarget={popoverId}>
+<button
+  interestfor={popoverId}
+  popovertarget={popoverId}
+  class:-popoverShown={popoverShown}
+  aria-label="Online timers"
+>
   <Variable value={online} />
-
-  <div id={popoverId} class="tooltip" popover="hint" ontoggle={onToggle}>
-    {#if popoverShown}
-      <CellOnlinePopoverBody {traceId} />
-    {/if}
-  </div>
 </button>
 
+<div
+  popover="hint"
+  ontoggle={onToggle}
+  id={popoverId}
+  class="popover"
+  role="dialog"
+>
+  {#if popoverShown}
+    <CellOnlinePopoverBody {traceId} />
+  {/if}
+</div>
+
 <style lang="scss">
-  button {
-    &:interest-source {
-      color: var(--attention);
-    }
+  button.-popoverShown {
+    background-color: var(--bg-invert);
+    color: var(--text-invert);
   }
 
-  .tooltip {
-    inset: unset;
-    position-area: center bottom;
+  .popover {
+    position-area: block-end span-inline-start;
     max-height: 10rem;
     background-color: var(--bg-popover);
     border: 1px solid var(--border);
+    padding: 0;
   }
 </style>

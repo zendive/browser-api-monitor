@@ -46,7 +46,6 @@
 <button
   type="button"
   popovertarget="toggle-panels-menu"
-  class="toggle-menu-button"
   title="Control Panel"
   aria-label="Control Panel"
 >
@@ -119,20 +118,15 @@
   </table>
 </div>
 
-<Alert bind:this={reloadMessageEl} dismissable={false} title="Attention"
+<Alert
+  bind:this={reloadMessageEl}
+  dismissable={false}
+  title="Attention"
 >Tab reload required</Alert>
 
 <style lang="scss">
-  .toggle-menu-button {
-    anchor-name: --toggle-menu-button;
-  }
-
   #toggle-panels-menu {
-    position: absolute;
-    position-anchor: --toggle-menu-button;
-    top: anchor(bottom);
-    left: anchor(left);
-
+    position-area: block-end span-inline-end;
     background-color: var(--bg-popover);
     border: 1px solid var(--border);
     margin: 0;
