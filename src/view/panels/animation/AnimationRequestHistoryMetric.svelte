@@ -1,19 +1,20 @@
 <script lang="ts">
-  import type { IRequestAnimationFrameHistory } from '../../../wrapper/AnimationWrapper.ts';
-  import type { TFindRegressorCallback } from '../../shared/util.ts';
+  import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import Variable from '../../shared/Variable.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
+  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
+  import type { IRequestAnimationFrameHistory } from '../../../wrapper/AnimationWrapper.ts';
 
   let {
     metric,
-    onFindRegressors,
+    popoverId,
+    showTerminatorsFor,
   }: {
     metric: IRequestAnimationFrameHistory;
-    onFindRegressors: TFindRegressorCallback;
+    popoverId: string;
+    showTerminatorsFor: (traceId: string) => void;
   } = $props();
 </script>
 
@@ -27,11 +28,12 @@
   <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
   <td class="ta-c">{metric.cps || undefined}</td>
   <td class="ta-c">
-    <CellCancelable
+    <CellTerminatableCalls
       calls={metric.calls}
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
-      onClick={onFindRegressors}
+      {popoverId}
+      eventClick={() => void showTerminatorsFor(metric.traceId)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>

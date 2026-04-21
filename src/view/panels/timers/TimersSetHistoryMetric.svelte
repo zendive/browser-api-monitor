@@ -1,26 +1,25 @@
 <script lang="ts">
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
+  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellFacts from '../shared/CellFacts.svelte';
+  import CellCallstack from '../shared/CellCallstack.svelte';
+  import CellOnline from './CellOnline.svelte';
+  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
   import {
     type ISetTimerHistory,
     SetTimerFacts,
   } from '../../../wrapper/TimerWrapper.ts';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import {
-    delayTooltip,
-    type TFindRegressorCallback,
-  } from '../../shared/util.ts';
-  import CellOnline from './CellOnline.svelte';
+  import { delayTooltip } from '../../shared/util.ts';
 
   let {
     metric,
-    onFindRegressors,
+    popoverId,
+    showTerminatorsFor,
   }: {
     metric: ISetTimerHistory;
-    onFindRegressors: TFindRegressorCallback;
+    popoverId: string;
+    showTerminatorsFor: (traceId: string) => void;
   } = $props();
 </script>
 
@@ -38,11 +37,12 @@
     <CellFacts facts={metric.facts} factsMap={SetTimerFacts} />
   </td>
   <td class="ta-c">
-    <CellCancelable
+    <CellTerminatableCalls
       calls={metric.calls}
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
-      onClick={onFindRegressors}
+      {popoverId}
+      eventClick={() => void showTerminatorsFor(metric.traceId)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>

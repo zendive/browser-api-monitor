@@ -1,18 +1,16 @@
 <script lang="ts">
+  import Variable from '../../shared/Variable.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
+  import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
+  import TimersClearHistory from './TimersClearHistory.svelte';
   import type {
     IClearTimerHistory,
     ISetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
-  import TimersClearHistory from './TimersClearHistory.svelte';
 
   let {
     setTimerHistory,
@@ -23,17 +21,44 @@
     setTimerHistory: ISetTimerHistory[];
     clearTimeoutHistory: IClearTimerHistory[] | null;
     clearIntervalHistory: IClearTimerHistory[] | null;
-    caption?: string;
+    caption: string;
   } = $props();
+  const popoverId = $derived.by(() => `${caption}_terminators`);
   const { sortSetTimers } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     setTimerHistory.toSorted(
       compareByFieldOrder(sortSetTimers.field, sortSetTimers.order),
     )
   );
-  let dialogEl: Dialog;
-  let alertEl: Alert;
-  let clearTimerHistoryMetrics: IClearTimerHistory[] = $state([]);
+  let traceIdForTerminators: string | null = $state(null);
+  const terminators = $derived.by(() => {
+    if (!traceIdForTerminators) return;
+
+    const metric = setTimerHistory.find((r) =>
+      r.traceId === traceIdForTerminators
+    );
+    if (!metric || !metric.canceledByTraceIds?.length) return;
+
+    const rv = clearTimeoutHistory?.filter(
+      (r) => metric.canceledByTraceIds?.includes(r.traceId),
+    ) || [];
+
+    return rv.concat(
+      clearIntervalHistory?.filter(
+        (r) => metric.canceledByTraceIds?.includes(r.traceId),
+      ) || [],
+    );
+  });
+
+  function showTerminatorsFor(traceId: string) {
+    traceIdForTerminators = traceId;
+  }
+
+  function onTogglePopover(e: ToggleEvent) {
+    if (e.newState === 'closed') {
+      traceIdForTerminators = null;
+    }
+  }
 
   function onChangeSort(field: string, order: ESortOrder) {
     sortSetTimers.field = <keyof ISetTimerHistory> field;
@@ -43,53 +68,24 @@
       sortSetTimers: $state.snapshot(sortSetTimers),
     });
   }
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = clearTimeoutHistory?.find((r) => r.traceId === traceId);
-
-      if (record) {
-        clearTimerHistoryMetrics.push(record);
-      }
-
-      record = clearIntervalHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        clearTimerHistoryMetrics.push(record);
-      }
-    }
-
-    if (clearTimerHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    clearTimerHistoryMetrics.splice(0);
-  }
 </script>
 
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which timer with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. For full coverage - requires clearTimeout and/or clearInterval panels enabled."
+<div
+  id={popoverId}
+  popover="hint"
+  class="popoverTerminators"
+  class:-empty={terminators?.length === 0}
+  ontoggle={onTogglePopover}
 >
-  <TimersClearHistory
-    caption="Cancelled by"
-    clearTimerHistory={$state.snapshot(clearTimerHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires clearTimeout and/or clearInterval panels enabled
-</Alert>
+  {#if terminators?.length}
+    <TimersClearHistory
+      caption="Terminated by"
+      clearTimerHistory={$state.snapshot(terminators)}
+    />
+  {:else}
+    Requires clearTimeout and clearInterval panels enabled
+  {/if}
+</div>
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -161,7 +157,20 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersSetHistoryMetric {metric} {onFindRegressors} />
+      <TimersSetHistoryMetric {metric} {popoverId} {showTerminatorsFor} />
     {/each}
   </tbody>
 </table>
+
+<style lang="scss">
+  .popoverTerminators {
+    position-area: block-end span-all;
+    max-height: 10rem;
+    background-color: var(--bg-popover);
+    border: 1px solid var(--border);
+
+    &:not(.-empty) {
+      padding: 0;
+    }
+  }
+</style>

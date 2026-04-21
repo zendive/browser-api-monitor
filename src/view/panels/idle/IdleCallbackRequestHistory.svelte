@@ -1,4 +1,8 @@
 <script lang="ts">
+  import Variable from '../../shared/Variable.svelte';
+  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
+  import IdleCallbackRequestHistoryMetric from './IdleCallbackRequestHistoryMetric.svelte';
   import {
     type ICancelIdleCallbackHistory,
     type IRequestIdleCallbackHistory,
@@ -6,13 +10,7 @@
   import type { ESortOrder } from '../../../api/const.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import IdleCallbackRequestHistoryMetric from './IdleCallbackRequestHistoryMetric.svelte';
 
   let {
     ricHistory,
@@ -23,8 +21,7 @@
     cicHistory: ICancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
-  let dialogEl: Dialog;
-  let alertEl: Alert;
+  const popoverId = $derived.by(() => `${caption}_terminators`);
   const { sortRequestIdleCallback } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(
@@ -34,6 +31,27 @@
       ),
     )
   );
+  let traceIdForTerminators: string | null = $state(null);
+  const terminators = $derived.by(() => {
+    if (!traceIdForTerminators) return;
+
+    const metric = ricHistory.find((r) => r.traceId === traceIdForTerminators);
+    if (!metric || !metric.canceledByTraceIds?.length) return;
+
+    return cicHistory?.filter((r) =>
+      metric.canceledByTraceIds?.includes(r.traceId)
+    );
+  });
+
+  function showTerminatorsFor(traceId: string) {
+    traceIdForTerminators = traceId;
+  }
+
+  function onTogglePopover(e: ToggleEvent) {
+    if (e.newState === 'closed') {
+      traceIdForTerminators = null;
+    }
+  }
 
   function onChangeSort(field: string, order: ESortOrder) {
     sortRequestIdleCallback.field = <keyof IRequestIdleCallbackHistory> field;
@@ -43,49 +61,24 @@
       sortRequestIdleCallback: $state.snapshot(sortRequestIdleCallback),
     });
   }
-
-  let cicHistoryMetrics: ICancelIdleCallbackHistory[] = $state([]);
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = cicHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        cicHistoryMetrics.push(record);
-      }
-    }
-
-    if (cicHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    cicHistoryMetrics.splice(0);
-  }
 </script>
 
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which requestIdleCallback with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
+<div
+  id={popoverId}
+  popover="hint"
+  class="popoverTerminators"
+  class:-empty={terminators?.length === 0}
+  ontoggle={onTogglePopover}
 >
-  <IdleCallbackCancelHistory
-    caption="Cancelled by"
-    cicHistory={$state.snapshot(cicHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires cancelIdleCallback panel enabled
-</Alert>
+  {#if terminators?.length}
+    <IdleCallbackCancelHistory
+      caption="Terminated by"
+      cicHistory={$state.snapshot(terminators)}
+    />
+  {:else}
+    Requires cancelIdleCallback panel enabled
+  {/if}
+</div>
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -161,8 +154,22 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <IdleCallbackRequestHistoryMetric
         {metric}
-        {onFindRegressors}
+        {popoverId}
+        {showTerminatorsFor}
       />
     {/each}
   </tbody>
 </table>
+
+<style lang="scss">
+  .popoverTerminators {
+    position-area: block-end span-all;
+    max-height: 10rem;
+    background-color: var(--bg-popover);
+    border: 1px solid var(--border);
+
+    &:not(.-empty) {
+      padding: 0;
+    }
+  }
+</style>

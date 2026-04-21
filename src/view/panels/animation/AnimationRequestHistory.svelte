@@ -1,4 +1,8 @@
 <script lang="ts">
+  import Variable from '../../shared/Variable.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
+  import AnimationCancelHistory from './AnimationCancelHistory.svelte';
+  import AnimationRequestHistoryMetric from './AnimationRequestHistoryMetric.svelte';
   import type {
     ICancelAnimationFrameHistory,
     IRequestAnimationFrameHistory,
@@ -6,13 +10,7 @@
   import type { ESortOrder } from '../../../api/const.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
-  import AnimationCancelHistory from './AnimationCancelHistory.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import AnimationRequestHistoryMetric from './AnimationRequestHistoryMetric.svelte';
 
   let {
     rafHistory,
@@ -23,9 +21,8 @@
     cafHistory: ICancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
+  const popoverId = $derived.by(() => `${caption}_terminators`);
   const { sortRequestAnimationFrame } = useConfigState();
-  let dialogEl: Dialog;
-  let alertEl: Alert;
   const sortedMetrics = $derived.by(() =>
     rafHistory.toSorted(
       compareByFieldOrder(
@@ -34,59 +31,55 @@
       ),
     )
   );
+  let traceIdForTerminators: string | null = $state(null);
+  const terminators = $derived.by(() => {
+    if (!traceIdForTerminators) return;
 
-  function onChangeSort(_field: string, _order: ESortOrder) {
+    const metric = rafHistory.find((r) => r.traceId === traceIdForTerminators);
+    if (!metric || !metric.canceledByTraceIds?.length) return;
+
+    return cafHistory?.filter((r) =>
+      metric.canceledByTraceIds?.includes(r.traceId)
+    );
+  });
+
+  function showTerminatorsFor(traceId: string) {
+    traceIdForTerminators = traceId;
+  }
+
+  function onTogglePopover(e: ToggleEvent) {
+    if (e.newState === 'closed') {
+      traceIdForTerminators = null;
+    }
+  }
+
+  function onChangeSort(field: string, order: ESortOrder) {
     sortRequestAnimationFrame.field =
-      <keyof IRequestAnimationFrameHistory> _field;
-    sortRequestAnimationFrame.order = _order;
+      <keyof IRequestAnimationFrameHistory> field;
+    sortRequestAnimationFrame.order = order;
 
     saveLocalStorage({
       sortRequestAnimationFrame: $state.snapshot(sortRequestAnimationFrame),
     });
   }
-
-  let cafHistoryMetrics: ICancelAnimationFrameHistory[] = $state([]);
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = cafHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        cafHistoryMetrics.push(record);
-      }
-    }
-
-    if (cafHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    cafHistoryMetrics.splice(0);
-  }
 </script>
 
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which requestAnimationFrame with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. Requires cancelAnimationFrame panel enabled."
+<div
+  id={popoverId}
+  popover="hint"
+  class="popoverTerminators"
+  class:-empty={terminators?.length === 0}
+  ontoggle={onTogglePopover}
 >
-  <AnimationCancelHistory
-    caption="Cancelled by"
-    cafHistory={$state.snapshot(cafHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires cancelAnimationFrame panel enabled
-</Alert>
+  {#if terminators?.length}
+    <AnimationCancelHistory
+      caption="Terminated by"
+      cafHistory={$state.snapshot(terminators)}
+    />
+  {:else}
+    Requires cancelAnimationFrame panel enabled
+  {/if}
+</div>
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -143,7 +136,24 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <AnimationRequestHistoryMetric {metric} {onFindRegressors} />
+      <AnimationRequestHistoryMetric
+        {metric}
+        {popoverId}
+        {showTerminatorsFor}
+      />
     {/each}
   </tbody>
 </table>
+
+<style lang="scss">
+  .popoverTerminators {
+    position-area: block-end span-all;
+    max-height: 10rem;
+    background-color: var(--bg-popover);
+    border: 1px solid var(--border);
+
+    &:not(.-empty) {
+      padding: 0;
+    }
+  }
+</style>

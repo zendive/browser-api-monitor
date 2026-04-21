@@ -1,23 +1,25 @@
 <script lang="ts">
+  import Variable from '../../shared/Variable.svelte';
+  import CellCallstack from '../shared/CellCallstack.svelte';
+  import CellSelfTime from '../shared/CellSelfTime.svelte';
+  import CellFacts from '../shared/CellFacts.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
+  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
   import {
     type IRequestIdleCallbackHistory,
     RicFacts,
   } from '../../../wrapper/IdleWrapper.ts';
-  import {
-    delayTooltip,
-    type TFindRegressorCallback,
-  } from '../../shared/util.ts';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import Variable from '../../shared/Variable.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import { delayTooltip } from '../../shared/util.ts';
 
-  let { metric, onFindRegressors }: {
+  let {
+    metric,
+    popoverId,
+    showTerminatorsFor,
+  }: {
     metric: IRequestIdleCallbackHistory;
-    onFindRegressors: TFindRegressorCallback;
+    popoverId: string;
+    showTerminatorsFor: (traceId: string) => void;
   } = $props();
 </script>
 
@@ -35,11 +37,12 @@
   </td>
   <td class="ta-c">{metric.cps || undefined}</td>
   <td class="ta-c">
-    <CellCancelable
+    <CellTerminatableCalls
       calls={metric.calls}
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
-      onClick={onFindRegressors}
+      {popoverId}
+      eventClick={() => void showTerminatorsFor(metric.traceId)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>

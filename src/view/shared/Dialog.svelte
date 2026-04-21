@@ -1,15 +1,18 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { NOOP } from '../../api/const.ts';
 
   let {
     title = '',
     description = '',
-    eventClose: closeEvent,
+    eventClose = NOOP,
+    eventToggle = NOOP,
     children,
   }: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     eventClose?: () => void;
+    eventToggle?: (e: ToggleEvent) => void;
     children?: Snippet;
   } = $props();
   let showContent: boolean = $state(false);
@@ -48,11 +51,15 @@
     });
     selfEl.removeEventListener('click', onSelfClick);
     showContent = false;
-    closeEvent?.();
+    eventClose();
   }
 </script>
 
-<dialog bind:this={selfEl} onclose={onClose}>
+<dialog
+  bind:this={selfEl}
+  onclose={onClose}
+  ontoggle={(e) => void eventToggle(e)}
+>
   <header>
     <div class="title">
       {title}

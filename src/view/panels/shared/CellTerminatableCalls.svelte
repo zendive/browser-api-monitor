@@ -1,31 +1,29 @@
 <script lang="ts">
   import Variable from '../../shared/Variable.svelte';
-  import type { TFindRegressorCallback } from '../../shared/util.ts';
 
   let {
     calls,
     canceledCounter,
     canceledByTraceIds,
-    onClick,
+    popoverId,
+    eventClick,
   }: {
     calls: number;
     canceledCounter: number;
     canceledByTraceIds: string[] | null;
-    onClick: TFindRegressorCallback;
+    popoverId: string;
+    eventClick: () => void;
   } = $props();
 </script>
 
 <Variable value={calls} />
 {#if canceledCounter}
-  <a
-    href="."
-    role="button"
+  <button
+    popovertarget={popoverId}
     title="&lt;called&gt; [&lt;aborted&gt;/&lt;abort-locations&gt;]"
-    onclick={(e) => {
-      e.preventDefault();
-      onClick(canceledByTraceIds);
-    }}
+    aria-label="show regressors"
+    onclick={eventClick}
   >
     [<Variable value={canceledCounter} />/{canceledByTraceIds?.length}]
-  </a>
+  </button>
 {/if}
