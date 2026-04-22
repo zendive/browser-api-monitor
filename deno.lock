@@ -10,7 +10,7 @@
     "jsr:@std/internal@^1.0.13": "1.0.13",
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/testing@1.0.18": "1.0.18",
-    "npm:@noble/hashes@2.2.0": "2.2.0",
+    "npm:@awasm/noble@0.1.1": "0.1.1",
     "npm:@types/chrome@*": "0.1.40",
     "npm:@types/chrome@0.1.40": "0.1.40",
     "npm:@types/deno@2.5.0": "2.5.0",
@@ -73,6 +73,9 @@
     }
   },
   "npm": {
+    "@awasm/noble@0.1.1": {
+      "integrity": "sha512-WTAFJq3ShNt/ABL++b1PgnmR8W4rgQ6O49FGI5vUNlFehatf0M4yloEEosqgnvYkZPNyRMz6wCPyRI2JMU3kmQ=="
+    },
     "@dmsnell/diff-match-patch@1.1.0": {
       "integrity": "sha512-yejLPmM5pjsGvxS9gXablUSbInW7H976c/FJ4iQxWIm7/38xBySRemTPDe34lhg1gVLbJntX0+sH0jYfU+PN9A=="
     },
@@ -232,9 +235,6 @@
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
       ]
-    },
-    "@noble/hashes@2.2.0": {
-      "integrity": "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg=="
     },
     "@sveltejs/acorn-typescript@1.0.8_acorn@8.16.0": {
       "integrity": "sha512-esgN+54+q0NjB0Y/4BomT9samII7jGwNy/2a3wNZbT2A2RpmXsXwUt24LvLhx6jUq2gVk4cWEvcRO6MFQbOfNA==",
@@ -498,7 +498,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@noble/hashes@2.2.0",
+        "npm:@awasm/noble@0.1.1",
         "npm:@types/chrome@0.1.40",
         "npm:@types/deno@2.5.0",
         "npm:jsondiffpatch@0.7.3",
