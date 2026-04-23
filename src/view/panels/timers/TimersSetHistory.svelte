@@ -73,7 +73,7 @@
 <div
   id={popoverId}
   popover="hint"
-  class="popoverTerminators"
+  class="popover-terminators"
   class:-empty={terminators?.length === 0}
   ontoggle={onTogglePopover}
 >
@@ -161,16 +161,3 @@
     {/each}
   </tbody>
 </table>
-
-<style lang="scss">
-  .popoverTerminators {
-    position-area: block-end span-all;
-    max-height: 10rem;
-    background-color: var(--bg-popover);
-    border: 1px solid var(--border);
-
-    &:not(.-empty) {
-      padding: 0;
-    }
-  }
-</style>

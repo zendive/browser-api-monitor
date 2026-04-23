@@ -117,6 +117,17 @@ th,
   vertical-align: middle;
 }
 
+.popover-terminators {
+  position-area: block-end span-all;
+  max-height: 10rem;
+  background-color: var(--bg-popover);
+  border: 1px solid var(--border);
+
+  &:not(.-empty) {
+    padding: 0;
+  }
+}
+
 .icon {
   display: inline-block;
   width: 1rem;
