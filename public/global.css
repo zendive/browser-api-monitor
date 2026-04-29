@@ -121,11 +121,15 @@ th,
   position-area: block-end span-all;
   max-height: 10rem;
   background-color: var(--bg-popover);
-  border: 1px solid var(--border);
+  border: 1px solid var(--attention);
 
   &:not(.-empty) {
     padding: 0;
   }
+}
+.popover-target-active {
+  background-color: var(--attention);
+  color: var(--text);
 }
 
 .icon {

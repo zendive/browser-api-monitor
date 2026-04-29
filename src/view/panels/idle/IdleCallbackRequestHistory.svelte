@@ -11,6 +11,7 @@
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { TerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
 
   let {
     ricHistory,
@@ -31,27 +32,17 @@
       ),
     )
   );
-  let traceIdForTerminators: string | null = $state(null);
+  const tph = new TerminatorsPopoverHelper();
   const terminators = $derived.by(() => {
-    if (!traceIdForTerminators) return;
+    if (!tph.traceId) return;
 
-    const metric = ricHistory.find((r) => r.traceId === traceIdForTerminators);
+    const metric = ricHistory.find((r) => r.traceId === tph.traceId);
     if (!metric || !metric.canceledByTraceIds?.length) return;
 
     return cicHistory?.filter((r) =>
       metric.canceledByTraceIds?.includes(r.traceId)
     );
   });
-
-  function showTerminatorsFor(traceId: string) {
-    traceIdForTerminators = traceId;
-  }
-
-  function onTogglePopover(e: ToggleEvent) {
-    if (e.newState === 'closed') {
-      traceIdForTerminators = null;
-    }
-  }
 
   function onChangeSort(field: string, order: ESortOrder) {
     sortRequestIdleCallback.field = <keyof IRequestIdleCallbackHistory> field;
@@ -63,22 +54,24 @@
   }
 </script>
 
-<div
-  id={popoverId}
-  popover="hint"
-  class="popover-terminators"
-  class:-empty={terminators?.length === 0}
-  ontoggle={onTogglePopover}
->
-  {#if terminators?.length}
-    <IdleCallbackCancelHistory
-      caption="Terminated by"
-      cicHistory={$state.snapshot(terminators)}
-    />
-  {:else}
-    Requires cancelIdleCallback panel enabled
-  {/if}
-</div>
+{#if tph.traceId}
+  <div
+    id={popoverId}
+    popover="hint"
+    class="popover-terminators"
+    class:-empty={terminators?.length === 0}
+    ontoggle={tph.toggle}
+  >
+    {#if terminators?.length}
+      <IdleCallbackCancelHistory
+        caption="Terminated by"
+        cicHistory={terminators}
+      />
+    {:else}
+      Requires cancelIdleCallback panel enabled
+    {/if}
+  </div>
+{/if}
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -155,7 +148,7 @@
       <IdleCallbackRequestHistoryMetric
         {metric}
         {popoverId}
-        {showTerminatorsFor}
+        {tph}
       />
     {/each}
   </tbody>

@@ -10,8 +10,8 @@
 <button
   type="button"
   onclick={togglePause}
-  title="Toggle pause"
-  aria-label="Toggle pause"
+  title="Toggle pause telemetry"
+  aria-label="Toggle pause telemetry"
 >
   <span class="icon {config.paused?'-play':'-pause'}"></span>
 </button>

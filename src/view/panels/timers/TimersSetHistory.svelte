@@ -11,6 +11,7 @@
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { TerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
 
   let {
     setTimerHistory,
@@ -30,13 +31,11 @@
       compareByFieldOrder(sortSetTimers.field, sortSetTimers.order),
     )
   );
-  let traceIdForTerminators: string | null = $state(null);
+  const tph = new TerminatorsPopoverHelper();
   const terminators = $derived.by(() => {
-    if (!traceIdForTerminators) return;
+    if (!tph.traceId) return;
 
-    const metric = setTimerHistory.find((r) =>
-      r.traceId === traceIdForTerminators
-    );
+    const metric = setTimerHistory.find((r) => r.traceId === tph.traceId);
     if (!metric || !metric.canceledByTraceIds?.length) return;
 
     const rv = clearTimeoutHistory?.filter(
@@ -50,16 +49,6 @@
     );
   });
 
-  function showTerminatorsFor(traceId: string) {
-    traceIdForTerminators = traceId;
-  }
-
-  function onTogglePopover(e: ToggleEvent) {
-    if (e.newState === 'closed') {
-      traceIdForTerminators = null;
-    }
-  }
-
   function onChangeSort(field: string, order: ESortOrder) {
     sortSetTimers.field = <keyof ISetTimerHistory> field;
     sortSetTimers.order = order;
@@ -70,22 +59,24 @@
   }
 </script>
 
-<div
-  id={popoverId}
-  popover="hint"
-  class="popover-terminators"
-  class:-empty={terminators?.length === 0}
-  ontoggle={onTogglePopover}
->
-  {#if terminators?.length}
-    <TimersClearHistory
-      caption="Terminated by"
-      clearTimerHistory={$state.snapshot(terminators)}
-    />
-  {:else}
-    Requires clearTimeout and clearInterval panels enabled
-  {/if}
-</div>
+{#if tph.traceId}
+  <div
+    id={popoverId}
+    popover="hint"
+    class="popover-terminators"
+    class:-empty={terminators?.length === 0}
+    ontoggle={tph.toggle}
+  >
+    {#if terminators?.length}
+      <TimersClearHistory
+        caption="Terminated by"
+        clearTimerHistory={terminators}
+      />
+    {:else}
+      Requires clearTimeout and clearInterval panels enabled
+    {/if}
+  </div>
+{/if}
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -157,7 +148,7 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersSetHistoryMetric {metric} {popoverId} {showTerminatorsFor} />
+      <TimersSetHistoryMetric {metric} {popoverId} {tph} />
     {/each}
   </tbody>
 </table>

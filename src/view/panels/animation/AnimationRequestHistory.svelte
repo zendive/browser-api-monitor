@@ -11,6 +11,7 @@
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { TerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
 
   let {
     rafHistory,
@@ -31,27 +32,17 @@
       ),
     )
   );
-  let traceIdForTerminators: string | null = $state(null);
+  const tph = new TerminatorsPopoverHelper();
   const terminators = $derived.by(() => {
-    if (!traceIdForTerminators) return;
+    if (!tph.traceId) return;
 
-    const metric = rafHistory.find((r) => r.traceId === traceIdForTerminators);
+    const metric = rafHistory.find((r) => r.traceId === tph.traceId);
     if (!metric || !metric.canceledByTraceIds?.length) return;
 
     return cafHistory?.filter((r) =>
       metric.canceledByTraceIds?.includes(r.traceId)
     );
   });
-
-  function showTerminatorsFor(traceId: string) {
-    traceIdForTerminators = traceId;
-  }
-
-  function onTogglePopover(e: ToggleEvent) {
-    if (e.newState === 'closed') {
-      traceIdForTerminators = null;
-    }
-  }
 
   function onChangeSort(field: string, order: ESortOrder) {
     sortRequestAnimationFrame.field =
@@ -64,22 +55,24 @@
   }
 </script>
 
-<div
-  id={popoverId}
-  popover="hint"
-  class="popover-terminators"
-  class:-empty={terminators?.length === 0}
-  ontoggle={onTogglePopover}
->
-  {#if terminators?.length}
-    <AnimationCancelHistory
-      caption="Terminated by"
-      cafHistory={$state.snapshot(terminators)}
-    />
-  {:else}
-    Requires cancelAnimationFrame panel enabled
-  {/if}
-</div>
+{#if tph.traceId}
+  <div
+    id={popoverId}
+    popover="hint"
+    class="popover-terminators"
+    class:-empty={terminators?.length === 0}
+    ontoggle={tph.toggle}
+  >
+    {#if terminators?.length}
+      <AnimationCancelHistory
+        caption="Terminated by"
+        cafHistory={terminators}
+      />
+    {:else}
+      Requires cancelAnimationFrame panel enabled
+    {/if}
+  </div>
+{/if}
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
@@ -139,7 +132,7 @@
       <AnimationRequestHistoryMetric
         {metric}
         {popoverId}
-        {showTerminatorsFor}
+        {tph}
       />
     {/each}
   </tbody>

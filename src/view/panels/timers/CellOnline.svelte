@@ -14,7 +14,7 @@
 <button
   interestfor={popoverId}
   popovertarget={popoverId}
-  class:-popoverShown={popoverShown}
+  class:popover-target-active={popoverShown}
   aria-label="Online timers"
 >
   <Variable value={online} />
@@ -33,16 +33,11 @@
 </div>
 
 <style lang="scss">
-  button.-popoverShown {
-    background-color: var(--bg-invert);
-    color: var(--text-invert);
-  }
-
   .popover {
     position-area: block-end span-inline-start;
     max-height: 10rem;
     background-color: var(--bg-popover);
-    border: 1px solid var(--border);
+    border: 1px solid var(--attention);
     padding: 0;
   }
 </style>

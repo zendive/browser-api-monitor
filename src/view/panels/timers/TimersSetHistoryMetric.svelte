@@ -6,6 +6,7 @@
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellOnline from './CellOnline.svelte';
   import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
+  import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
   import {
     type ISetTimerHistory,
     SetTimerFacts,
@@ -15,11 +16,11 @@
   let {
     metric,
     popoverId,
-    showTerminatorsFor,
+    tph,
   }: {
     metric: ISetTimerHistory;
     popoverId: string;
-    showTerminatorsFor: (traceId: string) => void;
+    tph: TTerminatorsPopoverHelper;
   } = $props();
 </script>
 
@@ -42,7 +43,7 @@
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
       {popoverId}
-      eventClick={() => void showTerminatorsFor(metric.traceId)}
+      eventClick={(e: Event) => void tph.update(metric.traceId, e.currentTarget)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>

@@ -12,7 +12,7 @@
     canceledCounter: number;
     canceledByTraceIds: string[] | null;
     popoverId: string;
-    eventClick: () => void;
+    eventClick: (e: Event) => void;
   } = $props();
 </script>
 

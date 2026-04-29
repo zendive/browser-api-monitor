@@ -6,6 +6,7 @@
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
+  import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
   import {
     type IRequestIdleCallbackHistory,
     RicFacts,
@@ -15,11 +16,11 @@
   let {
     metric,
     popoverId,
-    showTerminatorsFor,
+    tph,
   }: {
     metric: IRequestIdleCallbackHistory;
     popoverId: string;
-    showTerminatorsFor: (traceId: string) => void;
+    tph: TTerminatorsPopoverHelper;
   } = $props();
 </script>
 
@@ -42,7 +43,7 @@
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
       {popoverId}
-      eventClick={() => void showTerminatorsFor(metric.traceId)}
+      eventClick={(e: Event) => void tph.update(metric.traceId, e.currentTarget)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>
