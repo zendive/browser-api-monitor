@@ -131,6 +131,10 @@ th,
   background-color: var(--attention);
   color: var(--text);
 }
+button[interestfor] {
+  interest-delay-start: 33ms;
+  interest-delay-end: 33ms;
+}
 
 .icon {
   display: inline-block;
