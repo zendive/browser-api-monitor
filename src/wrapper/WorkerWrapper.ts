@@ -127,7 +127,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       const constructorMetric = {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getDomain(callstack),
         firstSeen: performance.now(),
         calls: 0,
       };
@@ -162,7 +162,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
         };
@@ -181,7 +181,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
         };
@@ -223,7 +223,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           selfTime,
@@ -245,7 +245,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -287,7 +287,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -333,7 +333,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -425,7 +425,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           facts: <TFact> 0,

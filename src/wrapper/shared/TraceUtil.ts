@@ -71,7 +71,9 @@ export class TraceUtil {
     }
   }
 
-  getTraceDomain(trace: ITrace | undefined) {
+  getDomain(callstack: ICallstack) {
+    const trace = callstack.trace[0];
+
     if (!trace) {
       return ETraceDomain.UNKNOWN;
     } else if (trace.link.startsWith(location.origin)) {

@@ -117,7 +117,7 @@ export class TimerWrapper {
       delay,
       traceId: callstack.traceId,
       trace: callstack.trace,
-      traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+      traceDomain: traceUtil.getDomain(callstack),
     });
   }
 
@@ -185,7 +185,7 @@ export class TimerWrapper {
         online: 0,
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getDomain(callstack),
         firstSeen: performance.now(),
         facts,
         canceledCounter: 0,
@@ -234,7 +234,7 @@ export class TimerWrapper {
       return {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        traceDomain: traceUtil.getDomain(callstack),
         firstSeen: performance.now(),
         handler: <number | string> handler,
         calls: 0,

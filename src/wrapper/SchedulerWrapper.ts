@@ -56,7 +56,7 @@ export class SchedulerWrapper {
           return {
             traceId: callstack.traceId,
             trace: callstack.trace,
-            traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            traceDomain: traceUtil.getDomain(callstack),
             firstSeen: performance.now(),
             calls: 0,
             cps: 1,
@@ -94,7 +94,7 @@ export class SchedulerWrapper {
           return {
             traceId: callstack.traceId,
             trace: callstack.trace,
-            traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+            traceDomain: traceUtil.getDomain(callstack),
             firstSeen: performance.now(),
             calls: 0,
             cps: 1,
