@@ -6,13 +6,13 @@
   import CollapseExpand from './CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import type { IOnErrorMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import type { IWorkerOnErrorMetric } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: IOnErrorMetric[] } = $props();
+  let { metrics }: { metrics: IWorkerOnErrorMetric[] } = $props();
   const { sortWorkerOnError } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(
@@ -22,7 +22,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerOnError.field = <keyof IOnErrorMetric> field;
+    sortWorkerOnError.field = <keyof IWorkerOnErrorMetric> field;
     sortWorkerOnError.order = order;
 
     saveLocalStorage({ sortWorkerOnError: $state.snapshot(sortWorkerOnError) });

@@ -13,13 +13,13 @@ import type {
   ISetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
 import type {
-  IAddEventListenerMetric,
-  IConstructorMetric,
-  IOnErrorMetric,
-  IOnMessageMetric,
-  IPostMessageMetric,
-  IRemoveEventListenerMetric,
-  ITerminateMetric,
+  IWorkerAelMetric,
+  IWorkerConstructorMetric,
+  IWorkerOnErrorMetric,
+  IWorkerOnMessageMetric,
+  IWorkerPostMessageMetric,
+  IWorkerRelMetric,
+  IWorkerTerminateMetric,
 } from '../../wrapper/WorkerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
@@ -109,31 +109,31 @@ export const DEFAULT_PANELS: IPanel[] = [
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
   sortWorkerConstructor: {
-    field: <keyof IConstructorMetric> 'firstSeen',
+    field: <keyof IWorkerConstructorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerTerminate: {
-    field: <keyof ITerminateMetric> 'firstSeen',
+    field: <keyof IWorkerTerminateMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerPostMessage: {
-    field: <keyof IPostMessageMetric> 'firstSeen',
+    field: <keyof IWorkerPostMessageMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerOnMessage: {
-    field: <keyof IOnMessageMetric> 'firstSeen',
+    field: <keyof IWorkerOnMessageMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerOnError: {
-    field: <keyof IOnErrorMetric> 'firstSeen',
+    field: <keyof IWorkerOnErrorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerAEL: {
-    field: <keyof IAddEventListenerMetric> 'firstSeen',
+    field: <keyof IWorkerAelMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerREL: {
-    field: <keyof IRemoveEventListenerMetric> 'firstSeen',
+    field: <keyof IWorkerRelMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortPostTask: {

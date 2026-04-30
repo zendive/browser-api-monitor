@@ -3,7 +3,7 @@
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import {
-    type IConstructorMetric,
+    type IWorkerConstructorMetric,
     type IWorkerTelemetryMetric,
     WorkerConstructorFacts,
   } from '../../../wrapper/WorkerWrapper.js';
@@ -28,7 +28,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerConstructor.field = <keyof IConstructorMetric> field;
+    sortWorkerConstructor.field = <keyof IWorkerConstructorMetric> field;
     sortWorkerConstructor.order = order;
 
     saveLocalStorage({

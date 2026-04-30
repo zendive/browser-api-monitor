@@ -8,7 +8,7 @@
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
   import {
-    type IAddEventListenerMetric,
+    type IWorkerAelMetric,
     WorkerAELFacts,
   } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
@@ -16,7 +16,7 @@
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: IAddEventListenerMetric[] } = $props();
+  let { metrics }: { metrics: IWorkerAelMetric[] } = $props();
   const { sortWorkerAEL } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(
@@ -26,7 +26,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerAEL.field = <keyof IAddEventListenerMetric> field;
+    sortWorkerAEL.field = <keyof IWorkerAelMetric> field;
     sortWorkerAEL.order = order;
 
     saveLocalStorage({ sortWorkerAEL: $state.snapshot(sortWorkerAEL) });

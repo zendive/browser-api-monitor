@@ -6,13 +6,13 @@
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import type { IOnMessageMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import type { IWorkerOnMessageMetric } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: IOnMessageMetric[] } = $props();
+  let { metrics }: { metrics: IWorkerOnMessageMetric[] } = $props();
   const { sortWorkerOnMessage } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(
@@ -22,7 +22,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerOnMessage.field = <keyof IOnMessageMetric> field;
+    sortWorkerOnMessage.field = <keyof IWorkerOnMessageMetric> field;
     sortWorkerOnMessage.order = order;
 
     saveLocalStorage({

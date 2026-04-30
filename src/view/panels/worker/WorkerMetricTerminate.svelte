@@ -5,13 +5,13 @@
   import CollapseExpand from './CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import type { ITerminateMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import type { IWorkerTerminateMetric } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: ITerminateMetric[] } = $props();
+  let { metrics }: { metrics: IWorkerTerminateMetric[] } = $props();
   const { sortWorkerTerminate } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(
@@ -21,7 +21,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerTerminate.field = <keyof ITerminateMetric> field;
+    sortWorkerTerminate.field = <keyof IWorkerTerminateMetric> field;
     sortWorkerTerminate.order = order;
 
     saveLocalStorage({

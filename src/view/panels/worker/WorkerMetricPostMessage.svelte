@@ -6,13 +6,13 @@
   import CollapseExpand from './CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import type { IPostMessageMetric } from '../../../wrapper/WorkerWrapper.ts';
+  import type { IWorkerPostMessageMetric } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: IPostMessageMetric[] } = $props();
+  let { metrics }: { metrics: IWorkerPostMessageMetric[] } = $props();
   const { sortWorkerPostMessage } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(
@@ -25,7 +25,7 @@
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerPostMessage.field = <keyof IPostMessageMetric> field;
+    sortWorkerPostMessage.field = <keyof IWorkerPostMessageMetric> field;
     sortWorkerPostMessage.order = order;
 
     saveLocalStorage({

@@ -12,13 +12,13 @@ export interface IWorkerTelemetryMetric {
   specifier: string;
   online: number;
   facts: TFact;
-  konstruktor: IConstructorMetric[];
-  terminate: ITerminateMetric[];
-  postMessage: IPostMessageMetric[];
-  onmessage: IOnMessageMetric[];
-  onerror: IOnErrorMetric[];
-  ael: IAddEventListenerMetric[];
-  rel: IRemoveEventListenerMetric[];
+  konstruktor: IWorkerConstructorMetric[];
+  terminate: IWorkerTerminateMetric[];
+  postMessage: IWorkerPostMessageMetric[];
+  onmessage: IWorkerOnMessageMetric[];
+  onerror: IWorkerOnErrorMetric[];
+  ael: IWorkerAelMetric[];
+  rel: IWorkerRelMetric[];
 }
 
 interface IWorkerMetric {
@@ -26,38 +26,38 @@ interface IWorkerMetric {
   online: number;
   facts: TFact;
   callsMap: Map</*traceId*/ string, /*calls*/ number>;
-  konstruktor: Map</*traceId*/ string, IConstructorMetric>;
-  terminate: Map</*traceId*/ string, ITerminateMetric>;
-  postMessage: Map</*traceId*/ string, IPostMessageMetric>;
-  onmessage: Map</*traceId*/ string, IOnMessageMetric>;
-  onerror: Map</*traceId*/ string, IOnErrorMetric>;
-  ael: Map</*traceId*/ string, IAddEventListenerMetric>;
-  rel: Map</*traceId*/ string, IRemoveEventListenerMetric>;
+  konstruktor: Map</*traceId*/ string, IWorkerConstructorMetric>;
+  terminate: Map</*traceId*/ string, IWorkerTerminateMetric>;
+  postMessage: Map</*traceId*/ string, IWorkerPostMessageMetric>;
+  onmessage: Map</*traceId*/ string, IWorkerOnMessageMetric>;
+  onerror: Map</*traceId*/ string, IWorkerOnErrorMetric>;
+  ael: Map</*traceId*/ string, IWorkerAelMetric>;
+  rel: Map</*traceId*/ string, IWorkerRelMetric>;
 }
-export interface IConstructorMetric extends ITraceable {
+export interface IWorkerConstructorMetric extends ITraceable {
   calls: number;
 }
-export interface ITerminateMetric extends ITraceable {
+export interface IWorkerTerminateMetric extends ITraceable {
   calls: number;
 }
-export interface IPostMessageMetric extends ITraceable {
+export interface IWorkerPostMessageMetric extends ITraceable {
   calls: number;
   selfTime: number | null;
   cps: number;
 }
-export interface IOnMessageMetric extends ITraceable {
+export interface IWorkerOnMessageMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-export interface IOnErrorMetric extends ITraceable {
+export interface IWorkerOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
 }
-export interface IAddEventListenerMetric extends ITraceable {
+export interface IWorkerAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
@@ -65,7 +65,7 @@ export interface IAddEventListenerMetric extends ITraceable {
   canceledCounter: number;
   facts: TFact;
 }
-export interface IRemoveEventListenerMetric extends ITraceable {
+export interface IWorkerRelMetric extends ITraceable {
   calls: number;
   facts: TFact;
 }
