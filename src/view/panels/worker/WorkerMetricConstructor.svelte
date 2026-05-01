@@ -57,8 +57,8 @@
           </ColumnSortable>
         </th>
         <th class="ta-c">name</th>
-        <th class="ta-c">type</th>
-        <th class="ta-c">credentials</th>
+        <th class="ta-c" title="classic | module">type</th>
+        <th class="ta-c" title="same-origin | include | omit ">credentials</th>
         <th class="ta-c">
           <ColumnSortable
             field="facts"
