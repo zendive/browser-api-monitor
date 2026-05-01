@@ -1,5 +1,5 @@
 import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
-import { traceUtil } from './shared/util.ts';
+import { parseWorkerOptions, traceUtil } from './shared/util.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
@@ -20,7 +20,6 @@ export interface IWorkerTelemetryMetric {
   ael: IWorkerAelMetric[];
   rel: IWorkerRelMetric[];
 }
-
 interface IWorkerMetric {
   specifier: string;
   online: number;
@@ -34,7 +33,13 @@ interface IWorkerMetric {
   ael: Map</*traceId*/ string, IWorkerAelMetric>;
   rel: Map</*traceId*/ string, IWorkerRelMetric>;
 }
+export interface IWorkerOptions {
+  type: 'classic' | 'module';
+  credentials: 'include' | 'omit' | 'same-origin' | undefined;
+  name: string | undefined;
+}
 export interface IWorkerConstructorMetric extends ITraceable {
+  options: IWorkerOptions;
   calls: number;
 }
 export interface IWorkerTerminateMetric extends ITraceable {
@@ -129,6 +134,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
         trace: callstack.trace,
         traceDomain: traceUtil.getDomain(callstack),
         firstSeen: performance.now(),
+        options: parseWorkerOptions(options),
         calls: 0,
       };
 
@@ -164,6 +170,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           trace: callstack.trace,
           traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
+          options: parseWorkerOptions(options),
           calls: 0,
         };
       },

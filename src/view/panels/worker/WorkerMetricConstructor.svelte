@@ -56,7 +56,10 @@
             constructor [<Variable value={constructorSortedMetrics.length} />]
           </ColumnSortable>
         </th>
-        <th class="ta-c" title="Facts">
+        <th class="ta-c">name</th>
+        <th class="ta-c">type</th>
+        <th class="ta-c">credentials</th>
+        <th class="ta-c">
           <ColumnSortable
             field="facts"
             currentField={sortWorkerConstructor.field}
@@ -87,6 +90,9 @@
               traceDomain={metric.traceDomain}
             />
           </td>
+          <td class="ta-c">{metric.options.name}</td>
+          <td class="ta-c">{metric.options.type}</td>
+          <td class="ta-c">{metric.options.credentials}</td>
           <td class="ta-c">
             <CellFacts
               facts={workerMetric.facts}

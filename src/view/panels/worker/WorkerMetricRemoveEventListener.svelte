@@ -52,7 +52,7 @@
             removeEventListener [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
-        <th class="ta-c" title="Facts">
+        <th class="ta-c">
           <ColumnSortable
             field="facts"
             currentField={sortWorkerREL.field}
