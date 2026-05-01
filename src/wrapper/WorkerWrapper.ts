@@ -35,7 +35,7 @@ interface IWorkerMetric {
 }
 export interface IWorkerOptions {
   type: 'classic' | 'module';
-  credentials: 'include' | 'omit' | 'same-origin' | undefined;
+  credentials: 'same-origin' | 'include' | 'omit' | undefined;
   name: string | undefined;
 }
 export interface IWorkerConstructorMetric extends ITraceable {

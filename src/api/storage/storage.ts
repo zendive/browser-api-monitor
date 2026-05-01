@@ -50,7 +50,7 @@ function mockChromeStorageWith(
       // NOOP in window runtime
     },
 
-    // @ts-expect-error partial implementation
+    // @ts-expect-error: partial implementation
     onChanged: {
       addListener(callback: TOnChangeSignature) {
         allListeners.add(callback);
