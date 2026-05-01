@@ -10,7 +10,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@noble/hashes": "2.0.1",
+    "@noble/hashes": "2.2.0",
     "jsondiffpatch": "0.7.3"
   }
 }
