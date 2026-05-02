@@ -7,6 +7,7 @@ import {
   validHandler,
   validTimerDelay,
 } from '../src/wrapper/shared/util.ts';
+import { wait } from '../src/api/time.ts';
 
 describe('parseWorkerOptions', () => {
   test('empty', () => {
@@ -116,3 +117,6 @@ describe('validTimerDelay', () => {
     expect(validTimerDelay(NaN)).toBe(false);
   });
 });
+
+// wait till `deno` internal pending timers drain
+await wait(10);
