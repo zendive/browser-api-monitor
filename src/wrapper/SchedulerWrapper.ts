@@ -99,7 +99,7 @@ export class SchedulerWrapper {
             calls: 0,
             cps: 1,
             delay,
-            facts: <TFact> 0,
+            facts: Fact.pure,
             selfTime: null,
             priority: undefined,
             aborts: 0,

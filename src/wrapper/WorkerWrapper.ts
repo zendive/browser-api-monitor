@@ -145,7 +145,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       return {
         specifier: this.#specifier,
         online: 0,
-        facts: <TFact> 0,
+        facts: Fact.pure,
         callsMap: new Map(),
         konstruktor: new Map([[constructorMetric.traceId, constructorMetric]]),
         terminate: new Map(),
@@ -361,7 +361,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           eventSelfTime: null,
           eventsCps: 1,
           canceledCounter: 0,
-          facts: <TFact> 0,
+          facts: Fact.pure,
         };
       },
     );
@@ -449,7 +449,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
-          facts: <TFact> 0,
+          facts: Fact.pure,
         };
       },
     );

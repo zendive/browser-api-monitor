@@ -74,7 +74,7 @@ export class EvalWrapper {
           calls: 0,
           code: null,
           returnedValue: null,
-          facts: <TFact> 0,
+          facts: Fact.pure,
           selfTime: null,
         };
       },

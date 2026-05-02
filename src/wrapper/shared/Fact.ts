@@ -8,6 +8,10 @@ interface IFactDescriptor {
 export type TFactsMap = Map<TFact, IFactDescriptor>;
 
 export class Fact {
+  static get pure() {
+    return 0 as TFact;
+  }
+
   /**
    * @param(n): 53 bits number in range [1 ... Number.MAX_SAFE_INTEGER]
    */

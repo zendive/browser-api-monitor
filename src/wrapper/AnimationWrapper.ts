@@ -102,7 +102,7 @@ export class AnimationWrapper {
   }
 
   #updateCafHistory(handler: number | string, callstack: ICallstack) {
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
     let rafTraceId;
 
     if (validHandler(handler)) {

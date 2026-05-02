@@ -164,7 +164,7 @@ export class TimerWrapper {
     callstack: ICallstack,
     isEval: boolean,
   ) {
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
 
     if (validTimerDelay(delay)) {
       delay = trim2ms(delay);
@@ -211,7 +211,7 @@ export class TimerWrapper {
     callstack: ICallstack,
   ) {
     let handlerDelay: string | number | undefined = TAG_DELAY_NOT_FOUND;
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
 
     if (validHandler(handler)) {
       const onlineTimer = this.onlineTimers.get(handler);

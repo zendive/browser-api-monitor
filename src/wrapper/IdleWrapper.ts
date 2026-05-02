@@ -98,7 +98,7 @@ export class IdleWrapper {
     delay: number | undefined | string,
     callstack: ICallstack,
   ) {
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
 
     if (validTimerDelay(delay)) {
       delay = trim2ms(delay);
@@ -143,7 +143,7 @@ export class IdleWrapper {
   }
 
   #updateCicHistory(handler: number | string, callstack: ICallstack) {
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
     let ricTraceId;
 
     if (validHandler(handler)) {
