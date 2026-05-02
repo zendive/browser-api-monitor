@@ -1,5 +1,6 @@
 import { describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
+import './browserPolyfill.ts';
 import {
   parseSharedWorkerOptions,
   parseWorkerOptions,

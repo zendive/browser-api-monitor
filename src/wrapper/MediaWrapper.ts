@@ -1,13 +1,11 @@
-import { cloneObjectSafely } from '../api/clone.ts';
 import {
   isMediaFieldWritable,
   MEDIA_EVENTS,
   MEDIA_FIELDS,
-  NETWORK_STATE,
-  READY_STATE,
   TIME_60FPS_SEC,
 } from '../api/const.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
+import { parseMediaFieldValue } from './shared/util.ts';
 
 type TMediaElement = HTMLVideoElement | HTMLAudioElement;
 interface IMediaModel {
@@ -44,39 +42,6 @@ export type TMediaCommand =
 
 export class MediaWrapper {
   mediaCollection: IMediaModel[] = [];
-
-  #formatPropValue(prop: string, value: unknown): unknown {
-    let rv: unknown = value;
-
-    if ('networkState' === prop) {
-      rv = `${value} - ${NETWORK_STATE[value as number]}`;
-    } else if ('readyState' === prop) {
-      rv = `${value} - ${READY_STATE[value as number]}`;
-    } else if ('srcObject' === prop) {
-      rv = value ? `${value}` : value;
-    } else if ('mediaKeys' === prop) {
-      // https://web.dev/articles/eme-basics
-      rv = cloneObjectSafely(value);
-    } else if (value instanceof TimeRanges) {
-      const ranges: string[] = [];
-
-      for (let n = 0, N = value.length; n < N; n++) {
-        ranges.push(
-          `<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`,
-        );
-      }
-
-      rv = ranges.join('');
-    } else if (value instanceof TextTrackList) {
-      rv = value.length;
-    } else if (value instanceof MediaError) {
-      rv = `${value.code}/${value.message}`;
-    } else if (Number.isNaN(value)) {
-      rv = null;
-    }
-
-    return rv;
-  }
 
   #stopMonitorMedia(entry: IMediaModel) {
     for (const eventType of MEDIA_EVENTS) {
@@ -156,7 +121,7 @@ export class MediaWrapper {
         // refresh props metrics
         for (const prop of MEDIA_FIELDS) {
           if (prop in v.el) {
-            v.metrics.props[prop] = this.#formatPropValue(
+            v.metrics.props[prop] = parseMediaFieldValue(
               prop,
               v.el[prop as keyof TMediaElement],
             );
