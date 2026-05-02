@@ -16,4 +16,15 @@ declare global {
   let __home_page__: string;
   let __release_page__: string;
   let __mirror__: boolean;
+
+  /**
+   * Reverse engineered (not complete) callback argument for
+   * - chrome.devtools.panels.openResource
+   */
+  interface IOpenResourceCallbackArgument {
+    code: 'E_NOTFOUND' | string;
+    description: string;
+    details: string[];
+    isError: boolean;
+  }
 }

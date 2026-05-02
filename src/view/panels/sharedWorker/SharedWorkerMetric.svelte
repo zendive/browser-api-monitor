@@ -11,12 +11,7 @@
 
 <fieldset>
   <legend class="ta-r">
-    <WorkerSpecifier specifier={workerMetric.specifier} />
-    <!--{#if workerMetric.online}-->
-    <!--  <span title="Active Workers">-->
-    <!--    [<Variable value={workerMetric.online} />]-->
-    <!--  </span>-->
-    <!--{/if}-->
+    <WorkerSpecifier specifier={workerMetric.specifier} online={0} />
     <span class="divider"></span>
     <CollapseExpand
       {isExpanded}

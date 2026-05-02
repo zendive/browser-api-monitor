@@ -1,5 +1,9 @@
 import type { ITraceable } from './shared/TraceUtil.ts';
-import { parseSharedWorkerOptions, traceUtil } from './shared/util.ts';
+import {
+  parseSharedWorkerOptions,
+  parseWorkerSpecifier,
+  traceUtil,
+} from './shared/util.ts';
 import { TraceUtil } from './shared/TraceUtil.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 
@@ -31,14 +35,14 @@ const sharedWorkerMap: Map</*specifier*/ string, ISharedWorkerMetric> =
 export class ApiMonitorSharedWorker extends SharedWorker {
   readonly #specifier: string;
 
-  constructor(scriptURL: string | URL, options?: string | WorkerOptions) {
+  constructor(specifier: string | URL, options?: string | WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
 
     if (traceUtil.shouldPause(callstack.traceId)) {
       debugger;
     }
-    super(scriptURL, options);
-    this.#specifier = String(scriptURL);
+    super(specifier, options);
+    this.#specifier = parseWorkerSpecifier(specifier);
 
     const sharedWorkerMetric = sharedWorkerMap.getOrInsertComputed(
       this.#specifier,

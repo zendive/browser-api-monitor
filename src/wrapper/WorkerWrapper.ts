@@ -1,5 +1,9 @@
 import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
-import { parseWorkerOptions, traceUtil } from './shared/util.ts';
+import {
+  parseWorkerOptions,
+  parseWorkerSpecifier,
+  traceUtil,
+} from './shared/util.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
@@ -126,7 +130,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       debugger;
     }
     super(specifier, options);
-    this.#specifier = String(specifier);
+    this.#specifier = parseWorkerSpecifier(specifier);
 
     const workerMetric = workerMap.getOrInsertComputed(this.#specifier, () => {
       const constructorMetric = {

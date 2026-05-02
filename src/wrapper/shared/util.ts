@@ -64,3 +64,18 @@ export function parseSharedWorkerOptions(
     sameSiteCookies,
   };
 }
+
+export function parseWorkerSpecifier(url: string | URL): string {
+  url = String(url);
+
+  // no protocol - assume it's relative to the origin
+  if (!url.includes('://')) {
+    try {
+      url = new URL(url, globalThis.location.origin).toString();
+    } catch (_ignore) {
+      // ignore
+    }
+  }
+
+  return url;
+}

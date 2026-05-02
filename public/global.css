@@ -75,6 +75,9 @@ th,
 .tc-attention {
   color: var(--attention);
 }
+.tc-passive {
+  color: var(--text-passive);
+}
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
 }

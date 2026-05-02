@@ -45,8 +45,9 @@
       cleanUrl,
       lineNumber - 1,
       columnNumber - 1,
-      () => {
-        visited = true;
+      // @ts-expect-error: incomplete documentation for callback argument
+      (acknowledge: IOpenResourceCallbackArgument) => {
+        visited = !acknowledge.isError;
       },
     );
   }
