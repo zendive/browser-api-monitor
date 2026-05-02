@@ -13,6 +13,7 @@
   import Scheduler from './scheduler/Scheduler.svelte';
   import { useConfigState } from '../../state/config.state.svelte.ts';
   import { panelsArray2Map } from '../../api/storage/storage.local.ts';
+  import SharedWorker from './sharedWorker/SharedWorker.svelte';
 
   const ts = useTelemetryState();
   const config = useConfigState();
@@ -21,7 +22,6 @@
 
 {#if ts.telemetry}
   <Media media={ts.telemetry.media} />
-  <Worker telemetry={ts.telemetry.worker} />
   <Scheduler telemetry={ts.telemetry.scheduler} />
 
   {#if ts.telemetry.evalHistory?.length}
@@ -89,4 +89,7 @@
       cicHistory={ts.telemetry.cicHistory}
     />
   {/if}
+
+  <Worker telemetry={ts.telemetry.worker} />
+  <SharedWorker telemetry={ts.telemetry.sharedWorker} />
 {/if}

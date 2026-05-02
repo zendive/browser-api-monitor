@@ -8,7 +8,7 @@
 </script>
 
 <a
-  href="."
+  href="../worker"
   title="Open Specifier"
   aria-label="Open Specifier"
   role="button"

@@ -3,7 +3,7 @@
   import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import CollapseExpand from './CollapseExpand.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
   import type { IWorkerOnErrorMetric } from '../../../wrapper/WorkerWrapper.ts';

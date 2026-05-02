@@ -2,7 +2,7 @@
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CollapseExpand from './CollapseExpand.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
   import type { IWorkerTerminateMetric } from '../../../wrapper/WorkerWrapper.ts';

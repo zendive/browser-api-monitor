@@ -2,37 +2,37 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
-  import {
-    type IWorkerConstructorMetric,
-    type IWorkerTelemetryMetric,
-    WorkerConstructorFacts,
-  } from '../../../wrapper/WorkerWrapper.js';
   import CollapseExpand from '../shared/CollapseExpand.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import type {
+    ISharedWorkerConstructorMetric,
+    ISharedWorkerTelemetryMetric,
+  } from '../../../wrapper/SharedWorkerWrapper.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { workerMetric }: { workerMetric: IWorkerTelemetryMetric } = $props();
-  const { sortWorkerConstructor } = useConfigState();
+  let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
+    $props();
+  const { sortSharedWorkerConstructor } = useConfigState();
   const constructorSortedMetrics = $derived.by(() =>
     workerMetric.konstruktor.toSorted(
       compareByFieldOrder(
-        sortWorkerConstructor.field,
-        sortWorkerConstructor.order,
+        sortSharedWorkerConstructor.field,
+        sortSharedWorkerConstructor.order,
       ),
     )
   );
   let isExpanded = $state(true);
 
   function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerConstructor.field = <keyof IWorkerConstructorMetric> field;
-    sortWorkerConstructor.order = order;
+    sortSharedWorkerConstructor.field =
+      <keyof ISharedWorkerConstructorMetric> field;
+    sortSharedWorkerConstructor.order = order;
 
     saveLocalStorage({
-      sortWorkerConstructor: $state.snapshot(sortWorkerConstructor),
+      sortSharedWorkerConstructor: $state.snapshot(sortSharedWorkerConstructor),
     });
   }
 </script>
@@ -48,8 +48,8 @@
         />
         <ColumnSortable
           field="firstSeen"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
+          currentField={sortSharedWorkerConstructor.field}
+          currentFieldOrder={sortSharedWorkerConstructor.order}
           eventChangeSorting={onChangeSort}
         >
           constructor [<Variable value={constructorSortedMetrics.length} />]
@@ -58,21 +58,12 @@
       <th class="ta-c">name</th>
       <th class="ta-c" title="classic | module">type</th>
       <th class="ta-c" title="same-origin | include | omit ">credentials</th>
-      <th class="ta-c">
-        <ColumnSortable
-          field="facts"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
-        >
-          <span class="icon -facts"></span>
-        </ColumnSortable>
-      </th>
+      <th class="ta-c" title="sameSiteCookies: all | none ">sSC</th>
       <th class="ta-c">
         <ColumnSortable
           field="calls"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
+          currentField={sortSharedWorkerConstructor.field}
+          currentFieldOrder={sortSharedWorkerConstructor.order}
           eventChangeSorting={onChangeSort}
         >Called</ColumnSortable>
       </th>
@@ -92,12 +83,7 @@
         <td class="ta-c worker-name">{metric.options.name}</td>
         <td class="ta-c">{metric.options.type}</td>
         <td class="ta-c">{metric.options.credentials}</td>
-        <td class="ta-c">
-          <CellFacts
-            facts={workerMetric.facts}
-            factsMap={WorkerConstructorFacts}
-          />
-        </td>
+        <td class="ta-c">{metric.options.sameSiteCookies}</td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td><CellBreakpoint traceId={metric.traceId} /></td>
       </tr>

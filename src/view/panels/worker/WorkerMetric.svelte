@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
-  import WorkerSpecifier from './WorkerSpecifier.svelte';
-  import CollapseExpand from './CollapseExpand.svelte';
+  import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import WorkerMetricConstructor from './WorkerMetricConstructor.svelte';
   import WorkerMetricTerminate from './WorkerMetricTerminate.svelte';
   import WorkerMetricPostMessage from './WorkerMetricPostMessage.svelte';

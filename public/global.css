@@ -135,7 +135,14 @@ button[interestfor] {
   interest-delay-start: 33ms;
   interest-delay-end: 33ms;
 }
-
+.worker-name {
+  max-width: 6rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .icon {
   display: inline-block;
   width: 1rem;

@@ -24,11 +24,11 @@ import type {
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
 import { ESortOrder } from '../const.ts';
+import type { ISharedWorkerConstructorMetric } from '../../wrapper/SharedWorkerWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
   | 'media'
-  | 'worker'
   | 'scheduler'
   | 'eval'
   | 'activeTimers'
@@ -39,7 +39,9 @@ type TPanelKey =
   | 'requestAnimationFrame'
   | 'cancelAnimationFrame'
   | 'requestIdleCallback'
-  | 'cancelIdleCallback';
+  | 'cancelIdleCallback'
+  | 'worker'
+  | 'sharedWorker';
 
 export interface IPanel {
   key: TPanelKey;
@@ -58,7 +60,6 @@ export const DEFAULT_PANELS: IPanel[] = [
   { key: 'callsSummary', label: 'Summary Bar', visible: true },
   { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: false },
-  { key: 'worker', label: 'Worker', visible: true, wrap: true },
   { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
   { key: 'setTimeout', label: 'setTimeout', visible: true, wrap: true },
@@ -104,10 +105,16 @@ export const DEFAULT_PANELS: IPanel[] = [
     visible: true,
     wrap: true,
   },
+  { key: 'worker', label: 'Worker', visible: true, wrap: true },
+  { key: 'sharedWorker', label: 'SharedWorker', visible: true, wrap: true },
 ];
 
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
+  sortSharedWorkerConstructor: {
+    field: <keyof ISharedWorkerConstructorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
   sortWorkerConstructor: {
     field: <keyof IWorkerConstructorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,

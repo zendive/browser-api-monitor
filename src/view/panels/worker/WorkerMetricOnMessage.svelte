@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CollapseExpand from './CollapseExpand.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';

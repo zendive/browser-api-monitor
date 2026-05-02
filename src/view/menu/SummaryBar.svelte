@@ -33,15 +33,6 @@
       />
     {/if}
 
-    {#if panels.worker.wrap}
-      <SummaryBarItem
-        label="Worker"
-        navSelector="Worker"
-        visible={panels.worker.visible}
-        count={ts.telemetry.worker.totalOnline}
-      />
-    {/if}
-
     {#if panels.scheduler.wrap}
       <SummaryBarItem
         label="s.pT"
@@ -148,6 +139,24 @@
         navSelector="cancelIdleCallback"
         visible={panels.cancelIdleCallback.visible}
         count={ts.telemetry.callCounter.cancelIdleCallback}
+      />
+    {/if}
+
+    {#if panels.worker.wrap}
+      <SummaryBarItem
+        label="Worker"
+        navSelector="Worker"
+        visible={panels.worker.visible}
+        count={ts.telemetry.worker.totalOnline}
+      />
+    {/if}
+
+    {#if panels.worker.wrap}
+      <SummaryBarItem
+        label="SharedWorker"
+        navSelector="SharedWorker"
+        visible={panels.sharedWorker.visible}
+        count={ts.telemetry.sharedWorker.collection.length}
       />
     {/if}
   </nav>

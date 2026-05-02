@@ -35,6 +35,12 @@ import {
   SchedulerWrapper,
 } from './SchedulerWrapper.ts';
 import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
+import {
+  collectSharedWorkerHistory,
+  type ISharedWorkerTelemetry,
+  updateSharedWorkerCallsPerSecond,
+  wrapSharedWorker,
+} from './SharedWorkerWrapper.ts';
 
 export interface ITelemetry {
   media: IMediaTelemetry;
@@ -49,6 +55,7 @@ export interface ITelemetry {
   ricHistory: IRequestIdleCallbackHistory[] | null;
   cicHistory: ICancelIdleCallbackHistory[] | null;
   worker: IWorkerTelemetry;
+  sharedWorker: ISharedWorkerTelemetry;
   scheduler: ISchedulerTelemetry;
   callCounter: {
     setTimeout: number;
@@ -86,6 +93,7 @@ const wrapApis = callableOnce(() => {
   panels.requestIdleCallback.wrap && apiIdle.wrapRequestIdleCallback();
   panels.cancelIdleCallback.wrap && apiIdle.wrapCancelIdleCallback();
   panels.worker.wrap && wrapWorker();
+  panels.sharedWorker.wrap && wrapSharedWorker();
   if (panels.scheduler.wrap) {
     apiScheduler.wrapYield();
     apiScheduler.wrapPostTask();
@@ -108,6 +116,7 @@ export function onEachSecond() {
   apiAnimation.updateCallsPerSecond(panels.requestAnimationFrame);
   apiIdle.updateCallsPerSecond(panels.requestIdleCallback);
   updateWorkerCallsPerSecond(panels.worker);
+  updateSharedWorkerCallsPerSecond(panels.sharedWorker);
   apiScheduler.updateCallsPerSecond(panels.scheduler);
 }
 
@@ -130,6 +139,7 @@ export function collectMetrics(): ITelemetry {
       panels.cancelIdleCallback,
     ),
     worker: collectWorkerHistory(panels.worker),
+    sharedWorker: collectSharedWorkerHistory(panels.sharedWorker),
     scheduler: apiScheduler.collectHistory(panels.scheduler),
     callCounter: panels.callsSummary.visible
       ? {
