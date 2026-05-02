@@ -243,6 +243,11 @@ export class ApiMonitorWorkerWrapper extends Worker {
     methodMetric.selfTime = selfTime;
   }
 
+  override get onmessage() {
+    // @ts-expect-error: internal error - function signature and returning value mismatch
+    return super.onmessage;
+  }
+
   override set onmessage(rhs: (ev: MessageEvent) => unknown | null) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
     const workerMetric = workerMap.get(this.#specifier)!;
@@ -283,6 +288,11 @@ export class ApiMonitorWorkerWrapper extends Worker {
     } else {
       super.onmessage = rhs;
     }
+  }
+
+  override get onerror() {
+    // @ts-expect-error: internal error - function signature and returning value mismatch
+    return super.onerror;
   }
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
