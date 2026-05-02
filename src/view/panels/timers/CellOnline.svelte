@@ -2,8 +2,16 @@
   import Variable from '../../shared/Variable.svelte';
   import CellOnlinePopoverBody from './CellOnlinePopoverBody.svelte';
 
-  const { traceId, online }: { traceId: string; online: number } = $props();
-  const popoverId = $derived.by(() => `_${traceId}`);
+  const {
+    traceId,
+    popoverId,
+    online,
+  }: {
+    traceId: string;
+    popoverId: string;
+    online: number;
+  } = $props();
+  const hintPopoverId = $derived.by(() => `${popoverId}_${traceId}`);
   let popoverShown = $state(false);
 
   function onToggle(e: ToggleEvent) {
@@ -12,8 +20,8 @@
 </script>
 
 <button
-  interestfor={popoverId}
-  popovertarget={popoverId}
+  interestfor={hintPopoverId}
+  popovertarget={hintPopoverId}
   class:popover-target-active={popoverShown}
   aria-label="Online timers"
 >
@@ -23,7 +31,7 @@
 <div
   popover="hint"
   ontoggle={onToggle}
-  id={popoverId}
+  id={hintPopoverId}
   class="popover"
   role="dialog"
 >

@@ -22,7 +22,7 @@
     cicHistory: ICancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
-  const popoverId = $derived.by(() => `${caption}_terminators`);
+  const popoverId = $derived.by(() => `${caption}_popover_group`);
   const { sortRequestIdleCallback } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(

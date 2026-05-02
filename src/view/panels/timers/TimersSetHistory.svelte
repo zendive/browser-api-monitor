@@ -24,7 +24,7 @@
     clearIntervalHistory: IClearTimerHistory[] | null;
     caption: string;
   } = $props();
-  const popoverId = $derived.by(() => `${caption}_terminators`);
+  const popoverId = $derived.by(() => `${caption}_popover_group`);
   const { sortSetTimers } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     setTimerHistory.toSorted(

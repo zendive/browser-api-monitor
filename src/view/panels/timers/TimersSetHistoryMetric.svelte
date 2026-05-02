@@ -50,7 +50,7 @@
   <td class="ta-r" title={delayTooltip(metric.delay)}>{metric.delay}</td>
   <td class="ta-r">
     {#if metric.online}
-      <CellOnline traceId={metric.traceId} online={metric.online} />
+      <CellOnline traceId={metric.traceId} {popoverId} online={metric.online} />
     {/if}
   </td>
   <td><CellBypass traceId={metric.traceId} /></td>

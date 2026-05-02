@@ -22,7 +22,7 @@
     cafHistory: ICancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
-  const popoverId = $derived.by(() => `${caption}_terminators`);
+  const popoverId = $derived.by(() => `${caption}_popover_group`);
   const { sortRequestAnimationFrame } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     rafHistory.toSorted(
