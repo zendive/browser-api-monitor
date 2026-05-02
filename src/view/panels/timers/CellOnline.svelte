@@ -1,13 +1,16 @@
 <script lang="ts">
   import Variable from '../../shared/Variable.svelte';
   import CellOnlinePopoverBody from './CellOnlinePopoverBody.svelte';
+  import type { ETimerType } from '../../../wrapper/TimerWrapper.ts';
 
   const {
     traceId,
+    timerType,
     popoverId,
     online,
   }: {
     traceId: string;
+    timerType: ETimerType;
     popoverId: string;
     online: number;
   } = $props();
@@ -36,7 +39,7 @@
   role="dialog"
 >
   {#if popoverShown}
-    <CellOnlinePopoverBody {traceId} />
+    <CellOnlinePopoverBody {traceId} {timerType} />
   {/if}
 </div>
 

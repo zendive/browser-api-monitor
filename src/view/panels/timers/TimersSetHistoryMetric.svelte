@@ -8,6 +8,7 @@
   import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
   import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
   import {
+    type ETimerType,
     type ISetTimerHistory,
     SetTimerFacts,
   } from '../../../wrapper/TimerWrapper.ts';
@@ -15,10 +16,12 @@
 
   let {
     metric,
+    timerType,
     popoverId,
     tph,
   }: {
     metric: ISetTimerHistory;
+    timerType: ETimerType;
     popoverId: string;
     tph: TTerminatorsPopoverHelper;
   } = $props();
@@ -50,7 +53,12 @@
   <td class="ta-r" title={delayTooltip(metric.delay)}>{metric.delay}</td>
   <td class="ta-r">
     {#if metric.online}
-      <CellOnline traceId={metric.traceId} {popoverId} online={metric.online} />
+      <CellOnline
+        traceId={metric.traceId}
+        {timerType}
+        {popoverId}
+        online={metric.online}
+      />
     {/if}
   </td>
   <td><CellBypass traceId={metric.traceId} /></td>

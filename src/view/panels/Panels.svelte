@@ -14,6 +14,7 @@
   import { useConfigState } from '../../state/config.state.svelte.ts';
   import { panelsArray2Map } from '../../api/storage/storage.local.ts';
   import SharedWorker from './sharedWorker/SharedWorker.svelte';
+  import { ETimerType } from '../../wrapper/TimerWrapper.ts';
 
   const ts = useTelemetryState();
   const config = useConfigState();
@@ -35,6 +36,7 @@
   {#if ts.telemetry.setTimeoutHistory?.length}
     <TimersSetHistory
       caption="setTimeout"
+      timerType={ETimerType.TIMEOUT}
       setTimerHistory={ts.telemetry.setTimeoutHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}
@@ -50,6 +52,7 @@
   {#if ts.telemetry.setIntervalHistory?.length}
     <TimersSetHistory
       caption="setInterval"
+      timerType={ETimerType.INTERVAL}
       setTimerHistory={ts.telemetry.setIntervalHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}

@@ -3,9 +3,10 @@
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';
-  import type {
-    IClearTimerHistory,
-    ISetTimerHistory,
+  import {
+    type ETimerType,
+    type IClearTimerHistory,
+    type ISetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
@@ -17,11 +18,13 @@
     setTimerHistory,
     clearTimeoutHistory,
     clearIntervalHistory,
+    timerType,
     caption,
   }: {
     setTimerHistory: ISetTimerHistory[];
     clearTimeoutHistory: IClearTimerHistory[] | null;
     clearIntervalHistory: IClearTimerHistory[] | null;
+    timerType: ETimerType;
     caption: string;
   } = $props();
   const popoverId = $derived.by(() => `${caption}_popover_group`);
@@ -148,7 +151,7 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <TimersSetHistoryMetric {metric} {popoverId} {tph} />
+      <TimersSetHistoryMetric {metric} {timerType} {popoverId} {tph} />
     {/each}
   </tbody>
 </table>
