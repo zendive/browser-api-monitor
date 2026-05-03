@@ -41,21 +41,32 @@ export type TMediaCommand =
   | 'faster';
 
 export class MediaWrapper {
-  mediaCollection: IMediaModel[] = [];
+  #current: Set<TMediaElement> = new Set();
+  #tracked: WeakMap<TMediaElement, IMediaModel> = new WeakMap();
 
-  #stopMonitorMedia(entry: IMediaModel) {
-    for (const eventType of MEDIA_EVENTS) {
-      entry.el.removeEventListener(eventType, entry.eventListener);
-    }
+  meetMedia(panel: IPanel) {
+    if (!panel.visible) return;
+
+    this.#current = new Set(
+      // @ts-expect-error: intent
+      document.querySelectorAll('video,audio') as Set<TMediaElement>,
+    );
+
+    this.#current.forEach((el) => {
+      this.#tracked.getOrInsertComputed(
+        el,
+        (el) => this.#startMonitorMedia(el),
+      );
+    });
   }
 
-  #startMonitorMedia(mediaId: string, el: TMediaElement): IMediaModel {
+  #startMonitorMedia(el: TMediaElement): IMediaModel {
     const events: IMediaMetrics['events'] = {};
     const props: IMediaMetrics['props'] = {};
     const rv = {
       el,
       metrics: {
-        mediaId,
+        mediaId: crypto.randomUUID(),
         type: el instanceof HTMLVideoElement
           ? EMediaType.VIDEO
           : EMediaType.AUDIO,
@@ -75,63 +86,34 @@ export class MediaWrapper {
     return rv;
   }
 
-  meetMedia(panel: IPanel) {
-    if (!panel.visible) return;
-
-    const els: NodeListOf<TMediaElement> = document.querySelectorAll(
-      'video,audio',
-    );
-    // farewell old
-    for (const entry of this.mediaCollection) {
-      let found = false;
-
-      for (let i = 0, I = els.length; i < I; i++) {
-        if (entry.el === els[i]) {
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        this.#stopMonitorMedia(entry);
-        this.mediaCollection = this.mediaCollection.filter(
-          (v) => v.el !== entry.el,
-        );
-      }
-    }
-
-    // meet new
-    for (let i = 0, I = els.length; i < I; i++) {
-      if (!els[i].dataset?.['apiMon']) {
-        const id = crypto.randomUUID();
-        els[i].dataset['apiMon'] = id;
-        this.mediaCollection.push(this.#startMonitorMedia(id, els[i]));
-      }
-    }
-  }
-
   collectMetrics(panel: IPanel): IMediaTelemetry {
     const rv: IMediaTelemetry = {
-      total: this.mediaCollection.length,
+      total: this.#current.size,
       collection: [],
     };
 
     if (panel.visible) {
-      rv.collection = this.mediaCollection.map((v) => {
-        // refresh props metrics
-        for (const prop of MEDIA_FIELDS) {
-          if (prop in v.el) {
-            v.metrics.props[prop] = parseMediaFieldValue(
-              prop,
-              v.el[prop as keyof TMediaElement],
-            );
-          }
-        }
-        return v.metrics;
+      this.#current.forEach((el) => {
+        const model = this.#tracked.get(el);
+        if (!model) return;
+
+        this.#collectModelProps(model);
+        rv.collection.push(model.metrics);
       });
     }
 
     return rv;
+  }
+
+  #collectModelProps(model: IMediaModel) {
+    for (const prop of MEDIA_FIELDS) {
+      if (prop in model.el) {
+        model.metrics.props[prop] = parseMediaFieldValue(
+          prop,
+          model.el[prop as keyof TMediaElement],
+        );
+      }
+    }
   }
 
   runCommand(
@@ -139,40 +121,47 @@ export class MediaWrapper {
     cmd: TMediaCommand,
     property: keyof TMediaElement | undefined,
   ) {
-    const mediaModel = this.mediaCollection.find(
-      (model) => model.metrics.mediaId === mediaId,
-    );
-
-    if (!mediaModel || !mediaModel.el || !document.contains(mediaModel.el)) {
+    const model = this.#getModelByMediaId(mediaId);
+    if (!model || !document.contains(model.el)) {
       return;
     }
 
     if (cmd === 'log') {
-      console.log(mediaModel.el);
+      console.log(model.el);
     } else if (cmd === 'locate') {
-      mediaModel.el.scrollIntoView({
+      model.el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'center',
       });
     } else if (cmd === 'load') {
-      mediaModel.el.load();
+      model.el.load();
     } else if (cmd === 'pause') {
-      mediaModel.el.pause();
+      model.el.pause();
     } else if (cmd === 'play') {
-      mediaModel.el.play().catch(() => {});
+      model.el.play().catch(() => {});
     } else if (cmd === 'frame-backward') {
-      mediaModel.el.currentTime -= TIME_60FPS_SEC;
+      model.el.currentTime -= TIME_60FPS_SEC;
     } else if (cmd === 'frame-forward') {
-      mediaModel.el.currentTime += TIME_60FPS_SEC;
+      model.el.currentTime += TIME_60FPS_SEC;
     } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
       if (isMediaFieldWritable(property)) {
-        mediaModel.el[property] = !mediaModel.el[property];
+        model.el[property] = !model.el[property];
       }
     } else if (cmd === 'slower') {
-      mediaModel.el.playbackRate -= 0.1;
+      model.el.playbackRate -= 0.1;
     } else if (cmd === 'faster') {
-      mediaModel.el.playbackRate += 0.1;
+      model.el.playbackRate += 0.1;
+    }
+  }
+
+  #getModelByMediaId(mediaId: string) {
+    for (const el of this.#current) {
+      const model = this.#tracked.get(el);
+
+      if (model && model.metrics.mediaId === mediaId) {
+        return model;
+      }
     }
   }
 }
