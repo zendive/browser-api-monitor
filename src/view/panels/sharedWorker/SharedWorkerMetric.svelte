@@ -3,6 +3,7 @@
   import CollapseExpand from '../shared/CollapseExpand.svelte';
   import SharedWorkerMetricConstructor from './SharedWorkerMetricConstructor.svelte';
   import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
+  import SharedWorkerMetricOnError from './SharedWorkerMetricOnError.svelte';
 
   let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
     $props();
@@ -24,6 +25,7 @@
 
   <section class:d-none={!isExpanded}>
     <SharedWorkerMetricConstructor {workerMetric} />
+    <SharedWorkerMetricOnError metrics={workerMetric.onerror} />
   </section>
 </fieldset>
 

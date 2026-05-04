@@ -24,7 +24,10 @@ import type {
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
 import { ESortOrder } from '../const.ts';
-import type { ISharedWorkerConstructorMetric } from '../../wrapper/SharedWorkerWrapper.ts';
+import type {
+  ISharedWorkerConstructorMetric,
+  ISharedWorkerOnErrorMetric,
+} from '../../wrapper/SharedWorkerWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -113,6 +116,10 @@ export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
   sortSharedWorkerConstructor: {
     field: <keyof ISharedWorkerConstructorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerOnError: {
+    field: <keyof ISharedWorkerOnErrorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerConstructor: {

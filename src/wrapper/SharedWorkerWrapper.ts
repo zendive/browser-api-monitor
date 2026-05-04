@@ -6,6 +6,7 @@ import {
 } from './shared/util.ts';
 import { TraceUtil } from './shared/TraceUtil.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
+import { trim2ms } from '../api/time.ts';
 
 export interface ISharedWorkerTelemetry {
   total: number;
@@ -15,21 +16,30 @@ export interface ISharedWorkerTelemetryMetric {
   specifier: string;
   inMemory: number;
   konstruktor: ISharedWorkerConstructorMetric[];
+  onerror: ISharedWorkerOnErrorMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
   inMemory: number;
+  callsMap: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, ISharedWorkerConstructorMetric>;
+  onerror: Map</*traceId*/ string, ISharedWorkerOnErrorMetric>;
+}
+export interface ISharedWorkerConstructorMetric extends ITraceable {
+  options: ISharedWorkerOptions;
+  calls: number;
+}
+export interface ISharedWorkerOnErrorMetric extends ITraceable {
+  calls: number;
+  events: number;
+  eventSelfTime: number | null;
+  eventsCps: number;
 }
 export interface ISharedWorkerOptions {
   type: 'classic' | 'module';
   credentials: 'same-origin' | 'include' | 'omit' | undefined;
   name: string | undefined;
   sameSiteCookies: 'all' | 'none' | undefined;
-}
-export interface ISharedWorkerConstructorMetric extends ITraceable {
-  options: ISharedWorkerOptions;
-  calls: number;
 }
 
 const sharedWorkerMap: Map</*specifier*/ string, ISharedWorkerMetric> =
@@ -66,10 +76,12 @@ export class ApiMonitorSharedWorker extends SharedWorker {
         return {
           specifier: this.#specifier,
           inMemory: 0,
+          callsMap: new Map(),
           konstruktor: new Map([[
             constructorMetric.traceId,
             constructorMetric,
           ]]),
+          onerror: new Map(),
         };
       },
     );
@@ -94,24 +106,70 @@ export class ApiMonitorSharedWorker extends SharedWorker {
     methodMetric.calls++;
   }
 
-  // override get onerror() {
-  //   return super.onerror;
-  // }
+  override get onerror() {
+    // @ts-expect-error: internal error - function signature and returning value mismatch
+    return super.onerror;
+  }
 
-  // override set onerror(rhs: (e: ErrorEvent) => unknown | null) { }
+  override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const sharedWorkerMetric = sharedWorkerMap.get(this.#specifier)!;
+    const methodMetric = sharedWorkerMetric.onerror.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          traceDomain: traceUtil.getDomain(callstack),
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          eventsCps: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    if (typeof rhs !== 'function') {
+      super.onerror = rhs;
+      return;
+    }
+
+    super.onerror = function (...args) {
+      let eventSelfTime: null | number = null;
+
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        const start = performance.now();
+        rhs(...args);
+        eventSelfTime = trim2ms(performance.now() - start);
+        methodMetric.events++;
+      }
+
+      methodMetric.eventSelfTime = eventSelfTime;
+    };
+  }
 }
 
 export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
   if (!panel.wrap || !panel.visible) return;
 
-  // sharedWorkerMap.forEach((sharedWorkerMetric) => {
-  //   sharedWorkerMetric.onerror.forEach((methodMetric) => {
-  //     const prevEvents = sharedWorkerMetric.callsMap.get(methodMetric.traceId) || 0;
-  //
-  //     methodMetric.eventsCps = methodMetric.events - prevEvents;
-  //     sharedWorkerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
-  //   });
-  // });
+  sharedWorkerMap.forEach((sharedWorkerMetric) => {
+    sharedWorkerMetric.onerror.forEach((methodMetric) => {
+      const prevEvents =
+        sharedWorkerMetric.callsMap.get(methodMetric.traceId) || 0;
+
+      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      sharedWorkerMetric.callsMap.set(
+        methodMetric.traceId,
+        methodMetric.events,
+      );
+    });
+  });
 }
 
 export function wrapSharedWorker() {
@@ -132,6 +190,7 @@ export function collectSharedWorkerHistory(
         specifier: metric.specifier,
         inMemory: metric.inMemory,
         konstruktor: Array.from(metric.konstruktor.values()),
+        onerror: Array.from(metric.onerror.values()),
       });
     });
   }

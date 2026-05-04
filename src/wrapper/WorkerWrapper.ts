@@ -275,7 +275,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 1,
+          eventsCps: 0,
         };
       },
     );
@@ -322,32 +322,33 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 1,
+          eventsCps: 0,
         };
       },
     );
 
     methodMetric.calls++;
 
-    if (typeof rhs === 'function') {
-      super.onerror = function (...args) {
-        let eventSelfTime: null | number = null;
-
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
-            debugger;
-          }
-          const start = performance.now();
-          rhs(...args);
-          eventSelfTime = trim2ms(performance.now() - start);
-          methodMetric.events++;
-        }
-
-        methodMetric.eventSelfTime = eventSelfTime;
-      };
-    } else {
+    if (typeof rhs !== 'function') {
       super.onerror = rhs;
+      return;
     }
+
+    super.onerror = function (...args) {
+      let eventSelfTime: null | number = null;
+
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        const start = performance.now();
+        rhs(...args);
+        eventSelfTime = trim2ms(performance.now() - start);
+        methodMetric.events++;
+      }
+
+      methodMetric.eventSelfTime = eventSelfTime;
+    };
   }
 
   override addEventListener(
@@ -368,7 +369,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 1,
+          eventsCps: 0,
           canceledCounter: 0,
           facts: Fact.pure,
         };
