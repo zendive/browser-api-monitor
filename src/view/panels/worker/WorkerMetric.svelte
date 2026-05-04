@@ -19,6 +19,7 @@
     <WorkerSpecifier
       specifier={workerMetric.specifier}
       online={workerMetric.online}
+      inMemory={workerMetric.inMemory}
     />
     <span class="divider"></span>
     <CollapseExpand

@@ -4,12 +4,14 @@
   let {
     specifier,
     online,
+    inMemory,
   }: {
     specifier: string;
-    online: number;
+    online?: number;
+    inMemory: number;
   } = $props();
   const possiblyDestroyed = $derived.by(() =>
-    !online && specifier.startsWith('blob')
+    online === 0 && specifier.startsWith('blob')
   );
 
   function openSpecifier(e: MouseEvent) {
@@ -43,3 +45,7 @@
     [<Variable value={online} />]
   </span>
 {/if}
+
+<span title="Workers in memory">
+  &lbrace;<Variable value={inMemory} />&rbrace;
+</span>

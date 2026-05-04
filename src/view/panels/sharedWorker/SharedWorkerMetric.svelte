@@ -11,7 +11,10 @@
 
 <fieldset>
   <legend class="ta-r">
-    <WorkerSpecifier specifier={workerMetric.specifier} online={0} />
+    <WorkerSpecifier
+      specifier={workerMetric.specifier}
+      inMemory={workerMetric.inMemory}
+    />
     <span class="divider"></span>
     <CollapseExpand
       {isExpanded}

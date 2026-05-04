@@ -8,14 +8,17 @@ import { TraceUtil } from './shared/TraceUtil.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 
 export interface ISharedWorkerTelemetry {
+  total: number;
   collection: ISharedWorkerTelemetryMetric[];
 }
 export interface ISharedWorkerTelemetryMetric {
   specifier: string;
+  inMemory: number;
   konstruktor: ISharedWorkerConstructorMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
+  inMemory: number;
   konstruktor: Map</*traceId*/ string, ISharedWorkerConstructorMetric>;
 }
 export interface ISharedWorkerOptions {
@@ -31,6 +34,10 @@ export interface ISharedWorkerConstructorMetric extends ITraceable {
 
 const sharedWorkerMap: Map</*specifier*/ string, ISharedWorkerMetric> =
   new Map();
+const memoryTracker = new FinalizationRegistry((specifier: string) => {
+  const sharedWorkerMetric = sharedWorkerMap.get(specifier);
+  sharedWorkerMetric && sharedWorkerMetric.inMemory--;
+});
 
 export class ApiMonitorSharedWorker extends SharedWorker {
   readonly #specifier: string;
@@ -58,6 +65,7 @@ export class ApiMonitorSharedWorker extends SharedWorker {
 
         return {
           specifier: this.#specifier,
+          inMemory: 0,
           konstruktor: new Map([[
             constructorMetric.traceId,
             constructorMetric,
@@ -65,6 +73,9 @@ export class ApiMonitorSharedWorker extends SharedWorker {
         };
       },
     );
+
+    sharedWorkerMetric.inMemory++;
+    memoryTracker.register(this, this.#specifier);
 
     const methodMetric = sharedWorkerMetric.konstruktor.getOrInsertComputed(
       callstack.traceId,
@@ -83,9 +94,9 @@ export class ApiMonitorSharedWorker extends SharedWorker {
     methodMetric.calls++;
   }
 
-  override get onerror() {
-    return super.onerror;
-  }
+  // override get onerror() {
+  //   return super.onerror;
+  // }
 
   // override set onerror(rhs: (e: ErrorEvent) => unknown | null) { }
 }
@@ -110,12 +121,16 @@ export function wrapSharedWorker() {
 export function collectSharedWorkerHistory(
   panel: IPanel,
 ): ISharedWorkerTelemetry {
-  const rv: ISharedWorkerTelemetry = { collection: [] };
+  const rv: ISharedWorkerTelemetry = {
+    total: sharedWorkerMap.size,
+    collection: [],
+  };
 
   if (panel.visible) {
     sharedWorkerMap.forEach((metric) => {
       rv.collection.push({
         specifier: metric.specifier,
+        inMemory: metric.inMemory,
         konstruktor: Array.from(metric.konstruktor.values()),
       });
     });

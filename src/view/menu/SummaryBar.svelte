@@ -145,18 +145,18 @@
     {#if panels.worker.wrap}
       <SummaryBarItem
         label="Worker"
-        navSelector="Worker"
+        navSelector="_Worker"
         visible={panels.worker.visible}
-        count={ts.telemetry.worker.totalOnline}
+        count={ts.telemetry.worker.total}
       />
     {/if}
 
     {#if panels.worker.wrap}
       <SummaryBarItem
         label="SharedWorker"
-        navSelector="SharedWorker"
+        navSelector="_SharedWorker"
         visible={panels.sharedWorker.visible}
-        count={ts.telemetry.sharedWorker.collection.length}
+        count={ts.telemetry.sharedWorker.total}
       />
     {/if}
   </nav>

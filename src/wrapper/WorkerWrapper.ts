@@ -9,12 +9,13 @@ import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IWorkerTelemetry {
-  totalOnline: number;
+  total: number;
   collection: IWorkerTelemetryMetric[];
 }
 export interface IWorkerTelemetryMetric {
   specifier: string;
   online: number;
+  inMemory: number;
   facts: TFact;
   konstruktor: IWorkerConstructorMetric[];
   terminate: IWorkerTerminateMetric[];
@@ -27,6 +28,7 @@ export interface IWorkerTelemetryMetric {
 interface IWorkerMetric {
   specifier: string;
   online: number;
+  inMemory: number;
   facts: TFact;
   callsMap: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, IWorkerConstructorMetric>;
@@ -79,7 +81,6 @@ export interface IWorkerRelMetric extends ITraceable {
   facts: TFact;
 }
 
-const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
 export const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
 export const WorkerFact = /*@__PURE__*/ (() => ({
   MAX_ONLINE: Fact.define(1 << 0),
@@ -112,6 +113,11 @@ export const WorkerRELFacts = /*@__PURE__*/ (() =>
       details: `Listener not found - nothing to remove`,
     }],
   ]))();
+const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
+const memoryTracker = new FinalizationRegistry((specifier: string) => {
+  const workerMetric = workerMap.get(specifier);
+  workerMetric && workerMetric.inMemory--;
+});
 
 export class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
@@ -145,6 +151,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       return {
         specifier: this.#specifier,
         online: 0,
+        inMemory: 0,
         facts: Fact.pure,
         callsMap: new Map(),
         konstruktor: new Map([[constructorMetric.traceId, constructorMetric]]),
@@ -158,6 +165,8 @@ export class ApiMonitorWorkerWrapper extends Worker {
     });
 
     workerMetric.online++;
+    workerMetric.inMemory++;
+    memoryTracker.register(this, this.#specifier);
 
     if (workerMetric.online > HARDWARE_CONCURRENCY) {
       workerMetric.facts = Fact.assign(
@@ -526,16 +535,16 @@ export function wrapWorker() {
 
 export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
   const rv: IWorkerTelemetry = {
-    totalOnline: 0,
+    total: workerMap.size,
     collection: [],
   };
 
   if (panel.visible) {
     workerMap.forEach((metric) => {
-      rv.totalOnline += metric.online;
       rv.collection.push({
         specifier: metric.specifier,
         online: metric.online,
+        inMemory: metric.inMemory,
         facts: metric.facts,
         konstruktor: Array.from(metric.konstruktor.values()),
         terminate: Array.from(metric.terminate.values()),
@@ -545,10 +554,6 @@ export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
         ael: Array.from(metric.ael.values()),
         rel: Array.from(metric.rel.values()),
       });
-    });
-  } else {
-    workerMap.forEach((metric) => {
-      rv.totalOnline += metric.online;
     });
   }
 

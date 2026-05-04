@@ -7,7 +7,7 @@
 </script>
 
 {#if telemetry.collection.length}
-  <section data-navigation-tag="Worker">
+  <section data-navigation-tag="_Worker">
     <div class="label bc-invert">
       Worker [<Variable value={telemetry.collection.length} />]
     </div>
