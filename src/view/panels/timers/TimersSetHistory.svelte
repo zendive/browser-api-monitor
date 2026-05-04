@@ -4,7 +4,7 @@
   import TimersSetHistoryMetric from './TimersSetHistoryMetric.svelte';
   import TimersClearHistory from './TimersClearHistory.svelte';
   import {
-    type ETimerType,
+    ETimerType,
     type IClearTimerHistory,
     type ISetTimerHistory,
   } from '../../../wrapper/TimerWrapper.ts';
@@ -38,18 +38,44 @@
   const terminators = $derived.by(() => {
     if (!tph.traceId) return;
 
-    const metric = setTimerHistory.find((r) => r.traceId === tph.traceId);
+    const metric = setTimerHistory.find((v) => v.traceId === tph.traceId);
     if (!metric || !metric.canceledByTraceIds?.length) return;
 
-    const rv = clearTimeoutHistory?.filter(
-      (r) => metric.canceledByTraceIds?.includes(r.traceId),
-    ) || [];
+    const cthMap: Map<string, IClearTimerHistory> = new Map();
+    const cihMap: Map<string, IClearTimerHistory> = new Map();
+    let rv: IClearTimerHistory[];
 
-    return rv.concat(
-      clearIntervalHistory?.filter(
-        (r) => metric.canceledByTraceIds?.includes(r.traceId),
-      ) || [],
-    );
+    clearTimeoutHistory?.forEach((v) => {
+      if (metric.canceledByTraceIds?.includes(v.traceId)) {
+        cthMap.set(v.traceId, v);
+      }
+    });
+    clearIntervalHistory?.forEach((v) => {
+      if (metric.canceledByTraceIds?.includes(v.traceId)) {
+        cihMap.set(v.traceId, v);
+      }
+    });
+
+    // deduplicate data when both sources share the same traceId
+    if (timerType === ETimerType.TIMEOUT) {
+      rv = Array.from(cthMap.values());
+      cihMap.forEach((cihV) => {
+        const cthV = cthMap.get(cihV.traceId);
+        if (!cthV) {
+          rv.push(cihV);
+        }
+      });
+    } else {
+      rv = Array.from(cihMap.values());
+      cthMap.forEach((cthV) => {
+        const cihV = cihMap.get(cthV.traceId);
+        if (!cihV) {
+          rv.push(cthV);
+        }
+      });
+    }
+
+    return rv;
   });
 
   function onChangeSort(field: string, order: ESortOrder) {
