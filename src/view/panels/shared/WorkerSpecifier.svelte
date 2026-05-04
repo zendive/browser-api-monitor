@@ -46,6 +46,8 @@
   </span>
 {/if}
 
-<span title="Workers in memory">
-  &lbrace;<Variable value={inMemory} />&rbrace;
-</span>
+{#if inMemory}
+  <span title="Workers in memory">
+    &lbrace;<Variable value={inMemory} />&rbrace;
+  </span>
+{/if}
