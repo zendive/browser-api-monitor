@@ -82,6 +82,13 @@ describe('parseSharedWorkerOptions', () => {
       sameSiteCookies: 'all',
     });
   });
+
+  test('extendedLifetime', () => {
+    expect(parseSharedWorkerOptions({ extendedLifetime: true })).toMatchObject({
+      type: 'classic',
+      extendedLifetime: true,
+    });
+  });
 });
 
 describe('validHandler', () => {

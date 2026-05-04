@@ -40,6 +40,7 @@ export interface ISharedWorkerOptions {
   credentials: 'same-origin' | 'include' | 'omit' | undefined;
   name: string | undefined;
   sameSiteCookies: 'all' | 'none' | undefined;
+  extendedLifetime: boolean | undefined;
 }
 
 const sharedWorkerMap: Map</*specifier*/ string, ISharedWorkerMetric> =

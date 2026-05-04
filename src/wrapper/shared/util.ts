@@ -41,6 +41,7 @@ export function parseSharedWorkerOptions(
   let type: undefined | WorkerType;
   let credentials: undefined | RequestCredentials;
   let sameSiteCookies: ISharedWorkerOptions['sameSiteCookies'];
+  let extendedLifetime: boolean | undefined;
 
   if (typeof options === 'string') {
     name = options;
@@ -50,13 +51,15 @@ export function parseSharedWorkerOptions(
     name = options?.name;
     type = options?.type ?? 'classic';
     credentials = options?.credentials;
-    // @ts-expect-error: according to MDN, targeting Chrome only
-    sameSiteCookies = options?.sameSiteCookies;
-
     // credentials ignored for classic type
     if (type === 'module') {
       credentials ??= 'same-origin';
     }
+
+    // @ts-expect-error: according to MDN, targeting Chrome only
+    sameSiteCookies = options?.sameSiteCookies;
+    // @ts-expect-error: fresh Chrome's v148 feat, default unknown
+    extendedLifetime = options?.extendedLifetime;
   }
 
   return {
@@ -64,6 +67,7 @@ export function parseSharedWorkerOptions(
     type,
     credentials,
     sameSiteCookies,
+    extendedLifetime,
   };
 }
 

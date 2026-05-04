@@ -57,8 +57,11 @@
       </th>
       <th class="ta-c">name</th>
       <th class="ta-c" title="classic | module">type</th>
-      <th class="ta-c" title="same-origin | include | omit ">credentials</th>
+      <th class="ta-c" title="credentials: same-origin | include | omit ">
+        cred
+      </th>
       <th class="ta-c" title="sameSiteCookies: all | none ">sSC</th>
+      <th class="ta-c" title="extendedLifetime">exL</th>
       <th class="ta-c">
         <ColumnSortable
           field="calls"
@@ -84,6 +87,7 @@
         <td class="ta-c">{metric.options.type}</td>
         <td class="ta-c">{metric.options.credentials}</td>
         <td class="ta-c">{metric.options.sameSiteCookies}</td>
+        <td class="ta-c">{metric.options.extendedLifetime}</td>
         <td class="ta-c"><Variable value={metric.calls} /></td>
         <td><CellBreakpoint traceId={metric.traceId} /></td>
       </tr>
