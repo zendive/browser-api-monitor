@@ -19,6 +19,7 @@ import type {
   IWorkerOnMessageMetric,
   IWorkerPostMessageMetric,
   IWorkerRelMetric,
+  IWorkerTelemetryMetric,
   IWorkerTerminateMetric,
 } from '../../wrapper/WorkerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
@@ -27,7 +28,9 @@ import { ESortOrder } from '../const.ts';
 import type {
   ISharedWorkerConstructorMetric,
   ISharedWorkerOnErrorMetric,
+  ISharedWorkerTelemetryMetric,
 } from '../../wrapper/SharedWorkerWrapper.ts';
+import type { IMediaMetrics } from '../../wrapper/MediaWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -114,12 +117,20 @@ export const DEFAULT_PANELS: IPanel[] = [
 
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
+  sortSharedWorkerPanel: {
+    field: <keyof ISharedWorkerTelemetryMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
   sortSharedWorkerConstructor: {
     field: <keyof ISharedWorkerConstructorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortSharedWorkerOnError: {
     field: <keyof ISharedWorkerOnErrorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerPanel: {
+    field: <keyof IWorkerTelemetryMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerConstructor: {
@@ -185,6 +196,14 @@ export const DEFAULT_CONFIG = {
   sortCancelIdleCallback: {
     field: <keyof ICancelIdleCallbackHistory> 'firstSeen',
     order: ESortOrder.DESCENDING,
+  },
+  sortVideoPanel: {
+    field: <keyof IMediaMetrics> 'firstSeen',
+    order: ESortOrder.ASCENDING,
+  },
+  sortAudioPanel: {
+    field: <keyof IMediaMetrics> 'firstSeen',
+    order: ESortOrder.ASCENDING,
   },
   paused: false,
   devtoolsPanelShown: false,

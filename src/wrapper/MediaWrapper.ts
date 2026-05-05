@@ -20,6 +20,7 @@ export enum EMediaType {
 }
 export interface IMediaMetrics {
   mediaId: string;
+  firstSeen: number;
   type: EMediaType;
   events: { [key: string]: number };
   props: { [key: string]: unknown };
@@ -67,6 +68,7 @@ export class MediaWrapper {
       el,
       metrics: {
         mediaId: crypto.randomUUID(),
+        firstSeen: performance.now(),
         type: el instanceof HTMLVideoElement
           ? EMediaType.VIDEO
           : EMediaType.AUDIO,

@@ -14,6 +14,7 @@ export interface IWorkerTelemetry {
 }
 export interface IWorkerTelemetryMetric {
   specifier: string;
+  firstSeen: number;
   online: number;
   inMemory: number;
   facts: TFact;
@@ -27,6 +28,7 @@ export interface IWorkerTelemetryMetric {
 }
 interface IWorkerMetric {
   specifier: string;
+  firstSeen: number;
   online: number;
   inMemory: number;
   facts: TFact;
@@ -150,6 +152,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
       return {
         specifier: this.#specifier,
+        firstSeen: performance.now(),
         online: 0,
         inMemory: 0,
         facts: Fact.pure,
@@ -544,6 +547,7 @@ export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
     workerMap.forEach((metric) => {
       rv.collection.push({
         specifier: metric.specifier,
+        firstSeen: metric.firstSeen,
         online: metric.online,
         inMemory: metric.inMemory,
         facts: metric.facts,

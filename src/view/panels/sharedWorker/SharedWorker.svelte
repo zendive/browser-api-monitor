@@ -1,18 +1,51 @@
 <script lang="ts">
-  import type { ISharedWorkerTelemetry } from '../../../wrapper/SharedWorkerWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
   import SharedWorkerMetric from './SharedWorkerMetric.svelte';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import type {
+    ISharedWorkerTelemetry,
+    ISharedWorkerTelemetryMetric,
+  } from '../../../wrapper/SharedWorkerWrapper.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
 
   let { telemetry }: { telemetry: ISharedWorkerTelemetry } = $props();
+  const { sortSharedWorkerPanel } = useConfigState();
+  const sortedCollection = $derived.by(() =>
+    telemetry.collection.toSorted(
+      compareByFieldOrder(
+        sortSharedWorkerPanel.field,
+        sortSharedWorkerPanel.order,
+      ),
+    )
+  );
+
+  function onChangeSort(field: string, order: ESortOrder) {
+    sortSharedWorkerPanel.field = <keyof ISharedWorkerTelemetryMetric> field;
+    sortSharedWorkerPanel.order = order;
+
+    saveLocalStorage({
+      sortSharedWorkerPanel: $state.snapshot(sortSharedWorkerPanel),
+    });
+  }
 </script>
 
-{#if telemetry.collection.length}
+{#if sortedCollection.length}
   <section data-navigation-tag="_SharedWorker">
     <div class="label bc-invert">
-      SharedWorker [<Variable value={telemetry.collection.length} />]
+      <ColumnSortable
+        field="firstSeen"
+        currentField={sortSharedWorkerPanel.field}
+        currentFieldOrder={sortSharedWorkerPanel.order}
+        eventChangeSorting={onChangeSort}
+      >
+        SharedWorker [<Variable value={sortedCollection.length} />]
+      </ColumnSortable>
     </div>
 
-    {#each telemetry.collection as metric (metric.specifier)}
+    {#each sortedCollection as metric (metric.specifier)}
       <SharedWorkerMetric workerMetric={metric} />
     {/each}
   </section>

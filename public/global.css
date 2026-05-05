@@ -155,7 +155,8 @@ button[interestfor] {
   mask-repeat: no-repeat;
   vertical-align: bottom;
 }
-th .icon {
+th .icon,
+.bc-invert .icon {
   background-color: var(--text-invert);
 }
 .icon.-small {

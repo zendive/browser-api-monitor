@@ -14,12 +14,14 @@ export interface ISharedWorkerTelemetry {
 }
 export interface ISharedWorkerTelemetryMetric {
   specifier: string;
+  firstSeen: number;
   inMemory: number;
   konstruktor: ISharedWorkerConstructorMetric[];
   onerror: ISharedWorkerOnErrorMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
+  firstSeen: number;
   inMemory: number;
   callsMap: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, ISharedWorkerConstructorMetric>;
@@ -76,6 +78,7 @@ export class ApiMonitorSharedWorker extends SharedWorker {
 
         return {
           specifier: this.#specifier,
+          firstSeen: performance.now(),
           inMemory: 0,
           callsMap: new Map(),
           konstruktor: new Map([[
@@ -189,6 +192,7 @@ export function collectSharedWorkerHistory(
     sharedWorkerMap.forEach((metric) => {
       rv.collection.push({
         specifier: metric.specifier,
+        firstSeen: metric.firstSeen,
         inMemory: metric.inMemory,
         konstruktor: Array.from(metric.konstruktor.values()),
         onerror: Array.from(metric.onerror.values()),
