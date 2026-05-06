@@ -16,16 +16,7 @@ export interface ICallstack {
 export interface ITraceable {
   traceId: string;
   trace: ITrace[];
-  traceDomain: ETraceDomain;
   firstSeen: number;
-}
-export enum ETraceDomain {
-  SAME,
-  EXTERNAL,
-  EXTENSION,
-  SNIPPET,
-  WEBPACK,
-  UNKNOWN,
 }
 
 export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
@@ -47,9 +38,6 @@ const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
 const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/+/);
 const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
 const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/async /);
-const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?:\/+/i,
-);
 
 export class TraceUtil {
   selfTraceLink = '';
@@ -69,26 +57,6 @@ export class TraceUtil {
     } else {
       return this.#getShortCallstack(e, uniqueTrait);
     }
-  }
-
-  getDomain(callstack: ICallstack) {
-    const trace = callstack.trace[0];
-
-    if (!trace) {
-      return ETraceDomain.UNKNOWN;
-    } else if (trace.link.startsWith(location.origin)) {
-      return ETraceDomain.SAME;
-    } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
-      return ETraceDomain.EXTERNAL;
-    } else if (trace.link.startsWith('chrome-extension://')) {
-      return ETraceDomain.EXTENSION;
-    } else if (trace.link.startsWith('snippet:///')) {
-      return ETraceDomain.SNIPPET;
-    } else if (trace.link.startsWith('webpack://')) {
-      return ETraceDomain.WEBPACK;
-    }
-
-    return ETraceDomain.UNKNOWN;
   }
 
   shouldPass(traceId: string) {

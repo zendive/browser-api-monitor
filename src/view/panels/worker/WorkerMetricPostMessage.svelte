@@ -78,10 +78,7 @@
       {#each sortedMetrics as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">
-            <CellCallstack
-              trace={metric.trace}
-              traceDomain={metric.traceDomain}
-            />
+            <CellCallstack trace={metric.trace} />
           </td>
           <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
           <td class="ta-c">{metric.cps || undefined}</td>

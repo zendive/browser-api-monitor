@@ -9,10 +9,7 @@
 
 <tr class="t-zebra">
   <td class="wb-all w-full">
-    <CellCallstack
-      trace={metric.trace}
-      traceDomain={metric.traceDomain}
-    />
+    <CellCallstack trace={metric.trace} />
   </td>
   <td class="ta-c">
     <a

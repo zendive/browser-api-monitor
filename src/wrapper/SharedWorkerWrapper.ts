@@ -70,7 +70,6 @@ export class ApiMonitorSharedWorker extends SharedWorker {
         const constructorMetric = {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           options: parseSharedWorkerOptions(options),
           calls: 0,
@@ -99,7 +98,6 @@ export class ApiMonitorSharedWorker extends SharedWorker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           options: parseSharedWorkerOptions(options),
           calls: 0,
@@ -124,7 +122,6 @@ export class ApiMonitorSharedWorker extends SharedWorker {
         return {
           traceId: callstack.traceId,
           trace: callstack.trace,
-          traceDomain: traceUtil.getDomain(callstack),
           firstSeen: performance.now(),
           calls: 0,
           events: 0,

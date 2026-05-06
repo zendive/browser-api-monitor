@@ -43,6 +43,7 @@ import {
 } from './SharedWorkerWrapper.ts';
 
 export interface ITelemetry {
+  locationOrigin: string;
   media: IMediaTelemetry;
   onlineTimers: IOnlineTimerMetrics[];
   setTimeoutHistory: ISetTimerHistory[] | null;
@@ -122,6 +123,7 @@ export function onEachSecond() {
 
 export function collectMetrics(): ITelemetry {
   return {
+    locationOrigin: globalThis.location.origin,
     media: apiMedia.collectMetrics(panels.media),
     evalHistory: apiEval.collectHistory(panels.eval),
     ...apiTimer.collectHistory(
