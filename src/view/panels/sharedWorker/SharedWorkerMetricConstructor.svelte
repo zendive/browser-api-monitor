@@ -83,7 +83,9 @@
             traceDomain={metric.traceDomain}
           />
         </td>
-        <td class="ta-c worker-name">{metric.options.name}</td>
+        <td class="ta-c">
+          <div class="worker-name">{metric.options.name}</div>
+        </td>
         <td class="ta-c">{metric.options.type}</td>
         <td class="ta-c">{metric.options.credentials}</td>
         <td class="ta-c">{metric.options.sameSiteCookies}</td>

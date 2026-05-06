@@ -538,14 +538,11 @@ export function wrapWorker() {
 }
 
 export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
-  const rv: IWorkerTelemetry = {
-    total: workerMap.size,
-    collection: [],
-  };
+  const collection: IWorkerTelemetryMetric[] = [];
 
   if (panel.visible) {
     workerMap.forEach((metric) => {
-      rv.collection.push({
+      collection.push({
         specifier: metric.specifier,
         firstSeen: metric.firstSeen,
         online: metric.online,
@@ -562,7 +559,10 @@ export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
     });
   }
 
-  return rv;
+  return {
+    total: workerMap.size,
+    collection,
+  };
 }
 
 export function forTest_clearWorkerHistory() {

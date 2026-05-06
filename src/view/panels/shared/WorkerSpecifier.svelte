@@ -22,9 +22,12 @@
       0,
       // @ts-expect-error: incomplete documentation for callback argument
       (acknowledge: IOpenResourceCallbackArgument) => {
-        if (acknowledge.isError && acknowledge.code == 'E_NOTFOUND') {
+        if (!acknowledge.isError) return;
+        if (acknowledge.code === 'E_NOTFOUND') {
           // try to open resource in another way
           globalThis.open(specifier, '_blank');
+        } else {
+          console.error(acknowledge);
         }
       },
     );

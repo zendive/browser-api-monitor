@@ -89,10 +89,7 @@ export class MediaWrapper {
   }
 
   collectMetrics(panel: IPanel): IMediaTelemetry {
-    const rv: IMediaTelemetry = {
-      total: this.#current.size,
-      collection: [],
-    };
+    const collection: IMediaMetrics[] = [];
 
     if (panel.visible) {
       this.#current.forEach((el) => {
@@ -100,11 +97,14 @@ export class MediaWrapper {
         if (!model) return;
 
         this.#collectModelProps(model);
-        rv.collection.push(model.metrics);
+        collection.push(model.metrics);
       });
     }
 
-    return rv;
+    return {
+      total: this.#current.size,
+      collection,
+    };
   }
 
   #collectModelProps(model: IMediaModel) {

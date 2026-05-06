@@ -1,4 +1,10 @@
-import { afterEach, describe, test } from '@std/testing/bdd';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  test,
+} from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import {
@@ -13,15 +19,7 @@ import {
 import { NOOP } from '../src/api/const.ts';
 import { wait } from '../src/api/time.ts';
 
-const codeBlob = URL.createObjectURL(
-  new Blob([`
-  self.onmessage = (e) => {
-    self.postMessage('acknowledge');
-  }
-`], { type: 'text/javascript' }),
-);
-
-function NewWorker() {
+function NewWorker(codeBlob: string) {
   return new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
 }
 function getMetric() {
@@ -41,6 +39,21 @@ function getRELFact() {
 
 describe('WorkerWrapper', () => {
   let w: ApiMonitorWorkerWrapper;
+  let codeBlob: string;
+
+  beforeAll(() => {
+    codeBlob = URL.createObjectURL(
+      new Blob([`
+      self.onmessage = (e) => {
+        self.postMessage('acknowledge');
+      }
+    `], { type: 'text/javascript' }),
+    );
+  });
+  afterAll(() => {
+    codeBlob && URL.revokeObjectURL(codeBlob);
+    codeBlob = '';
+  });
 
   afterEach(() => {
     forTest_clearWorkerHistory();
@@ -48,14 +61,14 @@ describe('WorkerWrapper', () => {
 
   test('instance facts', () => {
     for (let n = 0, N = HARDWARE_CONCURRENCY + 1; n < N; n++) {
-      NewWorker();
+      NewWorker(codeBlob);
     }
 
     expect(getMetric().facts).toBe(WorkerFact.MAX_ONLINE);
   });
 
   test('aEL facts', () => {
-    w = NewWorker();
+    w = NewWorker(codeBlob);
 
     for (let n = 0, N = 2; n < N; n++) {
       w.addEventListener('message', NOOP);
@@ -65,7 +78,7 @@ describe('WorkerWrapper', () => {
   });
 
   test('rEL facts', () => {
-    w = NewWorker();
+    w = NewWorker(codeBlob);
     w.removeEventListener('message', NOOP);
 
     expect(getRELFact()).toBe(WorkerRELFact.NOT_FOUND);

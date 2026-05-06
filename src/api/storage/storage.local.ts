@@ -117,6 +117,10 @@ export const DEFAULT_PANELS: IPanel[] = [
 
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
+  paused: false,
+  devtoolsPanelShown: false,
+  wrapperCallstackType: EWrapperCallstackType.SHORT,
+  keepAwake: false,
   sortSharedWorkerPanel: {
     field: <keyof ISharedWorkerTelemetryMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
@@ -205,10 +209,6 @@ export const DEFAULT_CONFIG = {
     field: <keyof IMediaMetrics> 'firstSeen',
     order: ESortOrder.ASCENDING,
   },
-  paused: false,
-  devtoolsPanelShown: false,
-  wrapperCallstackType: EWrapperCallstackType.SHORT,
-  keepAwake: false,
 };
 const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;
 

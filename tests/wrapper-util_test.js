@@ -1,9 +1,10 @@
-import { describe, test } from '@std/testing/bdd';
+import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
 import {
   parseSharedWorkerOptions,
   parseWorkerOptions,
+  parseWorkerSpecifier,
   validHandler,
   validTimerDelay,
 } from '../src/wrapper/shared/util.ts';
@@ -112,6 +113,7 @@ describe('validTimerDelay', () => {
   test('true', () => {
     expect(validTimerDelay(undefined)).toBe(true);
     expect(validTimerDelay(0)).toBe(true);
+    expect(validTimerDelay(-0)).toBe(true);
     expect(validTimerDelay(1)).toBe(true);
   });
 
@@ -122,6 +124,31 @@ describe('validTimerDelay', () => {
     expect(validTimerDelay(-Infinity)).toBe(false);
     expect(validTimerDelay(Infinity)).toBe(false);
     expect(validTimerDelay(NaN)).toBe(false);
+  });
+});
+
+describe('parseWorkerSpecifier', () => {
+  const locationBackup = globalThis.location;
+
+  beforeEach(() => {
+    globalThis.location = { origin: 'https://example.com' };
+  });
+  afterEach(() => {
+    globalThis.location = locationBackup;
+  });
+
+  test('with protocol', () => {
+    expect(parseWorkerSpecifier('blob:https://example.com/w.js'))
+      .toBe('blob:https://example.com/w.js');
+  });
+
+  test('without protocol', () => {
+    expect(parseWorkerSpecifier('w.js?type=modeule')).toBe(
+      'https://example.com/w.js?type=modeule',
+    );
+    expect(parseWorkerSpecifier('/w.js?type=modeule')).toBe(
+      'https://example.com/w.js?type=modeule',
+    );
   });
 });
 

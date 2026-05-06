@@ -183,14 +183,11 @@ export function wrapSharedWorker() {
 export function collectSharedWorkerHistory(
   panel: IPanel,
 ): ISharedWorkerTelemetry {
-  const rv: ISharedWorkerTelemetry = {
-    total: sharedWorkerMap.size,
-    collection: [],
-  };
+  const collection: ISharedWorkerTelemetryMetric[] = [];
 
   if (panel.visible) {
     sharedWorkerMap.forEach((metric) => {
-      rv.collection.push({
+      collection.push({
         specifier: metric.specifier,
         firstSeen: metric.firstSeen,
         inMemory: metric.inMemory,
@@ -200,7 +197,10 @@ export function collectSharedWorkerHistory(
     });
   }
 
-  return rv;
+  return {
+    total: sharedWorkerMap.size,
+    collection,
+  };
 }
 
 export function forTest_clearSharedWorkerHistory() {
