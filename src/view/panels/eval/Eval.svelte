@@ -23,11 +23,10 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortEval.field = <keyof IEvalHistory> field;
+  function updateSort(field: keyof IEvalHistory, order: ESortOrder) {
+    sortEval.field = field;
     sortEval.order = order;
-
-    saveLocalStorage({ sortEval: $state.snapshot(sortEval) });
+    saveLocalStorage({ sortEval });
   }
 
   function dynamicValue(value: unknown): string {
@@ -48,36 +47,32 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortEval.field}
-          currentFieldOrder={sortEval.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortEval}
+          by="firstSeen"
+          update={updateSort}
         >
           eval [<Variable value={sortedMetrics.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortEval.field}
-          currentFieldOrder={sortEval.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortEval}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortEval.field}
-          currentFieldOrder={sortEval.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortEval}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortEval.field}
-          currentFieldOrder={sortEval.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortEval}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th>Code</th>

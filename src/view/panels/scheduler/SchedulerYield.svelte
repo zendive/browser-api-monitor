@@ -18,13 +18,10 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortYield.field = <keyof IYield> field;
+  function updateSort(field: keyof IYield, order: ESortOrder) {
+    sortYield.field = field;
     sortYield.order = order;
-
-    saveLocalStorage({
-      sortYield: $state.snapshot(sortYield),
-    });
+    saveLocalStorage({ sortYield });
   }
 </script>
 
@@ -33,10 +30,9 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortYield.field}
-          currentFieldOrder={sortYield.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortYield}
+          by="firstSeen"
+          update={updateSort}
         >
           scheduler.yield [<Variable value={sortedMetrics.length} />]
         </ColumnSortable>
@@ -44,10 +40,9 @@
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortYield.field}
-          currentFieldOrder={sortYield.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortYield}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

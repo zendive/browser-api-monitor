@@ -26,14 +26,13 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortSharedWorkerConstructor.field =
-      <keyof ISharedWorkerConstructorMetric> field;
+  function updateSort(
+    field: keyof ISharedWorkerConstructorMetric,
+    order: ESortOrder,
+  ) {
+    sortSharedWorkerConstructor.field = field;
     sortSharedWorkerConstructor.order = order;
-
-    saveLocalStorage({
-      sortSharedWorkerConstructor: $state.snapshot(sortSharedWorkerConstructor),
-    });
+    saveLocalStorage({ sortSharedWorkerConstructor });
   }
 </script>
 
@@ -47,10 +46,9 @@
           onClick={() => void (isExpanded = !isExpanded)}
         />
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortSharedWorkerConstructor.field}
-          currentFieldOrder={sortSharedWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSharedWorkerConstructor}
+          by="firstSeen"
+          update={updateSort}
         >
           constructor [<Variable value={constructorSortedMetrics.length} />]
         </ColumnSortable>
@@ -64,10 +62,9 @@
       <th class="ta-c" title="extendedLifetime">exL</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortSharedWorkerConstructor.field}
-          currentFieldOrder={sortSharedWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSharedWorkerConstructor}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>

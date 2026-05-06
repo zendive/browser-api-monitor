@@ -13,8 +13,10 @@
   let {
     cafHistory,
     caption = '',
-  }: { cafHistory: ICancelAnimationFrameHistory[]; caption?: string } =
-    $props();
+  }: {
+    cafHistory: ICancelAnimationFrameHistory[];
+    caption?: string;
+  } = $props();
   const { sortCancelAnimationFrame } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     cafHistory.toSorted(
@@ -25,13 +27,13 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelAnimationFrame.field = <keyof ICancelAnimationFrameHistory> field;
+  function updateSort(
+    field: keyof ICancelAnimationFrameHistory,
+    order: ESortOrder,
+  ) {
+    sortCancelAnimationFrame.field = field;
     sortCancelAnimationFrame.order = order;
-
-    saveLocalStorage({
-      sortCancelAnimationFrame: $state.snapshot(sortCancelAnimationFrame),
-    });
+    saveLocalStorage({ sortCancelAnimationFrame });
   }
 </script>
 
@@ -40,36 +42,32 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortCancelAnimationFrame.field}
-          currentFieldOrder={sortCancelAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelAnimationFrame}
+          by="firstSeen"
+          update={updateSort}
         >
           {caption} [<Variable value={cafHistory.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortCancelAnimationFrame.field}
-          currentFieldOrder={sortCancelAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelAnimationFrame}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortCancelAnimationFrame.field}
-          currentFieldOrder={sortCancelAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelAnimationFrame}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortCancelAnimationFrame.field}
-          currentFieldOrder={sortCancelAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelAnimationFrame}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

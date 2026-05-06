@@ -25,13 +25,13 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelIdleCallback.field = <keyof ICancelIdleCallbackHistory> field;
+  function updateSort(
+    field: keyof ICancelIdleCallbackHistory,
+    order: ESortOrder,
+  ) {
+    sortCancelIdleCallback.field = field;
     sortCancelIdleCallback.order = order;
-
-    saveLocalStorage({
-      sortCancelIdleCallback: $state.snapshot(sortCancelIdleCallback),
-    });
+    saveLocalStorage({ sortCancelIdleCallback });
   }
 </script>
 
@@ -40,36 +40,32 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="firstSeen"
+          update={updateSort}
         >
           {caption} [<Variable value={cicHistory.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

@@ -25,11 +25,10 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerAEL.field = <keyof IWorkerAelMetric> field;
+  function updateSort(field: keyof IWorkerAelMetric, order: ESortOrder) {
+    sortWorkerAEL.field = field;
     sortWorkerAEL.order = order;
-
-    saveLocalStorage({ sortWorkerAEL: $state.snapshot(sortWorkerAEL) });
+    saveLocalStorage({ sortWorkerAEL });
   }
 </script>
 
@@ -44,47 +43,40 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortWorkerAEL.field}
-            currentFieldOrder={sortWorkerAEL.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerAEL}
+            by="firstSeen"
+            update={updateSort}
           >
             addEventListener [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="eventSelfTime"
-            currentField={sortWorkerAEL.field}
-            currentFieldOrder={sortWorkerAEL.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerAEL}
+            by="eventSelfTime"
+            update={updateSort}
           >Self</ColumnSortable>
         </th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            field="events"
-            currentField={sortWorkerAEL.field}
-            currentFieldOrder={sortWorkerAEL.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerAEL}
+            by="events"
+            update={updateSort}
           >Events</ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="facts"
-            currentField={sortWorkerAEL.field}
-            currentFieldOrder={sortWorkerAEL.order}
-            eventChangeSorting={onChangeSort}
-          >
-            <span class="icon -facts"></span>
-          </ColumnSortable>
+            sort={sortWorkerAEL}
+            by="facts"
+            update={updateSort}
+          ><span class="icon -facts"></span></ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortWorkerAEL.field}
-            currentFieldOrder={sortWorkerAEL.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerAEL}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

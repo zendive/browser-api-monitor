@@ -78,13 +78,10 @@
     return rv;
   });
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortSetTimers.field = <keyof ISetTimerHistory> field;
+  function updateSort(field: keyof ISetTimerHistory, order: ESortOrder) {
+    sortSetTimers.field = field;
     sortSetTimers.order = order;
-
-    saveLocalStorage({
-      sortSetTimers: $state.snapshot(sortSetTimers),
-    });
+    saveLocalStorage({ sortSetTimers });
   }
 </script>
 
@@ -112,60 +109,53 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="firstSeen"
+          update={updateSort}
         >
           {caption} [<Variable value={setTimerHistory.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-r">
         <ColumnSortable
-          field="delay"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="delay"
+          update={updateSort}
         >Delay</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortSetTimers.field}
-          currentFieldOrder={sortSetTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortSetTimers}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

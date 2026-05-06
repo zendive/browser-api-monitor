@@ -31,18 +31,16 @@
     )
   );
 
-  function onChangeVideoSort(field: string, order: ESortOrder) {
-    sortVideoPanel.field = <keyof IMediaMetrics> field;
+  function updateVideoSort(field: keyof IMediaMetrics, order: ESortOrder) {
+    sortVideoPanel.field = field;
     sortVideoPanel.order = order;
-
-    saveLocalStorage({ sortVideoPanel: $state.snapshot(sortVideoPanel) });
+    saveLocalStorage({ sortVideoPanel });
   }
 
-  function onChangeAudioSort(field: string, order: ESortOrder) {
-    sortAudioPanel.field = <keyof IMediaMetrics> field;
+  function updateAudioSort(field: keyof IMediaMetrics, order: ESortOrder) {
+    sortAudioPanel.field = field;
     sortAudioPanel.order = order;
-
-    saveLocalStorage({ sortAudioPanel: $state.snapshot(sortAudioPanel) });
+    saveLocalStorage({ sortAudioPanel });
   }
 </script>
 
@@ -50,10 +48,9 @@
   <section data-navigation-tag="Videos">
     <div class="label bc-invert sticky-header">
       <ColumnSortable
-        field="firstSeen"
-        currentField={sortVideoPanel.field}
-        currentFieldOrder={sortVideoPanel.order}
-        eventChangeSorting={onChangeVideoSort}
+        sort={sortVideoPanel}
+        by="firstSeen"
+        update={updateVideoSort}
       >
         Videos: <Variable value={sortedVideoMetrics.length} />
       </ColumnSortable>
@@ -74,10 +71,9 @@
   <section data-navigation-tag="Audios">
     <div class="label bc-invert sticky-header">
       <ColumnSortable
-        field="firstSeen"
-        currentField={sortAudioPanel.field}
-        currentFieldOrder={sortAudioPanel.order}
-        eventChangeSorting={onChangeAudioSort}
+        sort={sortAudioPanel}
+        by="firstSeen"
+        update={updateAudioSort}
       >
         Audios: <Variable value={sortedAudioMetrics.length} />
       </ColumnSortable>

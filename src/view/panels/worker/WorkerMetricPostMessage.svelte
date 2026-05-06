@@ -24,13 +24,13 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerPostMessage.field = <keyof IWorkerPostMessageMetric> field;
+  function updateSort(
+    field: keyof IWorkerPostMessageMetric,
+    order: ESortOrder,
+  ) {
+    sortWorkerPostMessage.field = field;
     sortWorkerPostMessage.order = order;
-
-    saveLocalStorage({
-      sortWorkerPostMessage: $state.snapshot(sortWorkerPostMessage),
-    });
+    saveLocalStorage({ sortWorkerPostMessage });
   }
 </script>
 
@@ -45,29 +45,26 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortWorkerPostMessage.field}
-            currentFieldOrder={sortWorkerPostMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerPostMessage}
+            by="firstSeen"
+            update={updateSort}
           >
             postMessage [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="selfTime"
-            currentField={sortWorkerPostMessage.field}
-            currentFieldOrder={sortWorkerPostMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerPostMessage}
+            by="selfTime"
+            update={updateSort}
           >Self</ColumnSortable>
         </th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortWorkerPostMessage.field}
-            currentFieldOrder={sortWorkerPostMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerPostMessage}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

@@ -21,11 +21,10 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerOnError.field = <keyof IWorkerOnErrorMetric> field;
+  function updateSort(field: keyof IWorkerOnErrorMetric, order: ESortOrder) {
+    sortWorkerOnError.field = field;
     sortWorkerOnError.order = order;
-
-    saveLocalStorage({ sortWorkerOnError: $state.snapshot(sortWorkerOnError) });
+    saveLocalStorage({ sortWorkerOnError });
   }
 </script>
 
@@ -40,37 +39,33 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortWorkerOnError.field}
-            currentFieldOrder={sortWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnError}
+            by="firstSeen"
+            update={updateSort}
           >
             set onerror [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="eventSelfTime"
-            currentField={sortWorkerOnError.field}
-            currentFieldOrder={sortWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnError}
+            by="eventSelfTime"
+            update={updateSort}
           >Self</ColumnSortable>
         </th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            field="events"
-            currentField={sortWorkerOnError.field}
-            currentFieldOrder={sortWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnError}
+            by="events"
+            update={updateSort}
           >Events</ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortWorkerOnError.field}
-            currentFieldOrder={sortWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnError}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

@@ -20,13 +20,10 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerTerminate.field = <keyof IWorkerTerminateMetric> field;
+  function updateSort(field: keyof IWorkerTerminateMetric, order: ESortOrder) {
+    sortWorkerTerminate.field = field;
     sortWorkerTerminate.order = order;
-
-    saveLocalStorage({
-      sortWorkerTerminate: $state.snapshot(sortWorkerTerminate),
-    });
+    saveLocalStorage({ sortWorkerTerminate });
   }
 </script>
 
@@ -41,20 +38,18 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortWorkerTerminate.field}
-            currentFieldOrder={sortWorkerTerminate.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerTerminate}
+            by="firstSeen"
+            update={updateSort}
           >
             terminate [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortWorkerTerminate.field}
-            currentFieldOrder={sortWorkerTerminate.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerTerminate}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

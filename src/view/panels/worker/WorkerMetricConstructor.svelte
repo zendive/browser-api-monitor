@@ -27,13 +27,13 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerConstructor.field = <keyof IWorkerConstructorMetric> field;
+  function updateSort(
+    field: keyof IWorkerConstructorMetric,
+    order: ESortOrder,
+  ) {
+    sortWorkerConstructor.field = field;
     sortWorkerConstructor.order = order;
-
-    saveLocalStorage({
-      sortWorkerConstructor: $state.snapshot(sortWorkerConstructor),
-    });
+    saveLocalStorage({ sortWorkerConstructor });
   }
 </script>
 
@@ -47,10 +47,9 @@
           onClick={() => void (isExpanded = !isExpanded)}
         />
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortWorkerConstructor}
+          by="firstSeen"
+          update={updateSort}
         >
           constructor [<Variable value={constructorSortedMetrics.length} />]
         </ColumnSortable>
@@ -58,22 +57,12 @@
       <th class="ta-c">name</th>
       <th class="ta-c" title="classic | module">type</th>
       <th class="ta-c" title="same-origin | include | omit ">credentials</th>
+      <th class="ta-c" title="Fact"><span class="icon -facts"></span></th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
-        >
-          <span class="icon -facts"></span>
-        </ColumnSortable>
-      </th>
-      <th class="ta-c">
-        <ColumnSortable
-          field="calls"
-          currentField={sortWorkerConstructor.field}
-          currentFieldOrder={sortWorkerConstructor.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortWorkerConstructor}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th title="Breakpoint"><span class="icon -breakpoint"></span></th>

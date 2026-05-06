@@ -44,14 +44,13 @@
     );
   });
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortRequestAnimationFrame.field =
-      <keyof IRequestAnimationFrameHistory> field;
+  function updateSort(
+    field: keyof IRequestAnimationFrameHistory,
+    order: ESortOrder,
+  ) {
+    sortRequestAnimationFrame.field = field;
     sortRequestAnimationFrame.order = order;
-
-    saveLocalStorage({
-      sortRequestAnimationFrame: $state.snapshot(sortRequestAnimationFrame),
-    });
+    saveLocalStorage({ sortRequestAnimationFrame });
   }
 </script>
 
@@ -79,45 +78,40 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="firstSeen"
+          update={updateSort}
         >
           {caption} [<Variable value={rafHistory.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

@@ -44,13 +44,13 @@
     );
   });
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortRequestIdleCallback.field = <keyof IRequestIdleCallbackHistory> field;
+  function updateSort(
+    field: keyof IRequestIdleCallbackHistory,
+    order: ESortOrder,
+  ) {
+    sortRequestIdleCallback.field = field;
     sortRequestIdleCallback.order = order;
-
-    saveLocalStorage({
-      sortRequestIdleCallback: $state.snapshot(sortRequestIdleCallback),
-    });
+    saveLocalStorage({ sortRequestIdleCallback });
   }
 </script>
 
@@ -78,10 +78,9 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="firstSeen"
+          update={updateSort}
         >
           {caption} [<Variable value={ricHistory.length} />]
         </ColumnSortable>
@@ -89,51 +88,45 @@
       <th class="ta-c">didTimeout</th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-r">
         <ColumnSortable
-          field="delay"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="delay"
+          update={updateSort}
         >Timeout</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

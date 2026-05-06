@@ -19,13 +19,10 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerPanel.field = <keyof IWorkerTelemetryMetric> field;
+  function updateSort(field: keyof IWorkerTelemetryMetric, order: ESortOrder) {
+    sortWorkerPanel.field = field;
     sortWorkerPanel.order = order;
-
-    saveLocalStorage({
-      sortWorkerPanel: $state.snapshot(sortWorkerPanel),
-    });
+    saveLocalStorage({ sortWorkerPanel });
   }
 </script>
 
@@ -33,10 +30,9 @@
   <section data-navigation-tag="_Worker">
     <div class="label bc-invert">
       <ColumnSortable
-        field="firstSeen"
-        currentField={sortWorkerPanel.field}
-        currentFieldOrder={sortWorkerPanel.order}
-        eventChangeSorting={onChangeSort}
+        sort={sortWorkerPanel}
+        by="firstSeen"
+        update={updateSort}
       >
         Worker [<Variable value={sortedCollection.length} />]
       </ColumnSortable>

@@ -24,13 +24,10 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortPostTask.field = <keyof IPostTask> field;
+  function updateSort(field: keyof IPostTask, order: ESortOrder) {
+    sortPostTask.field = field;
     sortPostTask.order = order;
-
-    saveLocalStorage({
-      sortPostTask: $state.snapshot(sortPostTask),
-    });
+    saveLocalStorage({ sortPostTask });
   }
 </script>
 
@@ -39,61 +36,54 @@
     <tr>
       <th class="w-full">
         <ColumnSortable
-          field="firstSeen"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="firstSeen"
+          update={updateSort}
         >
           scheduler.postTask [<Variable value={sortedMetrics.length} />]
         </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="priority"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="priority"
+          update={updateSort}
         >Priority</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-r">
         <ColumnSortable
-          field="delay"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="delay"
+          update={updateSort}
         >Delay</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortPostTask.field}
-          currentFieldOrder={sortPostTask.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortPostTask}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

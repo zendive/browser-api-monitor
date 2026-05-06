@@ -24,13 +24,13 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortSharedWorkerOnError.field = <keyof ISharedWorkerOnErrorMetric> field;
+  function updateSort(
+    field: keyof ISharedWorkerOnErrorMetric,
+    order: ESortOrder,
+  ) {
+    sortSharedWorkerOnError.field = field;
     sortSharedWorkerOnError.order = order;
-
-    saveLocalStorage({
-      sortSharedWorkerOnError: $state.snapshot(sortSharedWorkerOnError),
-    });
+    saveLocalStorage({ sortSharedWorkerOnError });
   }
 </script>
 
@@ -45,37 +45,33 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortSharedWorkerOnError.field}
-            currentFieldOrder={sortSharedWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortSharedWorkerOnError}
+            by="firstSeen"
+            update={updateSort}
           >
             set onerror [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="eventSelfTime"
-            currentField={sortSharedWorkerOnError.field}
-            currentFieldOrder={sortSharedWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortSharedWorkerOnError}
+            by="eventSelfTime"
+            update={updateSort}
           >Self</ColumnSortable>
         </th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            field="events"
-            currentField={sortSharedWorkerOnError.field}
-            currentFieldOrder={sortSharedWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortSharedWorkerOnError}
+            by="events"
+            update={updateSort}
           >Events</ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortSharedWorkerOnError.field}
-            currentFieldOrder={sortSharedWorkerOnError.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortSharedWorkerOnError}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

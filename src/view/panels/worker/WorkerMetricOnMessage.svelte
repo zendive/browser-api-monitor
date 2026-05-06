@@ -21,13 +21,10 @@
   );
   let isExpanded = $state(true);
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortWorkerOnMessage.field = <keyof IWorkerOnMessageMetric> field;
+  function updateSort(field: keyof IWorkerOnMessageMetric, order: ESortOrder) {
+    sortWorkerOnMessage.field = field;
     sortWorkerOnMessage.order = order;
-
-    saveLocalStorage({
-      sortWorkerOnMessage: $state.snapshot(sortWorkerOnMessage),
-    });
+    saveLocalStorage({ sortWorkerOnMessage });
   }
 </script>
 
@@ -42,37 +39,33 @@
             onClick={() => void (isExpanded = !isExpanded)}
           />
           <ColumnSortable
-            field="firstSeen"
-            currentField={sortWorkerOnMessage.field}
-            currentFieldOrder={sortWorkerOnMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnMessage}
+            by="firstSeen"
+            update={updateSort}
           >
             set onmessage [<Variable value={sortedMetrics.length} />]
           </ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="eventSelfTime"
-            currentField={sortWorkerOnMessage.field}
-            currentFieldOrder={sortWorkerOnMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnMessage}
+            by="eventSelfTime"
+            update={updateSort}
           >Self</ColumnSortable>
         </th>
         <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            field="events"
-            currentField={sortWorkerOnMessage.field}
-            currentFieldOrder={sortWorkerOnMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnMessage}
+            by="events"
+            update={updateSort}
           >Events</ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            field="calls"
-            currentField={sortWorkerOnMessage.field}
-            currentFieldOrder={sortWorkerOnMessage.order}
-            eventChangeSorting={onChangeSort}
+            sort={sortWorkerOnMessage}
+            by="calls"
+            update={updateSort}
           >Called</ColumnSortable>
         </th>
         <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
