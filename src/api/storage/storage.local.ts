@@ -29,6 +29,7 @@ import type {
   ISharedWorkerConstructorMetric,
   ISharedWorkerOnErrorMetric,
   ISharedWorkerPortCloseMetric,
+  ISharedWorkerPortPostMessageMetric,
   ISharedWorkerPortStartMetric,
   ISharedWorkerTelemetryMetric,
 } from '../../wrapper/SharedWorkerWrapper.ts';
@@ -141,6 +142,10 @@ export const DEFAULT_CONFIG = {
   },
   sortSharedWorkerPortClose: {
     field: <keyof ISharedWorkerPortCloseMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortPostMessage: {
+    field: <keyof ISharedWorkerPortPostMessageMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerPanel: {

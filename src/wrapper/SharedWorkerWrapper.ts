@@ -1,11 +1,11 @@
 import type { ITraceable } from './shared/TraceUtil.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import {
   parseSharedWorkerOptions,
   parseWorkerSpecifier,
   traceUtil,
 } from './shared/util.ts';
 import { TraceUtil } from './shared/TraceUtil.ts';
-import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 
 export interface ISharedWorkerTelemetry {
@@ -20,6 +20,7 @@ export interface ISharedWorkerTelemetryMetric {
   onerror: ISharedWorkerOnErrorMetric[];
   portStart: ISharedWorkerPortStartMetric[];
   portClose: ISharedWorkerPortCloseMetric[];
+  portPostMessage: ISharedWorkerPortPostMessageMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
@@ -30,6 +31,7 @@ export interface ISharedWorkerMetric {
   onerror: Map</*traceId*/ string, ISharedWorkerOnErrorMetric>;
   portStart: Map</*traceId*/ string, ISharedWorkerPortStartMetric>;
   portClose: Map</*traceId*/ string, ISharedWorkerPortCloseMetric>;
+  portPostMessage: Map</*traceId*/ string, ISharedWorkerPortPostMessageMetric>;
 }
 export interface ISharedWorkerConstructorMetric extends ITraceable {
   options: ISharedWorkerOptions;
@@ -46,6 +48,11 @@ export interface ISharedWorkerPortStartMetric extends ITraceable {
 }
 export interface ISharedWorkerPortCloseMetric extends ITraceable {
   calls: number;
+}
+export interface ISharedWorkerPortPostMessageMetric extends ITraceable {
+  calls: number;
+  selfTime: number | null;
+  cps: number;
 }
 export interface ISharedWorkerOptions {
   type: 'classic' | 'module';
@@ -99,6 +106,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
           onerror: new Map(),
           portStart: new Map(),
           portClose: new Map(),
+          portPostMessage: new Map(),
         };
       },
     );
@@ -180,6 +188,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   #wrapMessagePort() {
     this.port.start = this.#portStart.bind(this);
     this.port.close = this.#portClose.bind(this);
+    // @ts-expect-error: suppress multiple signatures
+    this.port.postMessage = this.#portPostMessage.bind(this);
     this.port.addEventListener = this.#portAddEventListener.bind(this);
     this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
   }
@@ -232,6 +242,37 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     }
   }
 
+  #portPostMessage(...args: Parameters<MessagePort['postMessage']>) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    let selfTime = null;
+
+    if (traceUtil.shouldPass(callstack.traceId)) {
+      if (traceUtil.shouldPause(callstack.traceId)) {
+        debugger;
+      }
+      const start = performance.now();
+      this.#native.postMessage(...args);
+      selfTime = trim2ms(performance.now() - start);
+    }
+
+    const methodMetric = this.#metric.portPostMessage.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          selfTime,
+          cps: 1,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+    methodMetric.selfTime = selfTime;
+  }
+
   #portAddEventListener(...args: unknown[]) {
     // @ts-expect-error: covering fire
     this.#native.addEventListener(...args);
@@ -257,6 +298,14 @@ export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
         methodMetric.events,
       );
     });
+
+    sharedWorkerMetric.portPostMessage.forEach((methodMetric) => {
+      const prevCalls = sharedWorkerMetric.callsMap.get(methodMetric.traceId) ||
+        0;
+
+      methodMetric.cps = methodMetric.calls - prevCalls;
+      sharedWorkerMetric.callsMap.set(methodMetric.traceId, methodMetric.calls);
+    });
   });
 }
 
@@ -279,6 +328,7 @@ export function collectSharedWorkerHistory(
         onerror: Array.from(metric.onerror.values()),
         portStart: Array.from(metric.portStart.values()),
         portClose: Array.from(metric.portClose.values()),
+        portPostMessage: Array.from(metric.portPostMessage.values()),
       });
     });
   }

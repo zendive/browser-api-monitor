@@ -5,6 +5,7 @@
   import SharedWorkerMetricOnError from './SharedWorkerMetricOnError.svelte';
   import SharedWorkerMetricPortStart from './SharedWorkerMetricPortStart.svelte';
   import SharedWorkerMetricPortClose from './SharedWorkerMetricPortClose.svelte';
+  import SharedWorkerMetricPortPostMessage from './SharedWorkerMetricPortPostMessage.svelte';
   import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
 
   let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
@@ -30,6 +31,7 @@
     <SharedWorkerMetricOnError metrics={workerMetric.onerror} />
     <SharedWorkerMetricPortStart metrics={workerMetric.portStart} />
     <SharedWorkerMetricPortClose metrics={workerMetric.portClose} />
+    <SharedWorkerMetricPortPostMessage metrics={workerMetric.portPostMessage} />
   </section>
 </fieldset>
 
