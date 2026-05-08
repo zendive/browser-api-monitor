@@ -18,6 +18,8 @@ export interface ISharedWorkerTelemetryMetric {
   inMemory: number;
   konstruktor: ISharedWorkerConstructorMetric[];
   onerror: ISharedWorkerOnErrorMetric[];
+  portStart: ISharedWorkerPortStartMetric[];
+  portClose: ISharedWorkerPortCloseMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
@@ -26,6 +28,8 @@ export interface ISharedWorkerMetric {
   callsMap: Map</*traceId*/ string, /*calls*/ number>;
   konstruktor: Map</*traceId*/ string, ISharedWorkerConstructorMetric>;
   onerror: Map</*traceId*/ string, ISharedWorkerOnErrorMetric>;
+  portStart: Map</*traceId*/ string, ISharedWorkerPortStartMetric>;
+  portClose: Map</*traceId*/ string, ISharedWorkerPortCloseMetric>;
 }
 export interface ISharedWorkerConstructorMetric extends ITraceable {
   options: ISharedWorkerOptions;
@@ -36,6 +40,12 @@ export interface ISharedWorkerOnErrorMetric extends ITraceable {
   events: number;
   eventSelfTime: number | null;
   eventsCps: number;
+}
+export interface ISharedWorkerPortStartMetric extends ITraceable {
+  calls: number;
+}
+export interface ISharedWorkerPortCloseMetric extends ITraceable {
+  calls: number;
 }
 export interface ISharedWorkerOptions {
   type: 'classic' | 'module';
@@ -52,8 +62,10 @@ const memoryTracker = new FinalizationRegistry((specifier: string) => {
   sharedWorkerMetric && sharedWorkerMetric.inMemory--;
 });
 
-export class ApiMonitorSharedWorker extends SharedWorker {
+export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   readonly #specifier: string;
+  readonly #metric: ISharedWorkerMetric;
+  readonly #native;
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
@@ -64,7 +76,7 @@ export class ApiMonitorSharedWorker extends SharedWorker {
     super(specifier, options);
     this.#specifier = parseWorkerSpecifier(specifier);
 
-    const sharedWorkerMetric = sharedWorkerMap.getOrInsertComputed(
+    this.#metric = sharedWorkerMap.getOrInsertComputed(
       this.#specifier,
       () => {
         const constructorMetric = {
@@ -85,14 +97,16 @@ export class ApiMonitorSharedWorker extends SharedWorker {
             constructorMetric,
           ]]),
           onerror: new Map(),
+          portStart: new Map(),
+          portClose: new Map(),
         };
       },
     );
 
-    sharedWorkerMetric.inMemory++;
+    this.#metric.inMemory++;
     memoryTracker.register(this, this.#specifier);
 
-    const methodMetric = sharedWorkerMetric.konstruktor.getOrInsertComputed(
+    const methodMetric = this.#metric.konstruktor.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -106,6 +120,15 @@ export class ApiMonitorSharedWorker extends SharedWorker {
     );
 
     methodMetric.calls++;
+
+    this.#native = {
+      start: this.port.start.bind(this.port),
+      close: this.port.close.bind(this.port),
+      postMessage: this.port.postMessage.bind(this.port),
+      addEventListener: this.port.addEventListener.bind(this.port),
+      removeEventListener: this.port.removeEventListener.bind(this.port),
+    };
+    this.#wrapMessagePort();
   }
 
   override get onerror() {
@@ -115,8 +138,7 @@ export class ApiMonitorSharedWorker extends SharedWorker {
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const sharedWorkerMetric = sharedWorkerMap.get(this.#specifier)!;
-    const methodMetric = sharedWorkerMetric.onerror.getOrInsertComputed(
+    const methodMetric = this.#metric.onerror.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -154,6 +176,71 @@ export class ApiMonitorSharedWorker extends SharedWorker {
       methodMetric.eventSelfTime = eventSelfTime;
     };
   }
+
+  #wrapMessagePort() {
+    this.port.start = this.#portStart.bind(this);
+    this.port.close = this.#portClose.bind(this);
+    this.port.addEventListener = this.#portAddEventListener.bind(this);
+    this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
+  }
+
+  #portStart() {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.portStart.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    if (traceUtil.shouldPass(callstack.traceId)) {
+      if (traceUtil.shouldPause(callstack.traceId)) {
+        debugger;
+      }
+      this.#native.start();
+    }
+  }
+
+  #portClose() {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.portClose.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    if (traceUtil.shouldPass(callstack.traceId)) {
+      if (traceUtil.shouldPause(callstack.traceId)) {
+        debugger;
+      }
+      this.#native.close();
+    }
+  }
+
+  #portAddEventListener(...args: unknown[]) {
+    // @ts-expect-error: covering fire
+    this.#native.addEventListener(...args);
+  }
+
+  #portRemoveEventListener(...args: unknown[]) {
+    // @ts-expect-error: covering fire
+    thisl.#native.removeEventListener(...args);
+  }
 }
 
 export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
@@ -174,7 +261,7 @@ export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
 }
 
 export function wrapSharedWorker() {
-  globalThis.SharedWorker = ApiMonitorSharedWorker;
+  globalThis.SharedWorker = ApiMonitorSharedWorkerWrapper;
 }
 
 export function collectSharedWorkerHistory(
@@ -190,6 +277,8 @@ export function collectSharedWorkerHistory(
         inMemory: metric.inMemory,
         konstruktor: Array.from(metric.konstruktor.values()),
         onerror: Array.from(metric.onerror.values()),
+        portStart: Array.from(metric.portStart.values()),
+        portClose: Array.from(metric.portClose.values()),
       });
     });
   }

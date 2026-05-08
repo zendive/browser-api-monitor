@@ -2,8 +2,10 @@
   import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
   import CollapseExpand from '../shared/CollapseExpand.svelte';
   import SharedWorkerMetricConstructor from './SharedWorkerMetricConstructor.svelte';
-  import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
   import SharedWorkerMetricOnError from './SharedWorkerMetricOnError.svelte';
+  import SharedWorkerMetricPortStart from './SharedWorkerMetricPortStart.svelte';
+  import SharedWorkerMetricPortClose from './SharedWorkerMetricPortClose.svelte';
+  import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
 
   let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
     $props();
@@ -26,6 +28,8 @@
   <section class:d-none={!isExpanded}>
     <SharedWorkerMetricConstructor {workerMetric} />
     <SharedWorkerMetricOnError metrics={workerMetric.onerror} />
+    <SharedWorkerMetricPortStart metrics={workerMetric.portStart} />
+    <SharedWorkerMetricPortClose metrics={workerMetric.portClose} />
   </section>
 </fieldset>
 
