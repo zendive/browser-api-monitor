@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
-  import { EMsg, runtimeListen } from '../../api/communication.ts';
+  import { EMsg, listenRuntime } from '../../api/communication.ts';
   import Alert from '../shared/Alert.svelte';
   import {
     toggleKeepAwake,
@@ -24,7 +24,7 @@
   });
 
   onMount(() => {
-    runtimeListen((o) => {
+    listenRuntime((o) => {
       if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
         reloadMessageEl.hide();
         selfEl.hidePopover();

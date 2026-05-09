@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EMsg, portPost, runtimeListen } from '../api/communication.ts';
+  import { EMsg, listenRuntime, postPort } from '../api/communication.ts';
   import { ETimer, Timer } from '../api/time.ts';
   import Alert from './shared/Alert.svelte';
   import {
@@ -28,7 +28,7 @@
   );
 
   onMount(() => {
-    runtimeListen((o) => {
+    listenRuntime((o) => {
       if (o.msg === EMsg.INJECTION_CONFIRMED) {
         delayedAlert.stop();
         tabReloadAlertEl.hide();
@@ -49,7 +49,7 @@
   });
 
   function pingContentScript() {
-    portPost({ msg: EMsg.CONFIRM_INJECTION });
+    postPort({ msg: EMsg.CONFIRM_INJECTION });
     delayedAlert.start();
   }
 

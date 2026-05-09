@@ -1,11 +1,11 @@
 import type { ITelemetry } from '../wrapper/Wrapper.ts';
 import {
   EMsg,
-  portPost,
-  runtimeListen,
+  listenRuntime,
+  listenWindow,
+  postPort,
+  postWindow,
   type TMsgOptions,
-  windowListen,
-  windowPost,
 } from '../api/communication.ts';
 import diff from '../api/diff.ts';
 
@@ -23,9 +23,9 @@ export function useTelemetryState() {
 
 export function establishTelemetryReceiver() {
   if (__mirror__) {
-    windowListen(telemetryListener);
+    listenWindow(telemetryListener);
   } else {
-    runtimeListen(telemetryListener);
+    listenRuntime(telemetryListener);
   }
 }
 
@@ -61,13 +61,13 @@ function acknowledgeTelemetry(
   startAfresh: boolean = false,
 ) {
   if (__mirror__) {
-    windowPost({
+    postWindow({
       msg: EMsg.TELEMETRY_ACKNOWLEDGED,
       timeOfCollection,
       startAfresh,
     });
   } else {
-    portPost({
+    postPort({
       msg: EMsg.TELEMETRY_ACKNOWLEDGED,
       timeOfCollection,
       startAfresh,

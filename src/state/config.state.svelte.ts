@@ -1,4 +1,4 @@
-import { EMsg, portPost } from '../api/communication.ts';
+import { EMsg, postPort } from '../api/communication.ts';
 import {
   DEFAULT_CONFIG,
   loadLocalStorage,
@@ -23,9 +23,9 @@ export async function togglePause() {
   await saveLocalStorage({ paused: $state.snapshot(config.paused) });
 
   if (config.paused) {
-    portPost({ msg: EMsg.STOP_OBSERVE });
+    postPort({ msg: EMsg.STOP_OBSERVE });
   } else {
-    portPost({ msg: EMsg.START_OBSERVE });
+    postPort({ msg: EMsg.START_OBSERVE });
   }
 }
 
@@ -62,5 +62,5 @@ export async function togglePanelVisibility(index: number) {
 }
 
 export function postTimerCommand(type: ETimerType, handler: number) {
-  portPost({ msg: EMsg.TIMER_COMMAND, type, handler });
+  postPort({ msg: EMsg.TIMER_COMMAND, type, handler });
 }

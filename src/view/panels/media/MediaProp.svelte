@@ -1,7 +1,7 @@
 <script lang="ts">
   import { isMediaFieldWritable } from '../../../api/const.ts';
   import Variable from '../../shared/Variable.svelte';
-  import { EMsg, portPost } from '../../../api/communication.ts';
+  import { EMsg, postPort } from '../../../api/communication.ts';
 
   let { name, value, mediaId }: {
     name: string;
@@ -10,7 +10,7 @@
   } = $props();
 
   function onToggleMediaField(field: string) {
-    portPost({
+    postPort({
       msg: EMsg.MEDIA_COMMAND,
       mediaId: mediaId,
       cmd: 'toggle-boolean',

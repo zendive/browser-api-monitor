@@ -1,9 +1,6 @@
 <script lang="ts">
-  import {
-    EMsg,
-    type IMsgMediaCommand,
-    portPost,
-  } from '../../../api/communication.ts';
+  import { EMsg, postPort } from '../../../api/communication.ts';
+  import type { TMediaCommand } from '../../../wrapper/MediaWrapper.ts';
 
   let {
     mediaId,
@@ -13,8 +10,8 @@
     paused: unknown;
   } = $props();
 
-  function onMediaCommand(cmd: IMsgMediaCommand['cmd']) {
-    portPost({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
+  function onMediaCommand(cmd: TMediaCommand) {
+    postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
   }
 </script>
 

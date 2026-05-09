@@ -1,4 +1,4 @@
-import { EMsg, portPost } from './api/communication.ts';
+import { EMsg, postPort } from './api/communication.ts';
 import {
   loadLocalStorage,
   saveLocalStorage,
@@ -16,7 +16,7 @@ if (chrome.devtools.inspectedWindow.tabId !== null) {
       panel.onShown.addListener(async () => {
         const config = await loadLocalStorage();
         if (!config.paused) {
-          portPost({ msg: EMsg.START_OBSERVE });
+          postPort({ msg: EMsg.START_OBSERVE });
         }
         if (config.keepAwake) {
           chrome.power?.requestKeepAwake('display');
