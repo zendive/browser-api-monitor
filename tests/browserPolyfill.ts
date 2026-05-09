@@ -1,4 +1,5 @@
 import { PropertySymbol, Window } from 'happy-dom';
+import SharedWorker from '@okikio/sharedworker';
 import 'scheduler-polyfill';
 
 const window = new Window();
@@ -11,6 +12,7 @@ Object.assign(globalThis, {
   location: window.location,
   Element: browserWindow.Element,
   Document: browserWindow.Document,
+  SharedWorker,
   __mirror__: false,
 
   requestAnimationFrame: function requestAnimationFrameDumbStub(

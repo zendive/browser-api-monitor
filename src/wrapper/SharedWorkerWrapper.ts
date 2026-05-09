@@ -7,6 +7,9 @@ import {
 } from './shared/util.ts';
 import { TraceUtil } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
+import { WorkerAELFact, WorkerRELFact } from './WorkerWrapper.ts';
+import { NOOP } from '../api/const.ts';
 
 export interface ISharedWorkerTelemetry {
   total: number;
@@ -21,6 +24,8 @@ export interface ISharedWorkerTelemetryMetric {
   portStart: ISharedWorkerPortStartMetric[];
   portClose: ISharedWorkerPortCloseMetric[];
   portPostMessage: ISharedWorkerPortPostMessageMetric[];
+  portAel: ISharedWorkerPortAelMetric[];
+  portRel: ISharedWorkerPortRelMetric[];
 }
 export interface ISharedWorkerMetric {
   specifier: string;
@@ -32,6 +37,8 @@ export interface ISharedWorkerMetric {
   portStart: Map</*traceId*/ string, ISharedWorkerPortStartMetric>;
   portClose: Map</*traceId*/ string, ISharedWorkerPortCloseMetric>;
   portPostMessage: Map</*traceId*/ string, ISharedWorkerPortPostMessageMetric>;
+  portAel: Map</*traceId*/ string, ISharedWorkerPortAelMetric>;
+  portRel: Map</*traceId*/ string, ISharedWorkerPortRelMetric>;
 }
 export interface ISharedWorkerConstructorMetric extends ITraceable {
   options: ISharedWorkerOptions;
@@ -54,6 +61,18 @@ export interface ISharedWorkerPortPostMessageMetric extends ITraceable {
   selfTime: number | null;
   cps: number;
 }
+export interface ISharedWorkerPortAelMetric extends ITraceable {
+  calls: number;
+  events: number;
+  eventSelfTime: number | null;
+  eventsCps: number;
+  canceledCounter: number;
+  facts: TFact;
+}
+export interface ISharedWorkerPortRelMetric extends ITraceable {
+  calls: number;
+  facts: TFact;
+}
 export interface ISharedWorkerOptions {
   type: 'classic' | 'module';
   credentials: 'same-origin' | 'include' | 'omit' | undefined;
@@ -73,6 +92,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   readonly #specifier: string;
   readonly #metric: ISharedWorkerMetric;
   readonly #native;
+  readonly #eventHandlerLink: WeakMap<
+    /*authored handler*/ EventListenerOrEventListenerObject,
+    {
+      aelTraceId: string;
+      actualHandler: EventListener;
+    }
+  > = new WeakMap();
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
@@ -106,6 +132,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
           portStart: new Map(),
           portClose: new Map(),
           portPostMessage: new Map(),
+          portAel: new Map(),
+          portRel: new Map(),
         };
       },
     );
@@ -129,8 +157,14 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     methodMetric.calls++;
 
     this.#native = {
-      start: this.port.start.bind(this.port),
-      close: this.port.close.bind(this.port),
+      /** @note:
+       * using "optional chaining operator"+"NOOP" to workaround the
+       * failing test around start/close methods, since `@okikio/sharedworker`
+       * polyfill implementation is the only closes polyfill suitable
+       * for a deno environment I could find at the moment.
+       */
+      start: this.port.start?.bind(this.port) || NOOP,
+      close: this.port.close?.bind(this.port) || NOOP,
       postMessage: this.port.postMessage.bind(this.port),
       addEventListener: this.port.addEventListener.bind(this.port),
       removeEventListener: this.port.removeEventListener.bind(this.port),
@@ -272,14 +306,147 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     methodMetric.selfTime = selfTime;
   }
 
-  #portAddEventListener(...args: unknown[]) {
-    // @ts-expect-error: covering fire
-    this.#native.addEventListener(...args);
+  #portAddEventListener(
+    type: string,
+    listener: unknown,
+    options?: unknown,
+  ) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.portAel.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          eventsCps: 0,
+          canceledCounter: 0,
+          facts: Fact.pure,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    /**
+     * If the function or object is already in the list of event listeners for this target,
+     * the function or object is not added a second time.
+     * -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+     */
+    if (this.#eventHandlerLink.has(<EventListener> listener)) {
+      methodMetric.facts = Fact.assign(
+        methodMetric.facts,
+        WorkerAELFact.DUPLICATE_ADDITION,
+      );
+      return;
+    }
+
+    let selfHandler;
+
+    if (typeof listener === 'function') {
+      selfHandler = function (
+        this: ApiMonitorSharedWorkerWrapper,
+        e: Event,
+      ) {
+        let eventSelfTime: null | number = null;
+        const start = performance.now();
+
+        if (traceUtil.shouldPass(methodMetric.traceId)) {
+          if (traceUtil.shouldPause(methodMetric.traceId)) {
+            debugger;
+          }
+          (<EventListener> listener).call(this, e);
+          eventSelfTime = trim2ms(performance.now() - start);
+          methodMetric.events++;
+        }
+
+        methodMetric.eventSelfTime = eventSelfTime;
+      }.bind(this);
+    } else if (
+      listener && typeof listener === 'object' && 'handleEvent' in listener &&
+      typeof listener.handleEvent === 'function'
+    ) {
+      selfHandler = function (e: Event) {
+        let eventSelfTime: null | number = null;
+        const start = performance.now();
+
+        if (traceUtil.shouldPass(methodMetric.traceId)) {
+          if (traceUtil.shouldPause(methodMetric.traceId)) {
+            debugger;
+          }
+          (<EventListenerObject> listener).handleEvent(e);
+          eventSelfTime = trim2ms(performance.now() - start);
+          methodMetric.events++;
+        }
+
+        methodMetric.eventSelfTime = eventSelfTime;
+      };
+    }
+
+    if (selfHandler) {
+      this.#eventHandlerLink.set(<EventListenerObject> listener, {
+        actualHandler: selfHandler,
+        aelTraceId: methodMetric.traceId,
+      });
+      // @ts-expect-error: expects known types
+      this.#native.addEventListener(type, selfHandler, options);
+    }
   }
 
-  #portRemoveEventListener(...args: unknown[]) {
-    // @ts-expect-error: covering fire
-    thisl.#native.removeEventListener(...args);
+  #portRemoveEventListener(
+    type: string,
+    listener: unknown,
+    options?: unknown,
+  ) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.portRel.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          facts: Fact.pure,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    const aelRecord = this.#eventHandlerLink.get(
+      <EventListenerOrEventListenerObject> listener,
+    );
+
+    if (aelRecord) {
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        // @ts-expect-error: expects known types
+        this.#native.removeEventListener(
+          type,
+          aelRecord.actualHandler,
+          options,
+        );
+        this.#eventHandlerLink.delete(
+          <EventListenerOrEventListenerObject> listener,
+        );
+
+        const aelMethodMetric = this.#metric.portAel.get(aelRecord.aelTraceId);
+        if (aelMethodMetric) {
+          aelMethodMetric.canceledCounter++;
+        }
+      }
+    } else {
+      methodMetric.facts = Fact.assign(
+        methodMetric.facts,
+        WorkerRELFact.NOT_FOUND,
+      );
+    }
   }
 }
 
@@ -305,6 +472,17 @@ export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
       methodMetric.cps = methodMetric.calls - prevCalls;
       sharedWorkerMetric.callsMap.set(methodMetric.traceId, methodMetric.calls);
     });
+
+    sharedWorkerMetric.portAel.forEach((methodMetric) => {
+      const prevEvents =
+        sharedWorkerMetric.callsMap.get(methodMetric.traceId) || 0;
+
+      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      sharedWorkerMetric.callsMap.set(
+        methodMetric.traceId,
+        methodMetric.events,
+      );
+    });
   });
 }
 
@@ -328,6 +506,8 @@ export function collectSharedWorkerHistory(
         portStart: Array.from(metric.portStart.values()),
         portClose: Array.from(metric.portClose.values()),
         portPostMessage: Array.from(metric.portPostMessage.values()),
+        portAel: Array.from(metric.portAel.values()),
+        portRel: Array.from(metric.portRel.values()),
       });
     });
   }

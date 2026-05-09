@@ -125,7 +125,7 @@ function handleRuntimeMessageResponse(): void {
 
 export function provideChannelApi() {
   const { promise, resolve } = Promise.withResolvers<IChannelApi>();
-  const channelId = `${crypto.randomUUID()}`;
+  const channelId = crypto.randomUUID();
   const channel = new BroadcastChannel(channelId);
 
   listenWindowOnce((e) => {

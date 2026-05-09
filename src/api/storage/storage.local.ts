@@ -28,8 +28,10 @@ import { ESortOrder } from '../const.ts';
 import type {
   ISharedWorkerConstructorMetric,
   ISharedWorkerOnErrorMetric,
+  ISharedWorkerPortAelMetric,
   ISharedWorkerPortCloseMetric,
   ISharedWorkerPortPostMessageMetric,
+  ISharedWorkerPortRelMetric,
   ISharedWorkerPortStartMetric,
   ISharedWorkerTelemetryMetric,
 } from '../../wrapper/SharedWorkerWrapper.ts';
@@ -146,6 +148,14 @@ export const DEFAULT_CONFIG = {
   },
   sortSharedWorkerPortPostMessage: {
     field: <keyof ISharedWorkerPortPostMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortAel: {
+    field: <keyof ISharedWorkerPortAelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortRel: {
+    field: <keyof ISharedWorkerPortRelMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
   sortWorkerPanel: {

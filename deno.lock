@@ -11,6 +11,7 @@
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/testing@1.0.18": "1.0.18",
     "npm:@awasm/noble@0.1.2": "0.1.2",
+    "npm:@okikio/sharedworker@1.1.0": "1.1.0",
     "npm:@types/chrome@*": "0.1.40",
     "npm:@types/chrome@0.1.40": "0.1.40",
     "npm:@types/deno@2.5.0": "2.5.0",
@@ -235,6 +236,9 @@
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
       ]
+    },
+    "@okikio/sharedworker@1.1.0": {
+      "integrity": "sha512-Xj9TUWll9mhARsKu5DtlQCjRekfJfQ2E291ow6gmXIz+WuF6uJMH8ZmGhdRTx/ndOippHnm1j/vxXNjmR6JuXw=="
     },
     "@sveltejs/acorn-typescript@1.0.8_acorn@8.16.0": {
       "integrity": "sha512-esgN+54+q0NjB0Y/4BomT9samII7jGwNy/2a3wNZbT2A2RpmXsXwUt24LvLhx6jUq2gVk4cWEvcRO6MFQbOfNA==",
@@ -490,6 +494,7 @@
     "dependencies": [
       "jsr:@std/expect@1.0.19",
       "jsr:@std/testing@1.0.18",
+      "npm:@okikio/sharedworker@1.1.0",
       "npm:@types/chrome@*",
       "npm:esbuild-svelte@0.9.4",
       "npm:esbuild@0.28.0",

@@ -25,8 +25,8 @@ function NewWorker(codeBlob: string) {
 function getMetric() {
   return collectWorkerHistory({
     visible: true,
-    key: 'callsSummary',
-    label: '',
+    key: 'worker',
+    label: 'stub',
     wrap: true,
   }).collection[0];
 }

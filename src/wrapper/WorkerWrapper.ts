@@ -123,14 +123,14 @@ const memoryTracker = new FinalizationRegistry((specifier: string) => {
 
 export class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
-  #eventHandlerLink: WeakMap<
+  readonly #metric: IWorkerMetric;
+  readonly #eventHandlerLink: WeakMap<
     /*authored handler*/ EventListenerOrEventListenerObject,
     {
       aelTraceId: string;
       actualHandler: EventListener;
     }
   > = new WeakMap();
-  #metric: IWorkerMetric;
 
   constructor(specifier: string | URL, options?: WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
