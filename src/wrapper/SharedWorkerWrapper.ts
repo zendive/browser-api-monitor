@@ -76,13 +76,12 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-
     if (traceUtil.shouldPause(callstack.traceId)) {
       debugger;
     }
     super(specifier, options);
-    this.#specifier = parseWorkerSpecifier(specifier);
 
+    this.#specifier = parseWorkerSpecifier(specifier);
     this.#metric = sharedWorkerMap.getOrInsertComputed(
       this.#specifier,
       () => {

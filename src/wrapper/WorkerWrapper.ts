@@ -130,17 +130,17 @@ export class ApiMonitorWorkerWrapper extends Worker {
       actualHandler: EventListener;
     }
   > = new WeakMap();
+  #metric: IWorkerMetric;
 
   constructor(specifier: string | URL, options?: WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-
     if (traceUtil.shouldPause(callstack.traceId)) {
       debugger;
     }
     super(specifier, options);
-    this.#specifier = parseWorkerSpecifier(specifier);
 
-    const workerMetric = workerMap.getOrInsertComputed(this.#specifier, () => {
+    this.#specifier = parseWorkerSpecifier(specifier);
+    this.#metric = workerMap.getOrInsertComputed(this.#specifier, () => {
       const constructorMetric = {
         traceId: callstack.traceId,
         trace: callstack.trace,
@@ -166,18 +166,18 @@ export class ApiMonitorWorkerWrapper extends Worker {
       };
     });
 
-    workerMetric.online++;
-    workerMetric.inMemory++;
+    this.#metric.online++;
+    this.#metric.inMemory++;
     memoryTracker.register(this, this.#specifier);
 
-    if (workerMetric.online > HARDWARE_CONCURRENCY) {
-      workerMetric.facts = Fact.assign(
-        workerMetric.facts,
+    if (this.#metric.online > HARDWARE_CONCURRENCY) {
+      this.#metric.facts = Fact.assign(
+        this.#metric.facts,
         WorkerFact.MAX_ONLINE,
       );
     }
 
-    const methodMetric = workerMetric.konstruktor.getOrInsertComputed(
+    const methodMetric = this.#metric.konstruktor.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -195,8 +195,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
   override terminate() {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.terminate.getOrInsertComputed(
+    const methodMetric = this.#metric.terminate.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -216,8 +215,8 @@ export class ApiMonitorWorkerWrapper extends Worker {
       }
       super.terminate();
 
-      if (workerMetric.online) {
-        workerMetric.online--;
+      if (this.#metric.online) {
+        this.#metric.online--;
       }
     }
   }
@@ -236,8 +235,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       selfTime = trim2ms(performance.now() - start);
     }
 
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.postMessage.getOrInsertComputed(
+    const methodMetric = this.#metric.postMessage.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -262,8 +260,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
   override set onmessage(rhs: (ev: MessageEvent) => unknown | null) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.onmessage.getOrInsertComputed(
+    const methodMetric = this.#metric.onmessage.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -308,8 +305,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.onerror.getOrInsertComputed(
+    const methodMetric = this.#metric.onerror.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -354,8 +350,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     options?: unknown,
   ) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.ael.getOrInsertComputed(
+    const methodMetric = this.#metric.ael.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -445,8 +440,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     options?: unknown,
   ) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const workerMetric = workerMap.get(this.#specifier)!;
-    const methodMetric = workerMetric.rel.getOrInsertComputed(
+    const methodMetric = this.#metric.rel.getOrInsertComputed(
       callstack.traceId,
       () => {
         return {
@@ -476,7 +470,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           <EventListenerOrEventListenerObject> listener,
         );
 
-        const aelMethodMetric = workerMetric.ael.get(aelRecord.aelTraceId);
+        const aelMethodMetric = this.#metric.ael.get(aelRecord.aelTraceId);
         if (aelMethodMetric) {
           aelMethodMetric.canceledCounter++;
         }
