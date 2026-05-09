@@ -3,6 +3,7 @@ import {
   EMsg,
   portPost,
   runtimeListen,
+  type TMsgOptions,
   windowListen,
   windowPost,
 } from '../api/communication.ts';
@@ -21,82 +22,57 @@ export function useTelemetryState() {
 }
 
 export function establishTelemetryReceiver() {
-  runtimeListen((o) => {
-    if (o.msg === EMsg.TELEMETRY) {
-      telemetryProgressive = structuredClone(o.telemetry);
-      state.telemetry = o.telemetry;
-      acknowledgeTelemetry(o.timeOfCollection);
+  if (__mirror__) {
+    windowListen(telemetryListener);
+  } else {
+    runtimeListen(telemetryListener);
+  }
+}
 
-      if (__feat_dev_stats__) {
-        state.telemetrySize = objectInJsonLength(o.telemetry);
-      }
-    } else if (o.msg === EMsg.TELEMETRY_DELTA) {
-      try {
-        diff.patch(telemetryProgressive, o.telemetryDelta);
-        state.telemetry = structuredClone(telemetryProgressive);
-        acknowledgeTelemetry(o.timeOfCollection);
-      } catch (_) {
-        // if patching fails - request full telemetry
-        acknowledgeTelemetry(o.timeOfCollection, true);
-      }
+function telemetryListener(o: TMsgOptions) {
+  if (o.msg === EMsg.TELEMETRY) {
+    telemetryProgressive = structuredClone(o.telemetry);
+    state.telemetry = o.telemetry;
+    state.timeOfCollection = o.timeOfCollection;
+    acknowledgeTelemetry(o.timeOfCollection);
 
-      if (__feat_dev_stats__) {
-        state.telemetrySize = objectInJsonLength(o.telemetryDelta);
-      }
+    if (__feat_dev_stats__) {
+      state.telemetrySize = objectInJsonLength(o.telemetry);
     }
-  });
+  } else if (o.msg === EMsg.TELEMETRY_DELTA) {
+    try {
+      diff.patch(telemetryProgressive, o.telemetryDelta);
+      state.telemetry = structuredClone(telemetryProgressive);
+      state.timeOfCollection = o.timeOfCollection;
+      acknowledgeTelemetry(o.timeOfCollection);
+    } catch (_) {
+      // if patching fails - request full telemetry
+      acknowledgeTelemetry(o.timeOfCollection, true);
+    }
+
+    if (__feat_dev_stats__) {
+      state.telemetrySize = objectInJsonLength(o.telemetryDelta);
+    }
+  }
 }
 
 function acknowledgeTelemetry(
   timeOfCollection: number,
   startAfresh: boolean = false,
 ) {
-  portPost({
-    msg: EMsg.TELEMETRY_ACKNOWLEDGED,
-    timeOfCollection,
-    startAfresh,
-  });
-
-  state.timeOfCollection = timeOfCollection;
-}
-
-export function establishTelemetryReceiverMirror() {
-  windowListen((o) => {
-    if (o.msg === EMsg.TELEMETRY) {
-      telemetryProgressive = structuredClone(o.telemetry);
-      state.telemetry = o.telemetry;
-      acknowledgeTelemetryMirror(o.timeOfCollection);
-
-      if (__feat_dev_stats__) {
-        state.telemetrySize = objectInJsonLength(o.telemetry);
-      }
-    } else if (o.msg === EMsg.TELEMETRY_DELTA) {
-      try {
-        diff.patch(telemetryProgressive, o.telemetryDelta);
-        state.telemetry = structuredClone(telemetryProgressive);
-        acknowledgeTelemetryMirror(o.timeOfCollection);
-      } catch (_) {
-        acknowledgeTelemetryMirror(o.timeOfCollection, true);
-      }
-
-      if (__feat_dev_stats__) {
-        state.telemetrySize = objectInJsonLength(o.telemetryDelta);
-      }
-    }
-  });
-}
-
-function acknowledgeTelemetryMirror(
-  timeOfCollection: number,
-  startAfresh: boolean = false,
-) {
-  windowPost({
-    msg: EMsg.TELEMETRY_ACKNOWLEDGED,
-    timeOfCollection,
-    startAfresh,
-  });
-
-  state.timeOfCollection = timeOfCollection;
+  if (__mirror__) {
+    windowPost({
+      msg: EMsg.TELEMETRY_ACKNOWLEDGED,
+      timeOfCollection,
+      startAfresh,
+    });
+  } else {
+    portPost({
+      msg: EMsg.TELEMETRY_ACKNOWLEDGED,
+      timeOfCollection,
+      startAfresh,
+    });
+  }
 }
 
 function objectInJsonLength(obj: unknown): number {

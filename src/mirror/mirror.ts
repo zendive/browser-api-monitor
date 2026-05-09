@@ -1,7 +1,7 @@
 import { mount } from 'svelte';
 import App from '../view/App.svelte';
 import { initConfigState } from '../state/config.state.svelte.ts';
-import { establishTelemetryReceiverMirror } from '../state/telemetry.state.svelte.ts';
+import { establishTelemetryReceiver } from '../state/telemetry.state.svelte.ts';
 import { EMsg, windowPost } from '../api/communication.ts';
 import {
   loadLocalStorage,
@@ -14,7 +14,7 @@ import {
 
 initConfigState().then(() => {
   mount(App, { target: document.body });
-  establishTelemetryReceiverMirror();
+  establishTelemetryReceiver();
 
   Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
     ([config, session]) => {
