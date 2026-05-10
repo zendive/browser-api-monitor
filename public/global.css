@@ -146,6 +146,14 @@ button[interestfor] {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+input[type='range'] {
+  appearance: none;
+  cursor: pointer;
+  width: 6.25rem;
+  height: 0.5rem;
+}
+
 .icon {
   display: inline-block;
   width: 1rem;
@@ -201,12 +209,6 @@ th .icon,
 }
 .icon.-locate {
   mask-image: url(img/locate.svg);
-}
-.icon.-slower {
-  mask-image: url(img/slower.svg);
-}
-.icon.-faster {
-  mask-image: url(img/faster.svg);
 }
 .icon.-trace-external {
   mask-image: url(img/trace-external.svg);

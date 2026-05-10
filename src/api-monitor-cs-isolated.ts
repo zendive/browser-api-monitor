@@ -19,8 +19,7 @@ Promise.all([
   provideChannelApi(),
 ]).then(
   ([config, session, { listenChannel, postChannel }]) => {
-    postChannel({ msg: EMsg.CONFIG, config });
-    postChannel({ msg: EMsg.SESSION, session });
+    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
 
     if (config.devtoolsPanelShown && !config.paused) {
       postChannel({ msg: EMsg.START_OBSERVE });

@@ -1,3 +1,4 @@
+import type { IMsgMediaCommand } from '../api/communication.ts';
 import {
   isMediaFieldWritable,
   MEDIA_EVENTS,
@@ -38,8 +39,8 @@ export type TMediaCommand =
   | 'load'
   | 'locate'
   | 'toggle-boolean'
-  | 'slower'
-  | 'faster';
+  | 'set-volume'
+  | 'set-playbackRate';
 
 export class MediaWrapper {
   #current: Set<TMediaElement> = new Set();
@@ -118,42 +119,46 @@ export class MediaWrapper {
     }
   }
 
-  runCommand(
-    mediaId: string,
-    cmd: TMediaCommand,
-    property: keyof TMediaElement | undefined,
-  ) {
-    const model = this.#getModelByMediaId(mediaId);
+  runCommand(o: IMsgMediaCommand) {
+    const model = this.#getModelByMediaId(o.mediaId);
     if (!model || !document.contains(model.el)) {
       return;
     }
 
-    if (cmd === 'log') {
+    if (o.cmd === 'log') {
       console.log(model.el);
-    } else if (cmd === 'locate') {
+    } else if (o.cmd === 'locate') {
       model.el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'center',
       });
-    } else if (cmd === 'load') {
+    } else if (o.cmd === 'load') {
       model.el.load();
-    } else if (cmd === 'pause') {
+    } else if (o.cmd === 'pause') {
       model.el.pause();
-    } else if (cmd === 'play') {
+    } else if (o.cmd === 'play') {
       model.el.play().catch(() => {});
-    } else if (cmd === 'frame-backward') {
+    } else if (o.cmd === 'frame-backward') {
       model.el.currentTime -= TIME_60FPS_SEC;
-    } else if (cmd === 'frame-forward') {
+    } else if (o.cmd === 'frame-forward') {
       model.el.currentTime += TIME_60FPS_SEC;
-    } else if (cmd === 'toggle-boolean' && typeof property === 'string') {
-      if (isMediaFieldWritable(property)) {
-        model.el[property] = !model.el[property];
+    } else if (o.cmd === 'toggle-boolean' && typeof o.field === 'string') {
+      if (isMediaFieldWritable(o.field)) {
+        model.el[o.field] = !model.el[o.field];
       }
-    } else if (cmd === 'slower') {
-      model.el.playbackRate -= 0.1;
-    } else if (cmd === 'faster') {
-      model.el.playbackRate += 0.1;
+    } else if (
+      o.cmd === 'set-volume' &&
+      typeof (o.value) === 'number' &&
+      Number.isFinite(o.value)
+    ) {
+      model.el.volume = o.value;
+    } else if (
+      o.cmd === 'set-playbackRate' &&
+      typeof (o.value) === 'number' &&
+      Number.isFinite(o.value)
+    ) {
+      model.el.playbackRate = o.value;
     }
   }
 

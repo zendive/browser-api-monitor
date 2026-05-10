@@ -67,12 +67,16 @@ awaitChannelApi().then(({ listenChannel, postChannel }) => {
       originalMetrics = currentMetrics;
       const shouldRun = eachSecond.isPending() && !tick.isPending();
       shouldRun && tick.start();
-    } else if (EMsg.CONFIG === o.msg) {
+    } else if (EMsg.CONFIG_SESSION === o.msg || EMsg.CONFIG === o.msg) {
       applyConfig(o.config);
 
       if (o.config.devtoolsPanelShown && !eachSecond.isPending()) {
         startAfresh = true;
         tick.trigger();
+      }
+
+      if (EMsg.CONFIG_SESSION === o.msg) {
+        applySession(o.session);
       }
     } else if (EMsg.SESSION === o.msg) {
       applySession(o.session);
@@ -86,7 +90,7 @@ awaitChannelApi().then(({ listenChannel, postChannel }) => {
     } else if (EMsg.TIMER_COMMAND === o.msg) {
       runTimerCommand(o.type, o.handler);
     } else if (EMsg.MEDIA_COMMAND === o.msg) {
-      runMediaCommand(o.mediaId, o.cmd, o.field);
+      runMediaCommand(o);
     }
   });
 });

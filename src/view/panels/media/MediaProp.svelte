@@ -2,6 +2,8 @@
   import { isMediaFieldWritable } from '../../../api/const.ts';
   import Variable from '../../shared/Variable.svelte';
   import { EMsg, postPort } from '../../../api/communication.ts';
+  import MediaPropVolume from './MediaPropVolume.svelte';
+  import MediaPropPlaybackRate from './MediaPropPlaybackRate.svelte';
 
   let { name, value, mediaId }: {
     name: string;
@@ -31,25 +33,31 @@
   }
 </script>
 
-<tr class:isPassive={!value}>
-  <td class="name">{name}</td>
-  <td class="value">
-    {#if isMediaFieldWritable(name)}
-      <button
-        type="button"
-        aria-label="Toggle state"
-        class="isWritable"
-        onclick={() => void onToggleMediaField(name)}
-      >
-        {value}
-      </button>
-    {:else if isVariableMediaProp(name)}
-      <Variable {value} />
-    {:else}
-      {propValueFilter(value)}
-    {/if}
-  </td>
-</tr>
+{#if name === 'volume'}
+  <MediaPropVolume {mediaId} {value} />
+{:else if name === 'playbackRate'}
+  <MediaPropPlaybackRate {mediaId} {value} />
+{:else}
+  <tr class:isPassive={!value}>
+    <td class="ta-r">{name}</td>
+    <td class="value ta-l">
+      {#if isMediaFieldWritable(name)}
+        <button
+          type="button"
+          aria-label="Toggle state"
+          class="isWritable"
+          onclick={() => void onToggleMediaField(name)}
+        >
+          {value}
+        </button>
+      {:else if isVariableMediaProp(name)}
+        <Variable {value} />
+      {:else}
+        {propValueFilter(value)}
+      {/if}
+    </td>
+  </tr>
+{/if}
 
 <style lang="scss">
   .isPassive {
@@ -59,11 +67,7 @@
   .isWritable {
     cursor: pointer;
   }
-  .name {
-    text-align: right;
-  }
   .value {
     word-break: break-all;
-    text-align: left;
   }
 </style>

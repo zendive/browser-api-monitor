@@ -75,22 +75,6 @@
   >
     <span class="icon -frame-forward"></span>
   </button>
-  <button
-    type="button"
-    onclick={() => void onMediaCommand('slower')}
-    title="Speed -10%"
-    aria-label="Speed -10%"
-  >
-    <span class="icon -slower"></span>
-  </button>
-  <button
-    type="button"
-    onclick={() => void onMediaCommand('faster')}
-    title="Speed +10%"
-    aria-label="Speed +10%"
-  >
-    <span class="icon -faster"></span>
-  </button>
 </span>
 
 <style lang="scss">

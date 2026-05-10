@@ -62,20 +62,9 @@ export function postWindow(payload: TMsgOptions) {
   }, '*');
 }
 
-export function listenWindow(callback: (payload: TMsgOptions) => void) {
-  globalThis.addEventListener('message', (e: MessageEvent) => {
-    if (
-      e.source === window &&
-      e.data && typeof (e.data) === 'object' &&
-      e.data.application === APPLICATION_NAME &&
-      e.data.payload && typeof (e.data.payload) === 'object'
-    ) {
-      callback(e.data.payload);
-    }
-  });
-}
-
-export function listenWindowOnce(callback: (payload: TMsgOptions) => boolean) {
+export function listenWindow(
+  callback: (payload: TMsgOptions) => boolean | void,
+) {
   globalThis.addEventListener('message', function listener(e: MessageEvent) {
     if (
       e.source === window &&
@@ -128,7 +117,7 @@ export function provideChannelApi() {
   const channelId = crypto.randomUUID();
   const channel = new BroadcastChannel(channelId);
 
-  listenWindowOnce((e) => {
+  listenWindow((e) => {
     if (e.msg === EMsg.TUNE_CHANNEL_CONFIRMED) {
       resolve({
         listenChannel(callback: (e: TMsgOptions) => void) {
@@ -141,10 +130,8 @@ export function provideChannelApi() {
         },
       });
 
-      return true;
+      return true; // stop listen
     }
-
-    return false;
   });
 
   postWindow({ msg: EMsg.TUNE_CHANNEL, id: channelId });
@@ -155,7 +142,7 @@ export function provideChannelApi() {
 export function awaitChannelApi() {
   const { promise, resolve } = Promise.withResolvers<IChannelApi>();
 
-  listenWindowOnce((e) => {
+  listenWindow((e) => {
     if (e.msg === EMsg.TUNE_CHANNEL && e.id && typeof (e.id) === 'string') {
       const channel = new BroadcastChannel(e.id);
 
@@ -174,8 +161,6 @@ export function awaitChannelApi() {
 
       return true; // stop listen
     }
-
-    return false;
   });
 
   return promise;
@@ -187,6 +172,7 @@ interface IChannelApi {
 }
 
 export enum EMsg {
+  CONFIG_SESSION,
   CONFIG,
   CONTENT_SCRIPT_LOADED,
   START_OBSERVE,
@@ -236,11 +222,17 @@ interface IMsgConfig {
   msg: EMsg.CONFIG;
   config: TConfig;
 }
-interface IMsgMediaCommand {
+interface IMsgConfigSession {
+  msg: EMsg.CONFIG_SESSION;
+  config: TConfig;
+  session: TSession;
+}
+export interface IMsgMediaCommand {
   msg: EMsg.MEDIA_COMMAND;
   mediaId: string;
   cmd: TMediaCommand;
   field?: keyof HTMLMediaElement;
+  value?: unknown;
 }
 interface IMsgSession {
   msg: EMsg.SESSION;
@@ -268,6 +260,7 @@ export type TMsgOptions =
   | IMsgStopObserve
   | IMsgLoaded
   | IMsgTimerCommand
+  | IMsgConfigSession
   | IMsgConfig
   | IMsgMediaCommand
   | IMsgSession
