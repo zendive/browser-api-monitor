@@ -62,33 +62,6 @@ export class MediaWrapper {
     });
   }
 
-  #startMonitorMedia(el: TMediaElement): IMediaModel {
-    const events: IMediaMetrics['events'] = {};
-    const props: IMediaMetrics['props'] = {};
-    const rv = {
-      el,
-      metrics: {
-        mediaId: crypto.randomUUID(),
-        firstSeen: performance.now(),
-        type: el instanceof HTMLVideoElement
-          ? EMediaType.VIDEO
-          : EMediaType.AUDIO,
-        events,
-        props,
-      },
-      eventListener: function (this: typeof events, e: Event) {
-        this[e.type]++;
-      }.bind(events),
-    };
-
-    for (const event of MEDIA_EVENTS) {
-      events[event] = 0;
-      el.addEventListener(event, rv.eventListener);
-    }
-
-    return rv;
-  }
-
   collectMetrics(panel: IPanel): IMediaTelemetry {
     const collection: IMediaMetrics[] = [];
 
@@ -106,17 +79,6 @@ export class MediaWrapper {
       total: this.#current.size,
       collection,
     };
-  }
-
-  #collectModelProps(model: IMediaModel) {
-    for (const prop of MEDIA_FIELDS) {
-      if (prop in model.el) {
-        model.metrics.props[prop] = parseMediaFieldValue(
-          prop,
-          model.el[prop as keyof TMediaElement],
-        );
-      }
-    }
   }
 
   runCommand(o: IMsgMediaCommand) {
@@ -162,6 +124,44 @@ export class MediaWrapper {
     }
   }
 
+  #startMonitorMedia(el: TMediaElement): IMediaModel {
+    const events: IMediaMetrics['events'] = {};
+    const props: IMediaMetrics['props'] = {};
+    const rv = {
+      el,
+      metrics: {
+        mediaId: crypto.randomUUID(),
+        firstSeen: performance.now(),
+        type: el instanceof HTMLVideoElement
+          ? EMediaType.VIDEO
+          : EMediaType.AUDIO,
+        events,
+        props,
+      },
+      eventListener: function (this: typeof events, e: Event) {
+        this[e.type]++;
+      }.bind(events),
+    };
+
+    for (const event of MEDIA_EVENTS) {
+      events[event] = 0;
+      el.addEventListener(event, rv.eventListener);
+    }
+
+    return rv;
+  }
+
+  #collectModelProps(model: IMediaModel) {
+    for (const prop of MEDIA_FIELDS) {
+      if (prop in model.el) {
+        model.metrics.props[prop] = parseMediaFieldValue(
+          prop,
+          model.el[prop as keyof TMediaElement],
+        );
+      }
+    }
+  }
+  
   #getModelByMediaId(mediaId: string) {
     for (const el of this.#current) {
       const model = this.#tracked.get(el);
