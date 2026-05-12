@@ -161,7 +161,7 @@ export class MediaWrapper {
       }
     }
   }
-  
+
   #getModelByMediaId(mediaId: string) {
     for (const el of this.#current) {
       const model = this.#tracked.get(el);
