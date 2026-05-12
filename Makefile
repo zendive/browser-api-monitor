@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := dev
 
 # Ensure environment dependencies exist
-REQUIRED_BINS := deno jq zip tree grep wc python3
+REQUIRED_BINS := deno jq zip tree grep wc
 $(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)`)))
 
 BUILD_DEV := BUILD_MODE=development deno run --watch --allow-env --allow-read --allow-run
@@ -79,6 +79,9 @@ mirror-dev:
 
 .PHONY: mirror-serve
 mirror-serve:
+	REQUIRED_BINS := python3
+	$(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)` to run static http.server)))
+
 	@echo "🎗 reminder to switch extension off"
 	@echo "served at: http://localhost:5555/mirror.html"
 	python3 -m http.server 5555 -d ./public/
