@@ -160,7 +160,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       /** @note:
        * using "optional chaining operator"+"NOOP" to workaround the
        * failing test around start/close methods, since `@okikio/sharedworker`
-       * polyfill implementation is the only closes polyfill suitable
+       * polyfill implementation is the only closest polyfill suitable
        * for a deno environment I could find at the moment.
        */
       start: this.port.start?.bind(this.port) || NOOP,
