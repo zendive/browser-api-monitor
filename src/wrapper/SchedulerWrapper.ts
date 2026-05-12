@@ -110,10 +110,10 @@ export class SchedulerWrapper {
       methodMetric.priority = options?.priority;
       methodMetric.online++;
 
-      if (validTimerDelay(methodMetric.delay)) {
+      if (validTimerDelay(delay)) {
         methodMetric.delay = trim2ms(delay);
       } else {
-        methodMetric.delay = TAG_BAD_DELAY(methodMetric.delay);
+        methodMetric.delay = TAG_BAD_DELAY(delay);
         methodMetric.facts = Fact.assign(
           methodMetric.facts,
           PostTaskFact.BAD_DELAY,
