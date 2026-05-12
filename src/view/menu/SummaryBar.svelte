@@ -33,26 +33,6 @@
       />
     {/if}
 
-    {#if panels.scheduler.wrap}
-      <SummaryBarItem
-        label="s.pT"
-        tooltip="scheduler.postTask"
-        navSelector="scheduler.postTask"
-        visible={panels.scheduler.visible}
-        count={ts.telemetry.scheduler.postTask?.length || 0}
-      />
-    {/if}
-
-    {#if panels.scheduler.wrap}
-      <SummaryBarItem
-        label="s.y"
-        tooltip="scheduler.yield"
-        navSelector="scheduler.yield"
-        visible={panels.scheduler.visible}
-        count={ts.telemetry.scheduler.yield?.length || 0}
-      />
-    {/if}
-
     {#if panels.eval.wrap}
       <SummaryBarItem
         label="eval"
@@ -139,6 +119,26 @@
         navSelector="cancelIdleCallback"
         visible={panels.cancelIdleCallback.visible}
         count={ts.telemetry.callCounter.cancelIdleCallback}
+      />
+    {/if}
+
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.pT"
+        tooltip="scheduler.postTask"
+        navSelector="scheduler.postTask"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.postTask?.length || 0}
+      />
+    {/if}
+
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.y"
+        tooltip="scheduler.yield"
+        navSelector="scheduler.yield"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.yield?.length || 0}
       />
     {/if}
 

@@ -23,7 +23,6 @@
 
 {#if ts.telemetry}
   <Media media={ts.telemetry.media} />
-  <Scheduler telemetry={ts.telemetry.scheduler} />
 
   {#if ts.telemetry.evalHistory?.length}
     <Eval evalHistory={ts.telemetry.evalHistory} />
@@ -92,6 +91,8 @@
       cicHistory={ts.telemetry.cicHistory}
     />
   {/if}
+
+  <Scheduler telemetry={ts.telemetry.scheduler} />
 
   <Worker telemetry={ts.telemetry.worker} />
   <SharedWorker telemetry={ts.telemetry.sharedWorker} />
