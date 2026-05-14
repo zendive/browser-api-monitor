@@ -5,6 +5,7 @@ import {
   applyConfig,
   applySession,
   collectMetrics,
+  exposeConsoleInterface,
   type ITelemetry,
   onEachSecond,
   runMediaCommand,
@@ -12,6 +13,7 @@ import {
 } from './wrapper/Wrapper.ts';
 import diff from './api/diff.ts';
 
+exposeConsoleInterface();
 awaitChannelApi().then(({ listenChannel, postChannel }) => {
   let originalMetrics: ITelemetry | null;
   let currentMetrics: ITelemetry | null;

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { type IMediaMetrics } from '../../../wrapper/MediaWrapper.ts';
+  import { type IMediaTelemetryMetrics } from '../../../wrapper/MediaWrapper.ts';
   import MediaCommands from './MediaCommands.svelte';
   import MediaEvent from './MediaEvent.svelte';
   import MediaProp from './MediaProp.svelte';
 
   let { mediaId, events, props }: {
     mediaId: string;
-    events: IMediaMetrics['events'];
-    props: IMediaMetrics['props'];
+    events: IMediaTelemetryMetrics['events'];
+    props: IMediaTelemetryMetrics['props'];
   } = $props();
   let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
   const duplicateSrc = ['currentSrc', 'src'];
@@ -35,8 +35,8 @@
         <table class="w-full">
           <caption class="bc-invert ta-l">Events</caption>
           <tbody>
-            {#each Object.entries(events) as [name, value] (name)}
-              <MediaEvent {name} {value} />
+            {#each events as event (event.name)}
+              <MediaEvent metric={event} />
             {/each}
           </tbody>
         </table>

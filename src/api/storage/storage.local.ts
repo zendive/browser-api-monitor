@@ -35,7 +35,7 @@ import type {
   ISharedWorkerPortStartMetric,
   ISharedWorkerTelemetryMetric,
 } from '../../wrapper/SharedWorkerWrapper.ts';
-import type { IMediaMetrics } from '../../wrapper/MediaWrapper.ts';
+import type { IMediaTelemetryMetrics } from '../../wrapper/MediaWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -227,11 +227,11 @@ export const DEFAULT_CONFIG = {
     order: ESortOrder.DESCENDING,
   },
   sortVideoPanel: {
-    field: <keyof IMediaMetrics> 'firstSeen',
+    field: <keyof IMediaTelemetryMetrics> 'firstSeen',
     order: ESortOrder.ASCENDING,
   },
   sortAudioPanel: {
-    field: <keyof IMediaMetrics> 'firstSeen',
+    field: <keyof IMediaTelemetryMetrics> 'firstSeen',
     order: ESortOrder.ASCENDING,
   },
 };

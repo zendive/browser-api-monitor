@@ -396,7 +396,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           if (traceUtil.shouldPause(methodMetric.traceId)) {
             debugger;
           }
-          (<EventListener> listener).call(this, e);
+          listener.call(this, e);
           eventSelfTime = trim2ms(performance.now() - start);
           methodMetric.events++;
         }

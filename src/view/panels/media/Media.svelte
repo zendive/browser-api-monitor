@@ -4,8 +4,8 @@
   import type { ESortOrder } from '../../../api/const.ts';
   import {
     EMediaType,
-    type IMediaMetrics,
     type IMediaTelemetry,
+    type IMediaTelemetryMetrics,
   } from '../../../wrapper/MediaWrapper.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
@@ -31,13 +31,19 @@
     )
   );
 
-  function updateVideoSort(field: keyof IMediaMetrics, order: ESortOrder) {
+  function updateVideoSort(
+    field: keyof IMediaTelemetryMetrics,
+    order: ESortOrder,
+  ) {
     sortVideoPanel.field = field;
     sortVideoPanel.order = order;
     saveLocalStorage({ sortVideoPanel });
   }
 
-  function updateAudioSort(field: keyof IMediaMetrics, order: ESortOrder) {
+  function updateAudioSort(
+    field: keyof IMediaTelemetryMetrics,
+    order: ESortOrder,
+  ) {
     sortAudioPanel.field = field;
     sortAudioPanel.order = order;
     saveLocalStorage({ sortAudioPanel });

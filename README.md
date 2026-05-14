@@ -121,7 +121,13 @@ To assess web application implementation correctness and to expedite issues disc
 Here is a short list to help you get started; for a full set of make commands, refer to [./Makefile](./Makefile):
 
 ```bash
-make clean install  # install dependencies
-make dev            # build in development mode and watch for changes
-make prod           # build in production mode and make extension.chrome.zip
+git clone https://github.com/zendive/browser-api-monitor.git
+cd browser-api-monitor  # default branch is master
+
+make clean install      # install dependencies
+make dev                # build in development mode and watch for changes
 ```
+
+- navigate to `chrome://extensions/`
+- ensure "Developer mode" is on
+- hit "Load unpacked" and select extension folder

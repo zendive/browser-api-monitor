@@ -6,29 +6,64 @@ import {
   TIME_60FPS_SEC,
 } from '../api/const.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
-import { parseMediaFieldValue } from './shared/util.ts';
+import { trim2ms } from '../api/time.ts';
+import { Fact, type TFact } from './shared/Fact.ts';
+import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import { parseMediaFieldValue, traceUtil } from './shared/util.ts';
 
-type TMediaElement = HTMLVideoElement | HTMLAudioElement;
-interface IMediaModel {
-  el: TMediaElement;
-  metrics: IMediaMetrics;
-  eventListener: (e: Event) => void;
+export interface IMediaTelemetry {
+  total: number;
+  collection: IMediaTelemetryMetrics[];
 }
-
-export enum EMediaType {
-  VIDEO,
-  AUDIO,
-}
-export interface IMediaMetrics {
+export interface IMediaTelemetryMetrics {
   mediaId: string;
   firstSeen: number;
   type: EMediaType;
-  events: { [key: string]: number };
+  events: IMediaEventMetrics[];
   props: { [key: string]: unknown };
 }
-export interface IMediaTelemetry {
-  total: number;
-  collection: IMediaMetrics[];
+export interface IMediaEventMetrics {
+  name: string;
+  calls: number;
+  ael: IMediaAelMetric[];
+  rel: IMediaRelMetric[];
+}
+
+interface IMediaCacheModel {
+  mediaId: string;
+  firstSeen: number;
+  type: EMediaType;
+  events: Map</*event.type*/ string, IMediaEventModel>;
+  props: { [key: string]: unknown };
+  eventCounter: (e: Event) => void;
+}
+interface IMediaEventModel {
+  name: string;
+  calls: number;
+  ael: Map</*traceId*/ string, IMediaAelMetric>;
+  rel: Map</*traceId*/ string, IMediaRelMetric>;
+  eventHandlerLink: WeakMap<
+    /*authored handler*/ EventListenerOrEventListenerObject,
+    {
+      aelTraceId: string;
+      actualHandler: EventListener;
+    }
+  >;
+}
+interface IMediaAelMetric extends ITraceable {
+  calls: number;
+  events: number;
+  eventSelfTime: number | null;
+  canceledCounter: number;
+}
+interface IMediaRelMetric extends ITraceable {
+  calls: number;
+  facts: TFact;
+}
+type TMediaElement = HTMLVideoElement | HTMLAudioElement;
+export enum EMediaType {
+  VIDEO,
+  AUDIO,
 }
 export type TMediaCommand =
   | 'log'
@@ -42,133 +77,320 @@ export type TMediaCommand =
   | 'set-volume'
   | 'set-playbackRate';
 
+export const MediaRelFact = /*@__PURE__*/ (() => ({
+  NOT_FOUND: Fact.define(1 << 0),
+} as const))();
+export const WorkerRELFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [MediaRelFact.NOT_FOUND, {
+      tag: 'N',
+      details: `Listener not found - nothing to remove`,
+    }],
+  ]))();
+
 export class MediaWrapper {
-  #current: Set<TMediaElement> = new Set();
-  #tracked: WeakMap<TMediaElement, IMediaModel> = new WeakMap();
+  #manuallyAdded: Set<TMediaElement> = new Set();
+  #tracked: Set<TMediaElement> = new Set();
+  #cached: WeakMap<TMediaElement, IMediaCacheModel> = new WeakMap();
+
+  addToTelemetry(el: TMediaElement) {
+    this.#manuallyAdded.add(el);
+    this.#cached.getOrInsertComputed(el, (el) => this.#addNewCacheModel(el));
+  }
+
+  removeFromTelemetry(el: TMediaElement) {
+    this.#manuallyAdded.delete(el);
+    this.#cached.delete(el);
+  }
 
   meetMedia(panel: IPanel) {
-    if (!panel.visible) return;
+    if (!panel.visible) {
+      this.#tracked.size && this.#tracked.clear();
+      return;
+    }
 
-    this.#current = new Set(
-      // @ts-expect-error: intent
-      document.querySelectorAll('video,audio') as Set<TMediaElement>,
+    this.#tracked = new Set(this.#manuallyAdded);
+    const mounted: NodeListOf<TMediaElement> = document.querySelectorAll(
+      'video,audio',
     );
-
-    this.#current.forEach((el) => {
-      this.#tracked.getOrInsertComputed(
-        el,
-        (el) => this.#startMonitorMedia(el),
-      );
+    mounted.forEach((el) => {
+      this.#tracked.add(el);
+      this.#cached.getOrInsertComputed(el, (el) => this.#addNewCacheModel(el));
     });
   }
 
   collectMetrics(panel: IPanel): IMediaTelemetry {
-    const collection: IMediaMetrics[] = [];
+    const collection: IMediaTelemetryMetrics[] = [];
 
     if (panel.visible) {
-      this.#current.forEach((el) => {
-        const model = this.#tracked.get(el);
+      this.#tracked.forEach((el) => {
+        const model = this.#cached.get(el);
         if (!model) return;
 
-        this.#collectModelProps(model);
-        collection.push(model.metrics);
+        this.#updateModel(el, model);
+        collection.push({
+          mediaId: model.mediaId,
+          firstSeen: model.firstSeen,
+          type: model.type,
+          events: Array.from(model.events.values()).map((eModel) => ({
+            name: eModel.name,
+            calls: eModel.calls,
+            ael: Array.from(eModel.ael.values()),
+            rel: Array.from(eModel.rel.values()),
+          })),
+          props: model.props,
+        });
       });
     }
 
     return {
-      total: this.#current.size,
+      total: this.#tracked.size,
       collection,
     };
   }
 
   runCommand(o: IMsgMediaCommand) {
-    const model = this.#getModelByMediaId(o.mediaId);
-    if (!model || !document.contains(model.el)) {
-      return;
-    }
+    const el = this.#getElementByMediaId(o.mediaId);
+    if (!el || !document.contains(el)) return;
 
     if (o.cmd === 'log') {
-      console.log(model.el);
+      console.log(el);
     } else if (o.cmd === 'locate') {
-      model.el.scrollIntoView({
+      el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'center',
       });
     } else if (o.cmd === 'load') {
-      model.el.load();
+      el.load();
     } else if (o.cmd === 'pause') {
-      model.el.pause();
+      el.pause();
     } else if (o.cmd === 'play') {
-      model.el.play().catch(() => {});
+      el.play().catch(() => {});
     } else if (o.cmd === 'frame-backward') {
-      model.el.currentTime -= TIME_60FPS_SEC;
+      el.currentTime -= TIME_60FPS_SEC;
     } else if (o.cmd === 'frame-forward') {
-      model.el.currentTime += TIME_60FPS_SEC;
+      el.currentTime += TIME_60FPS_SEC;
     } else if (o.cmd === 'toggle-boolean' && typeof o.field === 'string') {
       if (isMediaFieldWritable(o.field)) {
-        model.el[o.field] = !model.el[o.field];
+        el[o.field] = !el[o.field];
       }
     } else if (
       o.cmd === 'set-volume' &&
-      typeof (o.value) === 'number' &&
+      typeof o.value === 'number' &&
       Number.isFinite(o.value)
     ) {
-      model.el.volume = o.value;
+      el.volume = o.value;
     } else if (
       o.cmd === 'set-playbackRate' &&
-      typeof (o.value) === 'number' &&
+      typeof o.value === 'number' &&
       Number.isFinite(o.value)
     ) {
-      model.el.playbackRate = o.value;
+      el.playbackRate = o.value;
     }
   }
 
-  #startMonitorMedia(el: TMediaElement): IMediaModel {
-    const events: IMediaMetrics['events'] = {};
-    const props: IMediaMetrics['props'] = {};
-    const rv = {
-      el,
-      metrics: {
-        mediaId: crypto.randomUUID(),
-        firstSeen: performance.now(),
-        type: el instanceof HTMLVideoElement
-          ? EMediaType.VIDEO
-          : EMediaType.AUDIO,
-        events,
-        props,
-      },
-      eventListener: function (this: typeof events, e: Event) {
-        this[e.type]++;
+  #addNewCacheModel(el: TMediaElement): IMediaCacheModel {
+    const modelType = (el instanceof HTMLVideoElement)
+      ? EMediaType.VIDEO
+      : EMediaType.AUDIO;
+    const events: IMediaCacheModel['events'] = new Map();
+    const model: IMediaCacheModel = {
+      mediaId: crypto.randomUUID(),
+      firstSeen: performance.now(),
+      type: modelType,
+      events,
+      props: {},
+      eventCounter: function ApiMonitorMediaEventCounter(this: typeof events, e: Event) {
+        const em = this.get(e.type);
+        em && em.calls++;
       }.bind(events),
     };
 
     for (const event of MEDIA_EVENTS) {
-      events[event] = 0;
-      el.addEventListener(event, rv.eventListener);
+      events.set(event, {
+        name: event,
+        calls: 0,
+        ael: new Map(),
+        rel: new Map(),
+        eventHandlerLink: new WeakMap(),
+      });
+      el.addEventListener(event, model.eventCounter);
     }
 
-    return rv;
+    this.#wrapAddEventListener(el, events);
+    this.#wrapRemoveEventListener(el, events);
+
+    return model;
   }
 
-  #collectModelProps(model: IMediaModel) {
+  #wrapAddEventListener(
+    el: TMediaElement,
+    events: IMediaCacheModel['events'],
+  ) {
+    const nativeAel = el.addEventListener.bind(el);
+    el.addEventListener = function ApiMonitorMediaAddEventListener(
+      this: MediaWrapper,
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions,
+    ): void {
+      const eventModel = events.get(type);
+      if (!eventModel) {
+        // newer or unsupported events
+        nativeAel(type, listener, options);
+        return;
+      }
+
+      const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+      const methodMetric = eventModel.ael.getOrInsertComputed(
+        callstack.traceId,
+        () => ({
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          canceledCounter: 0,
+        }),
+      );
+
+      methodMetric.calls++;
+
+      const handlerLink = eventModel.eventHandlerLink.get(listener);
+      let selfHandler = handlerLink?.actualHandler;
+
+      if (!selfHandler && typeof listener === 'function') {
+        selfHandler = function (e: Event) {
+          let eventSelfTime: null | number = null;
+          const start = performance.now();
+
+          if (traceUtil.shouldPass(methodMetric.traceId)) {
+            if (traceUtil.shouldPause(methodMetric.traceId)) {
+              debugger;
+            }
+            listener.call(el, e);
+
+            eventSelfTime = trim2ms(performance.now() - start);
+            methodMetric.events++;
+          }
+
+          methodMetric.eventSelfTime = eventSelfTime;
+        };
+      } else if (
+        !selfHandler &&
+        listener &&
+        typeof listener === 'object' &&
+        'handleEvent' in listener &&
+        typeof listener.handleEvent === 'function'
+      ) {
+        selfHandler = function (e: Event) {
+          let eventSelfTime: null | number = null;
+          const start = performance.now();
+
+          if (traceUtil.shouldPass(methodMetric.traceId)) {
+            if (traceUtil.shouldPause(methodMetric.traceId)) {
+              debugger;
+            }
+            listener.handleEvent(e);
+
+            eventSelfTime = trim2ms(performance.now() - start);
+            methodMetric.events++;
+          }
+
+          methodMetric.eventSelfTime = eventSelfTime;
+        };
+      }
+
+      if (selfHandler) {
+        eventModel.eventHandlerLink.set(listener, {
+          actualHandler: selfHandler,
+          aelTraceId: methodMetric.traceId,
+        });
+        nativeAel(type, selfHandler, options);
+      }
+    };
+  }
+
+  #wrapRemoveEventListener(
+    el: TMediaElement,
+    events: IMediaCacheModel['events'],
+  ) {
+    const nativeRel = el.removeEventListener.bind(el);
+    el.removeEventListener = function ApiMonitorMediaRemoveEventListener(
+      this: MediaWrapper,
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions,
+    ): void {
+      const eventModel = events.get(type);
+      if (!eventModel) {
+        // newer or unsupported events
+        nativeRel(type, listener, options);
+        return;
+      }
+
+      const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+      const methodMetric = eventModel.rel.getOrInsertComputed(
+        callstack.traceId,
+        () => ({
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          facts: Fact.pure,
+        }),
+      );
+
+      methodMetric.calls++;
+
+      const aelRecord = eventModel.eventHandlerLink.get(listener);
+
+      if (aelRecord) {
+        if (traceUtil.shouldPass(methodMetric.traceId)) {
+          if (traceUtil.shouldPause(methodMetric.traceId)) {
+            debugger;
+          }
+          nativeRel(type, aelRecord.actualHandler, options);
+
+          // open to suggestions
+          // eventModel.eventHandlerLink.delete(listener);
+
+          const aelMethodMetric = eventModel.ael.get(aelRecord.aelTraceId);
+          if (aelMethodMetric) {
+            aelMethodMetric.canceledCounter++;
+          }
+        }
+      } else {
+        methodMetric.facts = Fact.assign(
+          methodMetric.facts,
+          MediaRelFact.NOT_FOUND,
+        );
+      }
+    };
+  }
+
+  #updateModel(el: TMediaElement, model: IMediaCacheModel) {
     for (const prop of MEDIA_FIELDS) {
-      if (prop in model.el) {
-        model.metrics.props[prop] = parseMediaFieldValue(
+      if (prop in el) {
+        model.props[prop] = parseMediaFieldValue(
           prop,
-          model.el[prop as keyof TMediaElement],
+          el[prop as keyof TMediaElement],
         );
       }
     }
   }
 
-  #getModelByMediaId(mediaId: string) {
-    for (const el of this.#current) {
-      const model = this.#tracked.get(el);
+  #getElementByMediaId(mediaId: string): TMediaElement | null {
+    for (const el of this.#tracked) {
+      const model = this.#cached.get(el);
 
-      if (model && model.metrics.mediaId === mediaId) {
-        return model;
+      if (model && model.mediaId === mediaId) {
+        return el;
       }
     }
+
+    return null;
   }
 }

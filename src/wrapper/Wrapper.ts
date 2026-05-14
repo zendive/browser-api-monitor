@@ -175,3 +175,20 @@ export function runTimerCommand(
 ) {
   apiTimer.runCommand(...args);
 }
+
+export function exposeConsoleInterface() {
+  Object.assign(console, {
+    apiMonitor: {
+      observeMedia(el: HTMLMediaElement) {
+        if (el instanceof HTMLMediaElement) {
+          apiMedia.addToTelemetry(el);
+        }
+      },
+      unobserveMedia(el: HTMLMediaElement) {
+        if (el instanceof HTMLMediaElement) {
+          apiMedia.removeFromTelemetry(el);
+        }
+      },
+    },
+  });
+}

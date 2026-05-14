@@ -1,12 +1,17 @@
 <script lang="ts">
+  import type { IMediaEventMetrics } from '../../../wrapper/MediaWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
 
-  let { name, value }: { name: string; value: unknown } = $props();
+  let { metric }: { metric: IMediaEventMetrics } = $props();
 </script>
 
-<tr class:isPassive={0 === value} class:isActive={0 !== value}>
-  <td class="name">{name}</td>
-  <td class="value"><Variable {value} /></td>
+<tr class:isPassive={0 === metric.calls} class:isActive={0 !== metric.calls}>
+  <td class="ta-r">
+    {#if metric.ael.length || metric.rel.length}ƒ
+    {/if}
+    {metric.name}
+  </td>
+  <td class="ta-l value"><Variable value={metric.calls} /></td>
 </tr>
 
 <style lang="scss">
@@ -17,11 +22,7 @@
   .isActive {
     font-weight: bold;
   }
-  .name {
-    text-align: right;
-  }
   .value {
-    text-align: left;
     margin-left: 1rem;
   }
 </style>
