@@ -1,60 +1,68 @@
-## <img src="./public/img/icon.svg" style="width: 2.5rem; vertical-align: middle;"/> API Monitor - Chrome Developer Tools extension
+## <img src="./public/img/icon.svg" style="width: 2.5rem; vertical-align: middle;"/> API Monitor - Chrome Developer Tools extension - API panel
 
+Inspect scheduled timeouts, animation frames, idle callbacks, eval invocations, media, workers, scheduler API.
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
-
-Chrome Developer Tools `API 🔎` panel tries to gather every bit of useful information from the usage of certain native functions that are prone to human errors, or are difficult to spot intuitively.
 
 ### Motivation
 
-To assess Web Application implementation correctness and expedite issues discovery. [See examples](./doc/issues.log.md).
+To assess web application implementation correctness and to expedite issues discovery by gathering every bit of useful information from the usage of certain native APIs that are prone to human errors that are otherwise difficult to spot intuitively, [for example](./doc/issues.log.md).
 
 ### Specification
- 
+
 - Gather callstack that is used to call every wrapped function:
-  - **short** - just the nearest initiator.
-  - **full** - from the root to the nearest initiator (from left to right).
+  - Identify the origin of the callstack domain.
+  - Allow choosing the length of the collected trace:
+    - **short** - just the nearest initiator (default).
+    - **full** - from the root to the nearest initiator (from left to right).
 
 - Aggregate information about currently scheduled timeouts and intervals.
 
-- Gather details about which terminators are cancelling those scheduled setters:
+- Gather details about which cancellation methods are cancelling those scheduled setters:
   - `setTimeout`, `setInterval`, `requestAnimationFrame`, `requestIdleCallback`.
 
-- Allow to initiate a debugging session by redirecting the code flow to a `debugger` breakpoint right before the callback invocation.
-  - Hit <kbd>F11</kbd> (step inside) **twice** in order to progress into the callback itself.
+- Allow bypassing invocation of a tracked function or its callback, if it has one.
 
-- Allow to bypass (skip) setter's callback, or terminator invocation function.
+- Allow pausing before a tracked function or its callback invocation by redirecting the code flow to a *debugger* breakpoint.
+  - **Once paused**: hit "Step Inside" (<kbd>F11</kbd>) twice.
+  - **Once done**: the safest scenario to exit from the "custom" debugging session, especially if it's a hot path, - is to:
+    - hit "Deactivate breakpoints" (<kbd>Ctrl+F8</kbd>).
+    - hit "Resume script execution" (<kbd>F8</kbd>).
+    - then unset that originaly ordered breakpoint in the `API` panel.
+    - hit "Activate breakpoints" again (return focus to `Sources` panel then <kbd>Ctrl+F8</kbd>).
 
-- Measure callback's execution self-time.
+- Calculate the execution time of an event listener or callback.
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
+  - In extended view mode, show mean, standard deviation, and maximum values.
 
-- Count calls per second (CPS) where applicable.
+- Count calls per second (CPS) where it's rational.
 
-- Detect incorrect timeout argument passed to `setTimeout`, `setInterval`, `requestIdleCallback`, `scheduler.postTask`.
+- Detect when incorrect timeout/delay parameters are passed to `setTimeout`, `setInterval`, `requestIdleCallback`, `scheduler.postTask`.
 
-- Detect terminator function invocation with a handler that is non-positive integer, or of non-existent/elapsed setter.
+- Detect when the cancellation function handler is a non-positive integer, or belongs to a non-existent/elapsed setter.
 
-- Detect timeouts cleared with `clearInterval`, or intervals cleared with `clearTimeout`.
+- Detect when timeouts are cleared with `clearInterval`, or intervals are cleared with `clearTimeout`.
 
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
-  - By default - `off`, cause the fact of wrapping it, excludes the access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
+  - By default - `off`, because the fact of wrapping it excludes access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
 
-- Monitor Worker's methods and event handlers metrics.
-  - Warn if number of active workers exceeds number of available CPU cores.
-    - keep in mind: this extension can't wrap `self.close()` in worker global context (only `terminate()` in top context)
+- Monitor `Worker` and `ShadowWorker` methods' invocations and their metrics.
+  - Allow navigation to a worker source code (if available).
+  - Detect if the instance is not yet garbage-collected.
   - Detect anomalies:
-    - attempt to add already added listener with `addEventListener`.
-    - attempt to remove unknown listener with `removeEventListener`.
+      - Attempt to add an already added listener with `addEventListener`.
+      - Attempt to remove unknown listener with `removeEventListener`.
+      - When the number of created instances exceeds the number of available CPU cores.
+        - Keep in mind: this extension can't wrap `self.close()` in worker global context (only `terminate()` in top context).
 
 - Monitor `scheduler.yield` and `scheduler.postTask`.
   - Calls, delay, priority, aborts, self-time metrics.
 
-- Monitor mounted `video` and `audio` media elements in DOM.
-  - Present control panel with basic media functions.
-  - Show media events and number of times they have been fired.
-  - Show current state of properties.
-  - Allow to toggle the state of changeable boolean properties e.g. `controls`, `preservesPitch`...
-  
-- Prevent the system from going to Sleep state due to user inactivity for a better observational experience. By default - `off`.
+- Monitor mounted `video` and `audio` media elements found in DOM.
+  - Show all media events and track the number of times they have been fired.
+  - Show all properties and their values.
+  - Allow invoking `play`, `pause`, `load`, `scrollIntoView`, seek by frame, change `volume` and `playbackRate`, toggle some boolean properties like `controls`, `preservesPitch`...
+
+- Prevent the system from going to sleep state due to user inactivity for a better observational experience. By default - `off`.
 
 <details>
   <summary> <strong>Wrappable native functions</strong> </summary>
@@ -68,6 +76,9 @@ To assess Web Application implementation correctness and expedite issues discove
   - `cancelAnimationFrame`
 - `requestIdleCallback`
   - `cancelIdleCallback`
+- `scheduler`
+  - `postTask`
+  - `yield`
 - `Worker`
   - `constructor`
   - `terminate`
@@ -76,9 +87,14 @@ To assess Web Application implementation correctness and expedite issues discove
   - `postMessage`
   - `addEventListener`
   - `removeEventListener`
-- `scheduler`
-  - `postTask`
-  - `yield`
+- `SharedWorker`
+  - `constructor`
+  - `onerror`
+  - `port.start`
+  - `port.close`
+  - `port.postMessage`
+  - `port.addEventListener`
+  - `port.removeEventListener`
 
 </details>
 <details>
@@ -92,15 +108,17 @@ To assess Web Application implementation correctness and expedite issues discove
 </details>
 
 > [!NOTE]
-> While measuring performance of your code – consider disabling this extension as it may affect the results.
+> While measuring the performance of your code, kindly consider temporarily disabling this extension, as it may slightly affect the results, or just check the `Dim 3rd parties` checkbox to help you focus on what matters.
 
-### Build requirements
+### Build
 
-- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3`
+#### Requirements
 
-#### Build instructions
+- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run "mirror" static http.server)
 
-Here is a short list to help you get started, for a full set of make commands refer to [./Makefile](./Makefile):
+#### Instructions
+
+Here is a short list to help you get started; for a full set of make commands, refer to [./Makefile](./Makefile):
 
 ```bash
 make clean install  # install dependencies
