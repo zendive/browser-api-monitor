@@ -38,9 +38,10 @@ export function postPort(payload: TMsgOptions) {
   }
 
   if (!port) {
-    port = chrome.tabs.connect(chrome.devtools.inspectedWindow.tabId, {
-      name: APPLICATION_NAME,
-    });
+    port = chrome.tabs.connect(
+      chrome.devtools.inspectedWindow.tabId,
+      { name: APPLICATION_NAME },
+    );
     port?.onDisconnect.addListener(() => void (port = null));
   }
 
@@ -80,7 +81,7 @@ export function listenWindow(
 }
 
 export function postRuntime(payload: TMsgOptions) {
-  chrome.runtime.sendMessage(payload, handleRuntimeMessageResponse);
+  chrome.runtime.sendMessage(payload).catch(handleRuntimeMessageResponse);
 }
 
 export function listenRuntime(callback: (payload: TMsgOptions) => void) {

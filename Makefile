@@ -11,7 +11,7 @@ CHROME_ZIP := "extension.chrome-$(VERSION).zip"
 OUTPUT_DIR := ./public/
 BUILD_DIR := ./public/build/
 BUILD_SCRIPT := ./build.ts
-DEBUGGERs_IN_PROD := 29
+DEBUGGERs_IN_PROD := 32
 
 .PHONY: clean
 clean:

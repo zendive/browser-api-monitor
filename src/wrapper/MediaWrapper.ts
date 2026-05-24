@@ -35,7 +35,7 @@ interface IMediaCacheModel {
   type: EMediaType;
   events: Map</*event.type*/ string, IMediaEventModel>;
   props: { [key: string]: unknown };
-  eventCounter: (e: Event) => void;
+  handleEvent: (e: Event) => void;
 }
 interface IMediaEventModel {
   name: string;
@@ -201,10 +201,13 @@ export class MediaWrapper {
       type: modelType,
       events,
       props: {},
-      eventCounter: function ApiMonitorMediaEventCounter(this: typeof events, e: Event) {
-        const em = this.get(e.type);
+      handleEvent: function ApiMonitorMediaEventCounter(
+        this: IMediaCacheModel,
+        e: Event,
+      ) {
+        const em = this.events.get(e.type);
         em && em.calls++;
-      }.bind(events),
+      },
     };
 
     for (const event of MEDIA_EVENTS) {
@@ -215,7 +218,7 @@ export class MediaWrapper {
         rel: new Map(),
         eventHandlerLink: new WeakMap(),
       });
-      el.addEventListener(event, model.eventCounter);
+      el.addEventListener(event, model);
     }
 
     this.#wrapAddEventListener(el, events);

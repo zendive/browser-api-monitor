@@ -9,13 +9,13 @@ declare module 'svelte/elements' {
 export {};
 
 declare global {
-  let __development__: boolean;
-  let __feat_dev_stats__: boolean;
-  let __app_name__: string;
-  let __app_version__: string;
-  let __home_page__: string;
-  let __release_page__: string;
-  let __mirror__: boolean;
+  const __development__: boolean;
+  const __feat_dev_stats__: boolean;
+  const __app_name__: string;
+  const __app_version__: string;
+  const __home_page__: string;
+  const __release_page__: string;
+  const __mirror__: boolean;
 
   /**
    * Reverse engineered (not complete) callback argument for
