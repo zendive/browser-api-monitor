@@ -114,7 +114,9 @@ To assess web application implementation correctness and to expedite issues disc
 
 #### Requirements
 
-- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run "mirror" static http.server)
+- Linux: [deno v2.7.14](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode)
+  - how to set the specific deno version?
+    - `deno upgrade --version v2.7.14`
 
 #### Instructions
 
