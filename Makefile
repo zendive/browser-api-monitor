@@ -20,6 +20,7 @@ clean:
 .PHONY: install
 install:
 	deno install
+	deno audit
 
 .PHONY: update
 update:
