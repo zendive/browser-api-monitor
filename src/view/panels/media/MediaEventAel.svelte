@@ -1,49 +1,39 @@
 <script lang="ts">
+  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import {
-    type IWorkerAelMetric,
-    WorkerAelFacts,
-  } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
+  import type { IMediaAelMetric } from '../../../wrapper/MediaWrapper.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { metrics }: { metrics: IWorkerAelMetric[] } = $props();
-  const { sortWorkerAel } = useConfigState();
+  let { metrics }: { metrics: IMediaAelMetric[] } = $props();
+  const { sortMediaAel } = useConfigState();
   const sortedMetrics = $derived.by(() =>
-    metrics.toSorted(
-      compareByFieldOrder(sortWorkerAel.field, sortWorkerAel.order),
-    )
+    metrics.toSorted(compareByFieldOrder(
+      sortMediaAel.field,
+      sortMediaAel.order,
+    ))
   );
-  let isExpanded = $state(true);
 
-  function updateSort(field: keyof IWorkerAelMetric, order: ESortOrder) {
-    sortWorkerAel.field = field;
-    sortWorkerAel.order = order;
-    saveLocalStorage({ sortWorkerAel });
+  function updateSort(field: keyof IMediaAelMetric, order: ESortOrder) {
+    sortMediaAel.field = field;
+    sortMediaAel.order = order;
+    saveLocalStorage({ sortMediaAel });
   }
 </script>
 
 {#if sortedMetrics.length}
   <table>
-    <thead class="sticky-header">
+    <thead>
       <tr>
         <th class="w-full">
-          <CollapseExpand
-            class="bc-invert"
-            {isExpanded}
-            onClick={() => void (isExpanded = !isExpanded)}
-          />
           <ColumnSortable
-            sort={sortWorkerAel}
+            sort={sortMediaAel}
             by="firstSeen"
             update={updateSort}
           >
@@ -52,29 +42,21 @@
         </th>
         <th class="ta-c">
           <ColumnSortable
-            sort={sortWorkerAel}
+            sort={sortMediaAel}
             by="eventSelfTime"
             update={updateSort}
           >Self</ColumnSortable>
         </th>
-        <th class="ta-c" title="Calls per second">CPS</th>
         <th class="ta-c">
           <ColumnSortable
-            sort={sortWorkerAel}
+            sort={sortMediaAel}
             by="events"
             update={updateSort}
           >Events</ColumnSortable>
         </th>
         <th class="ta-c">
           <ColumnSortable
-            sort={sortWorkerAel}
-            by="facts"
-            update={updateSort}
-          ><span class="icon -facts"></span></ColumnSortable>
-        </th>
-        <th class="ta-c">
-          <ColumnSortable
-            sort={sortWorkerAel}
+            sort={sortMediaAel}
             by="calls"
             update={updateSort}
           >Called</ColumnSortable>
@@ -86,7 +68,7 @@
       </tr>
     </thead>
 
-    <tbody class:d-none={!isExpanded}>
+    <tbody>
       {#each sortedMetrics as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">
@@ -95,14 +77,7 @@
           <td class="ta-r">
             <CellSelfTime time={metric.eventSelfTime} />
           </td>
-          <td class="ta-c">{metric.eventsCps || undefined}</td>
           <td class="ta-c"><Variable value={metric.events} /></td>
-          <td class="ta-c">
-            <CellFacts
-              facts={metric.facts}
-              factsMap={WorkerAelFacts}
-            />
-          </td>
           <td class="ta-c" title="&lt;called&gt; [&lt;removed&gt;]">
             <Variable value={metric.calls} />
             {#if metric.canceledCounter}

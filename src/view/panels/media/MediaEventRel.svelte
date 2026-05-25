@@ -1,49 +1,42 @@
 <script lang="ts">
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellBypass from '../shared/CellBypass.svelte';
+  import CellCallstack from '../shared/CellCallstack.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
-  import {
-    type IWorkerRelMetric,
-    WorkerRELFacts,
-  } from '../../../wrapper/WorkerWrapper.ts';
   import type { ESortOrder } from '../../../api/const.ts';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import {
+    type IMediaRelMetric,
+    MediaRelFacts,
+  } from '../../../wrapper/MediaWrapper.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
 
-  let { metrics }: { metrics: IWorkerRelMetric[] } = $props();
-  const { sortWorkerRel } = useConfigState();
+  let { metrics }: { metrics: IMediaRelMetric[] } = $props();
+  const { sortMediaRel } = useConfigState();
   const sortedMetrics = $derived.by(() =>
     metrics.toSorted(compareByFieldOrder(
-      sortWorkerRel.field,
-      sortWorkerRel.order,
+      sortMediaRel.field,
+      sortMediaRel.order,
     ))
   );
-  let isExpanded = $state(true);
 
-  function updateSort(field: keyof IWorkerRelMetric, order: ESortOrder) {
-    sortWorkerRel.field = field;
-    sortWorkerRel.order = order;
-    saveLocalStorage({ sortWorkerRel });
+  function updateSort(field: keyof IMediaRelMetric, order: ESortOrder) {
+    sortMediaRel.field = field;
+    sortMediaRel.order = order;
+    saveLocalStorage({ sortMediaRel });
   }
 </script>
 
 {#if sortedMetrics.length}
   <table>
-    <thead class="sticky-header">
+    <thead>
       <tr>
         <th class="w-full">
-          <CollapseExpand
-            class="bc-invert"
-            {isExpanded}
-            onClick={() => void (isExpanded = !isExpanded)}
-          />
           <ColumnSortable
-            sort={sortWorkerRel}
+            sort={sortMediaRel}
             by="firstSeen"
             update={updateSort}
           >
@@ -52,7 +45,7 @@
         </th>
         <th class="ta-c">
           <ColumnSortable
-            sort={sortWorkerRel}
+            sort={sortMediaRel}
             by="facts"
             update={updateSort}
           >
@@ -61,7 +54,7 @@
         </th>
         <th class="ta-c">
           <ColumnSortable
-            sort={sortWorkerRel}
+            sort={sortMediaRel}
             by="calls"
             update={updateSort}
           >Called</ColumnSortable>
@@ -73,7 +66,7 @@
       </tr>
     </thead>
 
-    <tbody class:d-none={!isExpanded}>
+    <tbody>
       {#each sortedMetrics as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">
@@ -82,7 +75,7 @@
           <td class="ta-c">
             <CellFacts
               facts={metric.facts}
-              factsMap={WorkerRELFacts}
+              factsMap={MediaRelFacts}
             />
           </td>
           <td class="ta-c"><Variable value={metric.calls} /></td>

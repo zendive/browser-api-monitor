@@ -9,7 +9,7 @@
   import Variable from '../../shared/Variable.svelte';
   import type { ESortOrder } from '../../../api/const.ts';
   import type { ISharedWorkerPortAelMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
-  import { WorkerAELFacts } from '../../../wrapper/WorkerWrapper.ts';
+  import { WorkerAelFacts } from '../../../wrapper/WorkerWrapper.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
@@ -102,7 +102,7 @@
           <td class="ta-c">
             <CellFacts
               facts={metric.facts}
-              factsMap={WorkerAELFacts}
+              factsMap={WorkerAelFacts}
             />
           </td>
           <td class="ta-c" title="&lt;called&gt; [&lt;removed&gt;]">

@@ -95,22 +95,22 @@ export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
         `Number of online instances exceeds number of available CPUs [${HARDWARE_CONCURRENCY}]`,
     }],
   ]))();
-export const WorkerAELFact = /*@__PURE__*/ (() => ({
+export const WorkerAelFact = /*@__PURE__*/ (() => ({
   DUPLICATE_ADDITION: Fact.define(1 << 0),
 } as const))();
-export const WorkerAELFacts = /*@__PURE__*/ (() =>
+export const WorkerAelFacts = /*@__PURE__*/ (() =>
   Fact.map([
-    [WorkerAELFact.DUPLICATE_ADDITION, {
+    [WorkerAelFact.DUPLICATE_ADDITION, {
       tag: 'A',
       details: `Addition ignored - listener already in the list of events`,
     }],
   ]))();
-export const WorkerRELFact = /*@__PURE__*/ (() => ({
+export const WorkerRelFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
 export const WorkerRELFacts = /*@__PURE__*/ (() =>
   Fact.map([
-    [WorkerRELFact.NOT_FOUND, {
+    [WorkerRelFact.NOT_FOUND, {
       tag: 'N',
       details: `Listener not found - nothing to remove`,
     }],
@@ -377,7 +377,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     if (this.#eventHandlerLink.has(<EventListener> listener)) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerAELFact.DUPLICATE_ADDITION,
+        WorkerAelFact.DUPLICATE_ADDITION,
       );
       return;
     }
@@ -478,7 +478,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     } else {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerRELFact.NOT_FOUND,
+        WorkerRelFact.NOT_FOUND,
       );
     }
   }

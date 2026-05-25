@@ -35,7 +35,11 @@ import type {
   ISharedWorkerPortStartMetric,
   ISharedWorkerTelemetryMetric,
 } from '../../wrapper/SharedWorkerWrapper.ts';
-import type { IMediaTelemetryMetrics } from '../../wrapper/MediaWrapper.ts';
+import type {
+  IMediaAelMetric,
+  IMediaRelMetric,
+  IMediaTelemetryMetrics,
+} from '../../wrapper/MediaWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
@@ -182,11 +186,11 @@ export const DEFAULT_CONFIG = {
     field: <keyof IWorkerOnErrorMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
-  sortWorkerAEL: {
+  sortWorkerAel: {
     field: <keyof IWorkerAelMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
-  sortWorkerREL: {
+  sortWorkerRel: {
     field: <keyof IWorkerRelMetric> 'firstSeen',
     order: ESortOrder.DESCENDING,
   },
@@ -233,6 +237,14 @@ export const DEFAULT_CONFIG = {
   sortAudioPanel: {
     field: <keyof IMediaTelemetryMetrics> 'firstSeen',
     order: ESortOrder.ASCENDING,
+  },
+  sortMediaAel: {
+    field: <keyof IMediaAelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortMediaRel: {
+    field: <keyof IMediaRelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
   },
 };
 const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;

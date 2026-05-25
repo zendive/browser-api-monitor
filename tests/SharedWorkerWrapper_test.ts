@@ -7,7 +7,7 @@ import {
 } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import './browserPolyfill.ts';
-import { WorkerAELFact, WorkerRELFact } from '../src/wrapper/WorkerWrapper.ts';
+import { WorkerAelFact, WorkerRelFact } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
 import { wait } from '../src/api/time.ts';
 import {
@@ -63,14 +63,14 @@ describe('WorkerWrapper', () => {
       sw.port.addEventListener('message', NOOP);
     }
 
-    expect(getPortAelFact()).toBe(WorkerAELFact.DUPLICATE_ADDITION);
+    expect(getPortAelFact()).toBe(WorkerAelFact.DUPLICATE_ADDITION);
   });
 
   test('port.Rel facts', () => {
     sw = NewSharedWorker(codeBlob);
     sw.port.removeEventListener('message', NOOP);
 
-    expect(getPortRelFact()).toBe(WorkerRELFact.NOT_FOUND);
+    expect(getPortRelFact()).toBe(WorkerRelFact.NOT_FOUND);
   });
 });
 

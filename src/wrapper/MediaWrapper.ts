@@ -50,13 +50,13 @@ interface IMediaEventModel {
     }
   >;
 }
-interface IMediaAelMetric extends ITraceable {
+export interface IMediaAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   canceledCounter: number;
 }
-interface IMediaRelMetric extends ITraceable {
+export interface IMediaRelMetric extends ITraceable {
   calls: number;
   facts: TFact;
 }
@@ -77,10 +77,10 @@ export type TMediaCommand =
   | 'set-volume'
   | 'set-playbackRate';
 
-export const MediaRelFact = /*@__PURE__*/ (() => ({
+const MediaRelFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
-export const WorkerRELFacts = /*@__PURE__*/ (() =>
+export const MediaRelFacts = /*@__PURE__*/ (() =>
   Fact.map([
     [MediaRelFact.NOT_FOUND, {
       tag: 'N',

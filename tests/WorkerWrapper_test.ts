@@ -12,9 +12,9 @@ import {
   collectWorkerHistory,
   forTest_clearWorkerHistory,
   HARDWARE_CONCURRENCY,
-  WorkerAELFact,
+  WorkerAelFact,
   WorkerFact,
-  WorkerRELFact,
+  WorkerRelFact,
 } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
 import { wait } from '../src/api/time.ts';
@@ -74,14 +74,14 @@ describe('WorkerWrapper', () => {
       w.addEventListener('message', NOOP);
     }
 
-    expect(getAELFact()).toBe(WorkerAELFact.DUPLICATE_ADDITION);
+    expect(getAELFact()).toBe(WorkerAelFact.DUPLICATE_ADDITION);
   });
 
   test('rEL facts', () => {
     w = NewWorker(codeBlob);
     w.removeEventListener('message', NOOP);
 
-    expect(getRELFact()).toBe(WorkerRELFact.NOT_FOUND);
+    expect(getRELFact()).toBe(WorkerRelFact.NOT_FOUND);
   });
 });
 

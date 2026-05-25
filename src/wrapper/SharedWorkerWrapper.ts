@@ -8,7 +8,7 @@ import {
 import { TraceUtil } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { WorkerAELFact, WorkerRELFact } from './WorkerWrapper.ts';
+import { WorkerAelFact, WorkerRelFact } from './WorkerWrapper.ts';
 import { NOOP } from '../api/const.ts';
 
 export interface ISharedWorkerTelemetry {
@@ -339,7 +339,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     if (this.#eventHandlerLink.has(<EventListener> listener)) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerAELFact.DUPLICATE_ADDITION,
+        WorkerAelFact.DUPLICATE_ADDITION,
       );
       return;
     }
@@ -444,7 +444,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     } else {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerRELFact.NOT_FOUND,
+        WorkerRelFact.NOT_FOUND,
       );
     }
   }

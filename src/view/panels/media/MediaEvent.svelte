@@ -3,11 +3,15 @@
   import Variable from '../../shared/Variable.svelte';
 
   let { metric }: { metric: IMediaEventMetrics } = $props();
+  const hasListeners = $derived.by(() =>
+    metric.ael.length || metric.rel.length
+  );
 </script>
 
 <tr class:isPassive={0 === metric.calls} class:isActive={0 !== metric.calls}>
   <td class="ta-r">
-    {#if metric.ael.length || metric.rel.length}ƒ
+    {#if hasListeners}
+      <strong>ƒ</strong>
     {/if}
     {metric.name}
   </td>
