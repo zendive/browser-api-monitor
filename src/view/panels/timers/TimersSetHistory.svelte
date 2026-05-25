@@ -89,7 +89,7 @@
   <div
     id={popoverId}
     popover="hint"
-    class="popover-terminators"
+    class="metrics-popover"
     class:-empty={terminators?.length === 0}
     ontoggle={tph.toggle}
   >

@@ -69,7 +69,7 @@
     <tbody>
       {#each sortedMetrics as metric (metric.traceId)}
         <tr class="t-zebra">
-          <td class="wb-all">
+          <td class="ta-l wb-all">
             <CellCallstack trace={metric.trace} />
           </td>
           <td class="ta-c">

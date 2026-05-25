@@ -68,6 +68,7 @@
     cursor: pointer;
   }
   .value {
+    padding-left: 0.25rem;
     word-break: break-all;
   }
 </style>

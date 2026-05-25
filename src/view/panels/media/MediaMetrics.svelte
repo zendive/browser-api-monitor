@@ -36,7 +36,7 @@
           <caption class="bc-invert ta-l">Events</caption>
           <tbody>
             {#each events as event (event.name)}
-              <MediaEvent metric={event} />
+              <MediaEvent {mediaId} metric={event} />
             {/each}
           </tbody>
         </table>

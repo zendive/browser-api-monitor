@@ -120,7 +120,7 @@ th,
   vertical-align: middle;
 }
 
-.popover-terminators {
+.metrics-popover {
   position-area: block-end span-all;
   max-height: 10rem;
   background-color: var(--bg-popover);
