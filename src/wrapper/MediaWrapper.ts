@@ -151,7 +151,7 @@ export class MediaWrapper {
 
   runCommand(o: IMsgMediaCommand) {
     const el = this.#getElementByMediaId(o.mediaId);
-    if (!el || !document.contains(el)) return;
+    if (!el) return;
 
     if (o.cmd === 'log') {
       console.log(el);
