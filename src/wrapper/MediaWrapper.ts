@@ -100,7 +100,6 @@ export class MediaWrapper {
 
   removeFromTelemetry(el: TMediaElement) {
     this.#manuallyAdded.delete(el);
-    this.#cached.delete(el);
   }
 
   meetMedia(panel: IPanel) {
