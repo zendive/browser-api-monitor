@@ -179,14 +179,18 @@ export function runTimerCommand(
 export function exposeConsoleInterface() {
   Object.assign(console, {
     apiMonitor: {
-      observeMedia(el: HTMLMediaElement) {
+      observeMedia(el: unknown) {
         if (el instanceof HTMLMediaElement) {
           apiMedia.addToTelemetry(el);
+        } else {
+          console.error(`HTMLMediaElement expected`);
         }
       },
-      unobserveMedia(el: HTMLMediaElement) {
+      unobserveMedia(el: unknown) {
         if (el instanceof HTMLMediaElement) {
           apiMedia.removeFromTelemetry(el);
+        } else {
+          console.error(`HTMLMediaElement expected`);
         }
       },
     },

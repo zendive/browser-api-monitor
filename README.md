@@ -63,12 +63,21 @@ To assess web application implementation correctness and to expedite issues disc
   - Allow invoking `play`, `pause`, `load`, `scrollIntoView`, seek by frame, change `volume` and `playbackRate`, toggle  properties like `controls`, `preservesPitch` etc.
   - Scan for mounted media.
   - Observe custom media element:
-    ```javascript
-      const el = document.createElement('video');
-      console.apiMonitor?.observeMedia?.(el);
-      el.addEventListener('pause', ()=> {});
-      // ...
-      console.apiMonitor?.unobserveMedia?.(el);
+    ```typescript
+    declare global {
+      interface Console {
+        apiMonitor?: {
+          observeMedia?: (el: HTMLMediaElement) => void;
+          unobserveMedia?: (el: HTMLMediaElement) => void;
+        }
+      }
+    }
+    
+    const el = document.createElement('video');
+    console.apiMonitor?.observeMedia?.(el);
+    el.addEventListener('pause', ()=> {});
+    // ...
+    console.apiMonitor?.unobserveMedia?.(el);
     ```
     - Detect usage of `addEventListener` and `removeEventListener` methods.
 
