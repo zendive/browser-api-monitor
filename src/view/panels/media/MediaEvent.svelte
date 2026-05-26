@@ -60,6 +60,7 @@
     button {
       color: unset;
       padding: 0;
+      font-size: 100%;
     }
   }
 </style>
