@@ -57,10 +57,20 @@ To assess web application implementation correctness and to expedite issues disc
 - Monitor `scheduler.yield` and `scheduler.postTask`.
   - Calls, delay, priority, aborts, self-time metrics.
 
-- Monitor mounted `video` and `audio` media elements found in DOM.
+- Monitor `video` and `audio` elements.
   - Show all media events and track the number of times they have been fired.
   - Show all properties and their values.
-  - Allow invoking `play`, `pause`, `load`, `scrollIntoView`, seek by frame, change `volume` and `playbackRate`, toggle some boolean properties like `controls`, `preservesPitch`...
+  - Allow invoking `play`, `pause`, `load`, `scrollIntoView`, seek by frame, change `volume` and `playbackRate`, toggle  properties like `controls`, `preservesPitch` etc.
+  - Scan for mounted media.
+  - Observe custom media element:
+    ```javascript
+      const el = document.createElement('video');
+      console.apiMonitor?.observeMedia?.(el);
+      el.addEventListener('pause', ()=> {});
+      // ...
+      console.apiMonitor?.unobserveMedia?.(el);
+    ```
+    - Detect usage of `addEventListener` and `removeEventListener` methods.
 
 - Prevent the system from going to sleep state due to user inactivity for a better observational experience. By default - `off`.
 
