@@ -76,7 +76,7 @@
   dismissable={false}
   title="Attention"
 >
-  <div>Tab reload required to continue live inspection</div>
+  <div>Page reload required to continue live inspection</div>
 </Alert>
 
 <Alert

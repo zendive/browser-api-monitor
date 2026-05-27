@@ -122,7 +122,7 @@
   bind:this={reloadMessageEl}
   dismissable={false}
   title="Attention"
->Tab reload required</Alert>
+>Page reload required</Alert>
 
 <style lang="scss">
   #toggle-panels-menu {

@@ -1,0 +1,88 @@
+@startuml
+
+actor User
+participant csMain [
+  =cs-main
+  ----
+  content script
+  MAIN world
+]
+participant csIsolated [
+  =cs-isolated
+  ----
+  content script
+  ISOLATED world
+]
+participant Devtools [
+  =DevTools
+]
+participant Panel [
+  ="API" Panel
+  ----
+  DevTools iframe
+]
+
+== Injected on "document_start" ==
+rnote over csMain: runs first
+rnote over csIsolated: runs second
+group establish common BroadcastChannel
+  csIsolated -> csMain: TUNE_CHANNEL
+  csMain -> csIsolated: TUNE_CHANNEL_CONFIRMED
+end
+csIsolated -> csMain: CONFIG_SESSION
+alt if panel was shown and is not paused\n- happens when page reloaded while DevTools open
+  csIsolated -> csMain: START_OBSERVE
+end
+rnote over csIsolated: Serve as a message relay\nbetween runtime and cs-main
+alt if local storage changed
+  csIsolated -> csMain: CONFIG
+end
+alt if session storage changed
+  csIsolated -> csMain: SESSION
+end
+csIsolated -> Panel: CONTENT_SCRIPT_LOADED
+
+== DevTools opened ==
+User -> Devtools: Open Devtools
+rnote over Devtools: Create Panel
+
+== DevTools "API" panel selected ==
+User -> Panel: Select Panel
+rnote over Panel: Create and mount
+Devtools -> csMain: START_OBSERVE
+loop untill STOP_OBSERVE
+  alt for the first time or in case of receiving bad TELEMETRY_DELTA
+    csMain -> Panel: TELEMETRY
+  else
+    csMain -> Panel: TELEMETRY_DELTA
+  end
+  Panel -> csMain: TELEMETRY_ACKNOWLEDGED
+end
+
+Panel -> csIsolated: CONFIRM_INJECTION
+alt
+  csIsolated -> Panel: INJECTION_CONFIRMED
+else if there is no response for X seconds\n- happens when content script changes in dev mode
+  rnote over Panel: Page reload required
+end
+loop read local storage\nevery X seconds
+  alt if exception
+    rnote over Panel: Assume extension was updated\nand Devtools reload required
+  end
+end
+
+== Commands triggered via UI (not in particular order) ==
+group on toggle pause button
+  Panel --> csMain: START_OBSERVE
+  Panel --> csMain: STOP_OBSERVE
+end
+Panel --> csMain: TIMER_COMMAND
+Panel --> csMain: MEDIA_COMMAND
+
+== When another DevTools panel selected and "API" panel becomes hidden ==
+Devtools -> csMain: STOP_OBSERVE
+
+== On "API" Panel "Reload frame" or when DevTools closed ==
+Panel -> csMain: STOP_OBSERVE
+
+@enduml

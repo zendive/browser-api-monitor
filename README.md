@@ -3,6 +3,55 @@
 Inspect scheduled timeouts, animation frames, idle callbacks, eval invocations, media, workers, scheduler API.
 - Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
+### Sneak peek
+<details>
+  <summary> <strong>Screenshots...</strong> </summary>
+
+![screenshot](./doc/screenshot-01.png)
+![screenshot](./doc/screenshot-02.png)
+![screenshot](./doc/screenshot-03.png)
+![screenshot](./doc/screenshot-04.png)
+</details>
+
+<details>
+  <summary> <strong>List of monitored native APIs...</strong> </summary>
+
+- `eval`
+- `setTimeout`
+  - `clearTimeout`
+- `setInterval`
+  - `clearInterval`
+- `requestAnimationFrame`
+  - `cancelAnimationFrame`
+- `requestIdleCallback`
+  - `cancelIdleCallback`
+- `scheduler`
+  - `postTask`
+  - `yield`
+- `Worker`
+  - `constructor`
+  - `terminate`
+  - `onmessage`
+  - `onerror`
+  - `postMessage`
+  - `addEventListener`
+  - `removeEventListener`
+- `SharedWorker`
+  - `constructor`
+  - `onerror`
+  - `port.start`
+  - `port.close`
+  - `port.postMessage`
+  - `port.addEventListener`
+  - `port.removeEventListener`
+</details>
+<details>
+  <summary>Internal messaging communication diagram...</summary>
+
+  ![communication diagram](./doc/communication.diagram.png)
+</details>
+
+
 ### Motivation
 
 To assess web application implementation correctness and to expedite issues discovery by gathering every bit of useful information from the usage of certain native APIs that are prone to human errors that are otherwise difficult to spot intuitively, [for example](./doc/issues.log.md).
@@ -83,59 +132,16 @@ To assess web application implementation correctness and to expedite issues disc
 
 - Prevent the system from going to sleep state due to user inactivity for a better observational experience. By default - `off`.
 
-<details>
-  <summary> <strong>Wrappable native functions</strong> </summary>
-
-- `eval`
-- `setTimeout`
-  - `clearTimeout`
-- `setInterval`
-  - `clearInterval`
-- `requestAnimationFrame`
-  - `cancelAnimationFrame`
-- `requestIdleCallback`
-  - `cancelIdleCallback`
-- `scheduler`
-  - `postTask`
-  - `yield`
-- `Worker`
-  - `constructor`
-  - `terminate`
-  - `onmessage`
-  - `onerror`
-  - `postMessage`
-  - `addEventListener`
-  - `removeEventListener`
-- `SharedWorker`
-  - `constructor`
-  - `onerror`
-  - `port.start`
-  - `port.close`
-  - `port.postMessage`
-  - `port.addEventListener`
-  - `port.removeEventListener`
-
-</details>
-<details>
-  <summary> <strong>Screenshots</strong> </summary>
-
-![screenshot](./doc/screenshot-01.png)
-![screenshot](./doc/screenshot-02.png)
-![screenshot](./doc/screenshot-03.png)
-![screenshot](./doc/screenshot-04.png)
-
-</details>
-
 > [!NOTE]
-> While measuring the performance of your code, kindly consider temporarily disabling this extension, as it may slightly affect the results, or just check the `Dim 3rd parties` checkbox to help you focus on what matters.
+> While measuring the performance of your code, kindly consider temporarily disabling this extension, as it may slightly affect the results, or just check the `Dim 3rd parties` checkbox to focus on what matters the most.
 
 ### Build
 
 #### Requirements
 
-- Linux: [deno v2.7.14](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode)
-  - how to set the specific deno version?
-    - `deno upgrade --version v2.7.14`
+- Linux: `git`, [deno v2.7.14](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
+  - How to set a specific deno version?
+    - `deno upgrade --version v#.#.#`
 
 #### Instructions
 
@@ -149,6 +155,7 @@ make clean install      # install dependencies
 make dev                # build in development mode and watch for changes
 ```
 
-- navigate to `chrome://extensions/`
-- ensure "Developer mode" is on
-- hit "Load unpacked" and select extension folder
+#### Install in Chromium based browsers
+- Navigate to `chrome://extensions/`.
+- Ensure "Developer mode" is on.
+- Hit "Load unpacked" and select extension folder.
