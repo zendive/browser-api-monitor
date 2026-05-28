@@ -5,16 +5,16 @@ Inspect scheduled timeouts, animation frames, idle callbacks, eval invocations, 
 
 ### Sneak peek
 <details>
-  <summary> <strong>Screenshots...</strong> </summary>
+  <summary>Screenshots...</summary>
 
-![screenshot](./doc/screenshot-01.png)
-![screenshot](./doc/screenshot-02.png)
-![screenshot](./doc/screenshot-03.png)
-![screenshot](./doc/screenshot-04.png)
+  ![screenshot](./doc/screenshot-01.png)
+  ![screenshot](./doc/screenshot-02.png)
+  ![screenshot](./doc/screenshot-03.png)
+  ![screenshot](./doc/screenshot-04.png)
 </details>
 
 <details>
-  <summary> <strong>List of monitored native APIs...</strong> </summary>
+  <summary>List of monitored native APIs...</summary>
 
 - `eval`
 - `setTimeout`
