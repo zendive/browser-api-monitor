@@ -118,3 +118,27 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
 
   return rv;
 }
+
+export type TEventHandlerLink = Map<
+  /*aelKey*/ string,
+  WeakMap<
+    /*authored handler*/ EventListenerOrEventListenerObject,
+    {
+      aelTraceId: string;
+      actualHandler: EventListener;
+    }
+  >
+>;
+export function getAelKey(
+  type: string,
+  options: undefined | boolean | AddEventListenerOptions,
+) {
+  const capture = (typeof options === 'boolean')
+    ? options
+    : (typeof options === 'object' && 'capture' in options &&
+        typeof options.capture === 'boolean')
+    ? options.capture
+    : false;
+
+  return `${type}/${capture}`;
+}

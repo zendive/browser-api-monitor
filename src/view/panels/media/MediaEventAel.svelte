@@ -2,11 +2,15 @@
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
+  import CellFacts from '../shared/CellFacts.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
   import Variable from '../../shared/Variable.svelte';
   import type { ESortOrder } from '../../../api/const.ts';
-  import type { IMediaAelMetric } from '../../../wrapper/MediaWrapper.ts';
+  import {
+    type IMediaAelMetric,
+    MediaAelFacts,
+  } from '../../../wrapper/MediaWrapper.ts';
   import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
@@ -57,6 +61,13 @@
         <th class="ta-c">
           <ColumnSortable
             sort={sortMediaAel}
+            by="facts"
+            update={updateSort}
+          ><span class="icon -facts"></span></ColumnSortable>
+        </th>
+        <th class="ta-c">
+          <ColumnSortable
+            sort={sortMediaAel}
             by="calls"
             update={updateSort}
           >Called</ColumnSortable>
@@ -78,6 +89,12 @@
             <CellSelfTime time={metric.eventSelfTime} />
           </td>
           <td class="ta-c"><Variable value={metric.events} /></td>
+          <td class="ta-c">
+            <CellFacts
+              facts={metric.facts}
+              factsMap={MediaAelFacts}
+            />
+          </td>
           <td class="ta-c" title="&lt;called&gt; [&lt;removed&gt;]">
             <Variable value={metric.calls} />
             {#if metric.canceledCounter}

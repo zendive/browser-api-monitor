@@ -9,7 +9,12 @@ import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
-import { parseMediaFieldValue, traceUtil } from './shared/util.ts';
+import {
+  getAelKey,
+  parseMediaFieldValue,
+  type TEventHandlerLink,
+  traceUtil,
+} from './shared/util.ts';
 
 export interface IMediaTelemetry {
   total: number;
@@ -36,25 +41,22 @@ interface IMediaCacheModel {
   events: Map</*event.type*/ string, IMediaEventModel>;
   props: { [key: string]: unknown };
   handleEvent: (e: Event) => void;
+  nativeAel: TMediaElement['addEventListener'];
+  nativeRel: TMediaElement['removeEventListener'];
 }
 interface IMediaEventModel {
   name: string;
   calls: number;
   ael: Map</*traceId*/ string, IMediaAelMetric>;
   rel: Map</*traceId*/ string, IMediaRelMetric>;
-  eventHandlerLink: WeakMap<
-    /*authored handler*/ EventListenerOrEventListenerObject,
-    {
-      aelTraceId: string;
-      actualHandler: EventListener;
-    }
-  >;
+  eventHandlerLink: TEventHandlerLink;
 }
 export interface IMediaAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
   canceledCounter: number;
+  facts: TFact;
 }
 export interface IMediaRelMetric extends ITraceable {
   calls: number;
@@ -77,6 +79,16 @@ export type TMediaCommand =
   | 'set-volume'
   | 'set-playbackRate';
 
+const MediaAelFact = /*@__PURE__*/ (() => ({
+  DUPLICATE_ADDITION: Fact.define(1 << 0),
+} as const))();
+export const MediaAelFacts = /*@__PURE__*/ (() =>
+  Fact.map([
+    [MediaAelFact.DUPLICATE_ADDITION, {
+      tag: 'A',
+      details: `Addition ignored - listener already in the list of events`,
+    }],
+  ]))();
 const MediaRelFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
@@ -207,6 +219,8 @@ export class MediaWrapper {
         const em = this.events.get(e.type);
         em && em.calls++;
       },
+      nativeAel: el.addEventListener.bind(el),
+      nativeRel: el.removeEventListener.bind(el),
     };
 
     for (const event of MEDIA_EVENTS) {
@@ -215,32 +229,31 @@ export class MediaWrapper {
         calls: 0,
         ael: new Map(),
         rel: new Map(),
-        eventHandlerLink: new WeakMap(),
+        eventHandlerLink: new Map(),
       });
       el.addEventListener(event, model);
     }
 
-    this.#wrapAddEventListener(el, events);
-    this.#wrapRemoveEventListener(el, events);
+    this.#wrapAddEventListener(el, model);
+    this.#wrapRemoveEventListener(el, model);
 
     return model;
   }
 
   #wrapAddEventListener(
     el: TMediaElement,
-    events: IMediaCacheModel['events'],
+    model: IMediaCacheModel,
   ) {
-    const nativeAel = el.addEventListener.bind(el);
     el.addEventListener = function ApiMonitorMediaAddEventListener(
       this: MediaWrapper,
       type: string,
       listener: EventListenerOrEventListenerObject,
       options?: boolean | AddEventListenerOptions,
     ): void {
-      const eventModel = events.get(type);
+      const eventModel = model.events.get(type);
       if (!eventModel) {
         // newer or unsupported events
-        nativeAel(type, listener, options);
+        model.nativeAel(type, listener, options);
         return;
       }
 
@@ -255,16 +268,31 @@ export class MediaWrapper {
           events: 0,
           eventSelfTime: null,
           canceledCounter: 0,
+          facts: Fact.pure,
         }),
       );
 
       methodMetric.calls++;
 
-      const handlerLink = eventModel.eventHandlerLink.get(listener);
-      let selfHandler = handlerLink?.actualHandler;
+      const aelKey = getAelKey(type, options);
+      const links = eventModel.eventHandlerLink.getOrInsertComputed(
+        aelKey,
+        () => new WeakMap(),
+      );
+      const aelRecord = links.get(listener);
 
-      if (!selfHandler && typeof listener === 'function') {
-        selfHandler = function (e: Event) {
+      if (aelRecord) {
+        methodMetric.facts = Fact.assign(
+          methodMetric.facts,
+          MediaAelFact.DUPLICATE_ADDITION,
+        );
+        return;
+      }
+
+      let selfHandler;
+
+      if (typeof listener === 'function') {
+        selfHandler = function (...args: Parameters<EventListener>) {
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
@@ -272,7 +300,7 @@ export class MediaWrapper {
             if (traceUtil.shouldPause(methodMetric.traceId)) {
               debugger;
             }
-            listener.call(el, e);
+            listener.call(el, ...args);
 
             eventSelfTime = trim2ms(performance.now() - start);
             methodMetric.events++;
@@ -281,13 +309,14 @@ export class MediaWrapper {
           methodMetric.eventSelfTime = eventSelfTime;
         };
       } else if (
-        !selfHandler &&
         listener &&
         typeof listener === 'object' &&
         'handleEvent' in listener &&
         typeof listener.handleEvent === 'function'
       ) {
-        selfHandler = function (e: Event) {
+        selfHandler = function (
+          ...args: Parameters<EventListenerObject['handleEvent']>
+        ) {
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
@@ -295,7 +324,7 @@ export class MediaWrapper {
             if (traceUtil.shouldPause(methodMetric.traceId)) {
               debugger;
             }
-            listener.handleEvent(e);
+            listener.handleEvent(...args);
 
             eventSelfTime = trim2ms(performance.now() - start);
             methodMetric.events++;
@@ -306,30 +335,29 @@ export class MediaWrapper {
       }
 
       if (selfHandler) {
-        eventModel.eventHandlerLink.set(listener, {
+        links.set(listener, {
           actualHandler: selfHandler,
           aelTraceId: methodMetric.traceId,
         });
-        nativeAel(type, selfHandler, options);
+        model.nativeAel(type, selfHandler, options);
       }
     };
   }
 
   #wrapRemoveEventListener(
     el: TMediaElement,
-    events: IMediaCacheModel['events'],
+    model: IMediaCacheModel,
   ) {
-    const nativeRel = el.removeEventListener.bind(el);
     el.removeEventListener = function ApiMonitorMediaRemoveEventListener(
       this: MediaWrapper,
       type: string,
       listener: EventListenerOrEventListenerObject,
       options?: boolean | AddEventListenerOptions,
     ): void {
-      const eventModel = events.get(type);
+      const eventModel = model.events.get(type);
       if (!eventModel) {
         // newer or unsupported events
-        nativeRel(type, listener, options);
+        model.nativeRel(type, listener, options);
         return;
       }
 
@@ -347,28 +375,35 @@ export class MediaWrapper {
 
       methodMetric.calls++;
 
-      const aelRecord = eventModel.eventHandlerLink.get(listener);
+      const aelKey = getAelKey(type, options);
+      const links = eventModel.eventHandlerLink.get(aelKey);
+      const aelRecord = links?.get(listener);
 
-      if (aelRecord) {
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
-            debugger;
-          }
-          nativeRel(type, aelRecord.actualHandler, options);
+      if (!aelRecord) {
+        methodMetric.facts = Fact.assign(
+          methodMetric.facts,
+          MediaRelFact.NOT_FOUND,
+        );
+      }
 
-          // open to suggestions
-          // eventModel.eventHandlerLink.delete(listener);
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        model.nativeRel(
+          type,
+          aelRecord ? aelRecord.actualHandler : listener,
+          options,
+        );
+
+        if (links && aelRecord) {
+          links.delete(listener);
 
           const aelMethodMetric = eventModel.ael.get(aelRecord.aelTraceId);
           if (aelMethodMetric) {
             aelMethodMetric.canceledCounter++;
           }
         }
-      } else {
-        methodMetric.facts = Fact.assign(
-          methodMetric.facts,
-          MediaRelFact.NOT_FOUND,
-        );
       }
     };
   }
