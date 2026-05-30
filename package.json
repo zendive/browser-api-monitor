@@ -3,15 +3,15 @@
   "devDependencies": {
     "@std/expect": "jsr:1.0.19",
     "@std/testing": "jsr:1.0.18",
-    "@types/chrome": "0.1.40",
-    "@types/deno": "2.5.0",
-    "sv": "0.15.2",
-    "svelte": "5.55.5",
-    "svelte-check": "4.4.6",
+    "@types/chrome": "0.1.42",
+    "@types/deno": "2.7.0",
+    "sv": "0.15.3",
+    "svelte": "5.56.0",
+    "svelte-check": "4.4.8",
     "typescript": "6.0.3"
   },
   "dependencies": {
     "@awasm/noble": "0.1.2",
-    "jsondiffpatch": "0.7.3"
+    "jsondiffpatch": "0.7.6"
   }
 }
