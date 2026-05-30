@@ -1,6 +1,8 @@
 {
   "type": "module",
   "devDependencies": {
+    "@std/expect": "jsr:1.0.19",
+    "@std/testing": "jsr:1.0.18",
     "@types/chrome": "0.1.40",
     "@types/deno": "2.5.0",
     "sv": "0.15.2",

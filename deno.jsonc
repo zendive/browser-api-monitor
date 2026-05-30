@@ -39,9 +39,6 @@
     "esbuild": "npm:esbuild@0.28.0",
     "esbuild-svelte": "npm:esbuild-svelte@0.9.4",
 
-    // test imports
-    "@std/expect": "jsr:@std/expect@1.0.19",
-    "@std/testing": "jsr:@std/testing@1.0.18",
     "happy-dom": "npm:happy-dom@20.9.0",
     "scheduler-polyfill": "npm:scheduler-polyfill@1.3.0",
     "@okikio/sharedworker": "npm:@okikio/sharedworker@1.1.0",

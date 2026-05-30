@@ -159,7 +159,7 @@ describe('wrappers', () => {
     expect(recs[0].calls).toBe(1);
     expect(recs[1].selfTime).not.toBeNull();
     expect(recs[1].calls).toBe(2);
-  }, 1e3);
+  });
 
   test('clearTimeout - valid handler', () => {
     const handler = globalThis.setTimeout(() => {}, 1e3);
