@@ -10,9 +10,11 @@ import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
 import {
-  getAelKey,
+  atTheEventDetectAutoremove,
+  getEventHandlerLinksKey,
+  isEventListenerObject,
   parseMediaFieldValue,
-  type TEventHandlerLink,
+  type TEventHandlerLinks,
   traceUtil,
 } from './shared/util.ts';
 
@@ -49,7 +51,7 @@ interface IMediaEventModel {
   calls: number;
   ael: Map</*traceId*/ string, IMediaAelMetric>;
   rel: Map</*traceId*/ string, IMediaRelMetric>;
-  eventHandlerLink: TEventHandlerLink;
+  eventHandlerLinks: TEventHandlerLinks;
 }
 export interface IMediaAelMetric extends ITraceable {
   calls: number;
@@ -229,7 +231,7 @@ export class MediaWrapper {
         calls: 0,
         ael: new Map(),
         rel: new Map(),
-        eventHandlerLink: new Map(),
+        eventHandlerLinks: new Map(),
       });
       el.addEventListener(event, model);
     }
@@ -274,14 +276,13 @@ export class MediaWrapper {
 
       methodMetric.calls++;
 
-      const aelKey = getAelKey(type, options);
-      const links = eventModel.eventHandlerLink.getOrInsertComputed(
-        aelKey,
+      const key = getEventHandlerLinksKey(type, options);
+      const link = eventModel.eventHandlerLinks.getOrInsertComputed(
+        key,
         () => new WeakMap(),
       );
-      const aelRecord = links.get(listener);
 
-      if (aelRecord) {
+      if (link.has(listener)) {
         methodMetric.facts = Fact.assign(
           methodMetric.facts,
           MediaAelFact.DUPLICATE_ADDITION,
@@ -292,7 +293,9 @@ export class MediaWrapper {
       let selfHandler;
 
       if (typeof listener === 'function') {
-        selfHandler = function (...args: Parameters<EventListener>) {
+        selfHandler = function SelfHandler(...args: Parameters<EventListener>) {
+          atTheEventDetectAutoremove(link, listener, options, methodMetric);
+
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
@@ -308,15 +311,12 @@ export class MediaWrapper {
 
           methodMetric.eventSelfTime = eventSelfTime;
         };
-      } else if (
-        listener &&
-        typeof listener === 'object' &&
-        'handleEvent' in listener &&
-        typeof listener.handleEvent === 'function'
-      ) {
-        selfHandler = function (
+      } else if (isEventListenerObject(listener)) {
+        selfHandler = function SelfHandler(
           ...args: Parameters<EventListenerObject['handleEvent']>
         ) {
+          atTheEventDetectAutoremove(link, listener, options, methodMetric);
+
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
@@ -325,7 +325,6 @@ export class MediaWrapper {
               debugger;
             }
             listener.handleEvent(...args);
-
             eventSelfTime = trim2ms(performance.now() - start);
             methodMetric.events++;
           }
@@ -335,10 +334,11 @@ export class MediaWrapper {
       }
 
       if (selfHandler) {
-        links.set(listener, {
+        link.set(listener, {
           actualHandler: selfHandler,
           aelTraceId: methodMetric.traceId,
         });
+
         model.nativeAel(type, selfHandler, options);
       }
     };
@@ -375,9 +375,12 @@ export class MediaWrapper {
 
       methodMetric.calls++;
 
-      const aelKey = getAelKey(type, options);
-      const links = eventModel.eventHandlerLink.get(aelKey);
-      const aelRecord = links?.get(listener);
+      const key = getEventHandlerLinksKey(type, options);
+      const link = eventModel.eventHandlerLinks.getOrInsertComputed(
+        key,
+        () => new WeakMap(),
+      );
+      const aelRecord = link.get(listener);
 
       if (!aelRecord) {
         methodMetric.facts = Fact.assign(
@@ -396,8 +399,8 @@ export class MediaWrapper {
           options,
         );
 
-        if (links && aelRecord) {
-          links.delete(listener);
+        if (link && aelRecord) {
+          link.delete(listener);
 
           const aelMethodMetric = eventModel.ael.get(aelRecord.aelTraceId);
           if (aelMethodMetric) {

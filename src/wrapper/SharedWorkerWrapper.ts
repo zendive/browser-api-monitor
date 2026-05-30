@@ -1,8 +1,12 @@
 import type { ITraceable } from './shared/TraceUtil.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import {
+  atTheEventDetectAutoremove,
+  getEventHandlerLinksKey,
+  isEventListenerObject,
   parseSharedWorkerOptions,
   parseWorkerSpecifier,
+  type TEventHandlerLinks,
   traceUtil,
 } from './shared/util.ts';
 import { TraceUtil } from './shared/TraceUtil.ts';
@@ -92,13 +96,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   readonly #specifier: string;
   readonly #metric: ISharedWorkerMetric;
   readonly #native;
-  readonly #eventHandlerLink: WeakMap<
-    /*authored handler*/ EventListenerOrEventListenerObject,
-    {
-      aelTraceId: string;
-      actualHandler: EventListener;
-    }
-  > = new WeakMap();
+  readonly #eventHandlerLinks: TEventHandlerLinks = new Map();
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
@@ -308,8 +306,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
   #portAddEventListener(
     type: string,
-    listener: unknown,
-    options?: unknown,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
   ) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
     const methodMetric = this.#metric.portAel.getOrInsertComputed(
@@ -331,12 +329,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
     methodMetric.calls++;
 
-    /**
-     * If the function or object is already in the list of event listeners for this target,
-     * the function or object is not added a second time.
-     * -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-     */
-    if (this.#eventHandlerLink.has(<EventListener> listener)) {
+    const key = getEventHandlerLinksKey(type, options);
+    const link = this.#eventHandlerLinks.getOrInsertComputed(
+      key,
+      () => new WeakMap(),
+    );
+
+    if (link.has(listener)) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
         WorkerAelFact.DUPLICATE_ADDITION,
@@ -351,6 +350,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
         this: ApiMonitorSharedWorkerWrapper,
         e: Event,
       ) {
+        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+
         let eventSelfTime: null | number = null;
         const start = performance.now();
 
@@ -365,11 +366,10 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
         methodMetric.eventSelfTime = eventSelfTime;
       }.bind(this);
-    } else if (
-      listener && typeof listener === 'object' && 'handleEvent' in listener &&
-      typeof listener.handleEvent === 'function'
-    ) {
+    } else if (isEventListenerObject(listener)) {
       selfHandler = function (e: Event) {
+        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+
         let eventSelfTime: null | number = null;
         const start = performance.now();
 
@@ -377,7 +377,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
           if (traceUtil.shouldPause(methodMetric.traceId)) {
             debugger;
           }
-          (<EventListenerObject> listener).handleEvent(e);
+          listener.handleEvent(e);
           eventSelfTime = trim2ms(performance.now() - start);
           methodMetric.events++;
         }
@@ -387,19 +387,19 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     }
 
     if (selfHandler) {
-      this.#eventHandlerLink.set(<EventListenerObject> listener, {
+      link.set(listener, {
         actualHandler: selfHandler,
         aelTraceId: methodMetric.traceId,
       });
-      // @ts-expect-error: expects known types
+
       this.#native.addEventListener(type, selfHandler, options);
     }
   }
 
   #portRemoveEventListener(
     type: string,
-    listener: unknown,
-    options?: unknown,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions,
   ) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
     const methodMetric = this.#metric.portRel.getOrInsertComputed(
@@ -417,35 +417,36 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
     methodMetric.calls++;
 
-    const aelRecord = this.#eventHandlerLink.get(
-      <EventListenerOrEventListenerObject> listener,
+    const key = getEventHandlerLinksKey(type, options);
+    const link = this.#eventHandlerLinks.getOrInsertComputed(
+      key,
+      () => new WeakMap(),
     );
+    const aelRecord = link.get(listener);
 
-    if (aelRecord) {
-      if (traceUtil.shouldPass(methodMetric.traceId)) {
-        if (traceUtil.shouldPause(methodMetric.traceId)) {
-          debugger;
-        }
-        // @ts-expect-error: expects known types
-        this.#native.removeEventListener(
-          type,
-          aelRecord.actualHandler,
-          options,
-        );
-        this.#eventHandlerLink.delete(
-          <EventListenerOrEventListenerObject> listener,
-        );
-
-        const aelMethodMetric = this.#metric.portAel.get(aelRecord.aelTraceId);
-        if (aelMethodMetric) {
-          aelMethodMetric.canceledCounter++;
-        }
-      }
-    } else {
+    if (!aelRecord) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
         WorkerRelFact.NOT_FOUND,
       );
+      return;
+    }
+
+    if (traceUtil.shouldPass(methodMetric.traceId)) {
+      if (traceUtil.shouldPause(methodMetric.traceId)) {
+        debugger;
+      }
+      this.#native.removeEventListener(
+        type,
+        aelRecord.actualHandler,
+        options,
+      );
+      link.delete(listener);
+
+      const aelMethodMetric = this.#metric.portAel.get(aelRecord.aelTraceId);
+      if (aelMethodMetric) {
+        aelMethodMetric.canceledCounter++;
+      }
     }
   }
 }

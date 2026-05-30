@@ -119,17 +119,20 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
   return rv;
 }
 
-export type TEventHandlerLink = Map<
+export type TEventHandlerLinks = Map<
   /*aelKey*/ string,
-  WeakMap<
-    /*authored handler*/ EventListenerOrEventListenerObject,
-    {
-      aelTraceId: string;
-      actualHandler: EventListener;
-    }
-  >
+  TEventHandlerLink
 >;
-export function getAelKey(
+type TEventHandlerLink = WeakMap<
+  /*authored handler*/ EventListenerOrEventListenerObject,
+  IEventHandlerRecord
+>;
+interface IEventHandlerRecord {
+  aelTraceId: string;
+  actualHandler: EventListener;
+}
+
+export function getEventHandlerLinksKey(
   type: string,
   options: undefined | boolean | AddEventListenerOptions,
 ) {
@@ -141,4 +144,35 @@ export function getAelKey(
     : false;
 
   return `${type}/${capture}`;
+}
+
+export function atTheEventDetectAutoremove(
+  link: TEventHandlerLink,
+  listener: EventListenerOrEventListenerObject,
+  options: undefined | boolean | AddEventListenerOptions,
+  aelMethodMetric: { canceledCounter: number },
+) {
+  if (typeof options !== 'object') return;
+
+  if (options.once) {
+    link.delete(listener);
+  }
+
+  if (options.signal instanceof AbortSignal) {
+    options.signal.addEventListener('abort', () => {
+      link.delete(listener);
+      aelMethodMetric.canceledCounter++;
+    });
+  }
+}
+
+export function isEventListenerObject(
+  that: unknown,
+): that is EventListenerObject {
+  return (
+    that !== null &&
+    typeof that === 'object' &&
+    'handleEvent' in that &&
+    typeof that.handleEvent === 'function'
+  );
 }
