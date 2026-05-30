@@ -46,13 +46,14 @@
 <button
   type="button"
   popovertarget="toggle-panels-menu"
+  interestfor="toggle-panels-menu"
   title="Control Panel"
   aria-label="Control Panel"
 >
   <span class="icon -toggle-menu"></span>
 </button>
 
-<div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
+<div bind:this={selfEl} popover="hint" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
     <tbody>
       <tr class="menu-item -dash-bottom">
@@ -131,6 +132,7 @@
     border: 1px solid var(--border);
     margin: 0;
     padding: 0 0.375rem;
+    max-height: 100vh;
 
     .menu-content {
       margin: 0.2rem 0;
