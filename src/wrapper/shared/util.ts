@@ -87,36 +87,45 @@ export function parseWorkerSpecifier(url: string | URL): string {
 }
 
 export function parseMediaFieldValue(prop: string, value: unknown): unknown {
-  let rv: unknown = value;
-
   if ('networkState' === prop) {
-    rv = `${value} - ${NETWORK_STATE[value as number]}`;
+    return `${value} - ${NETWORK_STATE[value as number]}`;
   } else if ('readyState' === prop) {
-    rv = `${value} - ${READY_STATE[value as number]}`;
+    return `${value} - ${READY_STATE[value as number]}`;
   } else if ('srcObject' === prop) {
-    rv = value ? `${value}` : value;
+    return value ? `${value}` : value;
   } else if ('mediaKeys' === prop) {
     // https://web.dev/articles/eme-basics
-    rv = cloneObjectSafely(value);
-  } else if (value instanceof TimeRanges) {
+    return cloneObjectSafely(value);
+  } else if (
+    // for Chrome Browser
+    value instanceof TimeRanges ||
+    // for Chromium Browser
+    String(value) === '[object TimeRanges]'
+  ) {
     const ranges: string[] = [];
+    const timeRanges = value as TimeRanges;
 
-    for (let n = 0, N = value.length; n < N; n++) {
+    for (let n = 0, N = timeRanges.length; n < N; n++) {
       ranges.push(
-        `<${value.start(n).toFixed(3)} - ${value.end(n).toFixed(3)}>`,
+        `<${timeRanges.start(n).toFixed(3)} - ${timeRanges.end(n).toFixed(3)}>`,
       );
     }
 
-    rv = ranges.join('');
-  } else if (value instanceof TextTrackList) {
-    rv = value.length;
+    return ranges.join('');
+  } else if (
+    // for Chrome
+    value instanceof TextTrackList ||
+    // for Chromium
+    String(value) === '[object TextTrackList]'
+  ) {
+    return (value as TextTrackList).length;
   } else if (value instanceof MediaError) {
-    rv = `${value.code}/${value.message}`;
+    return `${value.code}/${value.message}`;
   } else if (Number.isNaN(value)) {
-    rv = null;
+    return null;
   }
 
-  return rv;
+  return String(value);
 }
 
 export type TEventHandlerLinks = Map<
