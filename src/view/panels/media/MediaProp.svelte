@@ -45,7 +45,6 @@
         <button
           type="button"
           aria-label="Toggle state"
-          class="isWritable"
           onclick={() => void onToggleMediaField(name)}
         >
           {value}
@@ -64,11 +63,15 @@
     color: var(--text-passive);
     font-weight: normal;
   }
-  .isWritable {
-    cursor: pointer;
-  }
+
   .value {
     padding-left: 0.25rem;
     word-break: break-all;
+
+    button {
+      color: inherit;
+      padding: 0;
+      font-size: 100%;
+    }
   }
 </style>

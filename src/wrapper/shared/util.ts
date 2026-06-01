@@ -123,6 +123,8 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
     return `${value.code}/${value.message}`;
   } else if (Number.isNaN(value)) {
     return null;
+  } else if (value === null || typeof value === 'boolean') {
+    return value;
   }
 
   return String(value);
