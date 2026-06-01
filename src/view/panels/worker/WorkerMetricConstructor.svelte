@@ -6,7 +6,7 @@
     type IWorkerConstructorMetric,
     type IWorkerTelemetryMetric,
     WorkerConstructorFacts,
-  } from '../../../wrapper/WorkerWrapper.js';
+  } from '../../../wrapper/WorkerWrapper.ts';
   import CollapseExpand from '../shared/CollapseExpand.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';

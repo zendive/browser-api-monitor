@@ -3,6 +3,7 @@ import type { IWorkerOptions } from '../WorkerWrapper.ts';
 import type { ISharedWorkerOptions } from '../SharedWorkerWrapper.ts';
 import { cloneObjectSafely } from '../../api/clone.ts';
 import { NETWORK_STATE, READY_STATE } from '../../api/const.ts';
+import { callableOnce } from '../../api/time.ts';
 
 export function validHandler(handler: unknown): handler is number {
   return Number.isInteger(handler) && <number> handler > 0;
@@ -96,14 +97,9 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
   } else if ('mediaKeys' === prop) {
     // https://web.dev/articles/eme-basics
     return cloneObjectSafely(value);
-  } else if (
-    // for Chrome Browser
-    value instanceof TimeRanges ||
-    // for Chromium Browser
-    String(value) === '[object TimeRanges]'
-  ) {
+  } else if (isTimeRanges(value)) {
     const ranges: string[] = [];
-    const timeRanges = value as TimeRanges;
+    const timeRanges = value;
 
     for (let n = 0, N = timeRanges.length; n < N; n++) {
       ranges.push(
@@ -112,13 +108,8 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
     }
 
     return ranges.join('');
-  } else if (
-    // for Chrome
-    value instanceof TextTrackList ||
-    // for Chromium
-    String(value) === '[object TextTrackList]'
-  ) {
-    return (value as TextTrackList).length;
+  } else if (isTextTrackList(value)) {
+    return value.length;
   } else if (value instanceof MediaError) {
     return `${value.code}/${value.message}`;
   } else if (Number.isNaN(value)) {
@@ -128,6 +119,24 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
   }
 
   return String(value);
+}
+
+function isTimeRanges(that: unknown): that is TimeRanges {
+  return (
+    // for Chrome Browser
+    that instanceof TimeRanges ||
+    // for Chromium Browser
+    String(that) === '[object TimeRanges]'
+  );
+}
+
+function isTextTrackList(that: unknown): that is TextTrackList {
+  return (
+    // for Chrome Browser
+    that instanceof TextTrackList ||
+    // for Chromium Browser
+    String(that) === '[object TextTrackList]'
+  );
 }
 
 export type TEventHandlerLinks = Map<
@@ -157,7 +166,7 @@ export function getEventHandlerLinksKey(
   return `${type}/${capture}`;
 }
 
-export function atTheEventDetectAutoremove(
+function detectEventAutoremove(
   link: TEventHandlerLink,
   listener: EventListenerOrEventListenerObject,
   options: undefined | boolean | AddEventListenerOptions,
@@ -169,12 +178,21 @@ export function atTheEventDetectAutoremove(
     link.delete(listener);
   }
 
-  if (options.signal instanceof AbortSignal) {
+  if (
+    options.signal instanceof AbortSignal &&
+    !options.signal.aborted
+  ) {
     options.signal.addEventListener('abort', () => {
       link.delete(listener);
       aelMethodMetric.canceledCounter++;
+    }, {
+      once: true,
     });
   }
+}
+
+export function atTheEventDetectAutoremove() {
+  return callableOnce(detectEventAutoremove);
 }
 
 export function isEventListenerObject(

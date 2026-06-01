@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EMsg, postPort } from '../../../api/communication';
+  import { EMsg, postPort } from '../../../api/communication.ts';
 
   let { mediaId, value }: {
     mediaId: string;
@@ -26,6 +26,7 @@
       step="0.01"
       oninput={onChangePlaybackRate}
       {value}
+      aria-label="playback rate"
     />
 
     {value}

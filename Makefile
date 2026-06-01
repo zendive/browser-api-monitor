@@ -80,8 +80,7 @@ mirror-dev:
 
 .PHONY: mirror-serve
 mirror-serve:
-	REQUIRED_BINS := python3
-	$(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)` to run static http.server)))
+	$(foreach bin,python3,$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)` to run static http.server)))
 
 	@echo "🎗 reminder to switch extension off"
 	@echo "served at: http://localhost:5555/mirror.html"

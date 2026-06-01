@@ -50,7 +50,7 @@ rnote over Devtools: Create Panel
 User -> Panel: Select Panel
 rnote over Panel: Create and mount
 Devtools -> csMain: START_OBSERVE
-loop untill STOP_OBSERVE
+loop until STOP_OBSERVE
   alt for the first time or in case of receiving bad TELEMETRY_DELTA
     csMain -> Panel: TELEMETRY
   else

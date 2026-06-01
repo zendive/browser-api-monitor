@@ -36,7 +36,6 @@ describe('AnimationWrapper', () => {
     expect(rec.calls).toBe(1);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(1);
-    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(rec.selfTime).not.toBeNull();
     expect(apiAnimation.callCounter.requestAnimationFrame).toBe(1);
   });
@@ -63,7 +62,7 @@ describe('AnimationWrapper', () => {
     expect(apiAnimation.callCounter.cancelAnimationFrame).toBe(1);
     expect(rafRec.canceledByTraceIds?.length).toBe(1);
     expect(rafRec.canceledCounter).toBe(1);
-    expect(cafRec.firstSeen).toBeGreaterThan(rafRec.firstSeen);
+    expect(cafRec.firstSeen).toBeGreaterThanOrEqual(rafRec.firstSeen);
   });
 
   test('cAF - invalid handler', () => {

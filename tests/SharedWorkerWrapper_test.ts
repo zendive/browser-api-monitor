@@ -34,7 +34,7 @@ function getPortRelFact() {
   return getMetric().portRel[0].facts;
 }
 
-describe('WorkerWrapper', () => {
+describe('SharedWorkerWrapper', () => {
   let sw: ApiMonitorSharedWorkerWrapper;
   let codeBlob: string;
 
@@ -56,7 +56,7 @@ describe('WorkerWrapper', () => {
     forTest_clearSharedWorkerHistory();
   });
 
-  test('portAel facts', () => {
+  test('port.aEL facts', () => {
     sw = NewSharedWorker(codeBlob);
 
     for (let n = 0, N = 2; n < N; n++) {
@@ -66,7 +66,7 @@ describe('WorkerWrapper', () => {
     expect(getPortAelFact()).toBe(WorkerAelFact.DUPLICATE_ADDITION);
   });
 
-  test('port.Rel facts', () => {
+  test('port.rEL facts', () => {
     sw = NewSharedWorker(codeBlob);
     sw.port.removeEventListener('message', NOOP);
 

@@ -57,7 +57,7 @@
     type="button"
     onclick={onPlayPause}
     title={playPauseTitle}
-    aria-label="title"
+    aria-label={playPauseTitle}
   >
     <span class="icon {playPauseIcon}"></span>
   </button>
@@ -66,7 +66,7 @@
     type="button"
     onclick={() => void onMediaCommand('frame-backward')}
     title="Seek -16ms (hold to repeat)"
-    aria-label="Seek -16ms"
+    aria-label="Seek -16ms (hold to repeat)"
   >
     <span class="icon -frame-backward"></span>
   </button>
@@ -75,7 +75,7 @@
     type="button"
     onclick={() => void onMediaCommand('frame-forward')}
     title="Seek +16ms (hold to repeat)"
-    aria-label="Seek +16ms"
+    aria-label="Seek +16ms (hold to repeat)"
   >
     <span class="icon -frame-forward"></span>
   </button>

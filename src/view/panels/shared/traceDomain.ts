@@ -14,17 +14,17 @@ const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
 );
 
 function getDomain(trace: ITrace[], locationOrigin: string) {
-  const first = trace[0] || '';
+  const firstLink = trace[0]?.link || '';
 
-  if (first.link.startsWith(locationOrigin)) {
+  if (firstLink.startsWith(locationOrigin)) {
     return ETraceDomain.SAME;
-  } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(first.link)) {
+  } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(firstLink)) {
     return ETraceDomain.EXTERNAL;
-  } else if (first.link.startsWith('chrome-extension://')) {
+  } else if (firstLink.startsWith('chrome-extension://')) {
     return ETraceDomain.EXTENSION;
-  } else if (first.link.startsWith('snippet:///')) {
+  } else if (firstLink.startsWith('snippet:///')) {
     return ETraceDomain.SNIPPET;
-  } else if (first.link.startsWith('webpack://')) {
+  } else if (firstLink.startsWith('webpack://')) {
     return ETraceDomain.WEBPACK;
   }
 
@@ -42,7 +42,7 @@ const traceDomainUIMap: Map<ETraceDomain, IDomainDescriptor> =
       [ETraceDomain.UNKNOWN, { icon: '', name: 'Unknown trace origin' }],
       [ETraceDomain.SAME, { icon: '-trace-local', name: 'Same domain' }],
       [ETraceDomain.EXTERNAL, {
-        icon: ' -trace-external',
+        icon: '-trace-external',
         name: 'External domain',
       }],
       [ETraceDomain.EXTENSION, { icon: '-trace-extension', name: 'Extension' }],

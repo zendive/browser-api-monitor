@@ -34,12 +34,12 @@
       document.addEventListener('keydown', onKeyboardEvent, {
         capture: true,
       });
-      globalThis.addEventListener('click', onWindowClick);
+      document.addEventListener('click', onWindowClick);
     } else if (e.newState === 'closed') {
       document.removeEventListener('keydown', onKeyboardEvent, {
         capture: true,
       });
-      globalThis.removeEventListener('click', onWindowClick);
+      document.removeEventListener('click', onWindowClick);
     }
 
     eventToggle(e);

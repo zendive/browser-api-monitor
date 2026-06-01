@@ -9,7 +9,7 @@ import {
   traceUtil,
 } from './shared/util.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
-import { trim2ms } from '../api/time.ts';
+import { callableOnce, trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IWorkerTelemetry {
@@ -191,6 +191,10 @@ export class ApiMonitorWorkerWrapper extends Worker {
     methodMetric.calls++;
   }
 
+  #markOfflineOnce = callableOnce(() => {
+    this.#metric.online--;
+  });
+
   override terminate() {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
     const methodMetric = this.#metric.terminate.getOrInsertComputed(
@@ -213,9 +217,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       }
       super.terminate();
 
-      if (this.#metric.online) {
-        this.#metric.online--;
-      }
+      this.#markOfflineOnce();
     }
   }
 
@@ -382,13 +384,14 @@ export class ApiMonitorWorkerWrapper extends Worker {
     }
 
     let selfHandler;
+    const detectEventAutoremove = atTheEventDetectAutoremove();
 
     if (typeof listener === 'function') {
       selfHandler = function (
         this: ApiMonitorWorkerWrapper,
         e: Event,
       ) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();
@@ -406,7 +409,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       }.bind(this);
     } else if (isEventListenerObject(listener)) {
       selfHandler = function (e: Event) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();

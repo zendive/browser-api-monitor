@@ -5,11 +5,11 @@
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CollapseExpand from '../shared/CollapseExpand.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import type { ESortOrder } from '../../../api/const';
-  import type { ISharedWorkerPortCloseMetric } from '../../../wrapper/SharedWorkerWrapper';
-  import { useConfigState } from '../../../state/config.state.svelte';
-  import { compareByFieldOrder } from '../shared/comparator';
-  import { saveLocalStorage } from '../../../api/storage/storage.local';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import type { ISharedWorkerPortCloseMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
   let { metrics }: { metrics: ISharedWorkerPortCloseMetric[] } = $props();
   const { sortSharedWorkerPortClose } = useConfigState();

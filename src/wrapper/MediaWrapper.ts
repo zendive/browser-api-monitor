@@ -193,7 +193,7 @@ export class MediaWrapper {
       typeof o.value === 'number' &&
       Number.isFinite(o.value)
     ) {
-      el.volume = o.value;
+      el.volume = Math.max(0, Math.min(1, o.value));
     } else if (
       o.cmd === 'set-playbackRate' &&
       typeof o.value === 'number' &&
@@ -247,7 +247,6 @@ export class MediaWrapper {
     model: IMediaCacheModel,
   ) {
     el.addEventListener = function ApiMonitorMediaAddEventListener(
-      this: MediaWrapper,
       type: string,
       listener: EventListenerOrEventListenerObject,
       options?: boolean | AddEventListenerOptions,
@@ -291,10 +290,11 @@ export class MediaWrapper {
       }
 
       let selfHandler;
+      const detectEventAutoremove = atTheEventDetectAutoremove();
 
       if (typeof listener === 'function') {
         selfHandler = function SelfHandler(...args: Parameters<EventListener>) {
-          atTheEventDetectAutoremove(link, listener, options, methodMetric);
+          detectEventAutoremove(link, listener, options, methodMetric);
 
           let eventSelfTime: null | number = null;
           const start = performance.now();
@@ -315,7 +315,7 @@ export class MediaWrapper {
         selfHandler = function SelfHandler(
           ...args: Parameters<EventListenerObject['handleEvent']>
         ) {
-          atTheEventDetectAutoremove(link, listener, options, methodMetric);
+          detectEventAutoremove(link, listener, options, methodMetric);
 
           let eventSelfTime: null | number = null;
           const start = performance.now();
@@ -349,7 +349,6 @@ export class MediaWrapper {
     model: IMediaCacheModel,
   ) {
     el.removeEventListener = function ApiMonitorMediaRemoveEventListener(
-      this: MediaWrapper,
       type: string,
       listener: EventListenerOrEventListenerObject,
       options?: boolean | AddEventListenerOptions,
@@ -399,7 +398,7 @@ export class MediaWrapper {
           options,
         );
 
-        if (link && aelRecord) {
+        if (aelRecord) {
           link.delete(listener);
 
           const aelMethodMetric = eventModel.ael.get(aelRecord.aelTraceId);

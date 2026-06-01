@@ -1,6 +1,6 @@
 import type { Brand } from '../../api/generics.ts';
 
-export type TFact = Brand<number, 'TFact'>;
+export type TFact = 0 | Brand<number, 'TFact'>;
 interface IFactDescriptor {
   tag: string;
   details: string;
@@ -8,8 +8,8 @@ interface IFactDescriptor {
 export type TFactsMap = Map<TFact, IFactDescriptor>;
 
 export class Fact {
-  static get pure() {
-    return 0 as TFact;
+  static get pure(): TFact {
+    return 0;
   }
 
   /**

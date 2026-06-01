@@ -76,7 +76,7 @@ To assess web application implementation correctness and to expedite issues disc
   - **Once done**: the safest scenario to exit from the "custom" debugging session, especially if it's a hot path, - is to:
     - hit "Deactivate breakpoints" (<kbd>Ctrl+F8</kbd>).
     - hit "Resume script execution" (<kbd>F8</kbd>).
-    - then unset that originaly ordered breakpoint in the `API` panel.
+    - then unset that originally ordered breakpoint in the `API` panel.
     - hit "Activate breakpoints" again (return focus to `Sources` panel then <kbd>Ctrl+F8</kbd>).
 
 - Calculate the execution time of an event listener or callback.
@@ -94,7 +94,7 @@ To assess web application implementation correctness and to expedite issues disc
 - Detect `eval` function usage in runtime, as well as `setTimeout` and `setInterval` when called with a `string` callback instead of a `function`.
   - By default - `off`, because the fact of wrapping it excludes access to local scope variables from the `eval` script, and as a result, may break the application if it does depend on it.
 
-- Monitor `Worker` and `ShadowWorker` methods' invocations and their metrics.
+- Monitor `Worker` and `SharedWorker` methods' invocations and their metrics.
   - Allow navigation to a worker source code (if available).
   - Detect if the instance is not yet garbage-collected.
   - Detect anomalies:
@@ -139,9 +139,10 @@ To assess web application implementation correctness and to expedite issues disc
 
 #### Requirements
 
-- Linux: `git`, [deno v2.7.14](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
-  - How to set a specific `deno` version and [why](https://deno.com/blog/v2.8#settimeout-and-setinterval)?
+- Linux: [deno v2.7.14](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
+  - How to set a specific `deno` version and [why](https://deno.com/blog/v2.8#settimeout-and-setinterval)
     - `deno upgrade --version v2.7.14`
+- Chrome: v145
 
 #### Instructions
 

@@ -44,7 +44,7 @@
       {#if isMediaFieldWritable(name)}
         <button
           type="button"
-          aria-label="Toggle state"
+          aria-label="Toggle {name} state"
           onclick={() => void onToggleMediaField(name)}
         >
           {value}

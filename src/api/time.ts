@@ -7,7 +7,7 @@ import {
   requestAnimationFrame,
   requestIdleCallback,
   setTimeout,
-  TELEMETRY_FREQUENCY_30PS,
+  TELEMETRY_FREQUENCY_HIGH,
   TIME_60FPS_MS,
 } from './const.ts';
 
@@ -335,5 +335,5 @@ export function adjustTelemetryDelay(
   const roundtrip = whenAcknowleged - whenCollected;
   const newDelay = roundtrip * TICK_TIME_LAG_SCALAR;
 
-  return Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+  return Math.max(TELEMETRY_FREQUENCY_HIGH, newDelay);
 }

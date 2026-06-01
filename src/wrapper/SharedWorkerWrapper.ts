@@ -167,7 +167,12 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       addEventListener: this.port.addEventListener.bind(this.port),
       removeEventListener: this.port.removeEventListener.bind(this.port),
     };
-    this.#wrapMessagePort();
+    this.port.start = this.#portStart.bind(this);
+    this.port.close = this.#portClose.bind(this);
+    // @ts-expect-error: suppress multiple signatures
+    this.port.postMessage = this.#portPostMessage.bind(this);
+    this.port.addEventListener = this.#portAddEventListener.bind(this);
+    this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
   }
 
   override get onerror() {
@@ -214,15 +219,6 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
       methodMetric.eventSelfTime = eventSelfTime;
     };
-  }
-
-  #wrapMessagePort() {
-    this.port.start = this.#portStart.bind(this);
-    this.port.close = this.#portClose.bind(this);
-    // @ts-expect-error: suppress multiple signatures
-    this.port.postMessage = this.#portPostMessage.bind(this);
-    this.port.addEventListener = this.#portAddEventListener.bind(this);
-    this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
   }
 
   #portStart() {
@@ -344,13 +340,14 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     }
 
     let selfHandler;
+    const detectEventAutoremove = atTheEventDetectAutoremove();
 
     if (typeof listener === 'function') {
       selfHandler = function (
         this: ApiMonitorSharedWorkerWrapper,
         e: Event,
       ) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();
@@ -368,7 +365,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       }.bind(this);
     } else if (isEventListenerObject(listener)) {
       selfHandler = function (e: Event) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();
