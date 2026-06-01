@@ -9,25 +9,26 @@
  * Panel listens with listenRuntime and sends messages
  * to cs-isolated with postPort.
  *
- * cs-isolated listens to enything sent by postPort with
+ * cs-isolated listens to anything sent by postPort with
  * listenPort, and relays it to cs-main with postChannel,
  * if needed.
  *
  * cs-isolated listens to cs-main with listenChannel and
- * relays it to panel via runtimePost.
+ * relays it to panel via postRuntime.
  *
  * In __mirror__ mode, postWindow and listenWindow are used
  * as a backup for a missing runtime API.
  */
 
 import { APPLICATION_NAME } from './env.ts';
-import { ERRORS_IGNORED } from './const.ts';
+import { IGNORED_ERRORS } from './const.ts';
 import { ETimerType } from '../wrapper/TimerWrapper.ts';
 import type { ITelemetry } from '../wrapper/Wrapper.ts';
 import type { TConfig } from './storage/storage.local.ts';
 import type { TMediaCommand } from '../wrapper/MediaWrapper.ts';
 import type { Delta } from 'jsondiffpatch';
 import type { TSession } from './storage/storage.session.ts';
+import { ETimer, Timer } from './time.ts';
 
 let port: chrome.runtime.Port | null = null;
 
@@ -101,25 +102,39 @@ export function listenRuntime(callback: (payload: TMsgOptions) => void) {
   }
 }
 
-function handleRuntimeMessageResponse(): void {
-  const error = chrome.runtime.lastError;
+function handleRuntimeMessageResponse(reason?: { message?: string }): void {
+  const message = chrome.runtime.lastError?.message ?? reason?.message;
 
   if (
-    error &&
-    typeof error.message === 'string' &&
-    !ERRORS_IGNORED.includes(error.message)
+    typeof message === 'string' &&
+    !IGNORED_ERRORS.includes(message)
   ) {
-    console.error(error.message);
+    console.error(message);
   }
 }
 
 export function provideChannelApi() {
-  const { promise, resolve } = Promise.withResolvers<IChannelApi>();
+  const { promise, resolve, reject } = Promise.withResolvers<IChannelApi>();
   const channelId = crypto.randomUUID();
   const channel = new BroadcastChannel(channelId);
+  const MAX_TRIES = 10;
+  let triesCount = 0;
+  const handshake = new Timer(
+    { type: ETimer.TIMEOUT, timeout: 1e3 },
+    () => {
+      if (triesCount++ === MAX_TRIES) {
+        reject(new Error('Handshake timeout'));
+        return;
+      }
+
+      handshake.start();
+      postWindow({ msg: EMsg.TUNE_CHANNEL, id: channelId });
+    },
+  );
 
   listenWindow((e) => {
     if (e.msg === EMsg.TUNE_CHANNEL_CONFIRMED) {
+      handshake.stop();
       resolve({
         listenChannel(callback: (e: TMsgOptions) => void) {
           channel.onmessage = (e: MessageEvent<TMsgOptions>) => {
@@ -135,7 +150,7 @@ export function provideChannelApi() {
     }
   });
 
-  postWindow({ msg: EMsg.TUNE_CHANNEL, id: channelId });
+  handshake.trigger();
 
   return promise;
 }

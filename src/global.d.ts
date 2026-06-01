@@ -22,7 +22,7 @@ declare global {
    * - chrome.devtools.panels.openResource
    */
   interface IOpenResourceCallbackArgument {
-    code: 'E_NOTFOUND' | string;
+    code: 'E_NOTFOUND';
     description: string;
     details: string[];
     isError: boolean;

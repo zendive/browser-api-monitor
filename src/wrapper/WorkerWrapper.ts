@@ -382,13 +382,14 @@ export class ApiMonitorWorkerWrapper extends Worker {
     }
 
     let selfHandler;
+    const detectEventAutoremove = atTheEventDetectAutoremove();
 
     if (typeof listener === 'function') {
       selfHandler = function (
         this: ApiMonitorWorkerWrapper,
         e: Event,
       ) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();
@@ -406,7 +407,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       }.bind(this);
     } else if (isEventListenerObject(listener)) {
       selfHandler = function (e: Event) {
-        atTheEventDetectAutoremove(link, listener, options, methodMetric);
+        detectEventAutoremove(link, listener, options, methodMetric);
 
         let eventSelfTime: null | number = null;
         const start = performance.now();

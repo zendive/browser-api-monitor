@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EMsg, postPort } from '../../../api/communication';
+  import { EMsg, postPort } from '../../../api/communication.ts';
 
   let { mediaId, value }: {
     mediaId: string;

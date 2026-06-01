@@ -11,19 +11,20 @@ export const autoclick: Action<HTMLButtonElement> = (node: HTMLElement) => {
   );
   function mousedown() {
     auto.start();
+    document.addEventListener('mouseup', mouseup);
   }
   function mouseup() {
     auto.stop();
+    document.removeEventListener('mouseup', mouseup);
   }
 
   node.addEventListener('mousedown', mousedown);
-  node.addEventListener('mouseup', mouseup);
 
   return {
     destroy() {
       auto.stop();
       node.removeEventListener('mousedown', mousedown);
-      node.removeEventListener('mouseup', mouseup);
+      document.removeEventListener('mouseup', mouseup);
     },
   };
 };

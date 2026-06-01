@@ -7,9 +7,10 @@ import {
   PostTaskFact,
   SchedulerWrapper,
 } from '../src/wrapper/SchedulerWrapper.ts';
+import { IPanel } from '../src/api/storage/storage.local.ts';
 
 let api: SchedulerWrapper;
-const schedulerPanel = {
+const schedulerPanel: IPanel = {
   wrap: true,
   visible: true,
   key: 'scheduler',
@@ -45,7 +46,6 @@ describe('scheduler.yield', {
 
     expect(yRec.calls).toBe(1);
     expect(yRec.firstSeen).toBeGreaterThan(1);
-    expect();
   });
 });
 

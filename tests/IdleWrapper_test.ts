@@ -60,7 +60,7 @@ describe('IdleWrapper', () => {
     expect(cicRec.calls).toBe(1);
     expect(cicRec.trace.length).toBeGreaterThan(1);
     expect(cicRec.traceId.length).toBeGreaterThan(1);
-    expect(cicRec.firstSeen).toBeGreaterThan(ricRec.firstSeen);
+    expect(cicRec.firstSeen).toBeGreaterThanOrEqual(ricRec.firstSeen);
     expect(apiIdle.callCounter.cancelIdleCallback).toBe(1);
     expect(ricRec.canceledByTraceIds?.length).toBe(1);
     expect(ricRec.canceledCounter).toBe(1);

@@ -79,7 +79,7 @@ export class SchedulerWrapper {
   wrapPostTask() {
     globalThis.scheduler.postTask = function (
       this: SchedulerWrapper,
-      fn: () => unknown,
+      fn: () => Promise<unknown>,
       options?: IPostTaskOptions,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
@@ -120,35 +120,42 @@ export class SchedulerWrapper {
         );
       }
 
-      options?.signal?.addEventListener?.('abort', function listener() {
-        options.signal?.removeEventListener('abort', listener);
-        if (finished) {
-          return;
-        }
+      if (
+        options?.signal instanceof AbortSignal &&
+        !options.signal.aborted
+      ) {
+        options.signal.addEventListener('abort', () => {
+          if (finished) {
+            return;
+          }
 
-        aborted = true;
-        methodMetric.aborts++;
-        methodMetric.online--;
-      });
+          aborted = true;
+          methodMetric.aborts++;
+          methodMetric.online--;
+        }, {
+          once: true,
+        });
+      }
 
       return nativePostTask(function () {
+        let rv: Promise<unknown> = Promise.resolve(); // in case of bypass
         const start = performance.now();
 
         if (traceUtil.shouldPass(callstack.traceId)) {
           if (traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
+          rv = fn();
 
-          const rv = fn();
           methodMetric.selfTime = trim2ms(performance.now() - start);
-          finished = true;
-          if (!aborted) {
-            methodMetric.online--;
-          }
-          return rv;
         }
 
-        return Promise.resolve(); // in case of bypass
+        finished = true;
+        if (!aborted) {
+          methodMetric.online--;
+        }
+
+        return rv;
       }, options);
     }.bind(this);
   }

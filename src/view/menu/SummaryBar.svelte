@@ -151,7 +151,7 @@
       />
     {/if}
 
-    {#if panels.worker.wrap}
+    {#if panels.sharedWorker.wrap}
       <SummaryBarItem
         label="SharedWorker"
         navSelector="_SharedWorker"

@@ -8,8 +8,6 @@ export class TerminatorsPopoverHelper {
 
   update = (traceId: string, el: EventTarget | null) => {
     if (this.#opened) {
-      this.#targetEl?.classList.remove(TARGET_CLASS);
-
       return;
     }
 

@@ -1,10 +1,10 @@
 export function NOOP() {}
-export const ERRORS_IGNORED = [
+export const IGNORED_ERRORS = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const TELEMETRY_FREQUENCY_30PS = 37.5; // ms
-export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
+export const TELEMETRY_FREQUENCY_HIGH = 37.5; // ms
+export const TELEMETRY_FREQUENCY_LOW = 1000; // ms
 export const TIME_60FPS_SEC = 0.0166666666667; // s
 export const TIME_60FPS_MS = 16.666666666666668;
 

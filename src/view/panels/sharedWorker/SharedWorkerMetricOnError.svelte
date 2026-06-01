@@ -82,19 +82,19 @@
     </thead>
 
     <tbody class:d-none={!isExpanded}>
-      {#each sortedMetrics as metrics (metrics.traceId)}
+      {#each sortedMetrics as metric (metric.traceId)}
         <tr class="t-zebra">
           <td class="wb-all">
-            <CellCallstack trace={metrics.trace} />
+            <CellCallstack trace={metric.trace} />
           </td>
           <td class="ta-r">
-            <CellSelfTime time={metrics.eventSelfTime} />
+            <CellSelfTime time={metric.eventSelfTime} />
           </td>
-          <td class="ta-c">{metrics.eventsCps || undefined}</td>
-          <td class="ta-c"><Variable value={metrics.events} /></td>
-          <td class="ta-c"><Variable value={metrics.calls} /></td>
-          <td><CellBypass traceId={metrics.traceId} /></td>
-          <td><CellBreakpoint traceId={metrics.traceId} /></td>
+          <td class="ta-c">{metric.eventsCps || undefined}</td>
+          <td class="ta-c"><Variable value={metric.events} /></td>
+          <td class="ta-c"><Variable value={metric.calls} /></td>
+          <td><CellBypass traceId={metric.traceId} /></td>
+          <td><CellBreakpoint traceId={metric.traceId} /></td>
         </tr>
       {/each}
     </tbody>

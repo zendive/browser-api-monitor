@@ -43,7 +43,9 @@ Promise.all([
 
     postRuntime({ msg: EMsg.CONTENT_SCRIPT_LOADED });
   },
-);
+).catch((reason?: { message?: string }) => {
+  console.error(reason?.message);
+});
 
 __development__ &&
   console.log('api-monitor-cs-isolated.ts', performance.now());

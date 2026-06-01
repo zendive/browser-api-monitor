@@ -5,7 +5,7 @@ import {
   describe,
   test,
 } from '@std/testing/bdd';
-import { expect } from '@std/expect';
+import { expect, fn } from '@std/expect';
 import './browserPolyfill.ts';
 import {
   ApiMonitorWorkerWrapper,
@@ -45,7 +45,7 @@ describe('WorkerWrapper', () => {
     codeBlob = URL.createObjectURL(
       new Blob([`
       self.onmessage = (e) => {
-        self.postMessage('acknowledge');
+        self.postMessage(e.data);
       }
     `], { type: 'text/javascript' }),
     );
@@ -75,6 +75,44 @@ describe('WorkerWrapper', () => {
     }
 
     expect(getAELFact()).toBe(WorkerAelFact.DUPLICATE_ADDITION);
+  });
+
+  test('aEL once', async () => {
+    w = NewWorker(codeBlob);
+    const mockFn = fn();
+
+    // @ts-expect-error listener Deno signature uses Function
+    w.addEventListener('message', mockFn, { once: true });
+    w.postMessage(1);
+    w.postMessage(2);
+
+    await wait(10);
+    expect(mockFn).toBeCalledTimes(1);
+  });
+
+  // test skipped because deno's worker (preserved for a future migration)
+  // internal implementation of signal aborting
+  // uses removeEventListener - Chrome do not
+  // Worker extends from EventTarget:
+  // - https://github.com/denoland/deno/blob/7aceb221c3ea2fdb4cbe86256c1d1a4475985f04/ext/node/polyfills/internal/event_target.mjs#L600
+  test.skip('aEL abort signal', async () => {
+    w = NewWorker(codeBlob);
+    const mockFn = fn();
+    const ac = new AbortController();
+
+    // @ts-expect-error listener Deno signature uses Function
+    w.addEventListener('message', mockFn, { signal: ac.signal });
+
+    w.postMessage(1);
+    await wait(100);
+    expect(mockFn).toBeCalledTimes(1);
+
+    ac.abort('test suite');
+    expect(ac.signal.aborted).toBe(true);
+
+    w.postMessage(2);
+    await wait(100);
+    expect(mockFn).toBeCalledTimes(1);
   });
 
   test('rEL facts', () => {

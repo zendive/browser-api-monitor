@@ -1,5 +1,5 @@
 import { awaitChannelApi, EMsg } from './api/communication.ts';
-import { TELEMETRY_FREQUENCY_1PS } from './api/const.ts';
+import { TELEMETRY_FREQUENCY_LOW } from './api/const.ts';
 import { adjustTelemetryDelay, ETimer, Timer } from './api/time.ts';
 import {
   applyConfig,
@@ -21,7 +21,7 @@ awaitChannelApi().then(({ listenChannel, postChannel }) => {
   const tick = new Timer({
     type: ETimer.TASK,
     priority: 'background',
-    timeout: TELEMETRY_FREQUENCY_1PS,
+    timeout: TELEMETRY_FREQUENCY_LOW,
   }, function apiMonitorTelemetryTick() {
     const now = performance.now();
     currentMetrics = structuredClone(collectMetrics());
