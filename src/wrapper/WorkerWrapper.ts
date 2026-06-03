@@ -9,7 +9,7 @@ import {
   traceUtil,
 } from './shared/util.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
-import { trim2ms } from '../api/time.ts';
+import { callableOnce, trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IWorkerTelemetry {
@@ -191,6 +191,10 @@ export class ApiMonitorWorkerWrapper extends Worker {
     methodMetric.calls++;
   }
 
+  #markOfflineOnce = callableOnce(() => {
+    this.#metric.online--;
+  });
+
   override terminate() {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
     const methodMetric = this.#metric.terminate.getOrInsertComputed(
@@ -213,9 +217,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
       }
       super.terminate();
 
-      if (this.#metric.online) {
-        this.#metric.online--;
-      }
+      this.#markOfflineOnce();
     }
   }
 

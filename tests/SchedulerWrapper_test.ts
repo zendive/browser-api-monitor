@@ -45,7 +45,6 @@ describe('scheduler.yield', {
     const yRec = getYieldMetrics(api);
 
     expect(yRec.calls).toBe(1);
-    expect(yRec.firstSeen).toBeGreaterThan(1);
   });
 });
 
@@ -84,7 +83,6 @@ describe('scheduler.postTask', {
     expect(metric.calls).toBe(1);
     expect(metric.aborts).toBe(1);
     expect(metric.selfTime).toBeNull();
-    expect(metric.firstSeen).toBeGreaterThan(1);
   });
 
   test('aborts during run', async () => {

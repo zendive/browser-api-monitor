@@ -31,15 +31,17 @@
         <MediaEventAel metrics={metric.ael} />
         <MediaEventRel metrics={metric.rel} />
       </div>
-    {/if}
 
-    <button
-      popovertarget={popoverId}
-      interestfor={popoverId}
-      class:popover-target-active={hasListeners && popoverShown}
-    >
+      <button
+        popovertarget={popoverId}
+        interestfor={popoverId}
+        class:popover-target-active={popoverShown}
+      >
+        {metric.name}
+      </button>
+    {:else}
       {metric.name}
-    </button>
+    {/if}
   </td>
   <td class="ta-l value"><Variable value={metric.calls} /></td>
 </tr>
@@ -51,6 +53,10 @@
     &.-called {
       font-weight: bold;
       color: var(--text);
+
+      button {
+        font-weight: bold;
+      }
     }
 
     .value {

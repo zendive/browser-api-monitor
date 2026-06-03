@@ -45,9 +45,10 @@ function telemetryListener(o: TMsgOptions) {
       state.telemetry = structuredClone(telemetryProgressive);
       state.timeOfCollection = o.timeOfCollection;
       acknowledgeTelemetry(o.timeOfCollection);
-    } catch (_) {
+    } catch (e) {
       // if patching fails - request full telemetry
       acknowledgeTelemetry(o.timeOfCollection, true);
+      console.error(e);
     }
 
     if (__feat_dev_stats__) {

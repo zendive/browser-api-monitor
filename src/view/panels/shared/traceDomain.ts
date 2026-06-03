@@ -42,7 +42,7 @@ const traceDomainUIMap: Map<ETraceDomain, IDomainDescriptor> =
       [ETraceDomain.UNKNOWN, { icon: '', name: 'Unknown trace origin' }],
       [ETraceDomain.SAME, { icon: '-trace-local', name: 'Same domain' }],
       [ETraceDomain.EXTERNAL, {
-        icon: ' -trace-external',
+        icon: '-trace-external',
         name: 'External domain',
       }],
       [ETraceDomain.EXTENSION, { icon: '-trace-extension', name: 'Extension' }],

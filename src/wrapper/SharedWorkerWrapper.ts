@@ -167,7 +167,12 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       addEventListener: this.port.addEventListener.bind(this.port),
       removeEventListener: this.port.removeEventListener.bind(this.port),
     };
-    this.#wrapMessagePort();
+    this.port.start = this.#portStart.bind(this);
+    this.port.close = this.#portClose.bind(this);
+    // @ts-expect-error: suppress multiple signatures
+    this.port.postMessage = this.#portPostMessage.bind(this);
+    this.port.addEventListener = this.#portAddEventListener.bind(this);
+    this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
   }
 
   override get onerror() {
@@ -214,15 +219,6 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
       methodMetric.eventSelfTime = eventSelfTime;
     };
-  }
-
-  #wrapMessagePort() {
-    this.port.start = this.#portStart.bind(this);
-    this.port.close = this.#portClose.bind(this);
-    // @ts-expect-error: suppress multiple signatures
-    this.port.postMessage = this.#portPostMessage.bind(this);
-    this.port.addEventListener = this.#portAddEventListener.bind(this);
-    this.port.removeEventListener = this.#portRemoveEventListener.bind(this);
   }
 
   #portStart() {

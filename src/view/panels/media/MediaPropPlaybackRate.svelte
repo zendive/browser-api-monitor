@@ -26,6 +26,7 @@
       step="0.01"
       oninput={onChangePlaybackRate}
       {value}
+      aria-label="playback rate"
     />
 
     {value}

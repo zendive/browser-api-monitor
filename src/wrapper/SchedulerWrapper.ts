@@ -79,7 +79,7 @@ export class SchedulerWrapper {
   wrapPostTask() {
     globalThis.scheduler.postTask = function (
       this: SchedulerWrapper,
-      fn: () => Promise<unknown>,
+      fn: SchedulerPostTaskCallback,
       options?: IPostTaskOptions,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);

@@ -26,6 +26,7 @@
       step="0.01"
       oninput={onChangeVolume}
       {value}
+      aria-label="volume"
     />
 
     {value}

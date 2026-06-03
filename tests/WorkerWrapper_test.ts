@@ -19,8 +19,11 @@ import {
 import { NOOP } from '../src/api/const.ts';
 import { wait } from '../src/api/time.ts';
 
+const workerInstances: Set<ApiMonitorWorkerWrapper> = new Set();
 function NewWorker(codeBlob: string) {
-  return new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
+  const w = new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
+  workerInstances.add(w);
+  return w;
 }
 function getMetric() {
   return collectWorkerHistory({
@@ -57,6 +60,10 @@ describe('WorkerWrapper', () => {
 
   afterEach(() => {
     forTest_clearWorkerHistory();
+    workerInstances.forEach((w) => {
+      w.terminate();
+      workerInstances.delete(w);
+    });
   });
 
   test('instance facts', () => {

@@ -9,22 +9,27 @@ export const autoclick: Action<HTMLButtonElement> = (node: HTMLElement) => {
       node.click();
     },
   );
-  function mousedown() {
+
+  function startAutoclick() {
     auto.start();
-    document.addEventListener('mouseup', mouseup);
-  }
-  function mouseup() {
-    auto.stop();
-    document.removeEventListener('mouseup', mouseup);
+    node.addEventListener('mouseleave', stopAutoclick);
+    document.addEventListener('mouseup', stopAutoclick);
   }
 
-  node.addEventListener('mousedown', mousedown);
+  function stopAutoclick() {
+    auto.stop();
+    node.removeEventListener('mouseleave', stopAutoclick);
+    document.removeEventListener('mouseup', stopAutoclick);
+  }
+
+  node.addEventListener('mousedown', startAutoclick);
 
   return {
     destroy() {
       auto.stop();
-      node.removeEventListener('mousedown', mousedown);
-      document.removeEventListener('mouseup', mouseup);
+      node.removeEventListener('mousedown', startAutoclick);
+      node.removeEventListener('mouseleave', stopAutoclick);
+      document.removeEventListener('mouseup', stopAutoclick);
     },
   };
 };

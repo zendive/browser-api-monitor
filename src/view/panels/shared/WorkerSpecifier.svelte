@@ -35,7 +35,7 @@
 </script>
 
 <a
-  href="../worker"
+  href="."
   title="Open Specifier"
   aria-label="Open Specifier"
   role="button"

@@ -398,7 +398,7 @@ export class MediaWrapper {
           options,
         );
 
-        if (link && aelRecord) {
+        if (aelRecord) {
           link.delete(listener);
 
           const aelMethodMetric = eventModel.ael.get(aelRecord.aelTraceId);

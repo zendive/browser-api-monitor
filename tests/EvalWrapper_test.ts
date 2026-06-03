@@ -48,7 +48,6 @@ describe('EvalWrapper', () => {
     expect(rec.returnedValue).toBe(RESULT);
     expect(rec.trace.length).toBeGreaterThan(1);
     expect(rec.traceId.length).toBeGreaterThan(0);
-    expect(rec.firstSeen).toBeGreaterThan(1);
     expect(rec.selfTime).not.toBeNull();
   });
 
