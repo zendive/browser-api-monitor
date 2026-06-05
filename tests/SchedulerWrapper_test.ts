@@ -1,13 +1,12 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import {
   type IPostTask,
   type IYield,
   PostTaskFact,
   SchedulerWrapper,
 } from '../src/wrapper/SchedulerWrapper.ts';
-import { IPanel } from '../src/api/storage/storage.local.ts';
+import type { IPanel } from '../src/api/storage/storage.local.ts';
+import { NOOP } from '../src/api/const.ts';
 
 let api: SchedulerWrapper;
 const schedulerPanel: IPanel = {
@@ -18,19 +17,14 @@ const schedulerPanel: IPanel = {
 };
 
 function getYieldMetrics(api: SchedulerWrapper): IYield {
-  return api.collectHistory(schedulerPanel).yield?.[0];
+  return api.collectHistory(schedulerPanel).yield?.[0]!;
 }
 
 function getPostTaskMetrics(api: SchedulerWrapper): IPostTask {
-  return api.collectHistory(schedulerPanel).postTask?.[0];
+  return api.collectHistory(schedulerPanel).postTask?.[0]!;
 }
 
-function NOOP() {}
-
-describe('scheduler.yield', {
-  sanitizeOps: false,
-  sanitizeResources: false,
-}, () => {
+describe('scheduler.yield', () => {
   beforeEach(() => {
     api = new SchedulerWrapper();
     api.wrapYield();
@@ -48,10 +42,7 @@ describe('scheduler.yield', {
   });
 });
 
-describe('scheduler.postTask', {
-  sanitizeOps: false,
-  sanitizeResources: false,
-}, () => {
+describe('scheduler.postTask', () => {
   beforeEach(() => {
     api = new SchedulerWrapper();
     api.wrapPostTask();
@@ -64,6 +55,7 @@ describe('scheduler.postTask', {
   test('facts', async () => {
     const BAD_DELAY = '0';
     await globalThis.scheduler.postTask(NOOP, {
+      // @ts-expect-error: as expected
       delay: BAD_DELAY,
     }).catch(NOOP);
 

@@ -1,14 +1,13 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { describe, expect, test } from 'vitest';
 import {
+  isTextTrackList,
+  isTimeRanges,
   parseSharedWorkerOptions,
   parseWorkerOptions,
   parseWorkerSpecifier,
   validHandler,
   validTimerDelay,
 } from '../src/wrapper/shared/util.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('parseWorkerOptions', () => {
   test('empty', () => {
@@ -78,6 +77,7 @@ describe('parseSharedWorkerOptions', () => {
   });
 
   test('sameSiteCookies', () => {
+    // @ts-expect-error: too soon?
     expect(parseSharedWorkerOptions({ sameSiteCookies: 'all' })).toMatchObject({
       type: 'classic',
       sameSiteCookies: 'all',
@@ -85,6 +85,7 @@ describe('parseSharedWorkerOptions', () => {
   });
 
   test('extendedLifetime', () => {
+    // @ts-expect-error: too soon?
     expect(parseSharedWorkerOptions({ extendedLifetime: true })).toMatchObject({
       type: 'classic',
       extendedLifetime: true,
@@ -128,29 +129,39 @@ describe('validTimerDelay', () => {
 });
 
 describe('parseWorkerSpecifier', () => {
-  const locationBackup = globalThis.location;
-
-  beforeEach(() => {
-    globalThis.location = { origin: 'https://example.com' };
-  });
-  afterEach(() => {
-    globalThis.location = locationBackup;
-  });
-
   test('with protocol', () => {
     expect(parseWorkerSpecifier('blob:https://example.com/w.js'))
       .toBe('blob:https://example.com/w.js');
   });
 
   test('without protocol', () => {
-    expect(parseWorkerSpecifier('w.js?type=modeule')).toBe(
-      'https://example.com/w.js?type=modeule',
+    expect(parseWorkerSpecifier('w.js?type=module')).toBe(
+      `${globalThis.location.origin}/w.js?type=module`,
     );
-    expect(parseWorkerSpecifier('/w.js?type=modeule')).toBe(
-      'https://example.com/w.js?type=modeule',
+    expect(parseWorkerSpecifier('/w.js?type=module')).toBe(
+      `${globalThis.location.origin}/w.js?type=module`,
     );
   });
 });
 
-// wait till `deno` internal pending timers drain
-await wait(10);
+describe('check media prop instances', () => {
+  function whenCanPlay(el: HTMLAudioElement) {
+    return new Promise((resolve) => {
+      el.addEventListener('canplay', resolve, { once: true });
+    });
+  }
+
+  test('isTimeRanges', async () => {
+    const el = document.createElement('audio');
+    el.preload = 'auto';
+    el.src = `./assets/stub.ogg`;
+
+    await whenCanPlay(el);
+    expect(isTimeRanges(el.buffered)).toBe(true);
+  });
+
+  test('isTextTrackList', () => {
+    const el = document.createElement('video');
+    expect(isTextTrackList(el.textTracks)).toBe(true);
+  });
+});

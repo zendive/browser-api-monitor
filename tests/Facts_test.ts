@@ -1,5 +1,4 @@
-import { describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
+import { describe, expect, test } from 'vitest';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
 
 const fact_1 = Fact.define(0b0001);

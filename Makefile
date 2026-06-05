@@ -15,7 +15,7 @@ DEBUGGERs_IN_PROD := 32
 
 .PHONY: clean
 clean:
-	rm -rf ./node_modules $(BUILD_DIR) $(CHROME_ZIP)
+	rm -rf ./node_modules ./tests/node_modules $(BUILD_DIR) $(CHROME_ZIP)
 
 .PHONY: install
 install:
@@ -37,13 +37,19 @@ valid:
 	deno lint
 	deno run --allow-read --allow-env npm:svelte-check
 
+.PHONY: test-install
+test-install:
+	deno run -A npm:playwright install
+	deno run -A npm:playwright install-deps
+
 .PHONY: test
 test: valid
-	deno test --allow-env=WS_NO_BUFFER_UTIL --parallel --no-check --trace-leaks --reporter=dot
+	deno run -A npm:vitest --config=./tests/vitest.config.ts \
+    --run --browser.headless
 
 .PHONY: test-dev
 test-dev:
-	deno test --allow-env=WS_NO_BUFFER_UTIL --watch --parallel --no-check --trace-leaks
+	deno run -A npm:vitest --config=./tests/vitest.config.ts
 
 .PHONY: test-post-build
 test-post-build:

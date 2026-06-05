@@ -1,6 +1,4 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
@@ -9,7 +7,6 @@ import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('EvalWrapper', () => {
   let apiEval: EvalWrapper;
@@ -88,6 +85,3 @@ describe('EvalWrapper', () => {
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_INTERVAL);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

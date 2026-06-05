@@ -1,4 +1,4 @@
-import type { ITrace } from '../../../wrapper/shared/TraceUtil';
+import type { ITrace } from '../../../wrapper/shared/TraceUtil.ts';
 
 enum ETraceDomain {
   UNKNOWN,

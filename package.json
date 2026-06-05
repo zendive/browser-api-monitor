@@ -1,14 +1,14 @@
 {
   "type": "module",
   "devDependencies": {
-    "@std/expect": "jsr:1.0.19",
-    "@std/testing": "jsr:1.0.18",
     "@types/chrome": "0.1.42",
     "@types/deno": "2.7.0",
+    "@vitest/browser-playwright": "4.1.7",
     "sv": "0.15.3",
     "svelte": "5.56.0",
     "svelte-check": "4.4.8",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
   },
   "dependencies": {
     "@awasm/noble": "0.1.2",

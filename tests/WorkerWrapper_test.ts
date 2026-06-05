@@ -3,10 +3,10 @@ import {
   afterEach,
   beforeAll,
   describe,
+  expect,
   test,
-} from '@std/testing/bdd';
-import { expect, fn } from '@std/expect';
-import './browserPolyfill.ts';
+  vi,
+} from 'vitest';
 import {
   ApiMonitorWorkerWrapper,
   collectWorkerHistory,
@@ -43,6 +43,12 @@ function getRELFact() {
 describe('WorkerWrapper', () => {
   let w: ApiMonitorWorkerWrapper;
   let codeBlob: string;
+
+  function workerAcknowledge(w: EventTarget) {
+    return new Promise((resolve) => {
+      w.addEventListener('message', resolve, { once: true });
+    });
+  }
 
   beforeAll(() => {
     codeBlob = URL.createObjectURL(
@@ -86,40 +92,33 @@ describe('WorkerWrapper', () => {
 
   test('aEL once', async () => {
     w = NewWorker(codeBlob);
-    const mockFn = fn();
+    const mockFn = vi.fn();
 
-    // @ts-expect-error listener Deno signature uses Function
     w.addEventListener('message', mockFn, { once: true });
     w.postMessage(1);
     w.postMessage(2);
 
     await wait(100);
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledOnce();
   });
 
-  // test skipped because deno's worker (preserved for a future migration)
-  // internal implementation of signal aborting
-  // uses removeEventListener - Chrome do not
-  // Worker extends from EventTarget:
-  // - https://github.com/denoland/deno/blob/7aceb221c3ea2fdb4cbe86256c1d1a4475985f04/ext/node/polyfills/internal/event_target.mjs#L600
-  test.skip('aEL abort signal', async () => {
+  test('aEL abort signal', async () => {
     w = NewWorker(codeBlob);
-    const mockFn = fn();
+    const mockFn = vi.fn();
     const ac = new AbortController();
 
-    // @ts-expect-error listener Deno signature uses Function
     w.addEventListener('message', mockFn, { signal: ac.signal });
 
     w.postMessage(1);
-    await wait(100);
-    expect(mockFn).toBeCalledTimes(1);
+    await workerAcknowledge(w);
+    expect(mockFn).toHaveBeenCalledOnce();
 
     ac.abort('test suite');
     expect(ac.signal.aborted).toBe(true);
 
     w.postMessage(2);
     await wait(100);
-    expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toHaveBeenCalledOnce();
   });
 
   test('rEL facts', () => {
@@ -129,6 +128,3 @@ describe('WorkerWrapper', () => {
     expect(getRELFact()).toBe(WorkerRelFact.NOT_FOUND);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

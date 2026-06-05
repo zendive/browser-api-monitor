@@ -1,10 +1,7 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { AnimationWrapper, CafFact } from '../src/wrapper/AnimationWrapper.ts';
 import { TAG_BAD_HANDLER } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('AnimationWrapper', () => {
   let apiAnimation: AnimationWrapper;
@@ -82,6 +79,3 @@ describe('AnimationWrapper', () => {
     expect(Fact.check(rec.facts, CafFact.NOT_FOUND)).toBe(true);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);
