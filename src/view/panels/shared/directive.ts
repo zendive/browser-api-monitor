@@ -10,16 +10,22 @@ export const autoclick: Action<HTMLButtonElement> = (node: HTMLElement) => {
     },
   );
 
+  function onVisibility() {
+    document.hidden && stopAutoclick();
+  }
+
   function startAutoclick() {
     auto.start();
     node.addEventListener('mouseleave', stopAutoclick);
     document.addEventListener('mouseup', stopAutoclick);
+    document.addEventListener('visibilitychange', onVisibility);
   }
 
   function stopAutoclick() {
     auto.stop();
     node.removeEventListener('mouseleave', stopAutoclick);
     document.removeEventListener('mouseup', stopAutoclick);
+    document.removeEventListener('visibilitychange', onVisibility);
   }
 
   node.addEventListener('mousedown', startAutoclick);
