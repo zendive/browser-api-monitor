@@ -13,7 +13,7 @@
     "npm:svelte-check@4.4.8": "4.4.8_svelte@5.56.0_typescript@6.0.3",
     "npm:svelte@5.56.0": "5.56.0",
     "npm:typescript@6.0.3": "6.0.3",
-    "npm:vitest@^4.1.7": "4.1.7_@vitest+browser-playwright@4.1.7_@vitest+browser-webdriverio@4.1.7_vite@8.0.14__esbuild@0.28.0_esbuild@0.28.0_playwright@1.60.0_webdriverio@9.27.2"
+    "npm:vitest@4.1.7": "4.1.7_@vitest+browser-playwright@4.1.7_@vitest+browser-webdriverio@4.1.7_vite@8.0.14__esbuild@0.28.0_esbuild@0.28.0_playwright@1.60.0_webdriverio@9.27.2"
   },
   "npm": {
     "@awasm/noble@0.1.2": {
@@ -2138,7 +2138,7 @@
         "npm:svelte-check@4.4.8",
         "npm:svelte@5.56.0",
         "npm:typescript@6.0.3",
-        "npm:vitest@^4.1.7"
+        "npm:vitest@4.1.7"
       ]
     }
   }
