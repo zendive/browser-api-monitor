@@ -15,6 +15,7 @@ describe('TraceUtil', () => {
     at async https://example1.com/bundle2.js:2:3
     at self (${traceUtil.selfTraceLink}:77:19)`;
   const TEST_STACK_SHORT_HASH = 'https://example2.com/bundle3.js:4:5';
+  const HASH_REGEX = /^[a-f0-9]{64}$/i;
   const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
     at self (${traceUtil.selfTraceLink}:77:19)
     at async (<anonymous>:1:1)
@@ -32,7 +33,7 @@ describe('TraceUtil', () => {
       null,
     );
 
-    expect(traceId.length).toBe(64);
+    expect(traceId).toMatch(HASH_REGEX);
     expect(trace.length).toBe(3);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
@@ -75,7 +76,7 @@ describe('TraceUtil', () => {
       functionTrace,
     );
 
-    expect(traceId.length).toBe(64);
+    expect(traceId).toMatch(HASH_REGEX);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
   });

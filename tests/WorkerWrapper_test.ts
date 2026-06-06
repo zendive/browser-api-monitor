@@ -17,7 +17,6 @@ import {
   WorkerRelFact,
 } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
-import { wait } from '../src/api/time.ts';
 
 const workerInstances: Set<ApiMonitorWorkerWrapper> = new Set();
 function NewWorker(codeBlob: string) {
@@ -44,9 +43,10 @@ describe('WorkerWrapper', () => {
   let w: ApiMonitorWorkerWrapper;
   let codeBlob: string;
 
-  function workerAcknowledge(w: EventTarget) {
+  function workerAcknowledge(w: EventTarget, fn: () => void) {
     return new Promise((resolve) => {
       w.addEventListener('message', resolve, { once: true });
+      fn();
     });
   }
 
@@ -95,10 +95,11 @@ describe('WorkerWrapper', () => {
     const mockFn = vi.fn();
 
     w.addEventListener('message', mockFn, { once: true });
-    w.postMessage(1);
-    w.postMessage(2);
 
-    await wait(100);
+    await workerAcknowledge(w, () => void w.postMessage(1));
+    expect(mockFn).toHaveBeenCalledOnce();
+
+    await workerAcknowledge(w, () => void w.postMessage(2));
     expect(mockFn).toHaveBeenCalledOnce();
   });
 
@@ -109,15 +110,13 @@ describe('WorkerWrapper', () => {
 
     w.addEventListener('message', mockFn, { signal: ac.signal });
 
-    w.postMessage(1);
-    await workerAcknowledge(w);
+    await workerAcknowledge(w, () => void w.postMessage(1));
     expect(mockFn).toHaveBeenCalledOnce();
 
     ac.abort('test suite');
     expect(ac.signal.aborted).toBe(true);
 
-    w.postMessage(2);
-    await wait(100);
+    await workerAcknowledge(w, () => void w.postMessage(2));
     expect(mockFn).toHaveBeenCalledOnce();
   });
 

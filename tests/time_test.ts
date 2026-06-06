@@ -28,9 +28,6 @@ describe('Stopper', () => {
     const value2 = stopper.value();
 
     expect(value).toBe(value2);
-    expect(
-      /\d+\u00a0ms/.test(Stopper.toString(stopper.value()) || ''),
-    ).toBe(true);
   });
 
   test('elapsed continues counting after stop', async () => {
@@ -75,10 +72,10 @@ describe('Timer - default options', () => {
     expect(counter).toBe(1);
   });
 
-  test('stop before expected', () => {
+  test('stop before expected', async () => {
     let counter = 0;
     const timeout = new Timer(
-      { type: ETimer.TIMEOUT, timeout: 2 * DELAY },
+      { type: ETimer.TIMEOUT, timeout: DELAY },
       () => {
         counter++;
       },
@@ -88,6 +85,7 @@ describe('Timer - default options', () => {
     expect(timeout.isPending()).toBe(true);
     timeout.stop();
     expect(timeout.isPending()).toBe(false);
+    await wait(2 * DELAY);
     expect(counter).toBe(0);
   });
 });

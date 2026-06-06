@@ -22,6 +22,11 @@ install:
 	deno install
 	deno audit
 
+.PHONY: install-test-deps
+install-test-deps:
+	deno run -A npm:playwright install
+	deno run -A npm:playwright install-deps
+
 .PHONY: update
 update:
 	deno update --latest
@@ -36,11 +41,6 @@ valid:
 	deno fmt --unstable-component
 	deno lint
 	deno run --allow-read --allow-env npm:svelte-check
-
-.PHONY: test-install
-test-install:
-	deno run -A npm:playwright install
-	deno run -A npm:playwright install-deps
 
 .PHONY: test
 test: valid
