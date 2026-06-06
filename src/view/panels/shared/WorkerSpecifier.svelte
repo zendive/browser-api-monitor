@@ -35,7 +35,7 @@
 </script>
 
 <a
-  href="."
+  href={specifier}
   title="Open Specifier"
   aria-label="Open Specifier"
   role="button"
