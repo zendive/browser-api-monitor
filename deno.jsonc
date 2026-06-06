@@ -38,10 +38,6 @@
     // bundler imports
     "esbuild": "npm:esbuild@0.28.0",
     "esbuild-svelte": "npm:esbuild-svelte@0.9.5",
-
-    // test imports
-    "happy-dom": "npm:happy-dom@20.9.0",
-    "scheduler-polyfill": "npm:scheduler-polyfill@1.3.0",
-    "@okikio/sharedworker": "npm:@okikio/sharedworker@1.1.0",
-  }
+  },
+  "allowScripts": ["npm:edgedriver", "npm:geckodriver"]
 }

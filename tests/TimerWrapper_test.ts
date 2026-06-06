@@ -1,6 +1,4 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import {
   TAG_BAD_DELAY,
   TAG_BAD_HANDLER,
@@ -13,7 +11,6 @@ import {
 } from '../src/wrapper/TimerWrapper.ts';
 import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('wrappers', () => {
   const apiEval = new EvalWrapper();
@@ -314,6 +311,3 @@ describe('wrappers', () => {
     expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

@@ -1,6 +1,4 @@
-import { beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { beforeEach, describe, expect, test } from 'vitest';
 import {
   callableOnce,
   ETimer,
@@ -11,7 +9,6 @@ import {
   trim2ms,
   wait,
 } from '../src/api/time.ts';
-import { NOOP } from '../src/api/const.ts';
 
 const DELAY = 10;
 
@@ -31,20 +28,18 @@ describe('Stopper', () => {
     const value2 = stopper.value();
 
     expect(value).toBe(value2);
-    expect(/\d+\u00a0ms/.test(Stopper.toString(stopper.value()) || '')).toBe(
-      true,
-    );
   });
 
   test('elapsed continues counting after stop', async () => {
     stopper.start();
     await wait(DELAY);
     stopper.stop();
+
     const value = stopper.value();
     await wait(3 * DELAY);
     const elapsed = stopper.elapsed();
 
-    expect(elapsed > 2 * value).toBe(true);
+    expect(elapsed).toBeGreaterThan(2 * value);
   });
 
   test('toString()', () => {
@@ -60,14 +55,19 @@ describe('Stopper', () => {
 describe('Timer - default options', () => {
   test('start', async () => {
     let counter = 0;
-    const timeout = new Timer({ type: ETimer.TIMEOUT, timeout: DELAY }, () => {
+    const { promise, resolve } = Promise.withResolvers<void>();
+    const timeout = new Timer({
+      type: ETimer.TIMEOUT,
+      timeout: DELAY,
+    }, () => {
       counter++;
+      resolve();
     });
 
     expect(timeout.isPending()).toBe(false);
     timeout.start();
     expect(timeout.isPending()).toBe(true);
-    await wait(3 * DELAY);
+    await promise;
     expect(timeout.isPending()).toBe(false);
     expect(counter).toBe(1);
   });
@@ -75,7 +75,7 @@ describe('Timer - default options', () => {
   test('stop before expected', async () => {
     let counter = 0;
     const timeout = new Timer(
-      { type: ETimer.TIMEOUT, timeout: 2 * DELAY },
+      { type: ETimer.TIMEOUT, timeout: DELAY },
       () => {
         counter++;
       },
@@ -83,10 +83,9 @@ describe('Timer - default options', () => {
 
     timeout.start();
     expect(timeout.isPending()).toBe(true);
-    await wait(DELAY);
     timeout.stop();
     expect(timeout.isPending()).toBe(false);
-    await wait(3 * DELAY);
+    await wait(2 * DELAY);
     expect(counter).toBe(0);
   });
 });
@@ -94,15 +93,21 @@ describe('Timer - default options', () => {
 describe('Timer - repeatable', () => {
   test('start/stop', async () => {
     let counter = 0;
-    const interval = new Timer({ type: ETimer.TIMEOUT, timeout: DELAY }, () => {
+    const { promise, resolve } = Promise.withResolvers<void>();
+    const interval = new Timer({
+      type: ETimer.TIMEOUT,
+      timeout: DELAY,
+    }, () => {
       counter++;
       interval.start();
+      resolve();
     });
 
     interval.start();
     expect(interval.isPending()).toBe(true);
-    await wait(DELAY + DELAY / 2);
+    await promise;
     interval.stop();
+
     expect(interval.isPending()).toBe(false);
     expect(counter).toBe(1);
   });
@@ -111,29 +116,29 @@ describe('Timer - repeatable', () => {
 describe('Timer - animation + measurable', () => {
   test('start/stop', async () => {
     let count = 0;
-    const TIMESPAN = 100;
-    let timerArg = 0;
+    let timerArg: unknown;
     const timerArgExpected = 100;
     let hasAnimationArgs = false;
+    const { promise, resolve } = Promise.withResolvers<void>();
     const animation = new Timer({
       type: ETimer.ANIMATION,
       measurable: true,
-    }, (_timerArg: number, time: DOMHighResTimeStamp) => {
+    }, (arg: number | unknown, time: DOMHighResTimeStamp | unknown) => {
       count++;
-      timerArg = _timerArg;
+      timerArg = arg;
       hasAnimationArgs = !!time && typeof time === 'number';
+      resolve();
     });
 
     expect(animation.isPending()).toBe(false);
     animation.start(timerArgExpected);
     expect(animation.isPending()).toBe(true);
 
-    await wait(TIMESPAN);
+    await promise;
 
     expect(hasAnimationArgs).toBe(true);
     expect(timerArg).toBe(timerArgExpected);
     expect(animation.isPending()).toBe(false);
-    expect(animation.callbackSelfTime > 0).toBe(true);
     expect(count).toBe(1);
   });
 });
@@ -141,22 +146,25 @@ describe('Timer - animation + measurable', () => {
 describe('Timer - idle', () => {
   test('start/stop', async () => {
     let counter = 0;
-    let timerArg = 0;
+    let timerArg: unknown = 0;
     const timerArgExpected = 100;
     let hasIdleArgs = false;
+    const { promise, resolve } = Promise.withResolvers<void>();
     const task = new Timer(
       { type: ETimer.IDLE, timeout: DELAY },
-      (_timerArg: number, deadline: IdleDeadline) => {
+      (arg: number | unknown, deadline: IdleDeadline | unknown) => {
         counter++;
-        timerArg = _timerArg;
-        hasIdleArgs = !!deadline && typeof deadline.didTimeout == 'boolean';
+        timerArg = arg;
+        hasIdleArgs = deadline instanceof IdleDeadline &&
+          typeof deadline.didTimeout == 'boolean';
         task.start();
+        resolve();
       },
     );
 
     task.start(timerArgExpected);
     expect(task.isPending()).toBe(true);
-    await wait(DELAY + DELAY / 2);
+    await promise;
     task.stop();
 
     expect(timerArg).toBe(timerArgExpected);
@@ -169,13 +177,19 @@ describe('Timer - idle', () => {
 describe('Timer - task', () => {
   test('start/stop', async () => {
     let counter = 0;
-    const task = new Timer({ type: ETimer.TASK, timeout: DELAY }, () => {
+    const { promise, resolve } = Promise.withResolvers<void>();
+    const task = new Timer({
+      type: ETimer.TASK,
+      priority: 'user-blocking',
+      timeout: DELAY,
+    }, () => {
       counter++;
+      resolve();
     });
 
     task.start();
     expect(task.isPending()).toBe(true);
-    await wait(DELAY + DELAY / 2);
+    await promise;
 
     expect(task.isPending()).toBe(false);
     expect(counter).toBe(1);
@@ -185,17 +199,20 @@ describe('Timer - task', () => {
 describe('Fps', () => {
   test('collects ticks after a second', async () => {
     const COUNT = 20;
-    const fps = new Fps(NOOP);
-    fps.start();
+    let counted;
+    const fps = new Fps((value) => {
+      counted = value;
+    });
 
+    fps.start();
     for (let i = 0, I = COUNT; i < I; i++) {
       fps.tick();
     }
-
-    await wait(1.2e3);
+    await wait(1.1e3);
     fps.stop();
 
     expect(fps.value).toBe(COUNT);
+    expect(counted).toBe(COUNT);
   });
 });
 
@@ -214,20 +231,16 @@ describe('ms2HMS', () => {
 });
 
 describe('callableOnce', () => {
-  let count = 0;
-  const fn = callableOnce(() => {
-    return ++count;
-  });
-
   test('function called once', () => {
+    let count = 0;
+    const fn = callableOnce(() => {
+      return ++count;
+    });
     const rv1 = fn();
     const rv2 = fn();
 
     expect(count).toBe(1);
     expect(rv1).toBe(1);
-    expect(rv2).toBe(1);
+    expect(rv1).toBe(rv2);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

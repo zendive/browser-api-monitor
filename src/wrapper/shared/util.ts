@@ -121,7 +121,7 @@ export function parseMediaFieldValue(prop: string, value: unknown): unknown {
   return String(value);
 }
 
-function isTimeRanges(that: unknown): that is TimeRanges {
+export function isTimeRanges(that: unknown): that is TimeRanges {
   return (
     // for Chrome Browser
     that instanceof TimeRanges ||
@@ -130,7 +130,7 @@ function isTimeRanges(that: unknown): that is TimeRanges {
   );
 }
 
-function isTextTrackList(that: unknown): that is TextTrackList {
+export function isTextTrackList(that: unknown): that is TextTrackList {
   return (
     // for Chrome Browser
     that instanceof TextTrackList ||

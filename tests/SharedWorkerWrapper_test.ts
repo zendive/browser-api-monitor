@@ -1,15 +1,6 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  test,
-} from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
 import { WorkerAelFact, WorkerRelFact } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
-import { wait } from '../src/api/time.ts';
 import {
   ApiMonitorSharedWorkerWrapper,
   collectSharedWorkerHistory,
@@ -73,6 +64,3 @@ describe('SharedWorkerWrapper', () => {
     expect(getPortRelFact()).toBe(WorkerRelFact.NOT_FOUND);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);
