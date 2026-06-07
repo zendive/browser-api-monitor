@@ -68,7 +68,7 @@ prod: test
 	$(BUILD_PROD) $(BUILD_SCRIPT)
 	@$(MAKE) test-post-build
 
-	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json > /dev/null
+	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json ./LICENSE > /dev/null
 	zip --delete $(CHROME_ZIP) "$(OUTPUT_DIR)mirror.html" "$(BUILD_DIR)mirror/*" > /dev/null
 
 	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
