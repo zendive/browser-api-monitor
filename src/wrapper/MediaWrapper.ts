@@ -81,7 +81,7 @@ export type TMediaCommand =
   | 'set-volume'
   | 'set-playbackRate';
 
-const MediaAelFact = /*@__PURE__*/ (() => ({
+export const MediaAelFact = /*@__PURE__*/ (() => ({
   DUPLICATE_ADDITION: Fact.define(1 << 0),
 } as const))();
 export const MediaAelFacts = /*@__PURE__*/ (() =>
@@ -91,7 +91,7 @@ export const MediaAelFacts = /*@__PURE__*/ (() =>
       details: `Addition ignored - listener already in the list of events`,
     }],
   ]))();
-const MediaRelFact = /*@__PURE__*/ (() => ({
+export const MediaRelFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
 export const MediaRelFacts = /*@__PURE__*/ (() =>
