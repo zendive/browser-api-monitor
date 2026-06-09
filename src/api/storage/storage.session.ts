@@ -21,7 +21,7 @@ export async function loadSessionStorage(): Promise<TSession> {
 
   if (isEmpty) {
     await session.clear(); // reset previous version
-    store = { [SESSION_VERSION]: DEFAULT_SESSION };
+    store = { [SESSION_VERSION]: structuredClone(DEFAULT_SESSION) };
     await session.set(store);
   }
 

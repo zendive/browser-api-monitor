@@ -263,7 +263,7 @@ export async function loadLocalStorage(): Promise<TConfig> {
 
   if (isEmpty) {
     await local.clear(); // reset previous version
-    store = { [CONFIG_VERSION]: DEFAULT_CONFIG };
+    store = { [CONFIG_VERSION]: structuredClone(DEFAULT_CONFIG) };
     await local.set(store);
   }
 
