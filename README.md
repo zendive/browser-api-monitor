@@ -1,7 +1,7 @@
-## <img src="./public/img/icon.svg" style="width: 2.5rem; vertical-align: middle;"/> API Monitor - Chrome Developer Tools extension - API panel
+## <img src="./public/img/icon.svg" style="width: 2.5rem; vertical-align: middle;"/> API Monitor DevTools - Chrome Developer Tools extension - API panel
 
 Inspect scheduled timeouts, animation frames, idle callbacks, eval invocations, media, workers, scheduler API.
-- Available in Chrome Web Store as [API Monitor](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
+- Available in Chrome Web Store as [API Monitor DevTools](https://chromewebstore.google.com/detail/api-monitor/bghmfoakiidiedpheejcjhciekobjcjp)
 
 ### Sneak peek
 <details>
