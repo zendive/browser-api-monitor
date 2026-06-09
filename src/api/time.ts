@@ -329,10 +329,10 @@ function toPaddedString(value: number, padding: number) {
 
 const TICK_TIME_LAG_SCALAR = 3;
 export function adjustTelemetryDelay(
-  whenAcknowleged: number,
+  whenAcknowledged: number,
   whenCollected: number,
 ) {
-  const roundtrip = whenAcknowleged - whenCollected;
+  const roundtrip = whenAcknowledged - whenCollected;
   const newDelay = roundtrip * TICK_TIME_LAG_SCALAR;
 
   return Math.max(TELEMETRY_FREQUENCY_HIGH, newDelay);
