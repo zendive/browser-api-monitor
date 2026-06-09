@@ -11,6 +11,7 @@ Inspect scheduled timeouts, animation frames, idle callbacks, eval invocations, 
   ![screenshot](./doc/screenshot-02.png)
   ![screenshot](./doc/screenshot-03.png)
   ![screenshot](./doc/screenshot-04.png)
+  ![screenshot](./doc/screenshot-05.png)
 </details>
 
 <details>
@@ -139,7 +140,7 @@ To assess web application implementation correctness and to expedite issues disc
 
 #### Requirements
 
-- Linux: [deno](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
+- Linux: [deno v2.8.2](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
 - Chrome: v145
 
 #### Instructions
