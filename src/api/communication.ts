@@ -61,7 +61,7 @@ export function postWindow(payload: TMsgOptions) {
   globalThis.postMessage({
     application: APPLICATION_NAME,
     payload,
-  }, '*');
+  }, globalThis.location.origin);
 }
 
 export function listenWindow(
