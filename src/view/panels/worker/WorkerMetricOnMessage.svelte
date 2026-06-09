@@ -53,7 +53,7 @@
             update={updateSort}
           >Self</ColumnSortable>
         </th>
-        <th class="ta-c" title="Calls per second">CPS</th>
+        <th class="ta-c" title="Events per second">EPS</th>
         <th class="ta-c">
           <ColumnSortable
             sort={sortWorkerOnMessage}
@@ -84,7 +84,7 @@
           <td class="ta-r">
             <CellSelfTime time={metric.eventSelfTime} />
           </td>
-          <td class="ta-c">{metric.eventsCps || undefined}</td>
+          <td class="ta-c">{metric.eps || undefined}</td>
           <td class="ta-c"><Variable value={metric.events} /></td>
           <td class="ta-c"><Variable value={metric.calls} /></td>
           <td><CellBypass traceId={metric.traceId} /></td>

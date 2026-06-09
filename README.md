@@ -83,7 +83,7 @@ To assess web application implementation correctness and to expedite issues disc
   - Warn if it exceeds 4/5 (13.33ms) of 60 FPS hardcoded frame-rate (16.66ms).
   - In extended view mode, show mean, standard deviation, and maximum values.
 
-- Count calls per second (CPS) where it's rational.
+- Count calls or events per second (CPS/EPS) where it's rational.
 
 - Detect when incorrect timeout/delay parameters are passed to `setTimeout`, `setInterval`, `requestIdleCallback`, `scheduler.postTask`.
 

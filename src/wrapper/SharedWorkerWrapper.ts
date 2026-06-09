@@ -52,7 +52,7 @@ export interface ISharedWorkerOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
 }
 export interface ISharedWorkerPortStartMetric extends ITraceable {
   calls: number;
@@ -69,7 +69,7 @@ export interface ISharedWorkerPortAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
   canceledCounter: number;
   facts: TFact;
 }
@@ -192,7 +192,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 0,
+          eps: 0,
         };
       },
     );
@@ -316,7 +316,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 0,
+          eps: 0,
           canceledCounter: 0,
           facts: Fact.pure,
         };
@@ -456,7 +456,7 @@ export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
       const prevEvents =
         sharedWorkerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       sharedWorkerMetric.callsMap.set(
         methodMetric.traceId,
         methodMetric.events,
@@ -475,7 +475,7 @@ export function updateSharedWorkerCallsPerSecond(panel: IPanel) {
       const prevEvents =
         sharedWorkerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       sharedWorkerMetric.callsMap.set(
         methodMetric.traceId,
         methodMetric.events,

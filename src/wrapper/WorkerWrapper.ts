@@ -66,19 +66,19 @@ export interface IWorkerOnMessageMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
 }
 export interface IWorkerOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
 }
 export interface IWorkerAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
   canceledCounter: number;
   facts: TFact;
 }
@@ -270,7 +270,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 0,
+          eps: 0,
         };
       },
     );
@@ -315,7 +315,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 0,
+          eps: 0,
         };
       },
     );
@@ -360,7 +360,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
           calls: 0,
           events: 0,
           eventSelfTime: null,
-          eventsCps: 0,
+          eps: 0,
           canceledCounter: 0,
           facts: Fact.pure,
         };
@@ -502,21 +502,21 @@ export function updateWorkerCallsPerSecond(panel: IPanel) {
     workerMetric.onmessage.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
 
     workerMetric.onerror.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
 
     workerMetric.ael.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
   });
