@@ -123,6 +123,7 @@ export function provideChannelApi() {
     { type: ETimer.TIMEOUT, timeout: 1e3 },
     () => {
       if (triesCount++ === MAX_TRIES) {
+        channel.close();
         reject(new Error('Handshake timeout'));
         return;
       }
