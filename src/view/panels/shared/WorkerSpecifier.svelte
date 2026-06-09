@@ -17,13 +17,16 @@
   function openSpecifier(e: MouseEvent) {
     e.preventDefault();
     chrome?.devtools?.panels.openResource(
-      String(specifier),
+      specifier,
       0,
       0,
       // @ts-expect-error: incomplete documentation for callback argument
       (acknowledge: IOpenResourceCallbackArgument) => {
-        if (!acknowledge.isError) return;
-        if (acknowledge.code === 'E_NOTFOUND') {
+        if (
+          typeof acknowledge === 'object' &&
+          acknowledge.isError &&
+          acknowledge.code === 'E_NOTFOUND'
+        ) {
           // try to open resource in another way
           globalThis.open(specifier, '_blank');
         } else {
