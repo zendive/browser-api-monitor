@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+  import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
   import OnlineTimerMetric from './OnlineTimerMetric.svelte';
 
@@ -7,7 +7,7 @@
     metrics,
     caption,
   }: {
-    metrics: TOnlineTimerMetrics[];
+    metrics: IOnlineTimerMetrics[];
     caption: string;
   } = $props();
 </script>
@@ -16,7 +16,7 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={metrics.length} />]
+        {caption} [<Variable value={metrics.length} />]
       </th>
       <th class="ta-c">Handler</th>
       <th class="ta-r">Delay</th>

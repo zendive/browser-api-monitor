@@ -1,5 +1,4 @@
-import { describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
+import { describe, expect, test } from 'vitest';
 import {
   EWrapperCallstackType,
   TAG_INVALID_CALLSTACK_LINK,
@@ -9,12 +8,14 @@ import {
 describe('TraceUtil', () => {
   const traceUtil = new TraceUtil();
   const TEST_STACK = `Error: ${TraceUtil.SIGNATURE}
-  at self (${traceUtil.selfTraceLink}:77:19)
-  at async (<anonymous>:1:1)
-  at call2 (async https://example2.com/bundle3.js:4:5)
-  at call1 (https://example1.com/bundle2.js:3:4)
-  at async https://example1.com/bundle2.js:2:3
-  at self (${traceUtil.selfTraceLink}:77:19)`;
+    at self (${traceUtil.selfTraceLink}:77:19)
+    at async (<anonymous>:1:1)
+    at call2 (async https://example2.com/bundle3.js:4:5)
+    at call1 (https://example1.com/bundle2.js:3:4)
+    at async https://example1.com/bundle2.js:2:3
+    at self (${traceUtil.selfTraceLink}:77:19)`;
+  const TEST_STACK_SHORT_HASH = 'https://example2.com/bundle3.js:4:5';
+  const HASH_REGEX = /^[a-f0-9]{64}$/i;
   const TEST_MISSING_STACK = `Error: ${TraceUtil.SIGNATURE}
     at self (${traceUtil.selfTraceLink}:77:19)
     at async (<anonymous>:1:1)
@@ -27,11 +28,12 @@ describe('TraceUtil', () => {
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_STACK },
       null,
     );
 
+    expect(traceId).toMatch(HASH_REGEX);
     expect(trace.length).toBe(3);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
@@ -49,11 +51,12 @@ describe('TraceUtil', () => {
         link: 'https://example2.com/bundle3.js:4:5',
       },
     ];
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_STACK },
       null,
     );
 
+    expect(traceId).toBe(TEST_STACK_SHORT_HASH);
     expect(trace.length).toBe(1);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
@@ -68,11 +71,12 @@ describe('TraceUtil', () => {
       },
     ];
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
-    const { trace } = traceUtil.getCallstack(
+    const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_MISSING_STACK },
       functionTrace,
     );
 
+    expect(traceId).toMatch(HASH_REGEX);
     expect(trace[0].name).toBe(standard[0].name);
     expect(trace[0].link).toBe(standard[0].link);
   });

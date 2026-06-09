@@ -7,7 +7,7 @@ import {
   requestAnimationFrame,
   requestIdleCallback,
   setTimeout,
-  TELEMETRY_FREQUENCY_30PS,
+  TELEMETRY_FREQUENCY_HIGH,
   TIME_60FPS_MS,
 } from './const.ts';
 
@@ -95,31 +95,31 @@ export enum ETimer {
   IDLE,
   TASK,
 }
-type TTimerMeasurable = {
+interface ITimerMeasurable {
   /** populate `callbackSelfTime` with measured execution time of `callback` (default: false) */
   measurable?: boolean;
-};
-type TTimerTimeout = TTimerMeasurable & {
+}
+interface ITimerTimeout extends ITimerMeasurable {
   type: ETimer.TIMEOUT;
   timeout: number;
-};
-type TTimerAnimation = TTimerMeasurable & {
+}
+interface ITimerAnimation extends ITimerMeasurable {
   type: ETimer.ANIMATION;
-};
-type TTimerIdle = TTimerMeasurable & {
+}
+interface ITimerIdle extends ITimerMeasurable {
   type: ETimer.IDLE;
   timeout: number;
-};
-type TTimerTask = TTimerMeasurable & {
+}
+interface ITimerTask extends ITimerMeasurable {
   type: ETimer.TASK;
   timeout: number;
   priority?: TTaskPriority;
-};
+}
 type TTimerOptions =
-  | TTimerTimeout
-  | TTimerAnimation
-  | TTimerIdle
-  | TTimerTask;
+  | ITimerTimeout
+  | ITimerAnimation
+  | ITimerIdle
+  | ITimerTask;
 
 const timerApi = __mirror__
   ? {
@@ -328,9 +328,12 @@ function toPaddedString(value: number, padding: number) {
 }
 
 const TICK_TIME_LAG_SCALAR = 3;
-export function adjustTelemetryDelay(timeOfCollection: number) {
-  const timeLag = performance.now() - timeOfCollection;
-  const newDelay = timeLag * TICK_TIME_LAG_SCALAR;
+export function adjustTelemetryDelay(
+  whenAcknowledged: number,
+  whenCollected: number,
+) {
+  const roundtrip = whenAcknowledged - whenCollected;
+  const newDelay = roundtrip * TICK_TIME_LAG_SCALAR;
 
-  return Math.max(TELEMETRY_FREQUENCY_30PS, newDelay);
+  return Math.max(TELEMETRY_FREQUENCY_HIGH, newDelay);
 }

@@ -12,7 +12,10 @@ updates:
       day: 'sunday'
     cooldown:
       default-days: 7
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
     allow:
-      # Allow updates for dpecific dependencies
+      # Allow updates for specific dependencies
       - dependency-name: 'jsondiffpatch'
-      - dependency-name: '@noble/hashes'
+      - dependency-name: '@awasm/noble'

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
-  import WorkerSpecifier from './WorkerSpecifier.svelte';
-  import CollapseExpand from './CollapseExpand.svelte';
+  import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
   import WorkerMetricConstructor from './WorkerMetricConstructor.svelte';
   import WorkerMetricTerminate from './WorkerMetricTerminate.svelte';
   import WorkerMetricPostMessage from './WorkerMetricPostMessage.svelte';
@@ -9,20 +9,18 @@
   import WorkerMetricRemoveEventListener from './WorkerMetricRemoveEventListener.svelte';
   import WorkerMetricAddEventListener from './WorkerMetricAddEventListener.svelte';
   import WorkerMetricOnError from './WorkerMetricOnError.svelte';
-  import Variable from '../../shared/Variable.svelte';
 
-  let { metric }: { metric: IWorkerTelemetryMetric } = $props();
+  let { workerMetric }: { workerMetric: IWorkerTelemetryMetric } = $props();
   let isExpanded = $state(true);
 </script>
 
 <fieldset>
   <legend class="ta-r">
-    <WorkerSpecifier specifier={metric.specifier} />
-    {#if metric.online}
-      <span title="Active Workers">
-        [<Variable value={metric.online} />]
-      </span>
-    {/if}
+    <WorkerSpecifier
+      specifier={workerMetric.specifier}
+      online={workerMetric.online}
+      inMemory={workerMetric.inMemory}
+    />
     <span class="divider"></span>
     <CollapseExpand
       {isExpanded}
@@ -31,13 +29,13 @@
   </legend>
 
   <section class:d-none={!isExpanded}>
-    <WorkerMetricConstructor {metric} />
-    <WorkerMetricTerminate {metric} />
-    <WorkerMetricPostMessage {metric} />
-    <WorkerMetricOnMessage {metric} />
-    <WorkerMetricOnError {metric} />
-    <WorkerMetricAddEventListener {metric} />
-    <WorkerMetricRemoveEventListener {metric} />
+    <WorkerMetricConstructor {workerMetric} />
+    <WorkerMetricTerminate metrics={workerMetric.terminate} />
+    <WorkerMetricPostMessage metrics={workerMetric.postMessage} />
+    <WorkerMetricOnMessage metrics={workerMetric.onmessage} />
+    <WorkerMetricOnError metrics={workerMetric.onerror} />
+    <WorkerMetricAddEventListener metrics={workerMetric.ael} />
+    <WorkerMetricRemoveEventListener metrics={workerMetric.rel} />
   </section>
 </fieldset>
 

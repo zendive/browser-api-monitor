@@ -29,36 +29,7 @@
         label="Active Timers"
         navSelector="Active"
         visible={panels.activeTimers.visible}
-        count={ts.telemetry.activeTimers}
-      />
-    {/if}
-
-    {#if panels.worker.wrap}
-      <SummaryBarItem
-        label="Worker"
-        navSelector="Worker"
-        visible={panels.worker.visible}
-        count={ts.telemetry.worker.totalOnline}
-      />
-    {/if}
-
-    {#if panels.scheduler.wrap}
-      <SummaryBarItem
-        label="s.pT"
-        tooltip="scheduler.postTask"
-        navSelector="scheduler.postTask"
-        visible={panels.scheduler.visible}
-        count={ts.telemetry.scheduler.postTask?.length || 0}
-      />
-    {/if}
-
-    {#if panels.scheduler.wrap}
-      <SummaryBarItem
-        label="s.y"
-        tooltip="scheduler.yield"
-        navSelector="scheduler.yield"
-        visible={panels.scheduler.visible}
-        count={ts.telemetry.scheduler.yield?.length || 0}
+        count={ts.telemetry.onlineTimers.length}
       />
     {/if}
 
@@ -148,6 +119,44 @@
         navSelector="cancelIdleCallback"
         visible={panels.cancelIdleCallback.visible}
         count={ts.telemetry.callCounter.cancelIdleCallback}
+      />
+    {/if}
+
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.pT"
+        tooltip="scheduler.postTask"
+        navSelector="scheduler.postTask"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.postTask?.length || 0}
+      />
+    {/if}
+
+    {#if panels.scheduler.wrap}
+      <SummaryBarItem
+        label="s.y"
+        tooltip="scheduler.yield"
+        navSelector="scheduler.yield"
+        visible={panels.scheduler.visible}
+        count={ts.telemetry.scheduler.yield?.length || 0}
+      />
+    {/if}
+
+    {#if panels.worker.wrap}
+      <SummaryBarItem
+        label="Worker"
+        navSelector="_Worker"
+        visible={panels.worker.visible}
+        count={ts.telemetry.worker.total}
+      />
+    {/if}
+
+    {#if panels.sharedWorker.wrap}
+      <SummaryBarItem
+        label="SharedWorker"
+        navSelector="_SharedWorker"
+        visible={panels.sharedWorker.visible}
+        count={ts.telemetry.sharedWorker.total}
       />
     {/if}
   </nav>

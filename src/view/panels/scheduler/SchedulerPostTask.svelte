@@ -10,25 +10,82 @@
   import CellBypass from '../shared/CellBypass.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { metrics }: {
-    metrics: IPostTask[];
-  } = $props();
+  let { metrics }: { metrics: IPostTask[] } = $props();
+  const { sortPostTask } = useConfigState();
+  const sortedMetrics = $derived.by(() =>
+    metrics.toSorted(
+      compareByFieldOrder(sortPostTask.field, sortPostTask.order),
+    )
+  );
+
+  function updateSort(field: keyof IPostTask, order: ESortOrder) {
+    sortPostTask.field = field;
+    sortPostTask.order = order;
+    saveLocalStorage({ sortPostTask });
+  }
 </script>
 
 <table data-navigation-tag="scheduler.postTask">
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        scheduler.postTask Callstack [<Variable value={metrics.length} />]
+        <ColumnSortable
+          sort={sortPostTask}
+          by="firstSeen"
+          update={updateSort}
+        >
+          scheduler.postTask [<Variable value={sortedMetrics.length} />]
+        </ColumnSortable>
       </th>
-      <th class="ta-c">Self</th>
-      <th class="ta-c">priority</th>
-      <th class="ta-c"><span class="icon -facts"></span></th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="selfTime"
+          update={updateSort}
+        >Self</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="priority"
+          update={updateSort}
+        >Priority</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="facts"
+          update={updateSort}
+        ><span class="icon -facts"></span></ColumnSortable>
+      </th>
       <th class="ta-c" title="Calls per second">CPS</th>
-      <th class="ta-c">Called</th>
-      <th class="ta-r">Delay</th>
-      <th class="ta-c">Set</th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="calls"
+          update={updateSort}
+        >Called</ColumnSortable>
+      </th>
+      <th class="ta-r">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="delay"
+          update={updateSort}
+        >Delay</ColumnSortable>
+      </th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortPostTask}
+          by="online"
+          update={updateSort}
+        >Set</ColumnSortable>
+      </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
       <th class="ta-c" title="Breakpoint">
         <span class="icon -breakpoint"></span>
@@ -36,13 +93,10 @@
     </tr>
   </thead>
   <tbody>
-    {#each metrics as metric (metric.traceId)}
+    {#each sortedMetrics as metric (metric.traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
-          <CellCallstack
-            trace={metric.trace}
-            traceDomain={metric.traceDomain}
-          />
+          <CellCallstack trace={metric.trace} />
         </td>
         <td class="ta-r">
           <CellSelfTime time={metric.selfTime} />
@@ -51,7 +105,7 @@
         <td class="ta-c">
           <CellFacts facts={metric.facts} factsMap={PostTaskFacts} />
         </td>
-        <td class="ta-c">{metric.eventsCps || undefined}</td>
+        <td class="ta-c">{metric.cps || undefined}</td>
         <td class="ta-c" title="&lt;called&gt; [&lt;aborted&gt;]">
           <Variable value={metric.calls} />
           {#if metric.aborts}

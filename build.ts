@@ -1,6 +1,5 @@
 import { build, type BuildOptions, context, stop } from 'esbuild';
 import esbuildSvelte from 'esbuild-svelte';
-import { sveltePreprocess } from 'svelte-preprocess';
 import manifest from './manifest.json' with { type: 'json' };
 
 const isProd = Deno.env.get('BUILD_MODE') === 'production';
@@ -10,7 +9,6 @@ const logLevel = isProd ? 'warning' : 'debug';
 const buildOptions: BuildOptions = {
   plugins: [
     esbuildSvelte({
-      preprocess: sveltePreprocess(),
       compilerOptions: { dev: !isProd },
     }),
   ],
@@ -24,6 +22,7 @@ const buildOptions: BuildOptions = {
   outdir: './public/build/',
   define: {
     __development__: `${!isProd}`,
+    __feat_dev_stats__: `false`, // show telemetry statistics in devtools panel
     __app_name__: `"browser-api-monitor@${manifest.version}"`,
     __app_version__: `"${manifest.version}"`,
     __home_page__: `"${manifest.homepage_url}"`,

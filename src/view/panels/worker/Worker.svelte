@@ -1,19 +1,45 @@
 <script lang="ts">
-  import type { IWorkerTelemetry } from '../../../wrapper/WorkerWrapper.ts';
   import Variable from '../../shared/Variable.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
   import WorkerMetric from './WorkerMetric.svelte';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import type {
+    IWorkerTelemetry,
+    IWorkerTelemetryMetric,
+  } from '../../../wrapper/WorkerWrapper.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
 
   let { telemetry }: { telemetry: IWorkerTelemetry } = $props();
+  const { sortWorkerPanel } = useConfigState();
+  const sortedCollection = $derived.by(() =>
+    telemetry.collection.toSorted(
+      compareByFieldOrder(sortWorkerPanel.field, sortWorkerPanel.order),
+    )
+  );
+
+  function updateSort(field: keyof IWorkerTelemetryMetric, order: ESortOrder) {
+    sortWorkerPanel.field = field;
+    sortWorkerPanel.order = order;
+    saveLocalStorage({ sortWorkerPanel });
+  }
 </script>
 
-{#if telemetry.collection.length}
-  <section data-navigation-tag="Worker">
+{#if sortedCollection.length}
+  <section data-navigation-tag="_Worker">
     <div class="label bc-invert">
-      Worker [<Variable value={telemetry.collection.length} />]
+      <ColumnSortable
+        sort={sortWorkerPanel}
+        by="firstSeen"
+        update={updateSort}
+      >
+        Worker [<Variable value={sortedCollection.length} />]
+      </ColumnSortable>
     </div>
 
-    {#each telemetry.collection as metric (metric.specifier)}
-      <WorkerMetric {metric} />
+    {#each sortedCollection as metric (metric.specifier)}
+      <WorkerMetric workerMetric={metric} />
     {/each}
   </section>
 {/if}

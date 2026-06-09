@@ -1,16 +1,17 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/chrome": "0.1.37",
-    "@types/deno": "2.5.0",
-    "sass": "1.97.3",
-    "sv": "0.12.2",
-    "svelte": "5.53.3",
-    "svelte-check": "4.4.3",
-    "typescript": "5.9.3"
+    "@types/chrome": "0.1.42",
+    "@types/deno": "2.7.0",
+    "@vitest/browser-playwright": "4.1.8",
+    "sv": "0.15.3",
+    "svelte": "5.56.0",
+    "svelte-check": "4.4.8",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
   },
   "dependencies": {
-    "@noble/hashes": "2.0.1",
-    "jsondiffpatch": "0.7.3"
+    "@awasm/noble": "0.1.2",
+    "jsondiffpatch": "0.7.6"
   }
 }

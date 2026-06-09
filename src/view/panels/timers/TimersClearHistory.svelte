@@ -1,34 +1,31 @@
 <script lang="ts">
-  import type { TClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
-  import {
-    type ESortOrder,
-    saveLocalStorage,
-  } from '../../../api/storage/storage.local.ts';
+  import type { IClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
   import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
   import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
 
   let {
     clearTimerHistory,
     caption,
-  }: { clearTimerHistory: TClearTimerHistory[]; caption: string } =
-    $props();
+  }: {
+    clearTimerHistory: IClearTimerHistory[];
+    caption: string;
+  } = $props();
   const { sortClearTimers } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     clearTimerHistory.toSorted(
       compareByFieldOrder(sortClearTimers.field, sortClearTimers.order),
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortClearTimers.field = <keyof TClearTimerHistory> field;
+  function updateSort(field: keyof IClearTimerHistory, order: ESortOrder) {
+    sortClearTimers.field = field;
     sortClearTimers.order = order;
-
-    saveLocalStorage({
-      sortClearTimers: $state.snapshot(sortClearTimers),
-    });
+    saveLocalStorage({ sortClearTimers });
   }
 </script>
 
@@ -36,38 +33,40 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={clearTimerHistory.length} />]
+        <ColumnSortable
+          sort={sortClearTimers}
+          by="firstSeen"
+          update={updateSort}
+        >
+          {caption} [<Variable value={clearTimerHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortClearTimers.field}
-          currentFieldOrder={sortClearTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortClearTimers}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortClearTimers.field}
-          currentFieldOrder={sortClearTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortClearTimers}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortClearTimers.field}
-          currentFieldOrder={sortClearTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortClearTimers}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-r">
         <ColumnSortable
-          field="delay"
-          currentField={sortClearTimers.field}
-          currentFieldOrder={sortClearTimers.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortClearTimers}
+          by="delay"
+          update={updateSort}
         >Delay</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

@@ -1,17 +1,17 @@
-import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import { traceUtil, validTimerDelay } from './shared/util.ts';
 import { trim2ms, type TTaskPriority } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { nativePostTask, nativeYield, TAG_BAD_DELAY } from '../api/const.ts';
 
-export interface IYield extends TTraceable {
+export interface IYield extends ITraceable {
   calls: number;
   cps: number;
 }
-export interface IPostTask extends TTraceable {
+export interface IPostTask extends ITraceable {
   calls: number;
-  eventsCps: number;
+  cps: number;
   delay: number | undefined | string;
   priority: undefined | string;
   facts: TFact;
@@ -19,11 +19,11 @@ export interface IPostTask extends TTraceable {
   aborts: number;
   online: number;
 }
-type TPostTaskOptions = {
+interface IPostTaskOptions {
   priority?: TTaskPriority;
   signal?: AbortSignal /*| TaskSignal*/;
   delay?: number;
-};
+}
 
 export interface ISchedulerTelemetry {
   yield: IYield[] | null;
@@ -47,31 +47,29 @@ export class SchedulerWrapper {
   #callsMap: Map</*traceId*/ string, /*calls*/ number> = new Map();
 
   wrapYield() {
-    globalThis.scheduler.yield = function (
-      this: SchedulerWrapper,
-      ...args: unknown[] // reserved for future compatibility, currently no parameters accepted
-    ) {
+    globalThis.scheduler.yield = function (this: SchedulerWrapper) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err);
-      const methodMetric = this.#yieldMap.get(callstack.traceId);
+      const methodMetric = this.#yieldMap.getOrInsertComputed(
+        callstack.traceId,
+        () => {
+          return {
+            traceId: callstack.traceId,
+            trace: callstack.trace,
+            firstSeen: performance.now(),
+            calls: 0,
+            cps: 1,
+          };
+        },
+      );
 
-      if (methodMetric) {
-        methodMetric.calls++;
-      } else {
-        this.#yieldMap.set(callstack.traceId, {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-          calls: 1,
-          cps: 1,
-        });
-      }
+      methodMetric.calls++;
 
       if (traceUtil.shouldPass(callstack.traceId)) {
         if (traceUtil.shouldPause(callstack.traceId)) {
           debugger;
         }
-        return nativeYield(...args);
+        return nativeYield();
       }
 
       return Promise.resolve(); // in case of bypass
@@ -81,74 +79,83 @@ export class SchedulerWrapper {
   wrapPostTask() {
     globalThis.scheduler.postTask = function (
       this: SchedulerWrapper,
-      fn: () => unknown,
-      options?: TPostTaskOptions,
+      fn: SchedulerPostTaskCallback,
+      options?: IPostTaskOptions,
     ) {
       const err = new Error(TraceUtil.SIGNATURE);
       const callstack = traceUtil.getCallstack(err, fn);
-      let methodMetric = this.#postTaskMap.get(callstack.traceId);
       const delay = options?.delay;
       let aborted = false;
       let finished = false;
+      const methodMetric = this.#postTaskMap.getOrInsertComputed(
+        callstack.traceId,
+        () => {
+          return {
+            traceId: callstack.traceId,
+            trace: callstack.trace,
+            firstSeen: performance.now(),
+            calls: 0,
+            cps: 1,
+            delay,
+            facts: Fact.pure,
+            selfTime: null,
+            priority: undefined,
+            aborts: 0,
+            online: 0,
+          };
+        },
+      );
 
-      if (methodMetric) {
-        methodMetric.calls++;
-        methodMetric.priority = options?.priority;
-        methodMetric.online++;
-      } else {
-        methodMetric = {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
-          traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-          calls: 1,
-          eventsCps: 1,
-          delay,
-          facts: <TFact> 0,
-          selfTime: null,
-          priority: options?.priority,
-          aborts: 0,
-          online: 1,
-        };
-        this.#postTaskMap.set(callstack.traceId, methodMetric);
-      }
+      methodMetric.calls++;
+      methodMetric.priority = options?.priority;
+      methodMetric.online++;
 
-      if (validTimerDelay(methodMetric.delay)) {
+      if (validTimerDelay(delay)) {
         methodMetric.delay = trim2ms(delay);
       } else {
-        methodMetric.delay = TAG_BAD_DELAY(methodMetric.delay);
+        methodMetric.delay = TAG_BAD_DELAY(delay);
         methodMetric.facts = Fact.assign(
           methodMetric.facts,
           PostTaskFact.BAD_DELAY,
         );
       }
 
-      options?.signal?.addEventListener?.('abort', function listener() {
-        options.signal?.removeEventListener('abort', listener);
-        if (finished) {
-          return;
-        }
+      if (
+        options?.signal instanceof AbortSignal &&
+        !options.signal.aborted
+      ) {
+        options.signal.addEventListener('abort', () => {
+          if (finished) {
+            return;
+          }
 
-        aborted = true;
-        methodMetric.aborts++;
-        methodMetric.online--;
-      });
+          aborted = true;
+          methodMetric.aborts++;
+          methodMetric.online--;
+        }, {
+          once: true,
+        });
+      }
 
       return nativePostTask(function () {
+        let rv: Promise<unknown> = Promise.resolve(); // in case of bypass
         const start = performance.now();
 
         if (traceUtil.shouldPass(callstack.traceId)) {
           if (traceUtil.shouldPause(callstack.traceId)) {
             debugger;
           }
+          rv = fn();
 
-          const rv = fn();
           methodMetric.selfTime = trim2ms(performance.now() - start);
-          finished = true;
-          if (!aborted) {
-            methodMetric.online--;
-          }
-          return rv;
         }
+
+        finished = true;
+        if (!aborted) {
+          methodMetric.online--;
+        }
+
+        return rv;
       }, options);
     }.bind(this);
   }
@@ -161,7 +168,7 @@ export class SchedulerWrapper {
     globalThis.scheduler.postTask = nativePostTask;
   }
 
-  updateCallsPerSecond(panel: TPanel) {
+  updateCallsPerSecond(panel: IPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     this.#yieldMap.forEach((methodMetric) => {
@@ -174,12 +181,12 @@ export class SchedulerWrapper {
     this.#postTaskMap.forEach((methodMetric) => {
       const prevCalls = this.#callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.calls - prevCalls;
+      methodMetric.cps = methodMetric.calls - prevCalls;
       this.#callsMap.set(methodMetric.traceId, methodMetric.calls);
     });
   }
 
-  collectHistory(panel: TPanel): ISchedulerTelemetry {
+  collectHistory(panel: IPanel): ISchedulerTelemetry {
     return {
       yield: panel.visible ? Array.from(this.#yieldMap.values()) : null,
       postTask: panel.visible ? Array.from(this.#postTaskMap.values()) : null,

@@ -1,6 +1,10 @@
 import { local } from '../api/storage/storage.ts';
 import { APPLICATION_VERSION } from '../api/env.ts';
 
+interface IMetadata {
+  version?: string;
+}
+
 const METADATA_KEY = 'METADATA';
 
 /**
@@ -8,10 +12,11 @@ const METADATA_KEY = 'METADATA';
  * and if not - assume it's a newer version or fresh install
  */
 export async function isExtensionFresh() {
-  const meta = await local.get([METADATA_KEY]);
+  const store = await local.get([METADATA_KEY]);
+  if (!store) return true;
 
-  return !meta || !meta[METADATA_KEY] || !meta[METADATA_KEY].version ||
-    meta[METADATA_KEY].version !== APPLICATION_VERSION;
+  const meta = <IMetadata> store[METADATA_KEY];
+  return !meta || !meta.version || meta.version !== APPLICATION_VERSION;
 }
 
 export function rememberCurrentVersion() {

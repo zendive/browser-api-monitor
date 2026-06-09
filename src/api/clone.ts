@@ -63,21 +63,17 @@ class ObjectsCatalog {
     value: unknown,
     badge: TInstanceBadgeTag | TSymbolBadgeTag,
   ): ICatalogRecord {
-    let record = this.#records.get(value);
-
-    if (!record) {
+    return this.#records.getOrInsertComputed(value, () => {
       ++this.#instanceCounter;
       const id = this.#counterToString(this.#instanceCounter);
-      record = {
+
+      return {
         name: isSymbol(value)
           ? (badge as TSymbolBadgeTag)(value.toString(), id)
           : (badge as TInstanceBadgeTag)(id),
         seen: false,
       };
-      this.#records.set(value, record);
-    }
-
-    return record;
+    });
   }
 }
 
@@ -155,12 +151,12 @@ function serializeMap(
     record.seen = true;
     const obj = {} as ISerializeToObject;
 
-    for (const [k, v] of value) {
+    value.forEach((v, k) => {
       const newKey = serializeMapKey(catalog, k);
       const newValue = recursiveClone(catalog, v);
 
       obj[newKey] = newValue;
-    }
+    });
 
     rv = obj;
   }

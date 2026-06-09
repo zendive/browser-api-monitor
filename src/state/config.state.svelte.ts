@@ -1,4 +1,4 @@
-import { EMsg, portPost } from '../api/communication.ts';
+import { EMsg, postPort } from '../api/communication.ts';
 import {
   DEFAULT_CONFIG,
   loadLocalStorage,
@@ -6,6 +6,7 @@ import {
   type TConfig,
 } from '../api/storage/storage.local.ts';
 import { EWrapperCallstackType } from '../wrapper/shared/TraceUtil.ts';
+import type { ETimerType } from '../wrapper/TimerWrapper.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);
 
@@ -22,9 +23,9 @@ export async function togglePause() {
   await saveLocalStorage({ paused: $state.snapshot(config.paused) });
 
   if (config.paused) {
-    portPost({ msg: EMsg.STOP_OBSERVE });
+    postPort({ msg: EMsg.STOP_OBSERVE });
   } else {
-    portPost({ msg: EMsg.START_OBSERVE });
+    postPort({ msg: EMsg.START_OBSERVE });
   }
 }
 
@@ -58,4 +59,8 @@ export async function togglePanelWrap(index: number) {
 export async function togglePanelVisibility(index: number) {
   config.panels[index].visible = !config.panels[index].visible;
   await saveLocalStorage({ panels: $state.snapshot(config.panels) });
+}
+
+export function postTimerCommand(type: ETimerType, handler: number) {
+  postPort({ msg: EMsg.TIMER_COMMAND, type, handler });
 }

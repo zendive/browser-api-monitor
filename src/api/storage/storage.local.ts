@@ -1,22 +1,49 @@
+import type { IEvalHistory } from '../../wrapper/EvalWrapper.ts';
+import type { IPostTask, IYield } from '../../wrapper/SchedulerWrapper.ts';
 import type {
-  TCancelIdleCallbackHistory,
-  TRequestIdleCallbackHistory,
+  ICancelIdleCallbackHistory,
+  IRequestIdleCallbackHistory,
 } from '../../wrapper/IdleWrapper.ts';
 import type {
-  TCancelAnimationFrameHistory,
-  TRequestAnimationFrameHistory,
+  ICancelAnimationFrameHistory,
+  IRequestAnimationFrameHistory,
 } from '../../wrapper/AnimationWrapper.ts';
 import type {
-  TClearTimerHistory,
-  TSetTimerHistory,
+  IClearTimerHistory,
+  ISetTimerHistory,
 } from '../../wrapper/TimerWrapper.ts';
+import type {
+  IWorkerAelMetric,
+  IWorkerConstructorMetric,
+  IWorkerOnErrorMetric,
+  IWorkerOnMessageMetric,
+  IWorkerPostMessageMetric,
+  IWorkerRelMetric,
+  IWorkerTelemetryMetric,
+  IWorkerTerminateMetric,
+} from '../../wrapper/WorkerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
 import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
+import { ESortOrder } from '../const.ts';
+import type {
+  ISharedWorkerConstructorMetric,
+  ISharedWorkerOnErrorMetric,
+  ISharedWorkerPortAelMetric,
+  ISharedWorkerPortCloseMetric,
+  ISharedWorkerPortPostMessageMetric,
+  ISharedWorkerPortRelMetric,
+  ISharedWorkerPortStartMetric,
+  ISharedWorkerTelemetryMetric,
+} from '../../wrapper/SharedWorkerWrapper.ts';
+import type {
+  IMediaAelMetric,
+  IMediaRelMetric,
+  IMediaTelemetryMetrics,
+} from '../../wrapper/MediaWrapper.ts';
 
 type TPanelKey =
   | 'callsSummary'
   | 'media'
-  | 'worker'
   | 'scheduler'
   | 'eval'
   | 'activeTimers'
@@ -27,27 +54,27 @@ type TPanelKey =
   | 'requestAnimationFrame'
   | 'cancelAnimationFrame'
   | 'requestIdleCallback'
-  | 'cancelIdleCallback';
+  | 'cancelIdleCallback'
+  | 'worker'
+  | 'sharedWorker';
 
-export type TPanel = {
+export interface IPanel {
   key: TPanelKey;
   label: string;
   visible: boolean;
   wrap?: boolean;
-};
+}
 export type TPanelMap = {
-  [K in TPanelKey]: TPanel;
+  [K in TPanelKey]: IPanel;
 };
 
 export type TConfig = typeof DEFAULT_CONFIG;
-export type TConfigField = Partial<TConfig>;
+export interface IConfigField extends Partial<TConfig> {}
 
-export const DEFAULT_PANELS: TPanel[] = [
+export const DEFAULT_PANELS: IPanel[] = [
   { key: 'callsSummary', label: 'Summary Bar', visible: true },
   { key: 'media', label: 'Media', visible: true },
   { key: 'activeTimers', label: 'Active Timers', visible: false },
-  { key: 'worker', label: 'Worker', visible: true, wrap: true },
-  { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
   { key: 'eval', label: 'eval', visible: true, wrap: false },
   { key: 'setTimeout', label: 'setTimeout', visible: true, wrap: true },
   {
@@ -92,54 +119,137 @@ export const DEFAULT_PANELS: TPanel[] = [
     visible: true,
     wrap: true,
   },
+  { key: 'scheduler', label: 'Scheduler', visible: true, wrap: true },
+  { key: 'worker', label: 'Worker', visible: true, wrap: true },
+  { key: 'sharedWorker', label: 'SharedWorker', visible: true, wrap: true },
 ];
-
-export enum ESortOrder {
-  ASCENDING,
-  DESCENDING,
-}
-
-export const DEFAULT_SORT_SET_TIMERS = {
-  field: <keyof TSetTimerHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CLEAR_TIMERS = {
-  field: <keyof TClearTimerHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_RAF = {
-  field: <keyof TRequestAnimationFrameHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CAF = {
-  field: <keyof TCancelAnimationFrameHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_RIC = {
-  field: <keyof TRequestIdleCallbackHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
-export const DEFAULT_SORT_CIC = {
-  field: <keyof TCancelIdleCallbackHistory> 'calls',
-  order: <ESortOrder> ESortOrder.DESCENDING,
-};
 
 export const DEFAULT_CONFIG = {
   panels: DEFAULT_PANELS,
-  sortSetTimers: DEFAULT_SORT_SET_TIMERS,
-  sortClearTimers: DEFAULT_SORT_CLEAR_TIMERS,
-  sortRequestAnimationFrame: DEFAULT_SORT_RAF,
-  sortCancelAnimationFrame: DEFAULT_SORT_CAF,
-  sortRequestIdleCallback: DEFAULT_SORT_RIC,
-  sortCancelIdleCallback: DEFAULT_SORT_CIC,
   paused: false,
   devtoolsPanelShown: false,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
   keepAwake: false,
+  sortSharedWorkerPanel: {
+    field: <keyof ISharedWorkerTelemetryMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerConstructor: {
+    field: <keyof ISharedWorkerConstructorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerOnError: {
+    field: <keyof ISharedWorkerOnErrorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortStart: {
+    field: <keyof ISharedWorkerPortStartMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortClose: {
+    field: <keyof ISharedWorkerPortCloseMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortPostMessage: {
+    field: <keyof ISharedWorkerPortPostMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortAel: {
+    field: <keyof ISharedWorkerPortAelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSharedWorkerPortRel: {
+    field: <keyof ISharedWorkerPortRelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerPanel: {
+    field: <keyof IWorkerTelemetryMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerConstructor: {
+    field: <keyof IWorkerConstructorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerTerminate: {
+    field: <keyof IWorkerTerminateMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerPostMessage: {
+    field: <keyof IWorkerPostMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerOnMessage: {
+    field: <keyof IWorkerOnMessageMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerOnError: {
+    field: <keyof IWorkerOnErrorMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerAel: {
+    field: <keyof IWorkerAelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortWorkerRel: {
+    field: <keyof IWorkerRelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortPostTask: {
+    field: <keyof IPostTask> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortYield: {
+    field: <keyof IYield> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortEval: {
+    field: <keyof IEvalHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortSetTimers: {
+    field: <keyof ISetTimerHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortClearTimers: {
+    field: <keyof IClearTimerHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortRequestAnimationFrame: {
+    field: <keyof IRequestAnimationFrameHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortCancelAnimationFrame: {
+    field: <keyof ICancelAnimationFrameHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortRequestIdleCallback: {
+    field: <keyof IRequestIdleCallbackHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortCancelIdleCallback: {
+    field: <keyof ICancelIdleCallbackHistory> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortVideoPanel: {
+    field: <keyof IMediaTelemetryMetrics> 'firstSeen',
+    order: ESortOrder.ASCENDING,
+  },
+  sortAudioPanel: {
+    field: <keyof IMediaTelemetryMetrics> 'firstSeen',
+    order: ESortOrder.ASCENDING,
+  },
+  sortMediaAel: {
+    field: <keyof IMediaAelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
+  sortMediaRel: {
+    field: <keyof IMediaRelMetric> 'firstSeen',
+    order: ESortOrder.DESCENDING,
+  },
 };
 const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;
 
-export function panelsArray2Map(panels: TPanel[]) {
+export function panelsArray2Map(panels: IPanel[]) {
   return panels.reduce(
     (acc, o) => Object.assign(acc, { [o.key]: o }),
     {} as TPanelMap,
@@ -153,18 +263,18 @@ export async function loadLocalStorage(): Promise<TConfig> {
 
   if (isEmpty) {
     await local.clear(); // reset previous version
-    store = { [CONFIG_VERSION]: DEFAULT_CONFIG };
+    store = { [CONFIG_VERSION]: structuredClone(DEFAULT_CONFIG) };
     await local.set(store);
   }
 
-  return store[CONFIG_VERSION];
+  return <TConfig> store[CONFIG_VERSION];
 }
 
 /**
  * @NOTE: vulnerable to "time of check / time of use" bug (TOC/TOU)
  * @param value
  */
-export async function saveLocalStorage(value: TConfigField) {
+export async function saveLocalStorage(value: IConfigField) {
   const store = await loadLocalStorage();
 
   Object.assign(store, value);
@@ -176,8 +286,8 @@ export function onLocalStorageChange(
   callback: (newValue: TConfig, oldValue: TConfig | undefined) => void,
 ) {
   local.onChanged.addListener((change) => {
-    const newValue = change?.[CONFIG_VERSION]?.newValue;
-    const oldValue = change?.[CONFIG_VERSION]?.oldValue;
+    const newValue = <TConfig | undefined> change?.[CONFIG_VERSION]?.newValue;
+    const oldValue = <TConfig | undefined> change?.[CONFIG_VERSION]?.oldValue;
 
     if (
       !newValue || Object.keys(newValue).length !== DEFAULT_CONFIG_KEYS_LENGTH

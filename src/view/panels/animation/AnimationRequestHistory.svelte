@@ -1,34 +1,30 @@
 <script lang="ts">
-  import type {
-    TCancelAnimationFrameHistory,
-    TRequestAnimationFrameHistory,
-  } from '../../../wrapper/AnimationWrapper.ts';
-  import {
-    ESortOrder,
-    saveLocalStorage,
-  } from '../../../api/storage/storage.local.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
   import AnimationCancelHistory from './AnimationCancelHistory.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
   import AnimationRequestHistoryMetric from './AnimationRequestHistoryMetric.svelte';
+  import type {
+    ICancelAnimationFrameHistory,
+    IRequestAnimationFrameHistory,
+  } from '../../../wrapper/AnimationWrapper.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { TerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
 
   let {
     rafHistory,
     cafHistory,
     caption = '',
   }: {
-    rafHistory: TRequestAnimationFrameHistory[];
-    cafHistory: TCancelAnimationFrameHistory[] | null;
+    rafHistory: IRequestAnimationFrameHistory[];
+    cafHistory: ICancelAnimationFrameHistory[] | null;
     caption: string;
   } = $props();
+  const popoverId = $derived.by(() => `${caption}_popover_group`);
   const { sortRequestAnimationFrame } = useConfigState();
-  let dialogEl: Dialog;
-  let alertEl: Alert;
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     rafHistory.toSorted(
       compareByFieldOrder(
         sortRequestAnimationFrame.field,
@@ -36,97 +32,86 @@
       ),
     )
   );
+  const tph = new TerminatorsPopoverHelper();
+  const terminators = $derived.by(() => {
+    if (!tph.traceId) return;
 
-  function onChangeSort(_field: string, _order: ESortOrder) {
-    sortRequestAnimationFrame.field =
-      <keyof TRequestAnimationFrameHistory> _field;
-    sortRequestAnimationFrame.order = _order;
+    const metric = rafHistory.find((r) => r.traceId === tph.traceId);
+    if (!metric || !metric.canceledByTraceIds?.length) return;
 
-    saveLocalStorage({
-      sortRequestAnimationFrame: $state.snapshot(sortRequestAnimationFrame),
-    });
-  }
+    return cafHistory?.filter((r) =>
+      metric.canceledByTraceIds?.includes(r.traceId)
+    );
+  });
 
-  let cafHistoryMetrics: TCancelAnimationFrameHistory[] = $state([]);
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = cafHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        cafHistoryMetrics.push(record);
-      }
-    }
-
-    if (cafHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    cafHistoryMetrics.splice(0);
+  function updateSort(
+    field: keyof IRequestAnimationFrameHistory,
+    order: ESortOrder,
+  ) {
+    sortRequestAnimationFrame.field = field;
+    sortRequestAnimationFrame.order = order;
+    saveLocalStorage({ sortRequestAnimationFrame });
   }
 </script>
 
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which requestAnimationFrame with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. Requires cancelAnimationFrame panel enabled."
->
-  <AnimationCancelHistory
-    caption="Cancelled by"
-    cafHistory={$state.snapshot(cafHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires cancelAnimationFrame panel enabled
-</Alert>
+{#if tph.traceId}
+  <div
+    id={popoverId}
+    popover="hint"
+    class="metrics-popover"
+    class:-empty={terminators?.length === 0}
+    ontoggle={tph.toggle}
+  >
+    {#if terminators?.length}
+      <AnimationCancelHistory
+        caption="Terminated by"
+        cafHistory={terminators}
+      />
+    {:else}
+      Requires cancelAnimationFrame panel enabled
+    {/if}
+  </div>
+{/if}
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={rafHistory.length} />]
+        <ColumnSortable
+          sort={sortRequestAnimationFrame}
+          by="firstSeen"
+          update={updateSort}
+        >
+          {caption} [<Variable value={rafHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortRequestAnimationFrame.field}
-          currentFieldOrder={sortRequestAnimationFrame.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestAnimationFrame}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
@@ -138,7 +123,11 @@
 
   <tbody>
     {#each sortedMetrics as metric (metric.traceId)}
-      <AnimationRequestHistoryMetric {metric} {onFindRegressors} />
+      <AnimationRequestHistoryMetric
+        {metric}
+        {popoverId}
+        {tph}
+      />
     {/each}
   </tbody>
 </table>

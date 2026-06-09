@@ -1,29 +1,41 @@
-<script lang="ts">
+<script
+  lang="ts"
+  generics="TField, TSort extends { field: TField; order: ESortOrder }"
+>
   import type { Snippet } from 'svelte';
-  import { ESortOrder } from '../../../api/storage/storage.local.ts';
+  import { ESortOrder } from '../../../api/const.ts';
 
   let {
-    field,
-    currentField,
-    currentFieldOrder,
-    eventChangeSorting,
+    sort,
+    by,
+    update,
     children,
   }: {
-    field: string;
-    currentField: string;
-    currentFieldOrder: ESortOrder;
-    eventChangeSorting: (field: string, order: ESortOrder) => void;
+    sort: TSort;
+    by: TSort['field'];
+    update: (field: TField, order: ESortOrder) => void;
     children?: Snippet;
   } = $props();
 
+  const ORDER_MAP = {
+    [ESortOrder.ASCENDING]: ' ascending',
+    [ESortOrder.DESCENDING]: ' descending',
+  };
+  let tooltip = $derived.by(() => {
+    let rv = `Sort by ${by}`;
+    if (by === sort.field) {
+      rv += ORDER_MAP[sort.order];
+    }
+    return rv;
+  });
+
   function changeSort(e: MouseEvent) {
     e.preventDefault();
-
-    eventChangeSorting(
-      field,
-      field !== currentField
+    update(
+      by,
+      by !== sort.field
         ? ESortOrder.DESCENDING
-        : currentFieldOrder === ESortOrder.DESCENDING
+        : sort.order === ESortOrder.DESCENDING
         ? ESortOrder.ASCENDING
         : ESortOrder.DESCENDING,
     );
@@ -35,14 +47,14 @@
   role="cell"
   tabindex="0"
   onclick={changeSort}
-  title={`Sort by ${field}`}
+  title={tooltip}
 >
   {@render children?.()}
-  {#if field === currentField}
+  {#if by === sort.field}
     <span
       class="icon -small"
-      class:-up={currentFieldOrder === ESortOrder.ASCENDING}
-      class:-down={currentFieldOrder === ESortOrder.DESCENDING}
+      class:-up={sort.order === ESortOrder.ASCENDING}
+      class:-down={sort.order === ESortOrder.DESCENDING}
     ></span>
   {/if}
 </a>

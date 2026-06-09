@@ -1,9 +1,8 @@
 import {
   EMsg,
-  portListen,
-  runtimePost,
-  windowListen,
-  windowPost,
+  listenPort,
+  postRuntime,
+  provideChannelApi,
 } from './api/communication.ts';
 import {
   loadLocalStorage,
@@ -14,34 +13,39 @@ import {
   onSessionStorageChange,
 } from './api/storage/storage.session.ts';
 
-Promise.all([loadLocalStorage(), loadSessionStorage()]).then(
-  ([config, session]) => {
-    windowPost({ msg: EMsg.CONFIG, config });
-    windowPost({ msg: EMsg.SESSION, session });
-
-    if (config.devtoolsPanelShown && !config.paused) {
-      windowPost({ msg: EMsg.START_OBSERVE });
-    }
-
-    portListen((o) => {
+Promise.all([
+  loadLocalStorage(),
+  loadSessionStorage(),
+  provideChannelApi(),
+]).then(
+  ([config, session, { listenChannel, postChannel }]) => {
+    listenPort((o) => {
       if (o.msg === EMsg.CONFIRM_INJECTION) {
-        runtimePost({ msg: EMsg.INJECTION_CONFIRMED });
+        postRuntime({ msg: EMsg.INJECTION_CONFIRMED });
       } else {
-        windowPost(o);
+        postChannel(o);
       }
     });
-    windowListen(runtimePost);
+    listenChannel(postRuntime);
+
+    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
+
+    if (config.devtoolsPanelShown && !config.paused) {
+      postChannel({ msg: EMsg.START_OBSERVE });
+    }
 
     onLocalStorageChange((config) => {
-      windowPost({ msg: EMsg.CONFIG, config });
+      postChannel({ msg: EMsg.CONFIG, config });
     });
     onSessionStorageChange((session) => {
-      windowPost({ msg: EMsg.SESSION, session });
+      postChannel({ msg: EMsg.SESSION, session });
     });
 
-    runtimePost({ msg: EMsg.CONTENT_SCRIPT_LOADED });
-
-    __development__ &&
-      console.log('api-monitor-cs-isolated.ts', performance.now());
+    postRuntime({ msg: EMsg.CONTENT_SCRIPT_LOADED });
   },
-);
+).catch((reason?: { message?: string }) => {
+  console.error(reason?.message);
+});
+
+__development__ &&
+  console.log('api-monitor-cs-isolated.ts', performance.now());

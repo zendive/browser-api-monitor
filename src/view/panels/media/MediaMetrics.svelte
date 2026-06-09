@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { type TMediaMetrics } from '../../../wrapper/MediaWrapper.ts';
+  import { type IMediaTelemetryMetrics } from '../../../wrapper/MediaWrapper.ts';
   import MediaCommands from './MediaCommands.svelte';
   import MediaEvent from './MediaEvent.svelte';
   import MediaProp from './MediaProp.svelte';
 
   let { mediaId, events, props }: {
     mediaId: string;
-    events: TMediaMetrics['events'];
-    props: TMediaMetrics['props'];
+    events: IMediaTelemetryMetrics['events'];
+    props: IMediaTelemetryMetrics['props'];
   } = $props();
-  let isSameSource = $derived.by(() => props.src === props.currentSrc);
+  let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
   const duplicateSrc = ['currentSrc', 'src'];
   let filteredProps = $derived.by(() => {
     let rv = Object.entries(props);
@@ -26,7 +26,7 @@
   <caption class="bc-invert ta-l">
     <MediaCommands
       {mediaId}
-      paused={props.paused}
+      paused={props['paused']}
     />
   </caption>
   <tbody>
@@ -35,8 +35,8 @@
         <table class="w-full">
           <caption class="bc-invert ta-l">Events</caption>
           <tbody>
-            {#each Object.entries(events) as [name, value] (name)}
-              <MediaEvent {name} {value} />
+            {#each events as event (event.name)}
+              <MediaEvent {mediaId} metric={event} />
             {/each}
           </tbody>
         </table>
@@ -48,7 +48,7 @@
             {#if isSameSource}
               <MediaProp
                 name="src/currentSrc"
-                value={props.src}
+                value={props['src']}
                 {mediaId}
               />
             {/if}

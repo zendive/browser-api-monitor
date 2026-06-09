@@ -1,34 +1,30 @@
 <script lang="ts">
-  import {
-    type TCancelIdleCallbackHistory,
-    type TRequestIdleCallbackHistory,
-  } from '../../../wrapper/IdleWrapper.ts';
-  import {
-    ESortOrder,
-    saveLocalStorage,
-  } from '../../../api/storage/storage.local.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import IdleCallbackCancelHistory from './IdleCallbackCancelHistory.svelte';
-  import Dialog from '../../shared/Dialog.svelte';
-  import Alert from '../../shared/Alert.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
   import IdleCallbackRequestHistoryMetric from './IdleCallbackRequestHistoryMetric.svelte';
+  import {
+    type ICancelIdleCallbackHistory,
+    type IRequestIdleCallbackHistory,
+  } from '../../../wrapper/IdleWrapper.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { TerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
 
   let {
     ricHistory,
     cicHistory = null,
     caption = '',
   }: {
-    ricHistory: TRequestIdleCallbackHistory[];
-    cicHistory: TCancelIdleCallbackHistory[] | null;
+    ricHistory: IRequestIdleCallbackHistory[];
+    cicHistory: ICancelIdleCallbackHistory[] | null;
     caption: string;
   } = $props();
-  let dialogEl: Dialog;
-  let alertEl: Alert;
+  const popoverId = $derived.by(() => `${caption}_popover_group`);
   const { sortRequestIdleCallback } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     ricHistory.toSorted(
       compareByFieldOrder(
         sortRequestIdleCallback.field,
@@ -36,114 +32,101 @@
       ),
     )
   );
+  const tph = new TerminatorsPopoverHelper();
+  const terminators = $derived.by(() => {
+    if (!tph.traceId) return;
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortRequestIdleCallback.field =
-      <keyof TRequestIdleCallbackHistory> field;
+    const metric = ricHistory.find((r) => r.traceId === tph.traceId);
+    if (!metric || !metric.canceledByTraceIds?.length) return;
+
+    return cicHistory?.filter((r) =>
+      metric.canceledByTraceIds?.includes(r.traceId)
+    );
+  });
+
+  function updateSort(
+    field: keyof IRequestIdleCallbackHistory,
+    order: ESortOrder,
+  ) {
+    sortRequestIdleCallback.field = field;
     sortRequestIdleCallback.order = order;
-
-    saveLocalStorage({
-      sortRequestIdleCallback: $state.snapshot(sortRequestIdleCallback),
-    });
-  }
-
-  let cicHistoryMetrics: TCancelIdleCallbackHistory[] = $state([]);
-
-  function onFindRegressors(regressors: string[] | null) {
-    if (!regressors?.length) {
-      return;
-    }
-
-    for (let n = regressors.length - 1; n >= 0; n--) {
-      const traceId = regressors[n];
-      let record = cicHistory?.find((r) => r.traceId === traceId);
-      if (record) {
-        cicHistoryMetrics.push(record);
-      }
-    }
-
-    if (cicHistoryMetrics.length) {
-      dialogEl.show();
-    } else {
-      alertEl.show();
-    }
-  }
-
-  function onCloseDialog() {
-    cicHistoryMetrics.splice(0);
+    saveLocalStorage({ sortRequestIdleCallback });
   }
 </script>
 
-<Dialog
-  bind:this={dialogEl}
-  eventClose={onCloseDialog}
-  title="Places from which requestIdleCallback with current callstack was prematurely cancelled"
-  description="The information is actual only on time of demand. Requires cancelIdleCallback panel enabled."
->
-  <IdleCallbackCancelHistory
-    caption="Cancelled by"
-    cicHistory={$state.snapshot(cicHistoryMetrics)}
-  />
-</Dialog>
-
-<Alert bind:this={alertEl} title="Attention">
-  Requires cancelIdleCallback panel enabled
-</Alert>
+{#if tph.traceId}
+  <div
+    id={popoverId}
+    popover="hint"
+    class="metrics-popover"
+    class:-empty={terminators?.length === 0}
+    ontoggle={tph.toggle}
+  >
+    {#if terminators?.length}
+      <IdleCallbackCancelHistory
+        caption="Terminated by"
+        cicHistory={terminators}
+      />
+    {:else}
+      Requires cancelIdleCallback panel enabled
+    {/if}
+  </div>
+{/if}
 
 <table data-navigation-tag={caption}>
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={ricHistory.length} />]
+        <ColumnSortable
+          sort={sortRequestIdleCallback}
+          by="firstSeen"
+          update={updateSort}
+        >
+          {caption} [<Variable value={ricHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">didTimeout</th>
       <th class="ta-c">
         <ColumnSortable
-          field="selfTime"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="selfTime"
+          update={updateSort}
         >Self</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c" title="Calls per second">CPS</th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-r">
         <ColumnSortable
-          field="delay"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="delay"
+          update={updateSort}
         >Timeout</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="online"
-          currentField={sortRequestIdleCallback.field}
-          currentFieldOrder={sortRequestIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortRequestIdleCallback}
+          by="online"
+          update={updateSort}
         >Set</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>
@@ -157,7 +140,8 @@
     {#each sortedMetrics as metric (metric.traceId)}
       <IdleCallbackRequestHistoryMetric
         {metric}
-        {onFindRegressors}
+        {popoverId}
+        {tph}
       />
     {/each}
   </tbody>

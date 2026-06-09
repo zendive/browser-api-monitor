@@ -1,6 +1,4 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { EvalFact, EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { SetTimerFact, TimerWrapper } from '../src/wrapper/TimerWrapper.ts';
 import { TAG_UNDEFINED } from '../src/api/clone.ts';
@@ -9,7 +7,6 @@ import {
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('EvalWrapper', () => {
   let apiEval: EvalWrapper;
@@ -66,9 +63,10 @@ describe('EvalWrapper', () => {
 
   test('setTimeout - isEval recorded', () => {
     const CODE = '(1+2)';
-    setTimeout(CODE);
+    const handler = globalThis.setTimeout(CODE, 10);
     const timerRec = Array.from(apiTimer.setTimeoutHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
+    globalThis.clearTimeout(handler);
 
     expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
@@ -77,17 +75,13 @@ describe('EvalWrapper', () => {
 
   test('setInterval - isEval recorded', () => {
     const CODE = '(1+2)';
-    const handler = setInterval(CODE, 123);
+    const handler = globalThis.setInterval(CODE, 10);
     const timerRec = Array.from(apiTimer.setIntervalHistory.values())[0];
     const evalRec = Array.from(apiEval.evalHistory.values())[0];
+    globalThis.clearInterval(handler);
 
     expect(Fact.check(timerRec.facts, SetTimerFact.NOT_A_FUNCTION)).toBe(true);
     expect(evalRec.code).toBe(CODE);
     expect(evalRec.returnedValue).toBe(TAG_EVAL_RETURN_SET_INTERVAL);
-
-    clearInterval(handler);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

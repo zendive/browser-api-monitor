@@ -1,19 +1,19 @@
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import {
   cancelAnimationFrame,
   requestAnimationFrame,
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import { trim2ms } from '../api/time.ts';
 import { traceUtil, validHandler } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
-export type TRequestAnimationFrameHistory = TTraceable & {
+export interface IRequestAnimationFrameHistory extends ITraceable {
   calls: number;
   handler: number | undefined | string;
   selfTime: number | null;
@@ -21,12 +21,12 @@ export type TRequestAnimationFrameHistory = TTraceable & {
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   cps: number;
-};
-export type TCancelAnimationFrameHistory = TTraceable & {
+}
+export interface ICancelAnimationFrameHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | undefined | string;
-};
+}
 
 export const CafFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
@@ -49,9 +49,9 @@ export class AnimationWrapper {
   #callsMap = new Map</*traceId*/ string, /*calls*/ number>();
   onlineAnimationFrameLookup: Map</*handler*/ number, /*traceId*/ string> =
     new Map();
-  rafHistory: Map</*traceId*/ string, TRequestAnimationFrameHistory> =
+  rafHistory: Map</*traceId*/ string, IRequestAnimationFrameHistory> =
     new Map();
-  cafHistory: Map</*traceId*/ string, TCancelAnimationFrameHistory> = new Map();
+  cafHistory: Map</*traceId*/ string, ICancelAnimationFrameHistory> = new Map();
   callCounter = {
     requestAnimationFrame: 0,
     cancelAnimationFrame: 0,
@@ -60,27 +60,28 @@ export class AnimationWrapper {
   constructor() {
   }
 
-  #updateRafHistory(handler: number, callstack: TCallstack) {
-    const existing = this.rafHistory.get(callstack.traceId);
+  #updateRafHistory(handler: number, callstack: ICallstack) {
+    const rafRecord = this.rafHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          handler,
+          online: 0,
+          canceledCounter: 0,
+          canceledByTraceIds: null,
+          selfTime: null,
+          cps: 1,
+        };
+      },
+    );
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
-      existing.online++;
-    } else {
-      this.rafHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        handler,
-        online: 1,
-        canceledCounter: 0,
-        canceledByTraceIds: null,
-        selfTime: null,
-        cps: 1,
-      });
-    }
+    rafRecord.calls++;
+    rafRecord.handler = handler;
+    rafRecord.online++;
 
     this.onlineAnimationFrameLookup.set(handler, callstack.traceId);
   }
@@ -99,9 +100,8 @@ export class AnimationWrapper {
     }
   }
 
-  #updateCafHistory(handler: number | string, callstack: TCallstack) {
-    const existing = this.cafHistory.get(callstack.traceId);
-    let facts = <TFact> 0;
+  #updateCafHistory(handler: number | string, callstack: ICallstack) {
+    let facts = Fact.pure;
     let rafTraceId;
 
     if (validHandler(handler)) {
@@ -117,22 +117,24 @@ export class AnimationWrapper {
       facts = Fact.assign(facts, CafFact.BAD_HANDLER);
     }
 
-    if (existing) {
-      existing.calls++;
-      existing.handler = handler;
+    const cafRecord = this.cafHistory.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          facts,
+          calls: 0,
+          handler,
+        };
+      },
+    );
 
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      this.cafHistory.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        facts,
-        calls: 1,
-        handler,
-      });
+    cafRecord.calls++;
+    cafRecord.handler = handler;
+    if (facts) {
+      cafRecord.facts = Fact.assign(cafRecord.facts, facts);
     }
 
     const rafRecord = rafTraceId && this.rafHistory.get(rafTraceId);
@@ -148,7 +150,7 @@ export class AnimationWrapper {
     }
   }
 
-  updateCallsPerSecond(panel: TPanel) {
+  updateCallsPerSecond(panel: IPanel) {
     if (!panel.wrap || !panel.visible) return;
 
     this.rafHistory.forEach((rafRecord) => {
@@ -216,7 +218,7 @@ export class AnimationWrapper {
     globalThis.cancelAnimationFrame = this.native.cancelAnimationFrame;
   }
 
-  collectHistory(rafPanel: TPanel, cafPanel: TPanel) {
+  collectHistory(rafPanel: IPanel, cafPanel: IPanel) {
     return {
       rafHistory: rafPanel.wrap && rafPanel.visible
         ? Array.from(this.rafHistory.values())

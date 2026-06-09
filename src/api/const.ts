@@ -1,12 +1,10 @@
-import type { TWritableBooleanKeys } from './generics.ts';
-
 export function NOOP() {}
-export const ERRORS_IGNORED = [
+export const IGNORED_ERRORS = [
   'Could not establish connection. Receiving end does not exist.',
   'The message port closed before a response was received.',
 ];
-export const TELEMETRY_FREQUENCY_30PS = 33.3333333333; // ms
-export const TELEMETRY_FREQUENCY_1PS = 1000; // ms
+export const TELEMETRY_FREQUENCY_HIGH = 37.5; // ms
+export const TELEMETRY_FREQUENCY_LOW = 1000; // ms
 export const TIME_60FPS_SEC = 0.0166666666667; // s
 export const TIME_60FPS_MS = 16.666666666666668;
 
@@ -42,7 +40,7 @@ export const TAG_BAD_HANDLER = (x: unknown) => `${x}`;
 export const TAG_EVAL_RETURN_SET_TIMEOUT = '(N/A - via setTimeout)';
 export const TAG_EVAL_RETURN_SET_INTERVAL = '(N/A - via setInterval)';
 
-export const MEDIA_ELEMENT_EVENTS = [
+export const MEDIA_EVENTS = [
   'abort',
   'canplay',
   'canplaythrough',
@@ -72,9 +70,8 @@ export const MEDIA_ELEMENT_EVENTS = [
   'volumechange',
   'waiting',
   'waitingforkey',
-];
-
-export const MEDIA_ELEMENT_PROPS = [
+] as const;
+export const MEDIA_FIELDS = [
   'currentSrc',
   'src',
   'srcObject',
@@ -93,6 +90,7 @@ export const MEDIA_ELEMENT_PROPS = [
   'ended',
   'autoplay',
   'playsInline',
+  'loading',
   'loop',
   'defaultMuted',
   'mediaKeys',
@@ -112,22 +110,26 @@ export const MEDIA_ELEMENT_PROPS = [
   'height',
   'videoWidth',
   'videoHeight',
-];
-
-type TToggableMediaProps = TWritableBooleanKeys<
-  HTMLVideoElement & HTMLAudioElement
->;
-export const MEDIA_ELEMENT_TOGGABLE_PROPS: Set<TToggableMediaProps> =
-  /*@__PURE__*/ new Set([
-    'autoplay',
-    'playsInline',
-    'loop',
-    'defaultMuted',
-    'muted',
-    'preservesPitch',
-    'controls',
-    'disablePictureInPicture',
-  ]);
+] as const;
+const MEDIA_FIELDS_WRITABLE = [
+  'autoplay',
+  'playsInline',
+  'loop',
+  'defaultMuted',
+  'muted',
+  'preservesPitch',
+  'controls',
+  'disablePictureInPicture',
+] as const;
+type TMediaFieldWritable = typeof MEDIA_FIELDS_WRITABLE[number];
+const MEDIA_FIELDS_WRITABLE_SET: Set<string> = /*@__PURE__*/ new Set(
+  MEDIA_FIELDS_WRITABLE,
+);
+export function isMediaFieldWritable(
+  field: string,
+): field is TMediaFieldWritable {
+  return MEDIA_FIELDS_WRITABLE_SET.has(field);
+}
 
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/networkState
 export const NETWORK_STATE = [
@@ -135,7 +137,7 @@ export const NETWORK_STATE = [
   'NETWORK_IDLE',
   'NETWORK_LOADING',
   'NETWORK_NO_SOURCE',
-];
+] as const;
 // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
 export const READY_STATE = [
   'HAVE_NOTHING',
@@ -143,4 +145,9 @@ export const READY_STATE = [
   'HAVE_CURRENT_DATA',
   'HAVE_FUTURE_DATA',
   'HAVE_ENOUGH_DATA',
-];
+] as const;
+
+export enum ESortOrder {
+  ASCENDING,
+  DESCENDING,
+}

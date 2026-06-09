@@ -1,5 +1,4 @@
-import { describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
+import { describe, expect, test } from 'vitest';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
 
 const fact_1 = Fact.define(0b0001);
@@ -17,7 +16,7 @@ describe('Facts', () => {
   });
 
   test('assign/check', () => {
-    let data = 0;
+    let data = Fact.pure;
 
     data = Fact.assign(data, fact_1);
     expect(Fact.check(data, fact_1)).toBeTruthy();
@@ -29,7 +28,7 @@ describe('Facts', () => {
   });
 
   test('getDetails', () => {
-    let data = 0;
+    let data = Fact.pure;
     const factsMap = Fact.map([
       [fact_1, { tag: '1', details: 'fact_1' }],
       [fact_2, { tag: '2', details: 'fact_2' }],

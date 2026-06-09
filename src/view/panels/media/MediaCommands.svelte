@@ -1,9 +1,7 @@
 <script lang="ts">
-  import {
-    EMsg,
-    type IMsgMediaCommand,
-    portPost,
-  } from '../../../api/communication.ts';
+  import type { TMediaCommand } from '../../../wrapper/MediaWrapper.ts';
+  import { EMsg, postPort } from '../../../api/communication.ts';
+  import { autoclick } from '../shared/directive.ts';
 
   let {
     mediaId,
@@ -12,9 +10,21 @@
     mediaId: string;
     paused: unknown;
   } = $props();
+  const playPauseTitle = $derived.by(() =>
+    paused ? `media.play()` : `media.pause()`
+  );
+  const playPauseIcon = $derived.by(() => paused ? '-play' : '-pause');
 
-  function onMediaCommand(cmd: IMsgMediaCommand['cmd']) {
-    portPost({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
+  function onMediaCommand(cmd: TMediaCommand) {
+    postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
+  }
+
+  function onPlayPause() {
+    if (paused) {
+      postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'play' });
+    } else {
+      postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'pause' });
+    }
   }
 </script>
 
@@ -43,56 +53,31 @@
   >
     <span class="icon -refresh"></span>
   </button>
-  {#if paused}
-    <button
-      type="button"
-      onclick={() => void onMediaCommand('play')}
-      title="media.play()"
-      aria-label="media.play()"
-    >
-      <span class="icon -play"></span>
-    </button>
-  {:else}
-    <button
-      type="button"
-      onclick={() => void onMediaCommand('pause')}
-      title="media.pause()"
-      aria-label="media.pause()"
-    >
-      <span class="icon -pause"></span>
-    </button>
-  {/if}
   <button
     type="button"
+    onclick={onPlayPause}
+    title={playPauseTitle}
+    aria-label={playPauseTitle}
+  >
+    <span class="icon {playPauseIcon}"></span>
+  </button>
+  <button
+    use:autoclick
+    type="button"
     onclick={() => void onMediaCommand('frame-backward')}
-    title="Seek -16ms"
-    aria-label="Seek -16ms"
+    title="Seek -16ms (hold to repeat)"
+    aria-label="Seek -16ms (hold to repeat)"
   >
     <span class="icon -frame-backward"></span>
   </button>
   <button
+    use:autoclick
     type="button"
     onclick={() => void onMediaCommand('frame-forward')}
-    title="Seek +16ms"
-    aria-label="Seek +16ms"
+    title="Seek +16ms (hold to repeat)"
+    aria-label="Seek +16ms (hold to repeat)"
   >
     <span class="icon -frame-forward"></span>
-  </button>
-  <button
-    type="button"
-    onclick={() => void onMediaCommand('slower')}
-    title="Speed -10%"
-    aria-label="Speed -10%"
-  >
-    <span class="icon -slower"></span>
-  </button>
-  <button
-    type="button"
-    onclick={() => void onMediaCommand('faster')}
-    title="Speed +10%"
-    aria-label="Speed +10%"
-  >
-    <span class="icon -faster"></span>
   </button>
 </span>
 

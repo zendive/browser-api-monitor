@@ -1,10 +1,7 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { CicFact, IdleWrapper, RicFact } from '../src/wrapper/IdleWrapper.ts';
 import { TAG_BAD_DELAY, TAG_BAD_HANDLER } from '../src/api/const.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('IdleWrapper', () => {
   let apiIdle: IdleWrapper;
@@ -59,6 +56,7 @@ describe('IdleWrapper', () => {
     expect(cicRec.calls).toBe(1);
     expect(cicRec.trace.length).toBeGreaterThan(1);
     expect(cicRec.traceId.length).toBeGreaterThan(1);
+    expect(cicRec.firstSeen).toBeGreaterThanOrEqual(ricRec.firstSeen);
     expect(apiIdle.callCounter.cancelIdleCallback).toBe(1);
     expect(ricRec.canceledByTraceIds?.length).toBe(1);
     expect(ricRec.canceledCounter).toBe(1);
@@ -93,6 +91,3 @@ describe('IdleWrapper', () => {
     expect(Fact.check(rec.facts, CicFact.NOT_FOUND)).toBe(true);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

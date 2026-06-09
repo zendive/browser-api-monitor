@@ -1,32 +1,32 @@
 <script lang="ts">
-  import {
-    RicFacts,
-    type TRequestIdleCallbackHistory,
-  } from '../../../wrapper/IdleWrapper.ts';
-  import {
-    delayTooltip,
-    type TFindRegressorCallback,
-  } from '../../shared/util.ts';
+  import Variable from '../../shared/Variable.svelte';
   import CellCallstack from '../shared/CellCallstack.svelte';
   import CellSelfTime from '../shared/CellSelfTime.svelte';
   import CellFacts from '../shared/CellFacts.svelte';
-  import CellCancelable from '../shared/CellCancelable.svelte';
-  import Variable from '../../shared/Variable.svelte';
   import CellBypass from '../shared/CellBypass.svelte';
   import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
+  import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
+  import {
+    type IRequestIdleCallbackHistory,
+    RicFacts,
+  } from '../../../wrapper/IdleWrapper.ts';
+  import { delayTooltip } from '../../shared/util.ts';
 
-  let { metric, onFindRegressors }: {
-    metric: TRequestIdleCallbackHistory;
-    onFindRegressors: TFindRegressorCallback;
+  let {
+    metric,
+    popoverId,
+    tph,
+  }: {
+    metric: IRequestIdleCallbackHistory;
+    popoverId: string;
+    tph: TTerminatorsPopoverHelper;
   } = $props();
 </script>
 
 <tr class="t-zebra">
   <td class="wb-all">
-    <CellCallstack
-      trace={metric.trace}
-      traceDomain={metric.traceDomain}
-    />
+    <CellCallstack trace={metric.trace} />
   </td>
   <td class="ta-c">{metric.didTimeout}</td>
   <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
@@ -35,11 +35,12 @@
   </td>
   <td class="ta-c">{metric.cps || undefined}</td>
   <td class="ta-c">
-    <CellCancelable
+    <CellTerminatableCalls
       calls={metric.calls}
       canceledCounter={metric.canceledCounter}
       canceledByTraceIds={metric.canceledByTraceIds}
-      onClick={onFindRegressors}
+      {popoverId}
+      eventClick={(e: Event) => void tph.update(metric.traceId, e.currentTarget)}
     />
   </td>
   <td class="ta-c">{metric.handler}</td>

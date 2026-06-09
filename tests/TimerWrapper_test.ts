@@ -1,6 +1,4 @@
-import { afterEach, beforeEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import {
   TAG_BAD_DELAY,
   TAG_BAD_HANDLER,
@@ -13,7 +11,6 @@ import {
 } from '../src/wrapper/TimerWrapper.ts';
 import { EvalWrapper } from '../src/wrapper/EvalWrapper.ts';
 import { Fact } from '../src/wrapper/shared/Fact.ts';
-import { wait } from '../src/api/time.ts';
 
 describe('wrappers', () => {
   const apiEval = new EvalWrapper();
@@ -97,20 +94,14 @@ describe('wrappers', () => {
     );
 
     const rec = Array.from(apiTimer.setTimeoutHistory.values())[0];
-
     expect(rec.online).toBe(0);
     expect(rec.selfTime).toBeNull();
-    if (rec.canceledByTraceIds) {
-      expect(rec.canceledByTraceIds.length).toBe(2);
-
+    expect(rec.canceledByTraceIds!.length).toBe(2);
+    rec.canceledByTraceIds!.forEach((traceId) => {
       const clearHistory = Array.from(apiTimer.clearTimeoutHistory.values());
-      rec.canceledByTraceIds.forEach((traceId) => {
-        const found = clearHistory.find((rec) => rec.traceId === traceId);
-        expect(found).toBeTruthy();
-      });
-    } else {
-      expect(true).toBe(false);
-    }
+      const found = clearHistory.find((rec) => rec.traceId === traceId);
+      expect(found).toBeTruthy();
+    });
   });
 
   test('setTimeout - valid delay', () => {
@@ -164,7 +155,7 @@ describe('wrappers', () => {
     expect(recs[0].calls).toBe(1);
     expect(recs[1].selfTime).not.toBeNull();
     expect(recs[1].calls).toBe(2);
-  }, 1e3);
+  });
 
   test('clearTimeout - valid handler', () => {
     const handler = globalThis.setTimeout(() => {}, 1e3);
@@ -278,6 +269,8 @@ describe('wrappers', () => {
 
     expect(rec.handler).toBe(handler);
     expect(rec.delay).toBe(1e3);
+    expect(rec.trace.length).toBeGreaterThan(1);
+    expect(rec.traceId.length).toBeGreaterThan(0);
     expect(Fact.check(rec.facts, ClearTimerFact.BAD_HANDLER)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.NOT_FOUND)).toBe(false);
     expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
@@ -318,6 +311,3 @@ describe('wrappers', () => {
     expect(Fact.check(rec.facts, ClearTimerFact.IMPLICIT_USAGE)).toBe(false);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

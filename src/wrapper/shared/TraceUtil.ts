@@ -5,26 +5,18 @@ export enum EWrapperCallstackType {
   SHORT,
 }
 
-export type TTrace = {
+export interface ITrace {
   name: string | 0;
   link: string;
-};
-export type TCallstack = {
+}
+export interface ICallstack {
   traceId: string;
-  trace: TTrace[];
-};
-export type TTraceable = {
+  trace: ITrace[];
+}
+export interface ITraceable {
   traceId: string;
-  trace: TTrace[];
-  traceDomain: ETraceDomain;
-};
-export enum ETraceDomain {
-  SAME,
-  EXTERNAL,
-  EXTENSION,
-  SNIPPET,
-  WEBPACK,
-  UNKNOWN,
+  trace: ITrace[];
+  firstSeen: number;
 }
 
 export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
@@ -36,51 +28,35 @@ export const REGEX_STACKTRACE_LINE_NUMBER = /*@__PURE__*/ new RegExp(
 export const REGEX_STACKTRACE_COLUMN_NUMBER = /*@__PURE__*/ new RegExp(
   /.*:\d+:(\d+)$/,
 );
+export const REGEX_CUT_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
+  /^[a-z\-]+:\/+/i,
+);
 export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
 const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
-const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/\//);
+const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/+/);
 const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
 const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/async /);
-const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
-  /http[s]?\:\/\//,
-);
 
 export class TraceUtil {
   selfTraceLink = '';
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   debug: Set<string> = new Set();
   bypass: Set<string> = new Set();
-  #fullCallstackCacheTrace: Map</*traceId*/ string, TTrace[]> = new Map();
+  #fullCallstackCacheTrace: Map</*traceId*/ string, ITrace[]> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
     this.selfTraceLink = this.#getSelfTraceLink();
   }
 
-  getCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  getCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     if (this.callstackType === EWrapperCallstackType.FULL) {
       return this.#getFullCallstack(e, uniqueTrait);
     } else {
       return this.#getShortCallstack(e, uniqueTrait);
     }
-  }
-
-  getTraceDomain(trace: TTrace) {
-    if (trace.link.startsWith(location.origin)) {
-      return ETraceDomain.SAME;
-    } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(trace.link)) {
-      return ETraceDomain.EXTERNAL;
-    } else if (trace.link.startsWith('chrome-extension://')) {
-      return ETraceDomain.EXTENSION;
-    } else if (trace.link.startsWith('snippet:///')) {
-      return ETraceDomain.SNIPPET;
-    } else if (trace.link.startsWith('webpack://')) {
-      return ETraceDomain.WEBPACK;
-    }
-
-    return ETraceDomain.UNKNOWN;
   }
 
   shouldPass(traceId: string) {
@@ -99,28 +75,22 @@ export class TraceUtil {
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
-  #getFullCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  #getFullCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     const traceId = hashString(e.stack || String(uniqueTrait));
-    const cached = this.#fullCallstackCacheTrace.get(traceId);
-    let rv;
+    const trace = this.#fullCallstackCacheTrace.getOrInsertComputed(
+      traceId,
+      () => {
+        return this.#getFullTrace(e.stack || '') ||
+          [this.#getFallbackTrace(uniqueTrait)];
+      },
+    );
 
-    if (cached) {
-      rv = { traceId, trace: cached };
-    } else {
-      const trace = this.#getFullTrace(e.stack || '');
-      rv = {
-        traceId,
-        trace: trace || [this.#getInvalidTrace(uniqueTrait)],
-      };
-      this.#fullCallstackCacheTrace.set(traceId, rv.trace);
-    }
-
-    return rv;
+    return { traceId, trace };
   }
 
-  #getFullTrace(stackString: string): TTrace[] | null {
+  #getFullTrace(stackString: string): ITrace[] | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
-    const rv: TTrace[] = [];
+    const rv: ITrace[] = [];
 
     // loop from the end, excluding error name at [0] and self trace at [1|n]
     for (let n = stack.length - 1; n > 1; n--) {
@@ -134,7 +104,7 @@ export class TraceUtil {
     return rv.length ? rv : null;
   }
 
-  #getShortCallstack(e: Error, uniqueTrait?: unknown): TCallstack {
+  #getShortCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     let trace = this.#getShortTrace(e.stack || '');
     let traceId;
 
@@ -142,13 +112,13 @@ export class TraceUtil {
       traceId = hashString(trace.link);
     } else {
       traceId = hashString(e.stack || String(uniqueTrait));
-      trace = this.#getInvalidTrace(uniqueTrait);
+      trace = this.#getFallbackTrace(uniqueTrait);
     }
 
     return { traceId, trace: [trace] };
   }
 
-  #getShortTrace(stackString: string): TTrace | null {
+  #getShortTrace(stackString: string): ITrace | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
 
     // loop from the start, excluding error name at [0] and self trace at [1|n]
@@ -184,7 +154,7 @@ export class TraceUtil {
     return { name, link };
   }
 
-  #getInvalidTrace(uniqueTrait?: unknown): TTrace {
+  #getFallbackTrace(uniqueTrait?: unknown): ITrace {
     return {
       name: typeof uniqueTrait === 'function' && uniqueTrait.name
         ? uniqueTrait.name

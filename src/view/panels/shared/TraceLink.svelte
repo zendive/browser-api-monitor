@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    REGEX_CUT_LINK_PROTOCOL,
     REGEX_STACKTRACE_CLEAN_URL,
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
@@ -18,9 +19,20 @@
     parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
   );
   let isSourceLess = $derived.by(
-    () =>
-      !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
+    () => !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
   );
+  let linkFormatted = $derived.by(() => {
+    if (isSourceLess) {
+      return link;
+    }
+
+    try {
+      const url = new URL(link);
+      return url.pathname;
+    } catch (_e) {
+      return link.replace(REGEX_CUT_LINK_PROTOCOL, '');
+    }
+  });
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
@@ -33,8 +45,9 @@
       cleanUrl,
       lineNumber - 1,
       columnNumber - 1,
-      () => {
-        visited = true;
+      // @ts-expect-error: incomplete documentation for callback argument
+      (acknowledge: IOpenResourceCallbackArgument) => {
+        visited = !acknowledge.isError;
       },
     );
   }
@@ -56,7 +69,7 @@
     class:name={!!name}
     onclick={onClick}
   >
-    {name || link}
+    {name || linkFormatted}
   </a>
 {/if}
 

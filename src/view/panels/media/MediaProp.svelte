@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { isToggableMediaProp } from '../../../wrapper/MediaWrapper.ts';
+  import { isMediaFieldWritable } from '../../../api/const.ts';
   import Variable from '../../shared/Variable.svelte';
-  import { EMsg, portPost } from '../../../api/communication.ts';
+  import { EMsg, postPort } from '../../../api/communication.ts';
+  import MediaPropVolume from './MediaPropVolume.svelte';
+  import MediaPropPlaybackRate from './MediaPropPlaybackRate.svelte';
 
   let { name, value, mediaId }: {
     name: string;
@@ -9,12 +11,12 @@
     mediaId: string;
   } = $props();
 
-  function onToggleBoolean(property: string) {
-    portPost({
+  function onToggleMediaField(field: string) {
+    postPort({
       msg: EMsg.MEDIA_COMMAND,
       mediaId: mediaId,
       cmd: 'toggle-boolean',
-      property: property as keyof HTMLMediaElement,
+      field: field as keyof HTMLMediaElement,
     });
   }
 
@@ -31,42 +33,45 @@
   }
 </script>
 
-<tr class:isPassive={!value} class:isActive={true === value}>
-  <td class="name">{name}</td>
-  <td class="value">
-    {#if isToggableMediaProp(name)}
-      <button
-        type="button"
-        aria-label="Toggle state"
-        class="isToggable"
-        onclick={() => void onToggleBoolean(name)}
-      >
-        {value}
-      </button>
-    {:else if isVariableMediaProp(name)}
-      <Variable {value} />
-    {:else}
-      {propValueFilter(value)}
-    {/if}
-  </td>
-</tr>
+{#if name === 'volume'}
+  <MediaPropVolume {mediaId} {value} />
+{:else if name === 'playbackRate'}
+  <MediaPropPlaybackRate {mediaId} {value} />
+{:else}
+  <tr class:isPassive={!value}>
+    <td class="ta-r">{name}</td>
+    <td class="value ta-l">
+      {#if isMediaFieldWritable(name)}
+        <button
+          type="button"
+          aria-label="Toggle {name} state"
+          onclick={() => void onToggleMediaField(name)}
+        >
+          {value}
+        </button>
+      {:else if isVariableMediaProp(name)}
+        <Variable {value} />
+      {:else}
+        {propValueFilter(value)}
+      {/if}
+    </td>
+  </tr>
+{/if}
 
 <style lang="scss">
   .isPassive {
     color: var(--text-passive);
     font-weight: normal;
   }
-  .isActive {
-    font-weight: bold;
-  }
-  .isToggable {
-    cursor: pointer;
-  }
-  .name {
-    text-align: right;
-  }
+
   .value {
+    padding-left: 0.25rem;
     word-break: break-all;
-    text-align: left;
+
+    button {
+      color: inherit;
+      padding: 0;
+      font-size: 100%;
+    }
   }
 </style>

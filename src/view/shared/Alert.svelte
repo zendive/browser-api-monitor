@@ -1,15 +1,18 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { NOOP } from '../../api/const.ts';
 
   let {
     title = '',
     dismissable = true,
     class: className = '',
+    eventToggle = NOOP,
     children,
   }: {
     title: string;
     dismissable?: boolean;
     class?: string;
+    eventToggle?: (e: ToggleEvent) => void;
     children?: Snippet;
   } = $props();
   let selfEl: HTMLElement;
@@ -31,13 +34,15 @@
       document.addEventListener('keydown', onKeyboardEvent, {
         capture: true,
       });
-      globalThis.addEventListener('click', onWindowClick);
+      document.addEventListener('click', onWindowClick);
     } else if (e.newState === 'closed') {
       document.removeEventListener('keydown', onKeyboardEvent, {
         capture: true,
       });
-      globalThis.removeEventListener('click', onWindowClick);
+      document.removeEventListener('click', onWindowClick);
     }
+
+    eventToggle(e);
   }
 
   function onWindowClick(e: MouseEvent) {

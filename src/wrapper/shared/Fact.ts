@@ -1,6 +1,6 @@
 import type { Brand } from '../../api/generics.ts';
 
-export type TFact = Brand<number, 'TFact'>;
+export type TFact = 0 | Brand<number, 'TFact'>;
 interface IFactDescriptor {
   tag: string;
   details: string;
@@ -8,14 +8,18 @@ interface IFactDescriptor {
 export type TFactsMap = Map<TFact, IFactDescriptor>;
 
 export class Fact {
+  static get pure(): TFact {
+    return 0;
+  }
+
   /**
-   * @param(n): 53 bits number in range [0 ... Number.MAX_SAFE_INTEGER]
+   * @param(n): 53 bits number in range [1 ... Number.MAX_SAFE_INTEGER]
    */
   static define(n: number): TFact {
     if (Number.isInteger(n) && 0 < n && n <= Number.MAX_SAFE_INTEGER) {
       return n as TFact;
     } else {
-      throw new Error('Fact must be in range [0 .. Number.MAX_SAFE_INTEGER]');
+      throw new Error('Fact must be in range [1 ... Number.MAX_SAFE_INTEGER]');
     }
   }
 

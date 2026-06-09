@@ -1,0 +1,92 @@
+<script lang="ts">
+  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+  import Variable from '../../shared/Variable.svelte';
+  import CellCallstack from '../shared/CellCallstack.svelte';
+  import CollapseExpand from '../shared/CollapseExpand.svelte';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import type {
+    ISharedWorkerConstructorMetric,
+    ISharedWorkerTelemetryMetric,
+  } from '../../../wrapper/SharedWorkerWrapper.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+
+  let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
+    $props();
+  const { sortSharedWorkerConstructor } = useConfigState();
+  const constructorSortedMetrics = $derived.by(() =>
+    workerMetric.konstruktor.toSorted(
+      compareByFieldOrder(
+        sortSharedWorkerConstructor.field,
+        sortSharedWorkerConstructor.order,
+      ),
+    )
+  );
+  let isExpanded = $state(true);
+
+  function updateSort(
+    field: keyof ISharedWorkerConstructorMetric,
+    order: ESortOrder,
+  ) {
+    sortSharedWorkerConstructor.field = field;
+    sortSharedWorkerConstructor.order = order;
+    saveLocalStorage({ sortSharedWorkerConstructor });
+  }
+</script>
+
+<table>
+  <thead class="sticky-header">
+    <tr>
+      <th class="w-full">
+        <CollapseExpand
+          class="bc-invert"
+          {isExpanded}
+          onClick={() => void (isExpanded = !isExpanded)}
+        />
+        <ColumnSortable
+          sort={sortSharedWorkerConstructor}
+          by="firstSeen"
+          update={updateSort}
+        >
+          constructor [<Variable value={constructorSortedMetrics.length} />]
+        </ColumnSortable>
+      </th>
+      <th class="ta-c">name</th>
+      <th class="ta-c" title="classic | module">type</th>
+      <th class="ta-c" title="credentials: same-origin | include | omit ">
+        cred
+      </th>
+      <th class="ta-c" title="sameSiteCookies: all | none ">sSC</th>
+      <th class="ta-c" title="extendedLifetime">exL</th>
+      <th class="ta-c">
+        <ColumnSortable
+          sort={sortSharedWorkerConstructor}
+          by="calls"
+          update={updateSort}
+        >Called</ColumnSortable>
+      </th>
+      <th title="Breakpoint"><span class="icon -breakpoint"></span></th>
+    </tr>
+  </thead>
+
+  <tbody class:d-none={!isExpanded}>
+    {#each constructorSortedMetrics as metric (metric.traceId)}
+      <tr class="t-zebra">
+        <td class="wb-all">
+          <CellCallstack trace={metric.trace} />
+        </td>
+        <td class="ta-c">
+          <div class="worker-name">{metric.options.name}</div>
+        </td>
+        <td class="ta-c">{metric.options.type}</td>
+        <td class="ta-c">{metric.options.credentials}</td>
+        <td class="ta-c">{metric.options.sameSiteCookies}</td>
+        <td class="ta-c">{metric.options.extendedLifetime}</td>
+        <td class="ta-c"><Variable value={metric.calls} /></td>
+        <td><CellBreakpoint traceId={metric.traceId} /></td>
+      </tr>
+    {/each}
+  </tbody>
+</table>

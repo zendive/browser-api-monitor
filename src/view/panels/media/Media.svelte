@@ -1,56 +1,99 @@
 <script lang="ts">
-  import {
-    EMediaType,
-    type TMediaTelemetry,
-  } from '../../../wrapper/MediaWrapper.ts';
   import MediaMetrics from './MediaMetrics.svelte';
   import Variable from '../../shared/Variable.svelte';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import {
+    EMediaType,
+    type IMediaTelemetry,
+    type IMediaTelemetryMetrics,
+  } from '../../../wrapper/MediaWrapper.ts';
+  import { useConfigState } from '../../../state/config.state.svelte.ts';
+  import { compareByFieldOrder } from '../shared/comparator.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+  import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let {
-    media = { total: 0, collection: [] },
-  }: { media: TMediaTelemetry } = $props();
-  let videos = $derived.by(() =>
+  let { media }: { media: IMediaTelemetry } = $props();
+  const { sortVideoPanel, sortAudioPanel } = useConfigState();
+  const videoMetrics = $derived.by(() =>
     media.collection.filter((v) => v.type === EMediaType.VIDEO)
   );
-  let audios = $derived.by(() =>
+  const audioMetrics = $derived.by(() =>
     media.collection.filter((v) => v.type === EMediaType.AUDIO)
   );
+  const sortedVideoMetrics = $derived.by(() =>
+    videoMetrics.toSorted(
+      compareByFieldOrder(sortVideoPanel.field, sortVideoPanel.order),
+    )
+  );
+  const sortedAudioMetrics = $derived.by(() =>
+    audioMetrics.toSorted(
+      compareByFieldOrder(sortAudioPanel.field, sortAudioPanel.order),
+    )
+  );
+
+  function updateVideoSort(
+    field: keyof IMediaTelemetryMetrics,
+    order: ESortOrder,
+  ) {
+    sortVideoPanel.field = field;
+    sortVideoPanel.order = order;
+    saveLocalStorage({ sortVideoPanel });
+  }
+
+  function updateAudioSort(
+    field: keyof IMediaTelemetryMetrics,
+    order: ESortOrder,
+  ) {
+    sortAudioPanel.field = field;
+    sortAudioPanel.order = order;
+    saveLocalStorage({ sortAudioPanel });
+  }
 </script>
 
-{#if media.collection.length}
-  {#if videos.length}
-    <section data-navigation-tag="Videos">
-      <div class="label bc-invert sticky-header">
-        Videos: <Variable value={videos.length} />
-      </div>
-      <div class="list">
-        {#each videos as videoMetrics (videoMetrics.mediaId)}
-          <MediaMetrics
-            mediaId={videoMetrics.mediaId}
-            events={videoMetrics.events}
-            props={videoMetrics.props}
-          />
-        {/each}
-      </div>
-    </section>
-  {/if}
+{#if sortedVideoMetrics.length}
+  <section data-navigation-tag="Videos">
+    <div class="label bc-invert sticky-header">
+      <ColumnSortable
+        sort={sortVideoPanel}
+        by="firstSeen"
+        update={updateVideoSort}
+      >
+        Videos: <Variable value={sortedVideoMetrics.length} />
+      </ColumnSortable>
+    </div>
+    <div class="list">
+      {#each sortedVideoMetrics as metric (metric.mediaId)}
+        <MediaMetrics
+          mediaId={metric.mediaId}
+          events={metric.events}
+          props={metric.props}
+        />
+      {/each}
+    </div>
+  </section>
+{/if}
 
-  {#if audios.length}
-    <section data-navigation-tag="Audios">
-      <div class="label bc-invert sticky-header">
-        Audios: <Variable value={audios.length} />
-      </div>
-      <div class="list">
-        {#each audios as audioMetrics (audioMetrics.mediaId)}
-          <MediaMetrics
-            mediaId={audioMetrics.mediaId}
-            events={audioMetrics.events}
-            props={audioMetrics.props}
-          />
-        {/each}
-      </div>
-    </section>
-  {/if}
+{#if sortedAudioMetrics.length}
+  <section data-navigation-tag="Audios">
+    <div class="label bc-invert sticky-header">
+      <ColumnSortable
+        sort={sortAudioPanel}
+        by="firstSeen"
+        update={updateAudioSort}
+      >
+        Audios: <Variable value={sortedAudioMetrics.length} />
+      </ColumnSortable>
+    </div>
+    <div class="list">
+      {#each sortedAudioMetrics as metric (metric.mediaId)}
+        <MediaMetrics
+          mediaId={metric.mediaId}
+          events={metric.events}
+          props={metric.props}
+        />
+      {/each}
+    </div>
+  </section>
 {/if}
 
 <style lang="scss">

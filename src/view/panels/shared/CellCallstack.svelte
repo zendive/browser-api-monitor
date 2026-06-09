@@ -1,35 +1,19 @@
 <script lang="ts">
-  import {
-    ETraceDomain,
-    type TTrace,
-  } from '../../../wrapper/shared/TraceUtil.ts';
   import TraceLink from './TraceLink.svelte';
+  import { type ITrace } from '../../../wrapper/shared/TraceUtil.ts';
+  import { useTelemetryState } from '../../../state/telemetry.state.svelte.ts';
+  import { getDomainDescriptor } from './traceDomain.ts';
 
-  let {
-    trace,
-    traceDomain,
-  }: {
-    trace: TTrace[];
-    traceDomain: ETraceDomain;
-  } = $props();
+  let { trace }: { trace: ITrace[] } = $props();
+  const ts = useTelemetryState();
+  const domain = $derived.by(() =>
+    getDomainDescriptor(trace, ts.telemetry?.locationOrigin || '')
+  );
 </script>
 
-{#if traceDomain === ETraceDomain.SAME}
-  <span class="icon -small -trace-local" title="Same domain"></span>
-{:else if traceDomain === ETraceDomain.EXTERNAL}
-  <span class="icon -small -trace-external" title="External domain"></span>
-{:else if traceDomain === ETraceDomain.EXTENSION}
-  <span class="icon -small -trace-extension" title="Local extension"></span>
-{:else if traceDomain === ETraceDomain.SNIPPET}
-  <span class="icon -small -trace-extension" title="Local snippet"></span>
-{:else if traceDomain === ETraceDomain.WEBPACK}
-  <span class="icon -small -trace-webpack" title="Webpack"></span>
-{:else if traceDomain === ETraceDomain.UNKNOWN}
-  <span title="Unknown domain">❓</span>
-{/if}
+<span class="icon -small {domain.icon}" title={domain.name}></span>
 
 {#each trace as { link, name }, index (index)}
-  {@const isLast = index === trace.length - 1}
+  {#if index !== 0}&nbsp;•{/if}
   <TraceLink {link} {name} />
-  {#if !isLast}•&nbsp;{/if}
 {/each}

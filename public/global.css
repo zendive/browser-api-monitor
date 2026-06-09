@@ -75,6 +75,9 @@ th,
 .tc-attention {
   color: var(--attention);
 }
+.tc-passive {
+  color: var(--text-passive);
+}
 .t-zebra:where(:nth-child(even)) {
   background-color: var(--bg-table-even);
 }
@@ -117,6 +120,40 @@ th,
   vertical-align: middle;
 }
 
+.metrics-popover {
+  position-area: block-end span-all;
+  max-height: 10rem;
+  background-color: var(--bg-popover);
+  border: 1px solid var(--attention);
+
+  &:not(.-empty) {
+    padding: 0;
+  }
+}
+.popover-target-active {
+  background-color: var(--attention);
+  color: var(--text);
+}
+button[interestfor] {
+  interest-delay-start: 33ms;
+  interest-delay-end: 33ms;
+}
+.worker-name {
+  max-width: 6rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+input[type='range'] {
+  appearance: none;
+  cursor: pointer;
+  width: 6.25rem;
+  height: 0.5rem;
+}
+
 .icon {
   display: inline-block;
   width: 1rem;
@@ -126,7 +163,8 @@ th,
   mask-repeat: no-repeat;
   vertical-align: bottom;
 }
-th .icon {
+th .icon,
+.bc-invert .icon {
   background-color: var(--text-invert);
 }
 .icon.-small {
@@ -171,12 +209,6 @@ th .icon {
 }
 .icon.-locate {
   mask-image: url(img/locate.svg);
-}
-.icon.-slower {
-  mask-image: url(img/slower.svg);
-}
-.icon.-faster {
-  mask-image: url(img/faster.svg);
 }
 .icon.-trace-external {
   mask-image: url(img/trace-external.svg);

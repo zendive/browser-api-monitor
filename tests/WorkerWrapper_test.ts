@@ -1,34 +1,34 @@
-import { afterEach, describe, test } from '@std/testing/bdd';
-import { expect } from '@std/expect';
-import './browserPolyfill.ts';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import {
   ApiMonitorWorkerWrapper,
   collectWorkerHistory,
   forTest_clearWorkerHistory,
   HARDWARE_CONCURRENCY,
-  WorkerAELFact,
+  WorkerAelFact,
   WorkerFact,
-  WorkerRELFact,
+  WorkerRelFact,
 } from '../src/wrapper/WorkerWrapper.ts';
 import { NOOP } from '../src/api/const.ts';
-import { wait } from '../src/api/time.ts';
 
-const codeBlob = URL.createObjectURL(
-  new Blob([`
-  self.onmessage = (e) => {
-    self.postMessage('acknowledge');
-  }
-`], { type: 'text/javascript' }),
-);
-
-function NewWorker() {
-  return new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
+const workerInstances: Set<ApiMonitorWorkerWrapper> = new Set();
+function NewWorker(codeBlob: string) {
+  const w = new ApiMonitorWorkerWrapper(codeBlob, { type: 'module' });
+  workerInstances.add(w);
+  return w;
 }
 function getMetric() {
   return collectWorkerHistory({
     visible: true,
-    key: 'callsSummary',
-    label: '',
+    key: 'worker',
+    label: 'stub',
     wrap: true,
   }).collection[0];
 }
@@ -41,36 +41,89 @@ function getRELFact() {
 
 describe('WorkerWrapper', () => {
   let w: ApiMonitorWorkerWrapper;
+  let codeBlob: string;
+
+  function workerAcknowledge(w: EventTarget, fn: () => void) {
+    return new Promise((resolve) => {
+      w.addEventListener('message', resolve, { once: true });
+      fn();
+    });
+  }
+
+  beforeAll(() => {
+    codeBlob = URL.createObjectURL(
+      new Blob([`
+      self.onmessage = (e) => {
+        self.postMessage(e.data);
+      }
+    `], { type: 'text/javascript' }),
+    );
+  });
+  afterAll(() => {
+    codeBlob && URL.revokeObjectURL(codeBlob);
+    codeBlob = '';
+  });
 
   afterEach(() => {
     forTest_clearWorkerHistory();
+    workerInstances.forEach((w) => {
+      w.terminate();
+      workerInstances.delete(w);
+    });
   });
 
   test('instance facts', () => {
     for (let n = 0, N = HARDWARE_CONCURRENCY + 1; n < N; n++) {
-      NewWorker();
+      NewWorker(codeBlob);
     }
 
     expect(getMetric().facts).toBe(WorkerFact.MAX_ONLINE);
   });
 
   test('aEL facts', () => {
-    w = NewWorker();
+    w = NewWorker(codeBlob);
 
     for (let n = 0, N = 2; n < N; n++) {
       w.addEventListener('message', NOOP);
     }
 
-    expect(getAELFact()).toBe(WorkerAELFact.DUPLICATE_ADDITION);
+    expect(getAELFact()).toBe(WorkerAelFact.DUPLICATE_ADDITION);
+  });
+
+  test('aEL once', async () => {
+    w = NewWorker(codeBlob);
+    const mockFn = vi.fn();
+
+    w.addEventListener('message', mockFn, { once: true });
+
+    await workerAcknowledge(w, () => void w.postMessage(1));
+    expect(mockFn).toHaveBeenCalledOnce();
+
+    await workerAcknowledge(w, () => void w.postMessage(2));
+    expect(mockFn).toHaveBeenCalledOnce();
+  });
+
+  test('aEL abort signal', async () => {
+    w = NewWorker(codeBlob);
+    const mockFn = vi.fn();
+    const ac = new AbortController();
+
+    w.addEventListener('message', mockFn, { signal: ac.signal });
+
+    await workerAcknowledge(w, () => void w.postMessage(1));
+    expect(mockFn).toHaveBeenCalledOnce();
+
+    ac.abort('test suite');
+    expect(ac.signal.aborted).toBe(true);
+
+    await workerAcknowledge(w, () => void w.postMessage(2));
+    expect(mockFn).toHaveBeenCalledOnce();
   });
 
   test('rEL facts', () => {
-    w = NewWorker();
+    w = NewWorker(codeBlob);
     w.removeEventListener('message', NOOP);
 
-    expect(getRELFact()).toBe(WorkerRELFact.NOT_FOUND);
+    expect(getRELFact()).toBe(WorkerRelFact.NOT_FOUND);
   });
 });
-
-// wait till `deno` internal pending timers drain
-await wait(10);

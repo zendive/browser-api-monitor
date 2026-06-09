@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
-  import { EMsg, runtimeListen } from '../../api/communication.ts';
+  import { EMsg, listenRuntime } from '../../api/communication.ts';
   import Alert from '../shared/Alert.svelte';
   import {
     toggleKeepAwake,
@@ -24,7 +24,7 @@
   });
 
   onMount(() => {
-    runtimeListen((o) => {
+    listenRuntime((o) => {
       if (o.msg === EMsg.CONTENT_SCRIPT_LOADED) {
         reloadMessageEl.hide();
         selfEl.hidePopover();
@@ -46,14 +46,14 @@
 <button
   type="button"
   popovertarget="toggle-panels-menu"
-  class="toggle-menu-button"
+  interestfor="toggle-panels-menu"
   title="Control Panel"
   aria-label="Control Panel"
 >
   <span class="icon -toggle-menu"></span>
 </button>
 
-<div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
+<div bind:this={selfEl} popover="hint" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
     <tbody>
       <tr class="menu-item -dash-bottom">
@@ -119,24 +119,20 @@
   </table>
 </div>
 
-<Alert bind:this={reloadMessageEl} dismissable={false} title="Attention"
->Tab reload required</Alert>
+<Alert
+  bind:this={reloadMessageEl}
+  dismissable={false}
+  title="Attention"
+>Page reload required</Alert>
 
 <style lang="scss">
-  .toggle-menu-button {
-    anchor-name: --toggle-menu-button;
-  }
-
   #toggle-panels-menu {
-    position: absolute;
-    position-anchor: --toggle-menu-button;
-    top: anchor(bottom);
-    left: anchor(left);
-
+    position-area: block-end span-inline-end;
     background-color: var(--bg-popover);
     border: 1px solid var(--border);
     margin: 0;
     padding: 0 0.375rem;
+    max-height: 100vh;
 
     .menu-content {
       margin: 0.2rem 0;

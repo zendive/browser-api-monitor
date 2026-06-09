@@ -1,9 +1,7 @@
 <script lang="ts">
-  import type { TCancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
-  import {
-    type ESortOrder,
-    saveLocalStorage,
-  } from '../../../api/storage/storage.local.ts';
+  import type { ICancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
+  import type { ESortOrder } from '../../../api/const.ts';
+  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
   import { compareByFieldOrder } from '../shared/comparator.ts';
   import Variable from '../../shared/Variable.svelte';
   import ColumnSortable from '../shared/ColumnSortable.svelte';
@@ -13,10 +11,12 @@
   let {
     cicHistory,
     caption = '',
-  }: { cicHistory: TCancelIdleCallbackHistory[]; caption?: string } =
-    $props();
+  }: {
+    cicHistory: ICancelIdleCallbackHistory[];
+    caption?: string;
+  } = $props();
   const { sortCancelIdleCallback } = useConfigState();
-  let sortedMetrics = $derived.by(() =>
+  const sortedMetrics = $derived.by(() =>
     cicHistory.toSorted(
       compareByFieldOrder(
         sortCancelIdleCallback.field,
@@ -25,13 +25,13 @@
     )
   );
 
-  function onChangeSort(field: string, order: ESortOrder) {
-    sortCancelIdleCallback.field = <keyof TCancelIdleCallbackHistory> field;
+  function updateSort(
+    field: keyof ICancelIdleCallbackHistory,
+    order: ESortOrder,
+  ) {
+    sortCancelIdleCallback.field = field;
     sortCancelIdleCallback.order = order;
-
-    saveLocalStorage({
-      sortCancelIdleCallback: $state.snapshot(sortCancelIdleCallback),
-    });
+    saveLocalStorage({ sortCancelIdleCallback });
   }
 </script>
 
@@ -39,30 +39,33 @@
   <thead class="sticky-header">
     <tr>
       <th class="w-full">
-        {caption} Callstack [<Variable value={cicHistory.length} />]
+        <ColumnSortable
+          sort={sortCancelIdleCallback}
+          by="firstSeen"
+          update={updateSort}
+        >
+          {caption} [<Variable value={cicHistory.length} />]
+        </ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="facts"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="facts"
+          update={updateSort}
         ><span class="icon -facts"></span></ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="calls"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="calls"
+          update={updateSort}
         >Called</ColumnSortable>
       </th>
       <th class="ta-c">
         <ColumnSortable
-          field="handler"
-          currentField={sortCancelIdleCallback.field}
-          currentFieldOrder={sortCancelIdleCallback.order}
-          eventChangeSorting={onChangeSort}
+          sort={sortCancelIdleCallback}
+          by="handler"
+          update={updateSort}
         >Handler</ColumnSortable>
       </th>
       <th class="ta-c" title="Bypass"><span class="icon -bypass"></span></th>

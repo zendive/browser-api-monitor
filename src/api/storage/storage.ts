@@ -1,4 +1,4 @@
-export const CONFIG_VERSION = '2025-07-31';
+export const CONFIG_VERSION = '2026-06-09';
 export const SESSION_VERSION = '2025-04-25';
 
 export const local = /*@__PURE__*/ (() => {
@@ -50,7 +50,7 @@ function mockChromeStorageWith(
       // NOOP in window runtime
     },
 
-    // @ts-expect-error partial implementation
+    // @ts-expect-error: partial implementation
     onChanged: {
       addListener(callback: TOnChangeSignature) {
         allListeners.add(callback);

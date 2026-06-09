@@ -1,8 +1,8 @@
 .DEFAULT_GOAL := dev
 
 # Ensure environment dependencies exist
-REQUIRED_BINS := deno jq zip tree python3
-$(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error Missing dependency: `$(bin)`)))
+REQUIRED_BINS := deno jq zip tree grep wc
+$(foreach bin,$(REQUIRED_BINS),$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)`)))
 
 BUILD_DEV := BUILD_MODE=development deno run --watch --allow-env --allow-read --allow-run
 BUILD_PROD := BUILD_MODE=production deno run --allow-env --allow-read --allow-run
@@ -11,14 +11,21 @@ CHROME_ZIP := "extension.chrome-$(VERSION).zip"
 OUTPUT_DIR := ./public/
 BUILD_DIR := ./public/build/
 BUILD_SCRIPT := ./build.ts
+DEBUGGERs_IN_PROD := 32
 
 .PHONY: clean
 clean:
-	rm -rf ./node_modules $(BUILD_DIR) $(CHROME_ZIP)
+	rm -rf ./node_modules ./tests/node_modules $(BUILD_DIR) $(CHROME_ZIP)
 
 .PHONY: install
 install:
-	deno install --allow-scripts=npm:svelte-preprocess,npm:@parcel/watcher,npm:esbuild
+	deno install
+	deno audit
+
+.PHONY: install-test-deps
+install-test-deps:
+	deno run -A npm:playwright install
+	deno run -A npm:playwright install-deps
 
 .PHONY: update
 update:
@@ -33,22 +40,35 @@ dev:
 valid:
 	deno fmt --unstable-component
 	deno lint
-	deno run --allow-read --allow-env npm:svelte-check -- --no-tsconfig
+	deno run --allow-read --allow-env npm:svelte-check
 
 .PHONY: test
 test: valid
-	deno test --allow-env=WS_NO_BUFFER_UTIL --parallel --no-check --trace-leaks --reporter=dot
+	deno run -A npm:vitest --config=./tests/vitest.config.ts \
+    --run --browser.headless
 
 .PHONY: test-dev
 test-dev:
-	deno test --allow-env=WS_NO_BUFFER_UTIL --watch --parallel --no-check --trace-leaks
+	deno run -A npm:vitest --config=./tests/vitest.config.ts
+
+.PHONY: test-post-build
+test-post-build:
+	@echo "Ensure that debugger statement is preserved in production build mode"
+	@COUNT=$$(grep --only-matching --fixed-strings "debugger;" $(BUILD_DIR)/*cs-main.js | wc --lines); \
+	if [ "$$COUNT" -eq $(DEBUGGERs_IN_PROD) ]; then \
+		echo "$(DEBUGGERs_IN_PROD) is OK"; \
+	else \
+		echo "❓ Main content script has $$COUNT and not $(DEBUGGERs_IN_PROD) 'debugger;' statements"; \
+		exit 1; \
+	fi
 
 .PHONY: prod
 prod: test
 	rm -rf $(BUILD_DIR) $(CHROME_ZIP)
 	$(BUILD_PROD) $(BUILD_SCRIPT)
+	@$(MAKE) test-post-build
 
-	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json > /dev/null
+	zip -r $(CHROME_ZIP) $(OUTPUT_DIR) ./manifest.json ./LICENSE > /dev/null
 	zip --delete $(CHROME_ZIP) "$(OUTPUT_DIR)mirror.html" "$(BUILD_DIR)mirror/*" > /dev/null
 
 	tree -Dis $(BUILD_DIR) *.zip | grep -E "api|zip"
@@ -66,6 +86,8 @@ mirror-dev:
 
 .PHONY: mirror-serve
 mirror-serve:
+	$(foreach bin,python3,$(if $(shell command -v $(bin) 2> /dev/null),,$(error ❓ Missing dependency: `$(bin)` to run static http.server)))
+
 	@echo "🎗 reminder to switch extension off"
 	@echo "served at: http://localhost:5555/mirror.html"
 	python3 -m http.server 5555 -d ./public/

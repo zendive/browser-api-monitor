@@ -11,20 +11,31 @@
   import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
   import Worker from './worker/Worker.svelte';
   import Scheduler from './scheduler/Scheduler.svelte';
+  import { useConfigState } from '../../state/config.state.svelte.ts';
+  import { panelsArray2Map } from '../../api/storage/storage.local.ts';
+  import SharedWorker from './sharedWorker/SharedWorker.svelte';
+  import { ETimerType } from '../../wrapper/TimerWrapper.ts';
 
   const ts = useTelemetryState();
+  const config = useConfigState();
+  const panels = $derived.by(() => panelsArray2Map(config.panels));
 </script>
 
 {#if ts.telemetry}
   <Media media={ts.telemetry.media} />
-  <Worker telemetry={ts.telemetry.worker} />
-  <Scheduler telemetry={ts.telemetry.scheduler} />
-  <Eval evalHistory={ts.telemetry.evalHistory} />
-  <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
+
+  {#if ts.telemetry.evalHistory?.length}
+    <Eval evalHistory={ts.telemetry.evalHistory} />
+  {/if}
+
+  {#if panels.activeTimers.visible}
+    <OnlineTimers onlineTimers={ts.telemetry.onlineTimers} />
+  {/if}
 
   {#if ts.telemetry.setTimeoutHistory?.length}
     <TimersSetHistory
       caption="setTimeout"
+      timerType={ETimerType.TIMEOUT}
       setTimerHistory={ts.telemetry.setTimeoutHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}
@@ -40,6 +51,7 @@
   {#if ts.telemetry.setIntervalHistory?.length}
     <TimersSetHistory
       caption="setInterval"
+      timerType={ETimerType.INTERVAL}
       setTimerHistory={ts.telemetry.setIntervalHistory}
       clearTimeoutHistory={ts.telemetry.clearTimeoutHistory}
       clearIntervalHistory={ts.telemetry.clearIntervalHistory}
@@ -79,4 +91,9 @@
       cicHistory={ts.telemetry.cicHistory}
     />
   {/if}
+
+  <Scheduler telemetry={ts.telemetry.scheduler} />
+
+  <Worker telemetry={ts.telemetry.worker} />
+  <SharedWorker telemetry={ts.telemetry.sharedWorker} />
 {/if}

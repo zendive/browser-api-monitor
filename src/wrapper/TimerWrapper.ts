@@ -1,7 +1,7 @@
 import {
-  type TCallstack,
+  type ICallstack,
+  type ITraceable,
   TraceUtil,
-  type TTraceable,
 } from './shared/TraceUtil.ts';
 import {
   clearInterval,
@@ -14,7 +14,7 @@ import {
   TAG_EVAL_RETURN_SET_INTERVAL,
   TAG_EVAL_RETURN_SET_TIMEOUT,
 } from '../api/const.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
 import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
 import { trim2ms } from '../api/time.ts';
@@ -24,12 +24,12 @@ export enum ETimerType {
   TIMEOUT,
   INTERVAL,
 }
-export type TOnlineTimerMetrics = TTraceable & {
+export interface IOnlineTimerMetrics extends Omit<ITraceable, 'firstSeen'> {
   type: ETimerType;
   delay: number | undefined | string;
   handler: number;
-};
-export type TSetTimerHistory = TTraceable & {
+}
+export interface ISetTimerHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | string;
@@ -38,13 +38,13 @@ export type TSetTimerHistory = TTraceable & {
   canceledCounter: number;
   canceledByTraceIds: string[] | null;
   selfTime: number | null;
-};
-export type TClearTimerHistory = TTraceable & {
+}
+export interface IClearTimerHistory extends ITraceable {
   facts: TFact;
   calls: number;
   handler: number | string;
   delay: number | undefined | string;
-};
+}
 
 export const SetTimerFact = /*@__PURE__*/ (() => ({
   NOT_A_FUNCTION: Fact.define(1 << 0),
@@ -81,11 +81,11 @@ export const ClearTimerFacts = /*@__PURE__*/ (() =>
 
 export class TimerWrapper {
   apiEval: EvalWrapper;
-  onlineTimers: Map</*handler*/ number, TOnlineTimerMetrics> = new Map();
-  setTimeoutHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
-  clearTimeoutHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
-  setIntervalHistory: Map</*traceId*/ string, TSetTimerHistory> = new Map();
-  clearIntervalHistory: Map</*traceId*/ string, TClearTimerHistory> = new Map();
+  onlineTimers: Map</*handler*/ number, IOnlineTimerMetrics> = new Map();
+  setTimeoutHistory: Map</*traceId*/ string, ISetTimerHistory> = new Map();
+  clearTimeoutHistory: Map</*traceId*/ string, IClearTimerHistory> = new Map();
+  setIntervalHistory: Map</*traceId*/ string, ISetTimerHistory> = new Map();
+  clearIntervalHistory: Map</*traceId*/ string, IClearTimerHistory> = new Map();
   native = {
     setTimeout: setTimeout,
     clearTimeout: clearTimeout,
@@ -107,7 +107,7 @@ export class TimerWrapper {
     type: ETimerType,
     handler: number,
     delay: number | undefined | string,
-    callstack: TCallstack,
+    callstack: ICallstack,
   ) {
     delay = validTimerDelay(delay) ? trim2ms(delay) : TAG_BAD_DELAY(delay);
 
@@ -117,7 +117,6 @@ export class TimerWrapper {
       delay,
       traceId: callstack.traceId,
       trace: callstack.trace,
-      traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
     });
   }
 
@@ -158,14 +157,13 @@ export class TimerWrapper {
   }
 
   #updateSetTimersHistory(
-    history: Map<string, TSetTimerHistory>,
+    history: Map<string, ISetTimerHistory>,
     handler: number,
     delay: number | string | undefined,
-    callstack: TCallstack,
+    callstack: ICallstack,
     isEval: boolean,
   ) {
-    let facts = <TFact> 0;
-    const existing = history.get(callstack.traceId);
+    let facts = Fact.pure;
 
     if (validTimerDelay(delay)) {
       delay = trim2ms(delay);
@@ -178,41 +176,40 @@ export class TimerWrapper {
       facts = Fact.assign(facts, SetTimerFact.NOT_A_FUNCTION);
     }
 
-    if (existing) {
-      existing.handler = handler;
-      existing.delay = delay;
-      existing.calls++;
-      existing.online++;
-
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      history.set(callstack.traceId, {
+    const stRecord = history.getOrInsertComputed(callstack.traceId, () => {
+      return {
         handler,
-        calls: 1,
+        calls: 0,
         delay,
-        online: 1,
+        online: 0,
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        firstSeen: performance.now(),
         facts,
         canceledCounter: 0,
         canceledByTraceIds: null,
         selfTime: null,
-      });
+      };
+    });
+
+    stRecord.handler = handler;
+    stRecord.delay = delay;
+    stRecord.calls++;
+    stRecord.online++;
+
+    if (facts) {
+      stRecord.facts = Fact.assign(stRecord.facts, facts);
     }
   }
 
   #updateClearTimersHistory(
     type: ETimerType,
-    history: Map<string, TClearTimerHistory>,
+    history: Map<string, IClearTimerHistory>,
     handler: unknown,
-    callstack: TCallstack,
+    callstack: ICallstack,
   ) {
-    const existing = history.get(callstack.traceId);
     let handlerDelay: string | number | undefined = TAG_DELAY_NOT_FOUND;
-    let facts = <TFact> 0;
+    let facts = Fact.pure;
 
     if (validHandler(handler)) {
       const onlineTimer = this.onlineTimers.get(handler);
@@ -231,33 +228,33 @@ export class TimerWrapper {
       facts = Fact.assign(facts, ClearTimerFact.BAD_HANDLER);
     }
 
-    if (existing) {
-      existing.handler = <number | string> handler;
-      existing.delay = handlerDelay;
-      existing.calls++;
-
-      if (facts) {
-        existing.facts = Fact.assign(existing.facts, facts);
-      }
-    } else {
-      history.set(callstack.traceId, {
-        handler: <number | string> handler,
-        calls: 1,
-        delay: handlerDelay,
+    const ctRecord = history.getOrInsertComputed(callstack.traceId, () => {
+      return {
         traceId: callstack.traceId,
         trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
+        firstSeen: performance.now(),
+        handler: <number | string> handler,
+        calls: 0,
+        delay: handlerDelay,
         facts,
-      });
+      };
+    });
+
+    ctRecord.handler = <number | string> handler;
+    ctRecord.delay = handlerDelay;
+    ctRecord.calls++;
+
+    if (facts) {
+      ctRecord.facts = Fact.assign(ctRecord.facts, facts);
     }
   }
 
   #updateTimersSelfTime(
-    map: Map<string, TSetTimerHistory>,
+    history: Map<string, ISetTimerHistory>,
     traceId: string,
     selfTime: number | null,
   ) {
-    const record = map.get(traceId);
+    const record = history.get(traceId);
 
     if (record) {
       record.selfTime = trim2ms(selfTime);
@@ -480,16 +477,13 @@ export class TimerWrapper {
   }
 
   collectHistory(
-    activeTimers: TPanel,
-    setTimeout: TPanel,
-    clearTimeout: TPanel,
-    setInterval: TPanel,
-    clearInterval: TPanel,
+    setTimeout: IPanel,
+    clearTimeout: IPanel,
+    setInterval: IPanel,
+    clearInterval: IPanel,
   ) {
     return {
-      onlineTimers: activeTimers.visible
-        ? Array.from(this.onlineTimers.values())
-        : null,
+      onlineTimers: Array.from(this.onlineTimers.values()),
       setTimeoutHistory: setTimeout.wrap && setTimeout.visible
         ? Array.from(this.setTimeoutHistory.values())
         : null,

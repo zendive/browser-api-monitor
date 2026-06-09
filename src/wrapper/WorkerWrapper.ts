@@ -1,76 +1,92 @@
-import { TraceUtil, type TTraceable } from './shared/TraceUtil.ts';
-import { traceUtil } from './shared/util.ts';
-import type { TPanel } from '../api/storage/storage.local.ts';
-import { trim2ms } from '../api/time.ts';
+import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import {
+  atTheEventDetectAutoremove,
+  getEventHandlerLinksKey,
+  isEventListenerObject,
+  parseWorkerOptions,
+  parseWorkerSpecifier,
+  type TEventHandlerLinks,
+  traceUtil,
+} from './shared/util.ts';
+import type { IPanel } from '../api/storage/storage.local.ts';
+import { callableOnce, trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IWorkerTelemetry {
-  totalOnline: number;
+  total: number;
   collection: IWorkerTelemetryMetric[];
 }
 export interface IWorkerTelemetryMetric {
   specifier: string;
+  firstSeen: number;
   online: number;
+  inMemory: number;
   facts: TFact;
-  konstruktor: IConstructorMetric[];
-  terminate: ITerminateMetric[];
-  postMessage: IPostMessageMetric[];
-  onmessage: IOnMessageMetric[];
-  onerror: IOnErrorMetric[];
-  ael: IAddEventListenerMetric[];
-  rel: IRemoveEventListenerMetric[];
+  konstruktor: IWorkerConstructorMetric[];
+  terminate: IWorkerTerminateMetric[];
+  postMessage: IWorkerPostMessageMetric[];
+  onmessage: IWorkerOnMessageMetric[];
+  onerror: IWorkerOnErrorMetric[];
+  ael: IWorkerAelMetric[];
+  rel: IWorkerRelMetric[];
 }
-
 interface IWorkerMetric {
   specifier: string;
+  firstSeen: number;
   online: number;
+  inMemory: number;
   facts: TFact;
   callsMap: Map</*traceId*/ string, /*calls*/ number>;
-  konstruktor: Map</*traceId*/ string, IConstructorMetric>;
-  terminate: Map</*traceId*/ string, ITerminateMetric>;
-  postMessage: Map</*traceId*/ string, IPostMessageMetric>;
-  onmessage: Map</*traceId*/ string, IOnMessageMetric>;
-  onerror: Map</*traceId*/ string, IOnErrorMetric>;
-  ael: Map</*traceId*/ string, IAddEventListenerMetric>;
-  rel: Map</*traceId*/ string, IRemoveEventListenerMetric>;
+  konstruktor: Map</*traceId*/ string, IWorkerConstructorMetric>;
+  terminate: Map</*traceId*/ string, IWorkerTerminateMetric>;
+  postMessage: Map</*traceId*/ string, IWorkerPostMessageMetric>;
+  onmessage: Map</*traceId*/ string, IWorkerOnMessageMetric>;
+  onerror: Map</*traceId*/ string, IWorkerOnErrorMetric>;
+  ael: Map</*traceId*/ string, IWorkerAelMetric>;
+  rel: Map</*traceId*/ string, IWorkerRelMetric>;
 }
-interface IConstructorMetric extends TTraceable {
+export interface IWorkerOptions {
+  type: 'classic' | 'module';
+  credentials: 'same-origin' | 'include' | 'omit' | undefined;
+  name: string | undefined;
+}
+export interface IWorkerConstructorMetric extends ITraceable {
+  options: IWorkerOptions;
   calls: number;
 }
-interface ITerminateMetric extends TTraceable {
+export interface IWorkerTerminateMetric extends ITraceable {
   calls: number;
 }
-interface IPostMessageMetric extends TTraceable {
+export interface IWorkerPostMessageMetric extends ITraceable {
   calls: number;
   selfTime: number | null;
   cps: number;
 }
-interface IOnMessageMetric extends TTraceable {
+export interface IWorkerOnMessageMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
 }
-interface IOnErrorMetric extends TTraceable {
+export interface IWorkerOnErrorMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
 }
-interface IAddEventListenerMetric extends TTraceable {
+export interface IWorkerAelMetric extends ITraceable {
   calls: number;
   events: number;
   eventSelfTime: number | null;
-  eventsCps: number;
+  eps: number;
   canceledCounter: number;
   facts: TFact;
 }
-interface IRemoveEventListenerMetric extends TTraceable {
+export interface IWorkerRelMetric extends ITraceable {
   calls: number;
   facts: TFact;
 }
 
-const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
 export const HARDWARE_CONCURRENCY = globalThis.navigator.hardwareConcurrency;
 export const WorkerFact = /*@__PURE__*/ (() => ({
   MAX_ONLINE: Fact.define(1 << 0),
@@ -83,298 +99,331 @@ export const WorkerConstructorFacts = /*@__PURE__*/ (() =>
         `Number of online instances exceeds number of available CPUs [${HARDWARE_CONCURRENCY}]`,
     }],
   ]))();
-export const WorkerAELFact = /*@__PURE__*/ (() => ({
+export const WorkerAelFact = /*@__PURE__*/ (() => ({
   DUPLICATE_ADDITION: Fact.define(1 << 0),
 } as const))();
-export const WorkerAELFacts = /*@__PURE__*/ (() =>
+export const WorkerAelFacts = /*@__PURE__*/ (() =>
   Fact.map([
-    [WorkerAELFact.DUPLICATE_ADDITION, {
+    [WorkerAelFact.DUPLICATE_ADDITION, {
       tag: 'A',
       details: `Addition ignored - listener already in the list of events`,
     }],
   ]))();
-export const WorkerRELFact = /*@__PURE__*/ (() => ({
+export const WorkerRelFact = /*@__PURE__*/ (() => ({
   NOT_FOUND: Fact.define(1 << 0),
 } as const))();
 export const WorkerRELFacts = /*@__PURE__*/ (() =>
   Fact.map([
-    [WorkerRELFact.NOT_FOUND, {
+    [WorkerRelFact.NOT_FOUND, {
       tag: 'N',
       details: `Listener not found - nothing to remove`,
     }],
   ]))();
+const workerMap: Map</*specifier*/ string, IWorkerMetric> = new Map();
+const memoryTracker = new FinalizationRegistry((specifier: string) => {
+  const workerMetric = workerMap.get(specifier);
+  workerMetric && workerMetric.inMemory--;
+});
 
 export class ApiMonitorWorkerWrapper extends Worker {
   readonly #specifier: string;
-  #eventHandlerLink: WeakMap<
-    /*authored handler*/ EventListenerOrEventListenerObject,
-    {
-      aelTraceId: string;
-      actualHandler: EventListener;
-    }
-  > = new WeakMap();
+  readonly #metric: IWorkerMetric;
+  readonly #eventHandlerLinks: TEventHandlerLinks = new Map();
 
   constructor(specifier: string | URL, options?: WorkerOptions) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const methodMetric: IConstructorMetric = {
-      traceId: callstack.traceId,
-      trace: callstack.trace,
-      traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-      calls: 1,
-    };
-
-    if (traceUtil.shouldPause(methodMetric.traceId)) {
+    if (traceUtil.shouldPause(callstack.traceId)) {
       debugger;
     }
     super(specifier, options);
 
-    this.#specifier = String(specifier);
-    const workerMetric = workerMap.get(this.#specifier);
-    if (workerMetric) {
-      workerMetric.online++;
+    this.#specifier = parseWorkerSpecifier(specifier);
+    this.#metric = workerMap.getOrInsertComputed(this.#specifier, () => {
+      const constructorMetric = {
+        traceId: callstack.traceId,
+        trace: callstack.trace,
+        firstSeen: performance.now(),
+        options: parseWorkerOptions(options),
+        calls: 0,
+      };
 
-      if (workerMetric.online > HARDWARE_CONCURRENCY) {
-        workerMetric.facts = Fact.assign(
-          workerMetric.facts,
-          WorkerFact.MAX_ONLINE,
-        );
-      }
-
-      const rec = workerMetric.konstruktor.get(methodMetric.traceId);
-      if (rec) {
-        rec.calls++;
-      } else {
-        workerMetric.konstruktor.set(methodMetric.traceId, methodMetric);
-      }
-    } else {
-      workerMap.set(this.#specifier, {
+      return {
         specifier: this.#specifier,
-        online: 1,
-        facts: <TFact> 0,
+        firstSeen: performance.now(),
+        online: 0,
+        inMemory: 0,
+        facts: Fact.pure,
         callsMap: new Map(),
-        konstruktor: new Map([[methodMetric.traceId, methodMetric]]),
+        konstruktor: new Map([[constructorMetric.traceId, constructorMetric]]),
         terminate: new Map(),
         postMessage: new Map(),
         onmessage: new Map(),
         onerror: new Map(),
         ael: new Map(),
         rel: new Map(),
-      });
+      };
+    });
+
+    this.#metric.online++;
+    this.#metric.inMemory++;
+    memoryTracker.register(this, this.#specifier);
+
+    if (this.#metric.online > HARDWARE_CONCURRENCY) {
+      this.#metric.facts = Fact.assign(
+        this.#metric.facts,
+        WorkerFact.MAX_ONLINE,
+      );
     }
+
+    const methodMetric = this.#metric.konstruktor.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          options: parseWorkerOptions(options),
+          calls: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
   }
 
-  terminate() {
-    const workerMetric = workerMap.get(this.#specifier);
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const methodMetric = workerMetric &&
-      workerMetric.terminate.get(callstack.traceId);
+  #markOfflineOnce = callableOnce(() => {
+    this.#metric.online--;
+  });
 
-    if (methodMetric) {
-      methodMetric.calls++;
-    } else {
-      workerMetric!.terminate.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-      });
-    }
+  override terminate() {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.terminate.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
 
     if (traceUtil.shouldPass(callstack.traceId)) {
       if (traceUtil.shouldPause(callstack.traceId)) {
         debugger;
       }
       super.terminate();
-      if (workerMetric!.online) {
-        workerMetric!.online--;
-      }
+
+      this.#markOfflineOnce();
     }
   }
 
   // @ts-expect-error: `Parameters...` conflict with multiple signatures overrides
-  postMessage(...args: Parameters<Worker['postMessage']>) {
-    const workerMetric = workerMap.get(this.#specifier);
+  override postMessage(...args: Parameters<Worker['postMessage']>) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    const methodMetric = workerMetric &&
-      workerMetric.postMessage.get(callstack.traceId);
-    const start = performance.now();
     let selfTime = null;
 
     if (traceUtil.shouldPass(callstack.traceId)) {
       if (traceUtil.shouldPause(callstack.traceId)) {
         debugger;
       }
+      const start = performance.now();
       super.postMessage(...args);
       selfTime = trim2ms(performance.now() - start);
     }
 
-    if (methodMetric) {
-      methodMetric.calls++;
-      methodMetric.selfTime = selfTime;
-    } else {
-      workerMetric!.postMessage.set(callstack.traceId, {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        selfTime,
-        cps: 1,
-      });
-    }
+    const methodMetric = this.#metric.postMessage.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          selfTime,
+          cps: 1,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+    methodMetric.selfTime = selfTime;
   }
 
-  set onmessage(rhs: (ev: MessageEvent) => unknown | null) {
-    const workerMetric = workerMap.get(this.#specifier);
+  override get onmessage() {
+    // @ts-expect-error: internal error - function signature and returning value mismatch
+    return super.onmessage;
+  }
+
+  override set onmessage(rhs: (ev: MessageEvent) => unknown | null) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    let methodMetric = workerMetric &&
-      workerMetric.onmessage.get(callstack.traceId);
-    let eventSelfTime: null | number = null;
+    const methodMetric = this.#metric.onmessage.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          eps: 0,
+        };
+      },
+    );
 
-    if (methodMetric) {
-      methodMetric.calls++;
-    } else {
-      methodMetric = {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        events: 0,
-        eventSelfTime,
-        eventsCps: 1,
-      };
-      workerMetric!.onmessage.set(callstack.traceId, methodMetric);
-    }
+    methodMetric.calls++;
 
-    if (typeof rhs === 'function') {
-      super.onmessage = function (...args) {
-        const start = performance.now();
-
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
-            debugger;
-          }
-          rhs(...args);
-          eventSelfTime = trim2ms(performance.now() - start);
-          methodMetric.events++;
-        }
-
-        methodMetric.eventSelfTime = eventSelfTime;
-      };
-    } else {
+    if (typeof rhs !== 'function') {
       super.onmessage = rhs;
-    }
-  }
-
-  set onerror(rhs: (e: ErrorEvent) => unknown | null) {
-    const workerMetric = workerMap.get(this.#specifier);
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    let methodMetric = workerMetric &&
-      workerMetric.onerror.get(callstack.traceId);
-    let eventSelfTime: null | number = null;
-
-    if (methodMetric) {
-      methodMetric.calls++;
-    } else {
-      methodMetric = {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        events: 0,
-        eventSelfTime,
-        eventsCps: 1,
-      };
-      workerMetric!.onerror.set(callstack.traceId, methodMetric);
+      return;
     }
 
-    if (typeof rhs === 'function') {
-      super.onerror = function (...args) {
-        const start = performance.now();
+    super.onmessage = function (...args) {
+      let eventSelfTime: null | number = null;
+      let rv;
 
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
-            debugger;
-          }
-          rhs(...args);
-          eventSelfTime = trim2ms(performance.now() - start);
-          methodMetric.events++;
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
         }
+        const start = performance.now();
+        rv = rhs(...args);
+        eventSelfTime = trim2ms(performance.now() - start);
+        methodMetric.events++;
+      }
 
-        methodMetric.eventSelfTime = eventSelfTime;
-      };
-    } else {
-      super.onerror = rhs;
-    }
+      methodMetric.eventSelfTime = eventSelfTime;
+      return rv;
+    };
   }
 
-  addEventListener(type: string, listener: unknown, options?: unknown) {
-    const workerMetric = workerMap.get(this.#specifier);
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    let methodMetric = workerMetric && workerMetric.ael.get(callstack.traceId);
-    let eventSelfTime: null | number = null;
+  override get onerror() {
+    // @ts-expect-error: internal error - function signature and returning value mismatch
+    return super.onerror;
+  }
 
-    if (methodMetric) {
-      methodMetric.calls++;
-    } else {
-      methodMetric = {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        events: 0,
-        eventSelfTime,
-        eventsCps: 1,
-        canceledCounter: 0,
-        facts: <TFact> 0,
-      };
-      workerMetric!.ael.set(callstack.traceId, methodMetric);
+  override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.onerror.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          eps: 0,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    if (typeof rhs !== 'function') {
+      super.onerror = rhs;
+      return;
     }
 
-    /**
-     * If the function or object is already in the list of event listeners for this target,
-     * the function or object is not added a second time.
-     * -- https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-     */
-    if (this.#eventHandlerLink.has(<EventListener> listener)) {
+    super.onerror = function (...args) {
+      let eventSelfTime: null | number = null;
+      let rv;
+
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        const start = performance.now();
+        rv = rhs(...args);
+        eventSelfTime = trim2ms(performance.now() - start);
+        methodMetric.events++;
+      }
+
+      methodMetric.eventSelfTime = eventSelfTime;
+      return rv;
+    };
+  }
+
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ) {
+    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const methodMetric = this.#metric.ael.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          events: 0,
+          eventSelfTime: null,
+          eps: 0,
+          canceledCounter: 0,
+          facts: Fact.pure,
+        };
+      },
+    );
+
+    methodMetric.calls++;
+
+    const key = getEventHandlerLinksKey(type, options);
+    const link = this.#eventHandlerLinks.getOrInsertComputed(
+      key,
+      () => new WeakMap(),
+    );
+
+    if (link.has(listener)) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerAELFact.DUPLICATE_ADDITION,
+        WorkerAelFact.DUPLICATE_ADDITION,
       );
       return;
     }
 
     let selfHandler;
+    const detectEventAutoremove = atTheEventDetectAutoremove();
 
     if (typeof listener === 'function') {
       selfHandler = function (
         this: ApiMonitorWorkerWrapper,
         e: Event,
       ) {
+        detectEventAutoremove(link, listener, options, methodMetric);
+
+        let eventSelfTime: null | number = null;
         const start = performance.now();
 
         if (traceUtil.shouldPass(methodMetric.traceId)) {
           if (traceUtil.shouldPause(methodMetric.traceId)) {
             debugger;
           }
-          (<EventListener> listener).call(this, e);
+          listener.call(this, e);
           eventSelfTime = trim2ms(performance.now() - start);
           methodMetric.events++;
         }
 
         methodMetric.eventSelfTime = eventSelfTime;
       }.bind(this);
-    } else if (
-      listener && typeof listener === 'object' && 'handleEvent' in listener &&
-      typeof listener.handleEvent === 'function'
-    ) {
+    } else if (isEventListenerObject(listener)) {
       selfHandler = function (e: Event) {
+        detectEventAutoremove(link, listener, options, methodMetric);
+
+        let eventSelfTime: null | number = null;
         const start = performance.now();
 
         if (traceUtil.shouldPass(methodMetric.traceId)) {
           if (traceUtil.shouldPause(methodMetric.traceId)) {
             debugger;
           }
-          (<EventListenerObject> listener).handleEvent(e);
+          listener.handleEvent(e);
           eventSelfTime = trim2ms(performance.now() - start);
           methodMetric.events++;
         }
@@ -384,64 +433,67 @@ export class ApiMonitorWorkerWrapper extends Worker {
     }
 
     if (selfHandler) {
-      this.#eventHandlerLink.set(<EventListenerObject> listener, {
+      link.set(listener, {
         actualHandler: selfHandler,
         aelTraceId: methodMetric.traceId,
       });
-      // @ts-expect-error: expects known types
+
       super.addEventListener(type, selfHandler, options);
     }
   }
 
-  removeEventListener(type: string, listener: unknown, options?: unknown) {
-    const workerMetric = workerMap.get(this.#specifier);
+  override removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ) {
     const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    let methodMetric = workerMetric &&
-      workerMetric.rel.get(callstack.traceId);
-
-    if (methodMetric) {
-      methodMetric.calls++;
-    } else {
-      methodMetric = {
-        traceId: callstack.traceId,
-        trace: callstack.trace,
-        traceDomain: traceUtil.getTraceDomain(callstack.trace[0]),
-        calls: 1,
-        facts: <TFact> 0,
-      };
-      workerMetric!.rel.set(callstack.traceId, methodMetric);
-    }
-
-    const aelRecord = this.#eventHandlerLink.get(
-      <EventListenerOrEventListenerObject> listener,
+    const methodMetric = this.#metric.rel.getOrInsertComputed(
+      callstack.traceId,
+      () => {
+        return {
+          traceId: callstack.traceId,
+          trace: callstack.trace,
+          firstSeen: performance.now(),
+          calls: 0,
+          facts: Fact.pure,
+        };
+      },
     );
 
-    if (aelRecord) {
-      if (traceUtil.shouldPass(methodMetric.traceId)) {
-        if (traceUtil.shouldPause(methodMetric.traceId)) {
-          debugger;
-        }
-        // @ts-expect-error: expects known types
-        super.removeEventListener(type, aelRecord.actualHandler, options);
-        this.#eventHandlerLink.delete(
-          <EventListenerOrEventListenerObject> listener,
-        );
+    methodMetric.calls++;
 
-        const aelMethodMetric = workerMetric?.ael.get(aelRecord.aelTraceId);
-        if (aelMethodMetric) {
-          aelMethodMetric.canceledCounter++;
-        }
-      }
-    } else {
+    const key = getEventHandlerLinksKey(type, options);
+    const link = this.#eventHandlerLinks.getOrInsertComputed(
+      key,
+      () => new WeakMap(),
+    );
+    const aelRecord = link.get(listener);
+
+    if (!aelRecord) {
       methodMetric.facts = Fact.assign(
         methodMetric.facts,
-        WorkerRELFact.NOT_FOUND,
+        WorkerRelFact.NOT_FOUND,
       );
+      return;
+    }
+
+    if (traceUtil.shouldPass(methodMetric.traceId)) {
+      if (traceUtil.shouldPause(methodMetric.traceId)) {
+        debugger;
+      }
+      super.removeEventListener(type, aelRecord.actualHandler, options);
+      link.delete(listener);
+
+      const aelMethodMetric = this.#metric.ael.get(aelRecord.aelTraceId);
+      if (aelMethodMetric) {
+        aelMethodMetric.canceledCounter++;
+      }
     }
   }
 }
 
-export function updateWorkerCallsPerSecond(panel: TPanel) {
+export function updateWorkerCallsPerSecond(panel: IPanel) {
   if (!panel.wrap || !panel.visible) return;
 
   workerMap.forEach((workerMetric) => {
@@ -455,21 +507,21 @@ export function updateWorkerCallsPerSecond(panel: TPanel) {
     workerMetric.onmessage.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
 
     workerMetric.onerror.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
 
     workerMetric.ael.forEach((methodMetric) => {
       const prevEvents = workerMetric.callsMap.get(methodMetric.traceId) || 0;
 
-      methodMetric.eventsCps = methodMetric.events - prevEvents;
+      methodMetric.eps = methodMetric.events - prevEvents;
       workerMetric.callsMap.set(methodMetric.traceId, methodMetric.events);
     });
   });
@@ -480,18 +532,16 @@ export function wrapWorker() {
   globalThis.Worker = ApiMonitorWorkerWrapper;
 }
 
-export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
-  const rv: IWorkerTelemetry = {
-    totalOnline: 0,
-    collection: [],
-  };
+export function collectWorkerHistory(panel: IPanel): IWorkerTelemetry {
+  const collection: IWorkerTelemetryMetric[] = [];
 
   if (panel.visible) {
     workerMap.forEach((metric) => {
-      rv.totalOnline += metric.online;
-      rv.collection.push({
+      collection.push({
         specifier: metric.specifier,
+        firstSeen: metric.firstSeen,
         online: metric.online,
+        inMemory: metric.inMemory,
         facts: metric.facts,
         konstruktor: Array.from(metric.konstruktor.values()),
         terminate: Array.from(metric.terminate.values()),
@@ -502,13 +552,12 @@ export function collectWorkerHistory(panel: TPanel): IWorkerTelemetry {
         rel: Array.from(metric.rel.values()),
       });
     });
-  } else {
-    workerMap.forEach((metric) => {
-      rv.totalOnline += metric.online;
-    });
   }
 
-  return rv;
+  return {
+    total: workerMap.size,
+    collection,
+  };
 }
 
 export function forTest_clearWorkerHistory() {

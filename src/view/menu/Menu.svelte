@@ -21,7 +21,7 @@
   {/if}
   <div class="-spring"></div>
   <div class="divider"></div>
-  {#if __development__}
+  {#if __feat_dev_stats__}
     <DevStats />
     <div class="divider"></div>
   {/if}
