@@ -27,14 +27,13 @@ Promise.all([
     mount(App, { target: document.body });
     establishTelemetryReceiver();
 
-    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
+    listenWindow(postChannel);
+    listenChannel(postWindow);
 
+    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
     if (!config.paused) {
       postChannel({ msg: EMsg.START_OBSERVE });
     }
-
-    listenWindow(postChannel);
-    listenChannel(postWindow);
 
     onLocalStorageChange((config) => {
       postChannel({ msg: EMsg.CONFIG, config });

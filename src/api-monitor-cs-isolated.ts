@@ -19,12 +19,6 @@ Promise.all([
   provideChannelApi(),
 ]).then(
   ([config, session, { listenChannel, postChannel }]) => {
-    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
-
-    if (config.devtoolsPanelShown && !config.paused) {
-      postChannel({ msg: EMsg.START_OBSERVE });
-    }
-
     listenPort((o) => {
       if (o.msg === EMsg.CONFIRM_INJECTION) {
         postRuntime({ msg: EMsg.INJECTION_CONFIRMED });
@@ -33,6 +27,12 @@ Promise.all([
       }
     });
     listenChannel(postRuntime);
+
+    postChannel({ msg: EMsg.CONFIG_SESSION, config, session });
+
+    if (config.devtoolsPanelShown && !config.paused) {
+      postChannel({ msg: EMsg.START_OBSERVE });
+    }
 
     onLocalStorageChange((config) => {
       postChannel({ msg: EMsg.CONFIG, config });
