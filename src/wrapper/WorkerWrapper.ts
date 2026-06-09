@@ -277,25 +277,28 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
     methodMetric.calls++;
 
-    if (typeof rhs === 'function') {
-      super.onmessage = function (...args) {
-        let eventSelfTime: null | number = null;
-
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
-            debugger;
-          }
-          const start = performance.now();
-          rhs(...args);
-          eventSelfTime = trim2ms(performance.now() - start);
-          methodMetric.events++;
-        }
-
-        methodMetric.eventSelfTime = eventSelfTime;
-      };
-    } else {
+    if (typeof rhs !== 'function') {
       super.onmessage = rhs;
+      return;
     }
+
+    super.onmessage = function (...args) {
+      let eventSelfTime: null | number = null;
+      let rv;
+
+      if (traceUtil.shouldPass(methodMetric.traceId)) {
+        if (traceUtil.shouldPause(methodMetric.traceId)) {
+          debugger;
+        }
+        const start = performance.now();
+        rv = rhs(...args);
+        eventSelfTime = trim2ms(performance.now() - start);
+        methodMetric.events++;
+      }
+
+      methodMetric.eventSelfTime = eventSelfTime;
+      return rv;
+    };
   }
 
   override get onerror() {
@@ -329,18 +332,20 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
     super.onerror = function (...args) {
       let eventSelfTime: null | number = null;
+      let rv;
 
       if (traceUtil.shouldPass(methodMetric.traceId)) {
         if (traceUtil.shouldPause(methodMetric.traceId)) {
           debugger;
         }
         const start = performance.now();
-        rhs(...args);
+        rv = rhs(...args);
         eventSelfTime = trim2ms(performance.now() - start);
         methodMetric.events++;
       }
 
       methodMetric.eventSelfTime = eventSelfTime;
+      return rv;
     };
   }
 

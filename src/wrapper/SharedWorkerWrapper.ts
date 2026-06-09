@@ -206,18 +206,20 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
     super.onerror = function (...args) {
       let eventSelfTime: null | number = null;
+      let rv;
 
       if (traceUtil.shouldPass(methodMetric.traceId)) {
         if (traceUtil.shouldPause(methodMetric.traceId)) {
           debugger;
         }
         const start = performance.now();
-        rhs(...args);
+        rv = rhs(...args);
         eventSelfTime = trim2ms(performance.now() - start);
         methodMetric.events++;
       }
 
       methodMetric.eventSelfTime = eventSelfTime;
+      return rv;
     };
   }
 
