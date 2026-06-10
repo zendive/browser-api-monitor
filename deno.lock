@@ -1,7 +1,7 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@awasm/noble@0.1.2": "0.1.2",
+    "npm:@awasm/noble@0.1.4": "0.1.4",
     "npm:@types/chrome@*": "0.1.42",
     "npm:@types/chrome@0.1.42": "0.1.42",
     "npm:@types/deno@2.7.0": "2.7.0",
@@ -16,8 +16,8 @@
     "npm:vitest@4.1.8": "4.1.8_@vitest+browser-playwright@4.1.8_vite@8.0.16__esbuild@0.28.0_esbuild@0.28.0_playwright@1.60.0"
   },
   "npm": {
-    "@awasm/noble@0.1.2": {
-      "integrity": "sha512-eA9cvKsw0xgMFXHkBzCs+hQ2mNbNWi8ZBQJKUavcxHtJRNaVkf/ZBic2nLFVu5py3Y4aLD3a4I87LzmC7Gn/+Q=="
+    "@awasm/noble@0.1.4": {
+      "integrity": "sha512-LFkAq7VnGc8Hum4x12yxBsyoQYq9mWDf02j1lltzXaeZ14qcXwEYnOl5ByJ49xiBk1L7h6m3vkKkInvtDUIvOg=="
     },
     "@blazediff/core@1.9.1": {
       "integrity": "sha512-ehg3jIkYKulZh+8om/O25vkvSsXXwC+skXmyA87FFx6A/45eqOkZsBltMw/TVteb0mloiGT8oGRTcjRAz66zaA=="
@@ -890,7 +890,7 @@
     ],
     "packageJson": {
       "dependencies": [
-        "npm:@awasm/noble@0.1.2",
+        "npm:@awasm/noble@0.1.4",
         "npm:@types/chrome@0.1.42",
         "npm:@types/deno@2.7.0",
         "npm:@vitest/browser-playwright@4.1.8",
