@@ -30,6 +30,9 @@ import type { Delta } from 'jsondiffpatch';
 import type { TSession } from './storage/storage.session.ts';
 import { ETimer, Timer } from './time.ts';
 
+export const TUNE_CHANNEL = `X_TUNE_CHANNEL_${APPLICATION_NAME}`;
+export const TUNE_CHANNEL_CONFIRMED =
+  `X_TUNE_CHANNEL_CONFIRMED_${APPLICATION_NAME}`;
 let port: chrome.runtime.Port | null = null;
 
 export function postPort(payload: TMsgOptions) {
@@ -120,7 +123,7 @@ export function provideChannelApi() {
   const MAX_TRIES = 10;
   let triesCount = 0;
   const handshake = new Timer(
-    { type: ETimer.TIMEOUT, timeout: 1e3 },
+    { type: ETimer.TIMEOUT, timeout: 60e3 },
     () => {
       if (triesCount++ === MAX_TRIES) {
         channel.close();
@@ -129,39 +132,39 @@ export function provideChannelApi() {
       }
 
       handshake.start();
-      postWindow({ msg: EMsg.TUNE_CHANNEL, id: channelId });
+      document.dispatchEvent(
+        new CustomEvent(TUNE_CHANNEL, {
+          detail: channelId,
+        }),
+      );
     },
   );
 
-  listenWindow((e) => {
-    if (e.msg === EMsg.TUNE_CHANNEL_CONFIRMED) {
-      handshake.stop();
-      resolve({
-        listenChannel(callback: (e: TMsgOptions) => void) {
-          channel.onmessage = (e: MessageEvent<TMsgOptions>) => {
-            callback(e.data);
-          };
-        },
-        postChannel(e: TMsgOptions) {
-          channel.postMessage(e);
-        },
-      });
-
-      return true; // stop listen
-    }
-  });
+  document.addEventListener(TUNE_CHANNEL_CONFIRMED, () => {
+    handshake.stop();
+    resolve({
+      listenChannel(callback: (e: TMsgOptions) => void) {
+        channel.onmessage = (e: MessageEvent<TMsgOptions>) => {
+          callback(e.data);
+        };
+      },
+      postChannel(e: TMsgOptions) {
+        channel.postMessage(e);
+      },
+    });
+  }, { once: true });
 
   handshake.trigger();
-
   return promise;
 }
 
 export function awaitChannelApi() {
   const { promise, resolve } = Promise.withResolvers<IChannelApi>();
 
-  listenWindow((e) => {
-    if (e.msg === EMsg.TUNE_CHANNEL && e.id && typeof (e.id) === 'string') {
-      const channel = new BroadcastChannel(e.id);
+  document.addEventListener(
+    TUNE_CHANNEL,
+    ((e: CustomEvent<string>) => {
+      const channel = new BroadcastChannel(e.detail);
 
       resolve({
         listenChannel(callback: (e: TMsgOptions) => void) {
@@ -174,11 +177,10 @@ export function awaitChannelApi() {
         },
       });
 
-      postWindow({ msg: EMsg.TUNE_CHANNEL_CONFIRMED });
-
-      return true; // stop listen
-    }
-  });
+      document.dispatchEvent(new CustomEvent(TUNE_CHANNEL_CONFIRMED));
+    }) as EventListener,
+    { once: true },
+  );
 
   return promise;
 }
@@ -202,8 +204,6 @@ export enum EMsg {
   SESSION,
   CONFIRM_INJECTION,
   INJECTION_CONFIRMED,
-  TUNE_CHANNEL,
-  TUNE_CHANNEL_CONFIRMED,
 }
 
 interface IMsgStartObserve {
@@ -261,13 +261,6 @@ interface IMsgConfirmInjection {
 interface IMsgInjectionConfirmed {
   msg: EMsg.INJECTION_CONFIRMED;
 }
-interface IMsgTuneChannel {
-  msg: EMsg.TUNE_CHANNEL;
-  id: string;
-}
-interface IMsgTuneChannelConfirmed {
-  msg: EMsg.TUNE_CHANNEL_CONFIRMED;
-}
 
 export type TMsgOptions =
   | IMsgTelemetry
@@ -282,6 +275,4 @@ export type TMsgOptions =
   | IMsgMediaCommand
   | IMsgSession
   | IMsgConfirmInjection
-  | IMsgInjectionConfirmed
-  | IMsgTuneChannel
-  | IMsgTuneChannelConfirmed;
+  | IMsgInjectionConfirmed;
