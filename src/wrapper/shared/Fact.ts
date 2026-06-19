@@ -27,11 +27,11 @@ export class Fact {
     return new Map(descriptors);
   }
 
-  static assign(data: number, fact: TFact): TFact {
+  static assign(data: TFact, fact: TFact): TFact {
     return (data | fact) as TFact;
   }
 
-  static check(data: number, fact: TFact): boolean {
+  static check(data: TFact, fact: TFact): boolean {
     return !!(data & fact);
   }
 
@@ -45,7 +45,7 @@ export class Fact {
     return rv.join('\n');
   }
 
-  static getTags(data: number, factsMap: TFactsMap): string {
+  static getTags(data: TFact, factsMap: TFactsMap): string {
     let rv = '';
 
     factsMap.forEach((descriptor, fact) => {
