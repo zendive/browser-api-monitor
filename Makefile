@@ -32,6 +32,10 @@ install-test-deps:
 update:
 	deno update --latest
 
+.PHONY: update-check
+update-check:
+	@deno outdated
+
 .PHONY: dev
 dev:
 	rm -rf $(BUILD_DIR)
