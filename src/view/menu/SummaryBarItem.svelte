@@ -1,64 +1,64 @@
 <script lang="ts">
-  import Variable from '../shared/Variable.svelte';
-  import { ETimer, Timer } from '../../api/time.ts';
-  import {
-    AFTER_SCROLL_ANIMATION_CLASSNAME,
-    SCROLLABLE_CLASSNAME,
-  } from '../shared/const.ts';
+import Variable from '../shared/Variable.svelte';
+import { ETimer, Timer } from '../../api/time.ts';
+import {
+  AFTER_SCROLL_ANIMATION_CLASSNAME,
+  SCROLLABLE_CLASSNAME,
+} from '../shared/const.ts';
 
-  let {
-    visible,
-    label,
-    count,
-    navSelector,
-    tooltip = '',
-  }: {
-    visible: boolean;
-    label: string;
-    count: number;
-    navSelector: string;
-    tooltip?: string;
-  } = $props();
-  let hasShownData: boolean = $derived.by(() => visible && count > 0);
-  const stopAnimate = new Timer(
-    { type: ETimer.TIMEOUT, timeout: 512 },
-    (el: HTMLElement | unknown) =>
-      void requestAnimationFrame(() => {
-        if (el instanceof HTMLElement) {
-          el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);
-        }
-      }),
-  );
-
-  function scrollTo() {
-    const condition = navSelector
-      .split('|')
-      .map((caption) => `contains(@data-navigation-tag,'${caption}')`)
-      .join(' or ');
-    const el = document.evaluate(
-      `//node()[${condition}]`,
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue;
-    const main = document.querySelector(`.${SCROLLABLE_CLASSNAME}`);
-
-    if (main && el instanceof HTMLElement) {
-      const elBcr = el.getBoundingClientRect();
-      const mainBcr = main.getBoundingClientRect();
-
-      main.scrollBy(0, elBcr.y - mainBcr.y);
-
-      if (stopAnimate.isPending()) {
-        stopAnimate.stop();
+let {
+  visible,
+  label,
+  count,
+  navSelector,
+  tooltip = '',
+}: {
+  visible: boolean;
+  label: string;
+  count: number;
+  navSelector: string;
+  tooltip?: string;
+} = $props();
+let hasShownData: boolean = $derived.by(() => visible && count > 0);
+const stopAnimate = new Timer(
+  { type: ETimer.TIMEOUT, timeout: 512 },
+  (el: HTMLElement | unknown) =>
+    void requestAnimationFrame(() => {
+      if (el instanceof HTMLElement) {
+        el.classList.remove(AFTER_SCROLL_ANIMATION_CLASSNAME);
       }
-      void requestAnimationFrame(() => {
-        el.classList.add(AFTER_SCROLL_ANIMATION_CLASSNAME);
-        stopAnimate.start(el);
-      });
+    }),
+);
+
+function scrollTo() {
+  const condition = navSelector
+    .split('|')
+    .map((caption) => `contains(@data-navigation-tag,'${caption}')`)
+    .join(' or ');
+  const el = document.evaluate(
+    `//node()[${condition}]`,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  const main = document.querySelector(`.${SCROLLABLE_CLASSNAME}`);
+
+  if (main && el instanceof HTMLElement) {
+    const elBcr = el.getBoundingClientRect();
+    const mainBcr = main.getBoundingClientRect();
+
+    main.scrollBy(0, elBcr.y - mainBcr.y);
+
+    if (stopAnimate.isPending()) {
+      stopAnimate.stop();
     }
+    void requestAnimationFrame(() => {
+      el.classList.add(AFTER_SCROLL_ANIMATION_CLASSNAME);
+      stopAnimate.start(el);
+    });
   }
+}
 </script>
 
 <a
@@ -77,20 +77,20 @@
 </a>
 
 <style lang="scss">
-  a {
-    padding: 0 0.4rem;
+a {
+  padding: 0 0.4rem;
 
-    &:not(:last-of-type) {
-      border-right: 1px solid var(--border);
-    }
+  &:not(:last-of-type) {
+    border-right: 1px solid var(--border);
+  }
 
-    &.link-disabled {
-      cursor: default;
-      color: var(--text-passive);
+  &.link-disabled {
+    cursor: default;
+    color: var(--text-passive);
 
-      &:hover {
-        text-decoration: none;
-      }
+    &:hover {
+      text-decoration: none;
     }
   }
+}
 </style>

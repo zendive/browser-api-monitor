@@ -1,27 +1,27 @@
 <script lang="ts">
-  import Variable from '../../shared/Variable.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
-  import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
-  import {
-    type IRequestIdleCallbackHistory,
-    RicFacts,
-  } from '../../../wrapper/IdleWrapper.ts';
-  import { delayTooltip } from '../../shared/util.ts';
+import Variable from '../../shared/Variable.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CellSelfTime from '../shared/CellSelfTime.svelte';
+import CellFacts from '../shared/CellFacts.svelte';
+import CellBypass from '../shared/CellBypass.svelte';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
+import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
+import {
+  type IRequestIdleCallbackHistory,
+  RicFacts,
+} from '../../../wrapper/IdleWrapper.ts';
+import { delayTooltip } from '../../shared/util.ts';
 
-  let {
-    metric,
-    popoverId,
-    tph,
-  }: {
-    metric: IRequestIdleCallbackHistory;
-    popoverId: string;
-    tph: TTerminatorsPopoverHelper;
-  } = $props();
+let {
+  metric,
+  popoverId,
+  tph,
+}: {
+  metric: IRequestIdleCallbackHistory;
+  popoverId: string;
+  tph: TTerminatorsPopoverHelper;
+} = $props();
 </script>
 
 <tr class="t-zebra">
@@ -29,7 +29,9 @@
     <CellCallstack trace={metric.trace} />
   </td>
   <td class="ta-c">{metric.didTimeout}</td>
-  <td class="ta-r"><CellSelfTime time={metric.selfTime} /></td>
+  <td class="ta-r">
+    <CellSelfTime time={metric.selfTime} />
+  </td>
   <td class="ta-c">
     <CellFacts facts={metric.facts} factsMap={RicFacts} />
   </td>
@@ -50,6 +52,10 @@
       <Variable value={metric.online} />
     {/if}
   </td>
-  <td><CellBypass traceId={metric.traceId} /></td>
-  <td><CellBreakpoint traceId={metric.traceId} /></td>
+  <td>
+    <CellBypass traceId={metric.traceId} />
+  </td>
+  <td>
+    <CellBreakpoint traceId={metric.traceId} />
+  </td>
 </tr>

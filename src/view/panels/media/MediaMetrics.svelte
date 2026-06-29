@@ -1,25 +1,25 @@
 <script lang="ts">
-  import { type IMediaTelemetryMetrics } from '../../../wrapper/MediaWrapper.ts';
-  import MediaCommands from './MediaCommands.svelte';
-  import MediaEvent from './MediaEvent.svelte';
-  import MediaProp from './MediaProp.svelte';
+import { type IMediaTelemetryMetrics } from '../../../wrapper/MediaWrapper.ts';
+import MediaCommands from './MediaCommands.svelte';
+import MediaEvent from './MediaEvent.svelte';
+import MediaProp from './MediaProp.svelte';
 
-  let { mediaId, events, props }: {
-    mediaId: string;
-    events: IMediaTelemetryMetrics['events'];
-    props: IMediaTelemetryMetrics['props'];
-  } = $props();
-  let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
-  const duplicateSrc = ['currentSrc', 'src'];
-  let filteredProps = $derived.by(() => {
-    let rv = Object.entries(props);
+let { mediaId, events, props }: {
+  mediaId: string;
+  events: IMediaTelemetryMetrics['events'];
+  props: IMediaTelemetryMetrics['props'];
+} = $props();
+let isSameSource = $derived.by(() => props['src'] === props['currentSrc']);
+const duplicateSrc = ['currentSrc', 'src'];
+let filteredProps = $derived.by(() => {
+  let rv = Object.entries(props);
 
-    if (isSameSource) {
-      rv = rv.filter(([name]) => !duplicateSrc.includes(name));
-    }
+  if (isSameSource) {
+    rv = rv.filter(([name]) => !duplicateSrc.includes(name));
+  }
 
-    return rv;
-  });
+  return rv;
+});
 </script>
 
 <table class="group">
@@ -63,15 +63,15 @@
 </table>
 
 <style lang="scss">
-  .group {
-    max-width: 37rem;
+.group {
+  max-width: 37rem;
 
-    &:not(:first-child) {
-      border-left: 1px solid var(--border);
-    }
+  &:not(:first-child) {
+    border-left: 1px solid var(--border);
   }
-  .events,
-  .props {
-    vertical-align: top;
-  }
+}
+.events,
+.props {
+  vertical-align: top;
+}
 </style>

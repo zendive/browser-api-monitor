@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { EMsg, postPort } from '../../../api/communication.ts';
+import { EMsg, postPort } from '../../../api/communication.ts';
 
-  let { mediaId, value }: {
-    mediaId: string;
-    value: unknown;
-  } = $props();
+let { mediaId, value }: {
+  mediaId: string;
+  value: unknown;
+} = $props();
 
-  function onChangeVolume(e: Event) {
-    postPort({
-      msg: EMsg.MEDIA_COMMAND,
-      cmd: 'set-volume',
-      mediaId,
-      value: (e.target as HTMLInputElement).valueAsNumber,
-    });
-  }
+function onChangeVolume(e: Event) {
+  postPort({
+    msg: EMsg.MEDIA_COMMAND,
+    cmd: 'set-volume',
+    mediaId,
+    value: (e.target as HTMLInputElement).valueAsNumber,
+  });
+}
 </script>
 
 <tr>

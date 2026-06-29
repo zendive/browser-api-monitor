@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { local, session } from '../../api/storage/storage.ts';
+import { local, session } from '../../api/storage/storage.ts';
 
-  async function onDevReload() {
-    await Promise.all([
-      local.clear(),
-      session.clear(),
-    ]);
-    location.reload();
-  }
+async function onDevReload() {
+  await Promise.all([
+    local.clear(),
+    session.clear(),
+  ]);
+  location.reload();
+}
 </script>
 
 <button

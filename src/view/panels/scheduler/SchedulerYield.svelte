@@ -1,28 +1,28 @@
 <script lang="ts">
-  import type { IYield } from '../../../wrapper/SchedulerWrapper.ts';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import Variable from '../../shared/Variable.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
+import type { IYield } from '../../../wrapper/SchedulerWrapper.ts';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import CellBypass from '../shared/CellBypass.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import Variable from '../../shared/Variable.svelte';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import type { ESortOrder } from '../../../api/const.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { metrics }: { metrics: IYield[] } = $props();
-  let { sortYield } = useConfigState();
-  const sortedMetrics = $derived.by(() =>
-    metrics.toSorted(
-      compareByFieldOrder(sortYield.field, sortYield.order),
-    )
-  );
+let { metrics }: { metrics: IYield[] } = $props();
+let { sortYield } = useConfigState();
+const sortedMetrics = $derived.by(() =>
+  metrics.toSorted(
+    compareByFieldOrder(sortYield.field, sortYield.order),
+  )
+);
 
-  function updateSort(field: keyof IYield, order: ESortOrder) {
-    sortYield.field = field;
-    sortYield.order = order;
-    saveLocalStorage({ sortYield });
-  }
+function updateSort(field: keyof IYield, order: ESortOrder) {
+  sortYield.field = field;
+  sortYield.order = order;
+  saveLocalStorage({ sortYield });
+}
 </script>
 
 <table data-navigation-tag="scheduler.yield">

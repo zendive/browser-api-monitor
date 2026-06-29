@@ -1,17 +1,17 @@
 <script lang="ts">
-  import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
-  import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
-  import WorkerMetricConstructor from './WorkerMetricConstructor.svelte';
-  import WorkerMetricTerminate from './WorkerMetricTerminate.svelte';
-  import WorkerMetricPostMessage from './WorkerMetricPostMessage.svelte';
-  import WorkerMetricOnMessage from './WorkerMetricOnMessage.svelte';
-  import WorkerMetricRemoveEventListener from './WorkerMetricRemoveEventListener.svelte';
-  import WorkerMetricAddEventListener from './WorkerMetricAddEventListener.svelte';
-  import WorkerMetricOnError from './WorkerMetricOnError.svelte';
+import type { IWorkerTelemetryMetric } from '../../../wrapper/WorkerWrapper.ts';
+import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
+import CollapseExpand from '../shared/CollapseExpand.svelte';
+import WorkerMetricConstructor from './WorkerMetricConstructor.svelte';
+import WorkerMetricTerminate from './WorkerMetricTerminate.svelte';
+import WorkerMetricPostMessage from './WorkerMetricPostMessage.svelte';
+import WorkerMetricOnMessage from './WorkerMetricOnMessage.svelte';
+import WorkerMetricRemoveEventListener from './WorkerMetricRemoveEventListener.svelte';
+import WorkerMetricAddEventListener from './WorkerMetricAddEventListener.svelte';
+import WorkerMetricOnError from './WorkerMetricOnError.svelte';
 
-  let { workerMetric }: { workerMetric: IWorkerTelemetryMetric } = $props();
-  let isExpanded = $state(true);
+let { workerMetric }: { workerMetric: IWorkerTelemetryMetric } = $props();
+let isExpanded = $state(true);
 </script>
 
 <fieldset>
@@ -40,7 +40,7 @@
 </fieldset>
 
 <style lang="scss">
-  fieldset {
-    margin: 0.25rem auto;
-  }
+fieldset {
+  margin: 0.25rem auto;
+}
 </style>

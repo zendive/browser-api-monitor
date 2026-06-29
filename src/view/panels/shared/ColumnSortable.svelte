@@ -2,44 +2,44 @@
   lang="ts"
   generics="TField, TSort extends { field: TField; order: ESortOrder }"
 >
-  import type { Snippet } from 'svelte';
-  import { ESortOrder } from '../../../api/const.ts';
+import type { Snippet } from 'svelte';
+import { ESortOrder } from '../../../api/const.ts';
 
-  let {
-    sort,
-    by,
-    update,
-    children,
-  }: {
-    sort: TSort;
-    by: TSort['field'];
-    update: (field: TField, order: ESortOrder) => void;
-    children?: Snippet;
-  } = $props();
+let {
+  sort,
+  by,
+  update,
+  children,
+}: {
+  sort: TSort;
+  by: TSort['field'];
+  update: (field: TField, order: ESortOrder) => void;
+  children?: Snippet;
+} = $props();
 
-  const ORDER_MAP = {
-    [ESortOrder.ASCENDING]: ' ascending',
-    [ESortOrder.DESCENDING]: ' descending',
-  };
-  let tooltip = $derived.by(() => {
-    let rv = `Sort by ${by}`;
-    if (by === sort.field) {
-      rv += ORDER_MAP[sort.order];
-    }
-    return rv;
-  });
-
-  function changeSort(e: MouseEvent) {
-    e.preventDefault();
-    update(
-      by,
-      by !== sort.field
-        ? ESortOrder.DESCENDING
-        : sort.order === ESortOrder.DESCENDING
-        ? ESortOrder.ASCENDING
-        : ESortOrder.DESCENDING,
-    );
+const ORDER_MAP = {
+  [ESortOrder.ASCENDING]: ' ascending',
+  [ESortOrder.DESCENDING]: ' descending',
+};
+let tooltip = $derived.by(() => {
+  let rv = `Sort by ${by}`;
+  if (by === sort.field) {
+    rv += ORDER_MAP[sort.order];
   }
+  return rv;
+});
+
+function changeSort(e: MouseEvent) {
+  e.preventDefault();
+  update(
+    by,
+    by !== sort.field
+      ? ESortOrder.DESCENDING
+      : sort.order === ESortOrder.DESCENDING
+      ? ESortOrder.ASCENDING
+      : ESortOrder.DESCENDING,
+  );
+}
 </script>
 
 <a
@@ -60,10 +60,10 @@
 </a>
 
 <style lang="scss">
-  a {
-    display: inline-flex;
-    align-items: center;
-    text-wrap: nowrap;
-    color: var(--text-invert);
-  }
+a {
+  display: inline-flex;
+  align-items: center;
+  text-wrap: nowrap;
+  color: var(--text-invert);
+}
 </style>

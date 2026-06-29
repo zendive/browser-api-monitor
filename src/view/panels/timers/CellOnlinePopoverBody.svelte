@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { postTimerCommand } from '../../../state/config.state.svelte.ts';
-  import { delayTooltip } from '../../shared/util.ts';
-  import { useTelemetryState } from '../../../state/telemetry.state.svelte.ts';
-  import type { ETimerType } from '../../../wrapper/TimerWrapper.ts';
+import { postTimerCommand } from '../../../state/config.state.svelte.ts';
+import { delayTooltip } from '../../shared/util.ts';
+import { useTelemetryState } from '../../../state/telemetry.state.svelte.ts';
+import type { ETimerType } from '../../../wrapper/TimerWrapper.ts';
 
-  let {
-    traceId,
-    timerType,
-  }: {
-    traceId: string;
-    timerType: ETimerType;
-  } = $props();
-  const ts = useTelemetryState();
-  const onlineMetrics = $derived.by(() => {
-    return ts.telemetry?.onlineTimers.filter((o) =>
-      o.traceId === traceId && o.type === timerType
-    ) ||
-      [];
-  });
+let {
+  traceId,
+  timerType,
+}: {
+  traceId: string;
+  timerType: ETimerType;
+} = $props();
+const ts = useTelemetryState();
+const onlineMetrics = $derived.by(() => {
+  return ts.telemetry?.onlineTimers.filter((o) =>
+    o.traceId === traceId && o.type === timerType
+  ) ||
+    [];
+});
 </script>
 
 <table>
@@ -50,7 +50,7 @@
 </table>
 
 <style lang="scss">
-  a:hover {
-    text-decoration: line-through;
-  }
+a:hover {
+  text-decoration: line-through;
+}
 </style>

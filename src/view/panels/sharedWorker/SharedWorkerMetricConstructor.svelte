@@ -1,39 +1,38 @@
 <script lang="ts">
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import Variable from '../../shared/Variable.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import type {
-    ISharedWorkerConstructorMetric,
-    ISharedWorkerTelemetryMetric,
-  } from '../../../wrapper/SharedWorkerWrapper.ts';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import Variable from '../../shared/Variable.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CollapseExpand from '../shared/CollapseExpand.svelte';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
+import type { ESortOrder } from '../../../api/const.ts';
+import type {
+  ISharedWorkerConstructorMetric,
+  ISharedWorkerTelemetryMetric,
+} from '../../../wrapper/SharedWorkerWrapper.ts';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
-    $props();
-  const { sortSharedWorkerConstructor } = useConfigState();
-  const constructorSortedMetrics = $derived.by(() =>
-    workerMetric.konstruktor.toSorted(
-      compareByFieldOrder(
-        sortSharedWorkerConstructor.field,
-        sortSharedWorkerConstructor.order,
-      ),
-    )
-  );
-  let isExpanded = $state(true);
+let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } = $props();
+const { sortSharedWorkerConstructor } = useConfigState();
+const constructorSortedMetrics = $derived.by(() =>
+  workerMetric.konstruktor.toSorted(
+    compareByFieldOrder(
+      sortSharedWorkerConstructor.field,
+      sortSharedWorkerConstructor.order,
+    ),
+  )
+);
+let isExpanded = $state(true);
 
-  function updateSort(
-    field: keyof ISharedWorkerConstructorMetric,
-    order: ESortOrder,
-  ) {
-    sortSharedWorkerConstructor.field = field;
-    sortSharedWorkerConstructor.order = order;
-    saveLocalStorage({ sortSharedWorkerConstructor });
-  }
+function updateSort(
+  field: keyof ISharedWorkerConstructorMetric,
+  order: ESortOrder,
+) {
+  sortSharedWorkerConstructor.field = field;
+  sortSharedWorkerConstructor.order = order;
+  saveLocalStorage({ sortSharedWorkerConstructor });
+}
 </script>
 
 <table>

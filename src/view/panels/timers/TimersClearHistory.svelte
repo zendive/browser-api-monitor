@@ -1,32 +1,32 @@
 <script lang="ts">
-  import type { IClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
+import type { IClearTimerHistory } from '../../../wrapper/TimerWrapper.ts';
+import type { ESortOrder } from '../../../api/const.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import Variable from '../../shared/Variable.svelte';
+import TimersClearHistoryMetric from './TimersClearHistoryMetric.svelte';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let {
-    clearTimerHistory,
-    caption,
-  }: {
-    clearTimerHistory: IClearTimerHistory[];
-    caption: string;
-  } = $props();
-  const { sortClearTimers } = useConfigState();
-  const sortedMetrics = $derived.by(() =>
-    clearTimerHistory.toSorted(
-      compareByFieldOrder(sortClearTimers.field, sortClearTimers.order),
-    )
-  );
+let {
+  clearTimerHistory,
+  caption,
+}: {
+  clearTimerHistory: IClearTimerHistory[];
+  caption: string;
+} = $props();
+const { sortClearTimers } = useConfigState();
+const sortedMetrics = $derived.by(() =>
+  clearTimerHistory.toSorted(
+    compareByFieldOrder(sortClearTimers.field, sortClearTimers.order),
+  )
+);
 
-  function updateSort(field: keyof IClearTimerHistory, order: ESortOrder) {
-    sortClearTimers.field = field;
-    sortClearTimers.order = order;
-    saveLocalStorage({ sortClearTimers });
-  }
+function updateSort(field: keyof IClearTimerHistory, order: ESortOrder) {
+  sortClearTimers.field = field;
+  sortClearTimers.order = order;
+  saveLocalStorage({ sortClearTimers });
+}
 </script>
 
 <table data-navigation-tag={caption}>

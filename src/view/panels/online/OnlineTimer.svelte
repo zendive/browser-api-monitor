@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import OnlineTimerMetric from './OnlineTimerMetric.svelte';
+import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+import Variable from '../../shared/Variable.svelte';
+import OnlineTimerMetric from './OnlineTimerMetric.svelte';
 
-  let {
-    metrics,
-    caption,
-  }: {
-    metrics: IOnlineTimerMetrics[];
-    caption: string;
-  } = $props();
+let {
+  metrics,
+  caption,
+}: {
+  metrics: IOnlineTimerMetrics[];
+  caption: string;
+} = $props();
 </script>
 
 <table data-navigation-tag={caption}>
