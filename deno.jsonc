@@ -36,7 +36,7 @@
   "minimumDependencyAge": "P7D",
   "imports": {
     // bundler imports
-    "esbuild": "npm:esbuild@0.28.0",
+    "esbuild": "npm:esbuild@0.28.1",
     "esbuild-svelte": "npm:esbuild-svelte@0.9.5",
   },
   "allowScripts": ["npm:edgedriver", "npm:geckodriver"]
