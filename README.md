@@ -140,7 +140,7 @@ To assess web application implementation correctness and to expedite issues disc
 
 #### Requirements
 
-- Linux: [deno v2.9.0](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
+- Linux: [deno v2.9.2](https://docs.deno.com/runtime/getting_started/installation/), `make`, `jq`, `zip`, `tree`, `grep`, `wc`, `python3` (optional, to run static http.server for "__mirror__" mode build)
 - Chrome: v145
 
 #### Instructions
