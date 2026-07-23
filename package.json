@@ -3,12 +3,12 @@
   "devDependencies": {
     "@types/chrome": "0.2.2",
     "@types/deno": "2.7.0",
-    "@vitest/browser-playwright": "4.1.9",
+    "@vitest/browser-playwright": "4.1.10",
     "sv": "0.16.1",
     "svelte": "5.56.4",
-    "svelte-check": "4.6.0",
+    "svelte-check": "4.7.3",
     "typescript": "6.0.3",
-    "vitest": "4.1.9"
+    "vitest": "4.1.10"
   },
   "dependencies": {
     "@awasm/noble": "0.1.4",
