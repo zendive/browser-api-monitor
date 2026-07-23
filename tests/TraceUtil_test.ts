@@ -23,61 +23,46 @@ describe('TraceUtil', () => {
 
   test('createCallstack full', () => {
     traceUtil.callstackType = EWrapperCallstackType.FULL;
-    const standard = [
+    const { traceId, trace } = traceUtil.getCallstack(
+      <Error> { stack: TEST_STACK },
+      null,
+    );
+    const expected = [
       { name: 0, link: 'https://example1.com/bundle2.js:2:3' },
       { name: 'call1', link: 'https://example1.com/bundle2.js:3:4' },
       { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
     ];
-    const { traceId, trace } = traceUtil.getCallstack(
-      <Error> { stack: TEST_STACK },
-      null,
-    );
 
     expect(traceId).toMatch(HASH_REGEX);
-    expect(trace.length).toBe(3);
-    expect(trace[0].name).toBe(standard[0].name);
-    expect(trace[0].link).toBe(standard[0].link);
-    expect(trace[1].name).toBe(standard[1].name);
-    expect(trace[1].link).toBe(standard[1].link);
-    expect(trace[2].name).toBe(standard[2].name);
-    expect(trace[2].link).toBe(standard[2].link);
+    expect(trace).toEqual(expected);
   });
 
   test('createCallstack short', () => {
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
-    const standard = [
-      {
-        name: 'call2',
-        link: 'https://example2.com/bundle3.js:4:5',
-      },
-    ];
     const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_STACK },
       null,
     );
+    const expected = [
+      { name: 'call2', link: 'https://example2.com/bundle3.js:4:5' },
+    ];
 
     expect(traceId).toBe(TEST_STACK_SHORT_HASH);
-    expect(trace.length).toBe(1);
-    expect(trace[0].name).toBe(standard[0].name);
-    expect(trace[0].link).toBe(standard[0].link);
+    expect(trace).toEqual(expected);
   });
 
   test('missing link - use trait', () => {
     function functionTrace() {}
-    const standard = [
-      {
-        name: functionTrace.name,
-        link: TAG_INVALID_CALLSTACK_LINK,
-      },
-    ];
     traceUtil.callstackType = EWrapperCallstackType.SHORT;
     const { traceId, trace } = traceUtil.getCallstack(
       <Error> { stack: TEST_MISSING_STACK },
       functionTrace,
     );
+    const expected = [
+      { name: functionTrace.name, link: TAG_INVALID_CALLSTACK_LINK },
+    ];
 
     expect(traceId).toMatch(HASH_REGEX);
-    expect(trace[0].name).toBe(standard[0].name);
-    expect(trace[0].link).toBe(standard[0].link);
+    expect(trace).toEqual(expected);
   });
 });

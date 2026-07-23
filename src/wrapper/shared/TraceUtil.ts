@@ -36,8 +36,8 @@ export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
 const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
 const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/+/);
-const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((async )?(.*)\)$/);
-const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/async /);
+const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((.*)\)$/);
+const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/^async /);
 
 export class TraceUtil {
   selfTraceLink = '';
@@ -71,7 +71,7 @@ export class TraceUtil {
     const error = new Error(TraceUtil.SIGNATURE);
     return (error?.stack || '')
       .split(REGEX_STACKTRACE_SPLIT)[1]
-      .replace(REGEX_STACKTRACE_LINK, '$2')
+      .replace(REGEX_STACKTRACE_LINK, '$1')
       .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
   }
 
@@ -139,10 +139,11 @@ export class TraceUtil {
     }
 
     const link = stackRow
-      .replace(REGEX_STACKTRACE_LINK, '$2')
+      .replace(REGEX_STACKTRACE_LINK, '$1')
       .replace(REGEX_STACKTRACE_LINK_REMOVE, '')
       .trim();
-    if (link.indexOf('<anonymous>') >= 0) {
+
+    if (link.startsWith('<anonymous>')) {
       return;
     }
 
