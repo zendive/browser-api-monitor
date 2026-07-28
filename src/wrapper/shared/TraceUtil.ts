@@ -33,18 +33,14 @@ export const REGEX_CUT_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
 );
 export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
-const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s+at\s/);
-const REGEX_STACKTRACE_NAME = /*@__PURE__*/ new RegExp(/^(.+)\(.*/);
-const REGEX_STACKTRACE_HAS_LINK = /*@__PURE__*/ new RegExp(/:\/+/);
-const REGEX_STACKTRACE_LINK = /*@__PURE__*/ new RegExp(/.*\((.*)\)$/);
-const REGEX_STACKTRACE_LINK_REMOVE = /*@__PURE__*/ new RegExp(/^async /);
+const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s*at\s+/);
 
 export class TraceUtil {
   selfTraceLink = '';
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   debug: Set<string> = new Set();
   bypass: Set<string> = new Set();
-  #fullCallstackCacheTrace: Map</*traceId*/ string, ITrace[]> = new Map();
+  #fullCallstackCache: Map</*stack*/ string, ICallstack> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
 
   constructor() {
@@ -68,31 +64,36 @@ export class TraceUtil {
   }
 
   #getSelfTraceLink() {
-    const error = new Error(TraceUtil.SIGNATURE);
-    return (error?.stack || '')
-      .split(REGEX_STACKTRACE_SPLIT)[1]
-      .replace(REGEX_STACKTRACE_LINK, '$1')
-      .replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+    const stack = new Error(TraceUtil.SIGNATURE).stack ?? '';
+    const parsedFirstRow = this.#parseTraceRow(stack[1]);
+
+    if (parsedFirstRow) {
+      return parsedFirstRow.link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
+    } else {
+      return '/api-monitor-cs-main.js';
+    }
   }
 
   #getFullCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
-    const traceId = hashString(e.stack || String(uniqueTrait));
-    const trace = this.#fullCallstackCacheTrace.getOrInsertComputed(
-      traceId,
+    const stack = e.stack ?? '';
+    const callstack = this.#fullCallstackCache.getOrInsertComputed(
+      stack,
       () => {
-        return this.#getFullTrace(e.stack || '') ||
-          [this.#getFallbackTrace(uniqueTrait)];
+        const traceId = hashString(e.stack || String(uniqueTrait));
+        const trace = this.#getFullTrace(stack) ||
+          this.#getFallbackTrace(uniqueTrait);
+        return { traceId, trace };
       },
     );
 
-    return { traceId, trace };
+    return callstack;
   }
 
   #getFullTrace(stackString: string): ITrace[] | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
     const rv: ITrace[] = [];
 
-    // loop from the end, excluding error name at [0] and self trace at [1|n]
+    // loop from the end, excluding error name at [0] and self trace at [1]
     for (let n = stack.length - 1; n > 1; n--) {
       const parsed = this.#parseTraceRow(stack[n]);
 
@@ -105,62 +106,89 @@ export class TraceUtil {
   }
 
   #getShortCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
+    let traceId: string;
     let trace = this.#getShortTrace(e.stack || '');
-    let traceId;
 
-    if (trace) {
-      traceId = hashString(trace.link);
+    if (trace && trace[0]) {
+      traceId = hashString(trace[0].link);
     } else {
       traceId = hashString(e.stack || String(uniqueTrait));
       trace = this.#getFallbackTrace(uniqueTrait);
     }
 
-    return { traceId, trace: [trace] };
+    return { traceId, trace };
   }
 
-  #getShortTrace(stackString: string): ITrace | null {
+  #getShortTrace(stackString: string): ITrace[] | null {
     const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
 
-    // loop from the start, excluding error name at [0] and self trace at [1|n]
+    // loop from the start, excluding error name at [0] and self trace at [1]
     for (let n = 2, N = stack.length; n < N; n++) {
       const parsed = this.#parseTraceRow(stack[n]);
 
       if (parsed) {
-        return parsed;
+        return [parsed];
       }
     }
 
     return null;
   }
 
-  #parseTraceRow(stackRow: string) {
-    if (stackRow.indexOf(this.selfTraceLink) >= 0) {
-      return;
+  #parseTraceRow(row: string): ITrace | null {
+    if (row.indexOf(this.selfTraceLink) >= 0) {
+      return null;
     }
 
-    const link = stackRow
-      .replace(REGEX_STACKTRACE_LINK, '$1')
-      .replace(REGEX_STACKTRACE_LINK_REMOVE, '')
-      .trim();
+    let name: ITrace['name'] = 0;
+    let link: ITrace['link'];
+    const preOpenParenIndex = row.indexOf(' (');
+    const hasClosingParen = row.endsWith(')');
 
-    if (link.startsWith('<anonymous>')) {
-      return;
+    if (preOpenParenIndex > 0 && hasClosingParen) {
+      name = row.substring(0, preOpenParenIndex);
+      link = row.substring(preOpenParenIndex + 2, row.length - 1);
+    } else if (row.startsWith('(') && hasClosingParen) {
+      link = row.substring(1, row.length - 1);
+    } else {
+      link = row;
     }
 
-    let name: string | 0 = stackRow.replace(REGEX_STACKTRACE_NAME, '$1').trim();
-    if (name === link || REGEX_STACKTRACE_HAS_LINK.test(name)) {
-      name = 0;
+    if (link.startsWith('eval at ')) {
+      const commaIndex = link.lastIndexOf(', ');
+
+      if (commaIndex > 0) {
+        link = link.substring(commaIndex + 2);
+      } else {
+        return null;
+      }
+    }
+
+    if (link.startsWith('async ')) {
+      link = link.substring(6);
+    }
+
+    if (link.startsWith('new ')) {
+      link = link.substring(4);
+    }
+
+    if (
+      !link ||
+      link.startsWith('<anonymous>') ||
+      link.startsWith('index ') ||
+      link.startsWith('native')
+    ) {
+      return null;
     }
 
     return { name, link };
   }
 
-  #getFallbackTrace(uniqueTrait?: unknown): ITrace {
-    return {
+  #getFallbackTrace(uniqueTrait?: unknown): ITrace[] {
+    return [{
       name: typeof uniqueTrait === 'function' && uniqueTrait.name
         ? uniqueTrait.name
         : 0,
       link: TAG_INVALID_CALLSTACK_LINK,
-    };
+    }];
   }
 }
