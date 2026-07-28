@@ -7,6 +7,7 @@ enum ETraceDomain {
   EXTENSION,
   SNIPPET,
   WEBPACK,
+  URI_DATA,
 }
 
 const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
@@ -26,6 +27,8 @@ function getDomain(trace: ITrace[], locationOrigin: string) {
     return ETraceDomain.SNIPPET;
   } else if (firstLink.startsWith('webpack://')) {
     return ETraceDomain.WEBPACK;
+  } else if (firstLink.startsWith('data:')) {
+    return ETraceDomain.URI_DATA;
   }
 
   return ETraceDomain.UNKNOWN;
@@ -48,6 +51,7 @@ const traceDomainUIMap: Map<ETraceDomain, IDomainDescriptor> =
       [ETraceDomain.EXTENSION, { icon: '-trace-extension', name: 'Extension' }],
       [ETraceDomain.SNIPPET, { icon: '-trace-extension', name: 'Snippet' }],
       [ETraceDomain.WEBPACK, { icon: '-trace-webpack', name: 'Webpack' }],
+      [ETraceDomain.URI_DATA, { icon: '-trace-uri-data', name: 'data: URI' }],
     ]))();
 
 export function getDomainDescriptor(

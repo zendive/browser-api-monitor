@@ -222,6 +222,9 @@ th .icon,
 .icon.-trace-webpack {
   mask-image: url(img/trace-webpack.svg);
 }
+.icon.-trace-uri-data {
+  mask-image: url(img/trace-uri-data.svg);
+}
 .icon.-breakpoint {
   mask-image: url(img/breakpoint.svg);
 }
