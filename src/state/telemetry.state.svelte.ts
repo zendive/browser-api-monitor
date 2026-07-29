@@ -8,6 +8,7 @@ import {
   type TMsgOptions,
 } from '../api/communication.ts';
 import diff from '../api/diff.ts';
+import { ETimer, Timer } from '../api/time.ts';
 
 class TelemetryState {
   telemetry: ITelemetry | null = $state.raw(null);
@@ -16,6 +17,12 @@ class TelemetryState {
 }
 const state = new TelemetryState();
 let telemetryProgressive: ITelemetry | null = null;
+const updateTelemetrySize = new Timer(
+  { type: ETimer.IDLE, timeout: 1e3 },
+  (telemetry: unknown) => {
+    state.telemetrySize = JSON.stringify(telemetry || {}).length;
+  },
+);
 
 export function useTelemetryState() {
   return state;
@@ -37,7 +44,7 @@ function telemetryListener(o: TMsgOptions) {
     acknowledgeTelemetry(o.timeOfCollection);
 
     if (__feat_dev_stats__) {
-      state.telemetrySize = objectInJsonLength(o.telemetry);
+      updateTelemetrySize.start(o.telemetry);
     }
   } else if (o.msg === EMsg.TELEMETRY_DELTA) {
     try {
@@ -45,14 +52,14 @@ function telemetryListener(o: TMsgOptions) {
       state.telemetry = structuredClone(telemetryProgressive);
       state.timeOfCollection = o.timeOfCollection;
       acknowledgeTelemetry(o.timeOfCollection);
+
+      if (__feat_dev_stats__) {
+        updateTelemetrySize.start(o.telemetryDelta);
+      }
     } catch (e) {
       // if patching fails - request full telemetry
       acknowledgeTelemetry(o.timeOfCollection, true);
       console.error(e);
-    }
-
-    if (__feat_dev_stats__) {
-      state.telemetrySize = objectInJsonLength(o.telemetryDelta);
     }
   }
 }
@@ -74,8 +81,4 @@ function acknowledgeTelemetry(
       startAfresh,
     });
   }
-}
-
-function objectInJsonLength(obj: unknown): number {
-  return JSON.stringify(obj || {}).length;
 }
