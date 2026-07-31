@@ -36,16 +36,11 @@ export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s*at\s+/);
 
 export class TraceUtil {
-  selfTraceLink = '';
+  selfTraceLink = 'chrome-extension://bghmfoakiidiedpheejcjhciekobjcjp';
   callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
   debug: Set<string> = new Set();
   bypass: Set<string> = new Set();
-  #fullCallstackCache: Map</*stack*/ string, ICallstack> = new Map();
   static readonly SIGNATURE = 'browser-api-monitor';
-
-  constructor() {
-    this.selfTraceLink = this.#getSelfTraceLink();
-  }
 
   getCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     if (this.callstackType === EWrapperCallstackType.FULL) {
@@ -63,30 +58,13 @@ export class TraceUtil {
     return this.debug.has(traceId);
   }
 
-  #getSelfTraceLink() {
-    const stack = new Error(TraceUtil.SIGNATURE).stack ?? '';
-    const parsedFirstRow = this.#parseTraceRow(stack[1]);
-
-    if (parsedFirstRow) {
-      return parsedFirstRow.link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
-    } else {
-      return '/api-monitor-cs-main.js';
-    }
-  }
-
   #getFullCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
     const stack = e.stack ?? '';
-    const callstack = this.#fullCallstackCache.getOrInsertComputed(
-      stack,
-      () => {
-        const traceId = hashString(e.stack || String(uniqueTrait));
-        const trace = this.#getFullTrace(stack) ||
-          this.#getFallbackTrace(uniqueTrait);
-        return { traceId, trace };
-      },
-    );
+    const trace = this.#getFullTrace(stack) ||
+      this.#getFallbackTrace(uniqueTrait);
+    const traceId = hashString(trace.map((o) => o.link).join(';'));
 
-    return callstack;
+    return { traceId, trace };
   }
 
   #getFullTrace(stackString: string): ITrace[] | null {
