@@ -19,6 +19,9 @@ export interface ITraceable {
   firstSeen: number;
 }
 
+export const REGEX_STACKTRACE_LOCATION_URL = /*@__PURE__*/ new RegExp(
+  /.+:\d+:\d+$/,
+);
 export const REGEX_STACKTRACE_CLEAN_URL = /*@__PURE__*/ new RegExp(
   /(.*):\d+:\d+$/,
 );
