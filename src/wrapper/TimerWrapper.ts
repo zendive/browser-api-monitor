@@ -1,8 +1,4 @@
-import {
-  type ICallstack,
-  type ITraceable,
-  TraceUtil,
-} from './shared/TraceUtil.ts';
+import { type ICallstack, type ITraceable, Tracer } from './shared/Tracer.ts';
 import {
   clearInterval,
   clearTimeout,
@@ -16,7 +12,7 @@ import {
 } from '../api/const.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import type { EvalWrapper } from './EvalWrapper.ts';
-import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
+import { validHandler, validTimerDelay } from './shared/util.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
@@ -268,8 +264,7 @@ export class TimerWrapper {
       delay: number | undefined,
       ...args: unknown[]
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, code);
+      const callstack = new Tracer().getCallstack(code);
       const isEval = typeof code !== 'function';
 
       this.callCounter.setTimeout++;
@@ -280,8 +275,8 @@ export class TimerWrapper {
 
           if (isEval) {
             this.apiEval.callCounter++;
-            if (traceUtil.shouldPass(callstack.traceId)) {
-              if (traceUtil.shouldPause(callstack.traceId)) {
+            if (Tracer.shouldPass(callstack.traceId)) {
+              if (Tracer.shouldPause(callstack.traceId)) {
                 debugger;
               }
               // see https://developer.mozilla.org/docs/Web/API/setTimeout#code
@@ -289,8 +284,8 @@ export class TimerWrapper {
               selfTime = performance.now() - start;
             }
           } else {
-            if (traceUtil.shouldPass(callstack.traceId)) {
-              if (traceUtil.shouldPause(callstack.traceId)) {
+            if (Tracer.shouldPass(callstack.traceId)) {
+              if (Tracer.shouldPause(callstack.traceId)) {
                 debugger;
               }
               code(...params);
@@ -336,8 +331,7 @@ export class TimerWrapper {
       this: TimerWrapper,
       handler: number | undefined,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err);
+      const callstack = new Tracer().getCallstack();
 
       this.#updateClearTimersHistory(
         ETimerType.TIMEOUT,
@@ -352,8 +346,8 @@ export class TimerWrapper {
 
       this.callCounter.clearTimeout++;
 
-      if (traceUtil.shouldPass(callstack.traceId)) {
-        if (traceUtil.shouldPause(callstack.traceId)) {
+      if (Tracer.shouldPass(callstack.traceId)) {
+        if (Tracer.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.clearTimeout(handler);
@@ -368,8 +362,7 @@ export class TimerWrapper {
       delay: number | undefined,
       ...args: unknown[]
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, code);
+      const callstack = new Tracer().getCallstack(code);
       const isEval = typeof code !== 'function';
 
       this.callCounter.setInterval++;
@@ -381,8 +374,8 @@ export class TimerWrapper {
 
           if (isEval) {
             this.apiEval.callCounter++;
-            if (traceUtil.shouldPass(callstack.traceId)) {
-              if (traceUtil.shouldPause(callstack.traceId)) {
+            if (Tracer.shouldPass(callstack.traceId)) {
+              if (Tracer.shouldPause(callstack.traceId)) {
                 debugger;
               }
               // see https://developer.mozilla.org/docs/Web/API/setInterval
@@ -390,8 +383,8 @@ export class TimerWrapper {
               selfTime = performance.now() - start;
             }
           } else {
-            if (traceUtil.shouldPass(callstack.traceId)) {
-              if (traceUtil.shouldPause(callstack.traceId)) {
+            if (Tracer.shouldPass(callstack.traceId)) {
+              if (Tracer.shouldPause(callstack.traceId)) {
                 debugger;
               }
               code(...params);
@@ -436,8 +429,7 @@ export class TimerWrapper {
       this: TimerWrapper,
       handler: number | undefined,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err);
+      const callstack = new Tracer().getCallstack();
 
       this.#updateClearTimersHistory(
         ETimerType.INTERVAL,
@@ -452,8 +444,8 @@ export class TimerWrapper {
 
       this.callCounter.clearInterval++;
 
-      if (traceUtil.shouldPass(callstack.traceId)) {
-        if (traceUtil.shouldPause(callstack.traceId)) {
+      if (Tracer.shouldPass(callstack.traceId)) {
+        if (Tracer.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.clearInterval(handler);

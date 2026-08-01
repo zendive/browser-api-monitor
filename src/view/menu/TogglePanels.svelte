@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
+import { EWrapperCallstackType } from '../../wrapper/shared/Tracer.ts';
 import { EMsg, listenRuntime } from '../../api/communication.ts';
 import Alert from '../shared/Alert.svelte';
 import {

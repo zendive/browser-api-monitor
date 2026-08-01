@@ -6,7 +6,7 @@
     REGEX_STACKTRACE_LINE_NUMBER,
     REGEX_STACKTRACE_LOCATION_URL,
     TAG_INVALID_CALLSTACK_LINK,
-  } from '../../../wrapper/shared/TraceUtil.ts';
+  } from '../../../wrapper/shared/Tracer.ts';
 
   let {
     name,
@@ -25,7 +25,7 @@
     try {
       const url = new URL(link);
       return url.pathname;
-    } catch (_e) {
+    } catch (_ignore) {
       return link.replace(REGEX_CUT_LINK_PROTOCOL, '');
     }
   });

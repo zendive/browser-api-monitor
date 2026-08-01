@@ -23,7 +23,7 @@ import type {
   IWorkerTerminateMetric,
 } from '../../wrapper/WorkerWrapper.ts';
 import { CONFIG_VERSION, local } from './storage.ts';
-import { EWrapperCallstackType } from '../../wrapper/shared/TraceUtil.ts';
+import { EWrapperCallstackType } from '../../wrapper/shared/Tracer.ts';
 import { ESortOrder } from '../const.ts';
 import type {
   ISharedWorkerConstructorMetric,

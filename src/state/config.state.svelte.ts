@@ -5,7 +5,7 @@ import {
   saveLocalStorage,
   type TConfig,
 } from '../api/storage/storage.local.ts';
-import { EWrapperCallstackType } from '../wrapper/shared/TraceUtil.ts';
+import { EWrapperCallstackType } from '../wrapper/shared/Tracer.ts';
 import type { ETimerType } from '../wrapper/TimerWrapper.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);

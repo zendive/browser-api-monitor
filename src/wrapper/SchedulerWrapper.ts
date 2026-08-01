@@ -1,6 +1,6 @@
-import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import { type ITraceable, Tracer } from './shared/Tracer.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
-import { traceUtil, validTimerDelay } from './shared/util.ts';
+import { validTimerDelay } from './shared/util.ts';
 import { trim2ms, type TTaskPriority } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { nativePostTask, nativeYield, TAG_BAD_DELAY } from '../api/const.ts';
@@ -48,14 +48,13 @@ export class SchedulerWrapper {
 
   wrapYield() {
     globalThis.scheduler.yield = function (this: SchedulerWrapper) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err);
+      const { traceId, trace } = new Tracer().getCallstack();
       const methodMetric = this.#yieldMap.getOrInsertComputed(
-        callstack.traceId,
+        traceId,
         () => {
           return {
-            traceId: callstack.traceId,
-            trace: callstack.trace,
+            traceId: traceId,
+            trace: trace,
             firstSeen: performance.now(),
             calls: 0,
             cps: 1,
@@ -65,8 +64,8 @@ export class SchedulerWrapper {
 
       methodMetric.calls++;
 
-      if (traceUtil.shouldPass(callstack.traceId)) {
-        if (traceUtil.shouldPause(callstack.traceId)) {
+      if (Tracer.shouldPass(traceId)) {
+        if (Tracer.shouldPause(traceId)) {
           debugger;
         }
         return nativeYield();
@@ -82,17 +81,16 @@ export class SchedulerWrapper {
       fn: SchedulerPostTaskCallback,
       options?: IPostTaskOptions,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, fn);
+      const { traceId, trace } = new Tracer().getCallstack(fn);
       const delay = options?.delay;
       let aborted = false;
       let finished = false;
       const methodMetric = this.#postTaskMap.getOrInsertComputed(
-        callstack.traceId,
+        traceId,
         () => {
           return {
-            traceId: callstack.traceId,
-            trace: callstack.trace,
+            traceId: traceId,
+            trace: trace,
             firstSeen: performance.now(),
             calls: 0,
             cps: 1,
@@ -141,8 +139,8 @@ export class SchedulerWrapper {
         let rv: Promise<unknown> = Promise.resolve(); // in case of bypass
         const start = performance.now();
 
-        if (traceUtil.shouldPass(callstack.traceId)) {
-          if (traceUtil.shouldPause(callstack.traceId)) {
+        if (Tracer.shouldPass(traceId)) {
+          if (Tracer.shouldPause(traceId)) {
             debugger;
           }
           rv = fn();

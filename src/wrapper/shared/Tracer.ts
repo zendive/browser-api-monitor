@@ -38,40 +38,51 @@ export const TAG_INVALID_CALLSTACK_LINK = '⟪N/A⟫';
 
 const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s*at\s+/);
 
-export class TraceUtil {
-  selfTraceLink = 'chrome-extension://bghmfoakiidiedpheejcjhciekobjcjp';
-  callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
-  debug: Set<string> = new Set();
-  bypass: Set<string> = new Set();
-  static readonly SIGNATURE = 'browser-api-monitor';
+export class Tracer extends Error {
+  /**
+   * @param [stack]: string - optional stack string to override `this.stack`
+   */
+  constructor(stack?: string) {
+    super();
 
-  getCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
-    if (this.callstackType === EWrapperCallstackType.FULL) {
-      return this.#getFullCallstack(e, uniqueTrait);
-    } else {
-      return this.#getShortCallstack(e, uniqueTrait);
+    if (typeof stack === 'string') {
+      this.stack = stack;
     }
   }
 
-  shouldPass(traceId: string) {
-    return !this.bypass.has(traceId);
+  static callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
+  static debug: Set<string> = new Set();
+  static bypass: Set<string> = new Set();
+
+  static get selfTraceLink() {
+    return 'chrome-extension://bghmfoakiidiedpheejcjhciekobjcjp';
   }
 
-  shouldPause(traceId: string) {
-    return this.debug.has(traceId);
+  static shouldPass(traceId: string) {
+    return !Tracer.bypass.has(traceId);
   }
 
-  #getFullCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
-    const stack = e.stack ?? '';
-    const trace = this.#getFullTrace(stack) ||
-      this.#getFallbackTrace(uniqueTrait);
+  static shouldPause(traceId: string) {
+    return Tracer.debug.has(traceId);
+  }
+
+  getCallstack(uniqueTrait?: unknown): ICallstack {
+    if (Tracer.callstackType === EWrapperCallstackType.FULL) {
+      return this.#getFullCallstack(uniqueTrait);
+    } else {
+      return this.#getShortCallstack(uniqueTrait);
+    }
+  }
+
+  #getFullCallstack(uniqueTrait?: unknown): ICallstack {
+    const trace = this.#getFullTrace() || this.#getFallbackTrace(uniqueTrait);
     const traceId = hashString(trace.map((o) => o.link).join(';'));
 
     return { traceId, trace };
   }
 
-  #getFullTrace(stackString: string): ITrace[] | null {
-    const stack = stackString.split(REGEX_STACKTRACE_SPLIT) || [];
+  #getFullTrace(): ITrace[] | null {
+    const stack = (this.stack || '').split(REGEX_STACKTRACE_SPLIT) || [];
     const rv: ITrace[] = [];
 
     // loop from the end, excluding error name at [0] and self trace at [1]
@@ -86,14 +97,14 @@ export class TraceUtil {
     return rv.length ? rv : null;
   }
 
-  #getShortCallstack(e: Error, uniqueTrait?: unknown): ICallstack {
+  #getShortCallstack(uniqueTrait?: unknown): ICallstack {
     let traceId: string;
-    let trace = this.#getShortTrace(e.stack || '');
+    let trace = this.#getShortTrace(this.stack || '');
 
     if (trace && trace[0]) {
       traceId = hashString(trace[0].link);
     } else {
-      traceId = hashString(e.stack || String(uniqueTrait));
+      traceId = hashString(this.stack || String(uniqueTrait));
       trace = this.#getFallbackTrace(uniqueTrait);
     }
 
@@ -116,7 +127,7 @@ export class TraceUtil {
   }
 
   #parseTraceRow(row: string): ITrace | null {
-    if (row.indexOf(this.selfTraceLink) >= 0) {
+    if (row.indexOf(Tracer.selfTraceLink) >= 0) {
       return null;
     }
 

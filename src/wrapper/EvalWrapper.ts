@@ -1,13 +1,8 @@
 import { cloneObjectSafely } from '../api/clone.ts';
-import {
-  type ICallstack,
-  type ITraceable,
-  TraceUtil,
-} from './shared/TraceUtil.ts';
+import { type ICallstack, type ITraceable, Tracer } from './shared/Tracer.ts';
 import { trim2ms } from '../api/time.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { traceUtil } from './shared/util.ts';
 
 export interface IEvalHistory extends ITraceable {
   facts: TFact;
@@ -91,8 +86,7 @@ export class EvalWrapper {
       this: EvalWrapper,
       code: string,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, code);
+      const callstack = new Tracer().getCallstack(code);
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;
@@ -102,8 +96,8 @@ export class EvalWrapper {
         this.callCounter++;
         const start = performance.now();
 
-        if (traceUtil.shouldPass(callstack.traceId)) {
-          if (traceUtil.shouldPause(callstack.traceId)) {
+        if (Tracer.shouldPass(callstack.traceId)) {
+          if (Tracer.shouldPause(callstack.traceId)) {
             debugger;
           }
           rv = this.nativeEval(code);
