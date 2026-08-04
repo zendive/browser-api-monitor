@@ -98,7 +98,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   readonly #eventHandlerLinks: TEventHandlerLinks = new Map();
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     if (Tracer.shouldPause(traceId)) {
       debugger;
     }
@@ -180,7 +180,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.onerror.getOrInsertComputed(
       traceId,
       () => {
@@ -223,7 +223,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portStart() {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portStart.getOrInsertComputed(
       traceId,
       () => {
@@ -247,7 +247,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portClose() {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portClose.getOrInsertComputed(
       traceId,
       () => {
@@ -271,7 +271,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portPostMessage(...args: Parameters<MessagePort['postMessage']>) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     let selfTime = null;
 
     if (Tracer.shouldPass(traceId)) {
@@ -306,7 +306,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portAel.getOrInsertComputed(
       traceId,
       () => {
@@ -399,7 +399,7 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portRel.getOrInsertComputed(
       traceId,
       () => {

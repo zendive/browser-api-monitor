@@ -264,7 +264,7 @@ export class TimerWrapper {
       delay: number | undefined,
       ...args: unknown[]
     ) {
-      const callstack = new Tracer().getCallstack(code);
+      const callstack = Tracer.getCallstack(code);
       const isEval = typeof code !== 'function';
 
       this.callCounter.setTimeout++;
@@ -331,7 +331,7 @@ export class TimerWrapper {
       this: TimerWrapper,
       handler: number | undefined,
     ) {
-      const callstack = new Tracer().getCallstack();
+      const callstack = Tracer.getCallstack();
 
       this.#updateClearTimersHistory(
         ETimerType.TIMEOUT,
@@ -362,7 +362,7 @@ export class TimerWrapper {
       delay: number | undefined,
       ...args: unknown[]
     ) {
-      const callstack = new Tracer().getCallstack(code);
+      const callstack = Tracer.getCallstack(code);
       const isEval = typeof code !== 'function';
 
       this.callCounter.setInterval++;
@@ -429,7 +429,7 @@ export class TimerWrapper {
       this: TimerWrapper,
       handler: number | undefined,
     ) {
-      const callstack = new Tracer().getCallstack();
+      const callstack = Tracer.getCallstack();
 
       this.#updateClearTimersHistory(
         ETimerType.INTERVAL,

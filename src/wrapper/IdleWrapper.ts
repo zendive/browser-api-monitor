@@ -206,7 +206,7 @@ export class IdleWrapper {
       options?: IdleRequestOptions | undefined,
     ) {
       const delay = options?.timeout;
-      const callstack = new Tracer().getCallstack(fn);
+      const callstack = Tracer.getCallstack(fn);
 
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
@@ -234,7 +234,7 @@ export class IdleWrapper {
       this: IdleWrapper,
       handler: number,
     ) {
-      const callstack = new Tracer().getCallstack();
+      const callstack = Tracer.getCallstack();
 
       this.#updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;

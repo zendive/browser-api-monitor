@@ -257,7 +257,7 @@ export class MediaWrapper {
         return;
       }
 
-      const { traceId, trace } = new Tracer().getCallstack();
+      const { traceId, trace } = Tracer.getCallstack();
       const methodMetric = eventModel.ael.getOrInsertComputed(
         traceId,
         () => ({
@@ -359,7 +359,7 @@ export class MediaWrapper {
         return;
       }
 
-      const { traceId, trace } = new Tracer().getCallstack();
+      const { traceId, trace } = Tracer.getCallstack();
       const methodMetric = eventModel.rel.getOrInsertComputed(
         traceId,
         () => ({

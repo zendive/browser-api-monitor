@@ -48,7 +48,7 @@ export class SchedulerWrapper {
 
   wrapYield() {
     globalThis.scheduler.yield = function (this: SchedulerWrapper) {
-      const { traceId, trace } = new Tracer().getCallstack();
+      const { traceId, trace } = Tracer.getCallstack();
       const methodMetric = this.#yieldMap.getOrInsertComputed(
         traceId,
         () => {
@@ -81,7 +81,7 @@ export class SchedulerWrapper {
       fn: SchedulerPostTaskCallback,
       options?: IPostTaskOptions,
     ) {
-      const { traceId, trace } = new Tracer().getCallstack(fn);
+      const { traceId, trace } = Tracer.getCallstack(fn);
       const delay = options?.delay;
       let aborted = false;
       let finished = false;

@@ -130,7 +130,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   readonly #eventHandlerLinks: TEventHandlerLinks = new Map();
 
   constructor(specifier: string | URL, options?: WorkerOptions) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     if (Tracer.shouldPause(traceId)) {
       debugger;
     }
@@ -195,7 +195,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   });
 
   override terminate() {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.terminate.getOrInsertComputed(
       traceId,
       () => {
@@ -222,7 +222,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
 
   // @ts-expect-error: `Parameters...` conflict with multiple signatures overrides
   override postMessage(...args: Parameters<Worker['postMessage']>) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     let selfTime = null;
 
     if (Tracer.shouldPass(traceId)) {
@@ -258,7 +258,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   }
 
   override set onmessage(rhs: (ev: MessageEvent) => unknown | null) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.onmessage.getOrInsertComputed(
       traceId,
       () => {
@@ -306,7 +306,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
   }
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.onerror.getOrInsertComputed(
       traceId,
       () => {
@@ -353,7 +353,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.ael.getOrInsertComputed(
       traceId,
       () => {
@@ -446,7 +446,7 @@ export class ApiMonitorWorkerWrapper extends Worker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const { traceId, trace } = new Tracer().getCallstack();
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.rel.getOrInsertComputed(
       traceId,
       () => {

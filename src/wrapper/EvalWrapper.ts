@@ -86,7 +86,7 @@ export class EvalWrapper {
       this: EvalWrapper,
       code: string,
     ) {
-      const callstack = new Tracer().getCallstack(code);
+      const callstack = Tracer.getCallstack(code);
       let rv: unknown;
       let throwError = null;
       let usesLocalScope = false;

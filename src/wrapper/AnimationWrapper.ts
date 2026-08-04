@@ -162,7 +162,7 @@ export class AnimationWrapper {
       this: AnimationWrapper,
       fn: FrameRequestCallback,
     ) {
-      const callstack = new Tracer().getCallstack(fn);
+      const callstack = Tracer.getCallstack(fn);
 
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
@@ -190,7 +190,7 @@ export class AnimationWrapper {
       this: AnimationWrapper,
       handler: number,
     ) {
-      const callstack = new Tracer().getCallstack();
+      const callstack = Tracer.getCallstack();
 
       this.#updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
