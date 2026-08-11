@@ -27,13 +27,13 @@ export function show() {
   showContent = true;
 }
 
-export function hide() {
+export function close() {
   selfEl.close();
 }
 
 function onSelfClick(e: MouseEvent) {
   if (e.currentTarget === e.target) {
-    hide();
+    close();
   }
 }
 
@@ -41,7 +41,7 @@ function onKeyboardEvent(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopImmediatePropagation();
-    hide();
+    close();
   }
 }
 
@@ -76,7 +76,7 @@ function onClose() {
       class="close-icon"
       onclick={(e) => {
         e.preventDefault();
-        hide();
+        close();
       }}
     ><span class="icon -remove"></span></a>
   </header>
