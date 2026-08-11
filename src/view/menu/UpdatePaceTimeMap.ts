@@ -44,7 +44,6 @@ export function startAnimation(crc2d: CanvasRenderingContext2D) {
   const offColourSchemeChange = onColourSchemeChange((scheme) => {
     rgbPrimary = scheme === 'dark' ? WHITE : BLACK;
     rgbShadow = scheme === 'dark' ? BLACK : WHITE;
-    ctx.strokeStyle = rgbPrimary();
     ctx.shadowColor = rgbShadow();
   });
 
@@ -60,6 +59,7 @@ function initContext(crc2d: CanvasRenderingContext2D) {
   crc2d.lineCap = 'round';
   crc2d.lineWidth = LINE_WIDTH;
   crc2d.shadowBlur = SHADOW_WIDTH;
+  crc2d.shadowColor = rgbShadow();
 
   return crc2d;
 }
