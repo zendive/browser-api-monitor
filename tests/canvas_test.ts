@@ -83,6 +83,15 @@ describe('Point', () => {
 });
 
 describe('Vector', () => {
+  test('directional API', () => {
+    /*🤔*/ expect(0).not.toBe(-0);
+
+    expect(Vector.toNorth(1).rotateRight(halfPI).round().x).toBe(1);
+    expect(Vector.toEast(1).rotateLeft(PI).round().x).toBe(-1);
+    expect(Vector.toSouth(1).rotateLeft(halfPI).round().x).toBe(1);
+    expect(Vector.toWest(1).rotateRight(PI).round().x).toBe(1);
+  });
+
   test('rotate', () => {
     const p = new Point(2, 2);
     const base = new Point(4, 4);
@@ -140,10 +149,9 @@ describe('Vector', () => {
     const ox = new Vector(1, 0); // 0-right
     const oy = new Vector(0, 1); // 0-down
 
-    expect(Math.round(rad2deg(new Vector(1, 1).angle(new Vector(-1, -1)))))
-      .toBe(
-        180,
-      );
+    expect(
+      Math.round(rad2deg(new Vector(1, 1).angle(new Vector(-1, -1)))),
+    ).toBe(180);
     expect(Math.round(rad2deg(v.set(1, -1).angle(ox)))).toBe(45);
     expect(Math.round(rad2deg(v.set(-1, -1).angle(ox)))).toBe(135);
     expect(Math.round(rad2deg(v.set(-1, 1).angle(ox)))).toBe(135);

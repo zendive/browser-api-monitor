@@ -24,13 +24,13 @@ const paddingRem = 0.6;
 const axis = new Point(radiusRem, radiusRem);
 const deltaAngle = twoPI / optionsCount;
 let options = $derived.by(() => {
-  const vector = new Vector(0, paddingRem - radiusRem); // north
+  const vector = Vector.toNorth(paddingRem - radiusRem);
   const rv: IOption[] = new Array(optionsCount);
 
   for (let n = 0; n < optionsCount; n++) {
     rv[n] = {
       data: (n + 1) * mode,
-      ...vector.rotate(-deltaAngle).atBase(axis),
+      ...vector.rotateRight(deltaAngle).atBase(axis),
     };
   }
 

@@ -1,4 +1,4 @@
-import { deg2rad, Point, twoPI, Vector } from '../shared/canvas.ts';
+import { Point, twoPI, Vector } from '../shared/canvas.ts';
 import { onColourSchemeChange } from '../shared/theme.ts';
 import { ETimer, Timer } from '../../api/time.ts';
 
@@ -65,11 +65,8 @@ function initContext(crc2d: CanvasRenderingContext2D) {
 }
 
 export function updateAnimation(timeOfCollection: number) {
-  const angle = -(timeOfCollection % 1000) * 360 / 1000;
-  const vector = new Vector(R, 0)
-    .rotate(deg2rad(angle))
-    // rotate left to adjust zero angle to point at {0,-1} (north)
-    .rotateLeft();
+  const angle = (timeOfCollection % 1000) * (twoPI / 1000);
+  const vector = Vector.toNorth(R).rotateRight(angle);
   const timePoint = vector.atBase(pCenter);
   const vector2base = vector.rotateBack();
 
