@@ -1,16 +1,21 @@
 export const CONFIG_VERSION = '2026-08-05';
 export const SESSION_VERSION = '2025-04-25';
 
-export const local = /*@__PURE__*/ (() => {
-  return globalThis.chrome?.storage
+export const local: chrome.storage.LocalStorageArea = /*@__PURE__*/ (() => {
+  return !__mirror__
     ? chrome.storage.local
-    : mockChromeStorageWith(globalThis.localStorage, CONFIG_VERSION);
+    : (__mirror__ as unknown as chrome.storage.LocalStorageArea) &&
+      mockChromeStorageWith(
+        globalThis.localStorage,
+        CONFIG_VERSION,
+      );
 })();
 
 export const session = /*@__PURE__*/ (() => {
-  return globalThis.chrome?.storage
+  return !__mirror__
     ? chrome.storage.session
-    : mockChromeStorageWith(globalThis.sessionStorage, SESSION_VERSION);
+    : (__mirror__ as unknown as chrome.storage.SessionStorageArea) &&
+      mockChromeStorageWith(globalThis.sessionStorage, SESSION_VERSION);
 })();
 
 type TOnChangeSignature = (changes: {

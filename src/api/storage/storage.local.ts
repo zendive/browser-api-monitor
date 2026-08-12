@@ -248,7 +248,8 @@ export const DEFAULT_CONFIG = {
     order: ESortOrder.DESCENDING,
   },
 };
-const DEFAULT_CONFIG_KEYS_LENGTH = Object.keys(DEFAULT_CONFIG).length;
+const DEFAULT_CONFIG_KEYS_LENGTH =
+  /*@__PURE__*/ (() => Object.keys(DEFAULT_CONFIG).length)();
 
 export function panelsArray2Map(panels: IPanel[]) {
   return panels.reduce(

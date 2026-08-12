@@ -2,7 +2,7 @@ import { sha256 } from '@awasm/noble/js.js';
 
 const te = /*@__PURE__*/ (() => new TextEncoder())();
 const uint8buffer = /*@__PURE__*/ (() => new Uint8Array(sha256.outputLen))();
-const HASH_STRING_LENGTH = 2 * uint8buffer.byteLength;
+const HASH_STRING_LENGTH = /*@__PURE__*/ (() => 2 * uint8buffer.byteLength)();
 
 export function hashString(str: string) {
   return (

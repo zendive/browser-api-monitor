@@ -30,9 +30,11 @@ import type { Delta } from 'jsondiffpatch';
 import type { TSession } from './storage/storage.session.ts';
 import { ETimer, Timer } from './time.ts';
 
-export const TUNE_CHANNEL = `X_TUNE_CHANNEL_${APPLICATION_NAME}`;
+export const TUNE_CHANNEL =
+  /*@__PURE__*/ (() => `X_TUNE_CHANNEL_${APPLICATION_NAME}`)();
 export const TUNE_CHANNEL_CONFIRMED =
-  `X_TUNE_CHANNEL_CONFIRMED_${APPLICATION_NAME}`;
+  /*@__PURE__*/ (() => `X_TUNE_CHANNEL_CONFIRMED_${APPLICATION_NAME}`)();
+
 let port: chrome.runtime.Port | null = null;
 
 export function postPort(payload: TMsgOptions) {

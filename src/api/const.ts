@@ -9,30 +9,27 @@ export const TIME_60FPS_SEC = 0.0166666666667; // s
 export const TIME_60FPS_MS = 16.666666666666668;
 
 // state native functions
-export const setTimeout = /*@__PURE__*/ globalThis.setTimeout.bind(globalThis);
-export const clearTimeout = /*@__PURE__*/ globalThis.clearTimeout.bind(
-  globalThis,
-);
-export const setInterval = /*@__PURE__*/ globalThis.setInterval.bind(
-  globalThis,
-);
-export const clearInterval = /*@__PURE__*/ globalThis.clearInterval.bind(
-  globalThis,
-);
-export const requestAnimationFrame = /*@__PURE__*/ globalThis
-  .requestAnimationFrame.bind(globalThis);
-export const cancelAnimationFrame = /*@__PURE__*/ globalThis
-  .cancelAnimationFrame.bind(globalThis);
-export const requestIdleCallback = /*@__PURE__*/ globalThis
-  .requestIdleCallback.bind(globalThis);
-export const cancelIdleCallback = /*@__PURE__*/ globalThis
-  .cancelIdleCallback.bind(globalThis);
-export const nativeYield = /*@__PURE__*/ globalThis.scheduler.yield.bind(
-  globalThis.scheduler,
-);
-export const nativePostTask = /*@__PURE__*/ globalThis.scheduler.postTask.bind(
-  globalThis.scheduler,
-);
+export const setTimeout =
+  /*@__PURE__*/ (() => globalThis.setTimeout.bind(globalThis))();
+export const clearTimeout =
+  /*@__PURE__*/ (() => globalThis.clearTimeout.bind(globalThis))();
+export const setInterval =
+  /*@__PURE__*/ (() => globalThis.setInterval.bind(globalThis))();
+export const clearInterval =
+  /*@__PURE__*/ (() => globalThis.clearInterval.bind(globalThis))();
+export const requestAnimationFrame =
+  /*@__PURE__*/ (() => globalThis.requestAnimationFrame.bind(globalThis))();
+export const cancelAnimationFrame =
+  /*@__PURE__*/ (() => globalThis.cancelAnimationFrame.bind(globalThis))();
+export const requestIdleCallback =
+  /*@__PURE__*/ (() => globalThis.requestIdleCallback.bind(globalThis))();
+export const cancelIdleCallback =
+  /*@__PURE__*/ (() => globalThis.cancelIdleCallback.bind(globalThis))();
+export const nativeYield =
+  /*@__PURE__*/ (() => globalThis.scheduler.yield.bind(globalThis.scheduler))();
+export const nativePostTask =
+  /*@__PURE__*/ (() =>
+    globalThis.scheduler.postTask.bind(globalThis.scheduler))();
 
 export const TAG_DELAY_NOT_FOUND = '';
 export const TAG_BAD_DELAY = (x: unknown) => `${x}`;
