@@ -88,8 +88,8 @@ describe('Vector', () => {
 
     expect(Vector.toNorth(1).rotateRight(halfPI).round().x).toBe(1);
     expect(Vector.toEast(1).rotateLeft(PI).round().x).toBe(-1);
-    expect(Vector.toSouth(1).rotateLeft(halfPI).round().x).toBe(1);
-    expect(Vector.toWest(1).rotateRight(PI).round().x).toBe(1);
+    expect(Vector.toSouth(-1).rotateLeft(halfPI).round().x).toBe(1);
+    expect(Vector.toWest(-1).rotateRight(PI).round().x).toBe(1);
   });
 
   test('rotate', () => {

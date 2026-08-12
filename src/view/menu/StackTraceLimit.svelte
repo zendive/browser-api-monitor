@@ -24,7 +24,7 @@ const paddingRem = 0.6;
 const axis = new Point(radiusRem, radiusRem);
 const deltaAngle = twoPI / optionsCount;
 let options = $derived.by(() => {
-  const vector = Vector.toNorth(paddingRem - radiusRem);
+  const vector = Vector.toNorth(radiusRem - paddingRem);
   const rv: IOption[] = new Array(optionsCount);
 
   for (let n = 0; n < optionsCount; n++) {

@@ -137,16 +137,16 @@ export class Vector extends XY {
   }
 
   static toNorth(length: number) {
-    return new Vector(0, -length);
+    return new Vector(0, -Math.abs(length));
   }
   static toEast(length: number) {
-    return new Vector(length, 0);
+    return new Vector(Math.abs(length), 0);
   }
   static toSouth(length: number) {
-    return new Vector(0, length);
+    return new Vector(0, Math.abs(length));
   }
   static toWest(length: number) {
-    return new Vector(-length, 0);
+    return new Vector(-Math.abs(length), 0);
   }
 
   /**
