@@ -3,7 +3,9 @@ import { onMount } from 'svelte';
 import { EWrapperCallstackType } from '../../wrapper/shared/Tracer.ts';
 import { EMsg, listenRuntime } from '../../api/communication.ts';
 import Alert from '../shared/Alert.svelte';
+import StackTraceLimit from './StackTraceLimit.svelte';
 import {
+  setStackTraceLimit,
   toggleKeepAwake,
   togglePanelVisibility,
   togglePanelWrap,
@@ -41,22 +43,29 @@ function onToggleWrapperCallstackType() {
   toggleWrapperCallstackType();
   reloadMessageEl.show();
 }
+
+function changeStackTraceLimit(value: number) {
+  if (config.stackTraceLimit === value) return;
+
+  config.stackTraceLimit = value;
+  setStackTraceLimit(value);
+  reloadMessageEl.show();
+}
 </script>
 
 <button
   type="button"
   popovertarget="toggle-panels-menu"
-  interestfor="toggle-panels-menu"
   title="Control Panel"
   aria-label="Control Panel"
 >
   <span class="icon -toggle-menu"></span>
 </button>
 
-<div bind:this={selfEl} popover="hint" id="toggle-panels-menu" role="menu">
+<div bind:this={selfEl} popover="auto" id="toggle-panels-menu" role="menu">
   <table class="menu-content">
     <tbody>
-      <tr class="menu-item -dash-bottom">
+      <tr class="menu-item">
         <td class="-left">Callstack Type</td>
         <td class="-right">
           <button
@@ -64,9 +73,17 @@ function onToggleWrapperCallstackType() {
             class="btn-toggle"
             title="Toggle callstack type: full/short"
             onclick={onToggleWrapperCallstackType}
-          >
-            {wrapperCallstackTypeText}
-          </button>
+          >{wrapperCallstackTypeText}</button>
+        </td>
+      </tr>
+
+      <tr class="menu-item -dash-bottom">
+        <td class="-left">Stack trace limit</td>
+        <td class="-right">
+          <StackTraceLimit
+            value={config.stackTraceLimit}
+            onApply={changeStackTraceLimit}
+          />
         </td>
       </tr>
 
@@ -171,7 +188,6 @@ function onToggleWrapperCallstackType() {
 
       .btn-toggle {
         color: var(--text);
-        margin-left: 0.375rem;
         font-weight: bold;
       }
     }

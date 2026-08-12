@@ -1,4 +1,4 @@
-export const CONFIG_VERSION = '2026-06-09';
+export const CONFIG_VERSION = '2026-08-05';
 export const SESSION_VERSION = '2025-04-25';
 
 export const local = /*@__PURE__*/ (() => {

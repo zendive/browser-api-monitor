@@ -33,7 +33,7 @@ import {
   type ISchedulerTelemetry,
   SchedulerWrapper,
 } from './SchedulerWrapper.ts';
-import { type EWrapperCallstackType, Tracer } from './shared/Tracer.ts';
+import { Tracer } from './shared/Tracer.ts';
 import {
   collectSharedWorkerHistory,
   type ISharedWorkerTelemetry,
@@ -78,8 +78,9 @@ const apiAnimation = new AnimationWrapper();
 const apiIdle = new IdleWrapper();
 const apiScheduler = new SchedulerWrapper();
 
-const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
-  Tracer.callstackType = type;
+const applyTracerConfig = callableOnce((config: TConfig) => {
+  Tracer.callstackType = config.wrapperCallstackType;
+  Tracer.setStackTraceLimit(config.stackTraceLimit);
 });
 
 const wrapApis = callableOnce(() => {
@@ -102,7 +103,7 @@ const wrapApis = callableOnce(() => {
 
 export function applyConfig(config: TConfig) {
   panels = panelsArray2Map(config.panels);
-  setCallstackType(config.wrapperCallstackType);
+  applyTracerConfig(config);
   wrapApis();
 }
 

@@ -40,10 +40,14 @@ const REGEX_STACKTRACE_SPLIT = /*@__PURE__*/ new RegExp(/\n\s*at\s+/);
 
 export class Tracer {
   static callstackType: EWrapperCallstackType = EWrapperCallstackType.FULL;
-  // @note: browser's default limit is 10, here 11 to compensate for self-trace row
-  static stackTraceLimit: number = 11;
   static debug: Set<string> = new Set();
   static bypass: Set<string> = new Set();
+  // @note: browser's default limit is 10, here +1 to compensate for expected
+  // self-trace row that is going to be omitted during the stack traversal
+  static stackTraceLimit: number = 11;
+  static setStackTraceLimit(limit: number) {
+    Tracer.stackTraceLimit = limit + 1;
+  }
 
   /**
    * @param [uniqueTrait]: optional function to use in fallback scenarios

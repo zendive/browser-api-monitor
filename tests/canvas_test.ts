@@ -3,11 +3,11 @@ import {
   Box,
   deg2rad,
   fround,
+  halfPI,
   PI,
-  PI2,
-  PId2,
   Point,
   rad2deg,
+  twoPI,
   Vector,
 } from '../src/view/shared/canvas.ts';
 
@@ -19,17 +19,17 @@ describe('module exports', () => {
 
   test('rad2deg', () => {
     expect(rad2deg(0)).toBe(0);
-    expect(rad2deg(PId2)).toBe(90);
+    expect(rad2deg(halfPI)).toBe(90);
     expect(rad2deg(PI)).toBe(180);
-    expect(rad2deg(PI + PId2)).toBe(270);
-    expect(rad2deg(PI2)).toBe(0);
+    expect(rad2deg(PI + halfPI)).toBe(270);
+    expect(rad2deg(twoPI)).toBe(0);
   });
 
   test('deg2rad', () => {
     expect(deg2rad(0)).toBe(0);
-    expect(deg2rad(90)).toBe(PId2);
+    expect(deg2rad(90)).toBe(halfPI);
     expect(deg2rad(180)).toBe(PI);
-    expect(deg2rad(270)).toBe(PI + PId2);
+    expect(deg2rad(270)).toBe(PI + halfPI);
     expect(deg2rad(360)).toBe(0);
   });
 });
@@ -76,7 +76,7 @@ describe('Point', () => {
     const p = new Point(2, 2);
     const base = new Point(4, 4);
 
-    p.rotate(PId2, base);
+    p.rotate(halfPI, base);
     expect(p.x).toBe(2);
     expect(p.y).toBe(6);
   });
@@ -91,7 +91,7 @@ describe('Vector', () => {
     expect(v.x).toBe(-2);
     expect(v.y).toBe(-2);
 
-    v.rotate(PId2).round();
+    v.rotate(halfPI).round();
     expect(v.x).toBe(-2);
     expect(v.y).toBe(2);
 

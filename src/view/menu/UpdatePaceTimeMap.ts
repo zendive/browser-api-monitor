@@ -1,4 +1,4 @@
-import { deg2rad, PI2, Point, Vector } from '../shared/canvas.ts';
+import { deg2rad, Point, twoPI, Vector } from '../shared/canvas.ts';
 import { onColourSchemeChange } from '../shared/theme.ts';
 import { ETimer, Timer } from '../../api/time.ts';
 
@@ -101,7 +101,7 @@ function drawGrid() {
   ctx.clearRect(0, 0, D, D);
   ctx.save();
   ctx.beginPath();
-  ctx.arc(pCenter.x, pCenter.y, 0.5, 0, PI2);
+  ctx.arc(pCenter.x, pCenter.y, 0.5, 0, twoPI);
   ctx.stroke();
   ctx.closePath();
   ctx.restore();

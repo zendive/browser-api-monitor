@@ -129,6 +129,7 @@ export const DEFAULT_CONFIG = {
   paused: false,
   devtoolsPanelShown: false,
   wrapperCallstackType: EWrapperCallstackType.SHORT,
+  stackTraceLimit: 10,
   keepAwake: false,
   sortSharedWorkerPanel: {
     field: <keyof ISharedWorkerTelemetryMetric> 'firstSeen',

@@ -4,8 +4,8 @@
  */
 
 export const PI = 3.141592653589793;
-export const PI2 = 6.283185307179586;
-export const PId2 = 1.5707963267948966;
+export const twoPI = 6.283185307179586;
+export const halfPI = 1.5707963267948966;
 
 /**
  * Round floating point with custom precision
@@ -19,14 +19,14 @@ export function fround(n: number, precision?: number) {
  * Degrees to radians
  */
 export function deg2rad(deg: number) {
-  return ((deg % 360) / 360) * PI2;
+  return ((deg % 360) / 360) * twoPI;
 }
 
 /**
  * Radians to degrees
  */
 export function rad2deg(rad: number) {
-  return ((rad % PI2) / PI2) * 360;
+  return ((rad % twoPI) / twoPI) * 360;
 }
 
 class XY {
@@ -185,7 +185,7 @@ export class Vector extends XY {
   get angleWithX() {
     const angle = Math.atan2(-this.y, this.x);
 
-    return (angle < 0) ? angle + PI2 : angle;
+    return (angle < 0) ? angle + twoPI : angle;
   }
 
   angle(v: Vector) {

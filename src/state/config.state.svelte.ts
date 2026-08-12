@@ -64,3 +64,7 @@ export async function togglePanelVisibility(index: number) {
 export function postTimerCommand(type: ETimerType, handler: number) {
   postPort({ msg: EMsg.TIMER_COMMAND, type, handler });
 }
+
+export async function setStackTraceLimit(value: number) {
+  await saveLocalStorage({ stackTraceLimit: value });
+}
