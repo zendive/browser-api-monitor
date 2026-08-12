@@ -78,7 +78,10 @@ function changeStackTraceLimit(value: number) {
       </tr>
 
       <tr class="menu-item -dash-bottom">
-        <td class="-left">Stack trace limit</td>
+        <td
+          class="-left"
+          title="Manage `Error.stackTraceLimit`"
+        >Stack trace limit</td>
         <td class="-right">
           <StackTraceLimit
             value={config.stackTraceLimit}

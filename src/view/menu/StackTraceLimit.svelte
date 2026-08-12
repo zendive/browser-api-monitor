@@ -23,13 +23,15 @@ const radiusRem = 3.0;
 const paddingRem = 0.6;
 const axis = new Point(radiusRem, radiusRem);
 const deltaAngle = twoPI / optionsCount;
+const MAX_VALUE = Number.MAX_SAFE_INTEGER - 1;
 let options = $derived.by(() => {
   const vector = Vector.toNorth(radiusRem - paddingRem);
   const rv: IOption[] = new Array(optionsCount);
 
   for (let n = 0; n < optionsCount; n++) {
+    let data = (n + 1) * mode;
     rv[n] = {
-      data: (n + 1) * mode,
+      data: data === 100 ? MAX_VALUE : data,
       ...vector.rotateRight(deltaAngle).atBase(axis),
     };
   }
@@ -44,9 +46,23 @@ onMount(() => {
 function nextMode() {
   mode = (mode === 1) ? 10 : 1;
 }
+
+function displayValue(value: number) {
+  return value < MAX_VALUE ? value : 'max';
+}
+
+function displayLabel(value: number) {
+  if (value === 10) {
+    return 'default';
+  } else if (value === MAX_VALUE) {
+    return 'Number.MAX_SAFE_INTEGER';
+  }
+
+  return null;
+}
 </script>
 
-<button type="button" interestfor={uid}>{value}</button>
+<button type="button" interestfor={uid}>{displayValue(value)}</button>
 <div
   bind:this={selfEl}
   id={uid}
@@ -64,7 +80,8 @@ function nextMode() {
         selfEl.hidePopover();
         onApply(data);
       }}
-    >{data}</button>
+      title={displayLabel(data)}
+    >{displayValue(data)}</button>
   {/each}
 
   <button
@@ -93,7 +110,6 @@ div[popover] {
       calc(var(--x) - 50%),
       calc(var(--y) - 50%)
     );
-    background-color: var(--bg-popover);
     border-radius: 50%;
 
     &:hover {
