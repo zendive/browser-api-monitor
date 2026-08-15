@@ -223,7 +223,7 @@ export class Vector extends XY {
   }
 
   /**
-   * Get angle of vector relative to X axis in range [0 ... α ... PI2] counterclockwise
+   * Get angle of vector relative to X axis in range [0 ... α ... twoPI] counterclockwise
    */
   get angleWithX() {
     const angle = Math.atan2(-this.y, this.x);

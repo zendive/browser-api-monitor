@@ -29,7 +29,7 @@ declare global {
   /**
    * Does not exist in ts-types, safe for Chrome though
    */
-  interface ErrorConstructor extends ErrorConstructor {
+  interface ErrorConstructor {
     stackTraceLimit: number;
     captureStackTrace: (
       targetObject: { stack: string },

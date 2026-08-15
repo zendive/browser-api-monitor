@@ -17,7 +17,7 @@ const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
 function getDomain(trace: ITrace[], locationOrigin: string) {
   const firstLink = trace[0]?.link || '';
 
-  if (firstLink.startsWith(locationOrigin)) {
+  if (locationOrigin && firstLink.startsWith(locationOrigin)) {
     return ETraceDomain.SAME;
   } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(firstLink)) {
     return ETraceDomain.EXTERNAL;
