@@ -4,13 +4,9 @@ import {
   requestAnimationFrame,
   TAG_BAD_HANDLER,
 } from '../api/const.ts';
-import {
-  type ICallstack,
-  type ITraceable,
-  TraceUtil,
-} from './shared/TraceUtil.ts';
+import { type ICallstack, type ITraceable, Tracer } from './shared/Tracer.ts';
 import { trim2ms } from '../api/time.ts';
-import { traceUtil, validHandler } from './shared/util.ts';
+import { validHandler } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 
 export interface IRequestAnimationFrameHistory extends ITraceable {
@@ -166,16 +162,15 @@ export class AnimationWrapper {
       this: AnimationWrapper,
       fn: FrameRequestCallback,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, fn);
+      const callstack = Tracer.getCallstack(fn);
 
       this.callCounter.requestAnimationFrame++;
       const handler = this.native.requestAnimationFrame((...args) => {
         const start = performance.now();
         let selfTime = null;
 
-        if (traceUtil.shouldPass(callstack.traceId)) {
-          if (traceUtil.shouldPause(callstack.traceId)) {
+        if (Tracer.shouldPass(callstack.traceId)) {
+          if (Tracer.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(...args);
@@ -195,14 +190,13 @@ export class AnimationWrapper {
       this: AnimationWrapper,
       handler: number,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err);
+      const callstack = Tracer.getCallstack();
 
       this.#updateCafHistory(handler, callstack);
       this.callCounter.cancelAnimationFrame++;
 
-      if (traceUtil.shouldPass(callstack.traceId)) {
-        if (traceUtil.shouldPause(callstack.traceId)) {
+      if (Tracer.shouldPass(callstack.traceId)) {
+        if (Tracer.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelAnimationFrame(handler);

@@ -1,4 +1,4 @@
-import { deg2rad, PI2, Point, Vector } from '../shared/canvas.ts';
+import { Point, twoPI, Vector } from '../shared/canvas.ts';
 import { onColourSchemeChange } from '../shared/theme.ts';
 import { ETimer, Timer } from '../../api/time.ts';
 
@@ -44,7 +44,6 @@ export function startAnimation(crc2d: CanvasRenderingContext2D) {
   const offColourSchemeChange = onColourSchemeChange((scheme) => {
     rgbPrimary = scheme === 'dark' ? WHITE : BLACK;
     rgbShadow = scheme === 'dark' ? BLACK : WHITE;
-    ctx.strokeStyle = rgbPrimary();
     ctx.shadowColor = rgbShadow();
   });
 
@@ -60,16 +59,14 @@ function initContext(crc2d: CanvasRenderingContext2D) {
   crc2d.lineCap = 'round';
   crc2d.lineWidth = LINE_WIDTH;
   crc2d.shadowBlur = SHADOW_WIDTH;
+  crc2d.shadowColor = rgbShadow();
 
   return crc2d;
 }
 
 export function updateAnimation(timeOfCollection: number) {
-  const angle = -(timeOfCollection % 1000) * 360 / 1000;
-  const vector = new Vector(R, 0)
-    .rotate(deg2rad(angle))
-    // rotate left to adjust zero angle to point at {0,-1} (north)
-    .rotateLeft();
+  const angle = (timeOfCollection % 1000) * (twoPI / 1000);
+  const vector = Vector.toNorth(R).rotateRight(angle);
   const timePoint = vector.atBase(pCenter);
   const vector2base = vector.rotateBack();
 
@@ -101,7 +98,7 @@ function drawGrid() {
   ctx.clearRect(0, 0, D, D);
   ctx.save();
   ctx.beginPath();
-  ctx.arc(pCenter.x, pCenter.y, 0.5, 0, PI2);
+  ctx.arc(pCenter.x, pCenter.y, 0.5, 0, twoPI);
   ctx.stroke();
   ctx.closePath();
   ctx.restore();

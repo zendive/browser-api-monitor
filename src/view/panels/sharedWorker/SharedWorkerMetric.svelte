@@ -1,18 +1,17 @@
 <script lang="ts">
-  import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
-  import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
-  import SharedWorkerMetricConstructor from './SharedWorkerMetricConstructor.svelte';
-  import SharedWorkerMetricOnError from './SharedWorkerMetricOnError.svelte';
-  import SharedWorkerMetricPortStart from './SharedWorkerMetricPortStart.svelte';
-  import SharedWorkerMetricPortClose from './SharedWorkerMetricPortClose.svelte';
-  import SharedWorkerMetricPortPostMessage from './SharedWorkerMetricPortPostMessage.svelte';
-  import SharedWorkerMetricPortAel from './SharedWorkerMetricPortAel.svelte';
-  import SharedWorkerMetricPortRel from './SharedWorkerMetricPortRel.svelte';
+import type { ISharedWorkerTelemetryMetric } from '../../../wrapper/SharedWorkerWrapper.ts';
+import WorkerSpecifier from '../shared/WorkerSpecifier.svelte';
+import CollapseExpand from '../shared/CollapseExpand.svelte';
+import SharedWorkerMetricConstructor from './SharedWorkerMetricConstructor.svelte';
+import SharedWorkerMetricOnError from './SharedWorkerMetricOnError.svelte';
+import SharedWorkerMetricPortStart from './SharedWorkerMetricPortStart.svelte';
+import SharedWorkerMetricPortClose from './SharedWorkerMetricPortClose.svelte';
+import SharedWorkerMetricPortPostMessage from './SharedWorkerMetricPortPostMessage.svelte';
+import SharedWorkerMetricPortAel from './SharedWorkerMetricPortAel.svelte';
+import SharedWorkerMetricPortRel from './SharedWorkerMetricPortRel.svelte';
 
-  let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
-    $props();
-  let isExpanded = $state(true);
+let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } = $props();
+let isExpanded = $state(true);
 </script>
 
 <fieldset>
@@ -40,7 +39,7 @@
 </fieldset>
 
 <style lang="scss">
-  fieldset {
-    margin: 0.25rem auto;
-  }
+fieldset {
+  margin: 0.25rem auto;
+}
 </style>

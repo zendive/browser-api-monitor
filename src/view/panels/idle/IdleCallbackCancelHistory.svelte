@@ -1,38 +1,38 @@
 <script lang="ts">
-  import type { ICancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import IdleCallbackCancelHistoryMetric from './IdleCallbackCancelHistoryMetric.svelte';
+import type { ICancelIdleCallbackHistory } from '../../../wrapper/IdleWrapper.ts';
+import type { ESortOrder } from '../../../api/const.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import Variable from '../../shared/Variable.svelte';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import IdleCallbackCancelHistoryMetric from './IdleCallbackCancelHistoryMetric.svelte';
 
-  let {
-    cicHistory,
-    caption = '',
-  }: {
-    cicHistory: ICancelIdleCallbackHistory[];
-    caption?: string;
-  } = $props();
-  const { sortCancelIdleCallback } = useConfigState();
-  const sortedMetrics = $derived.by(() =>
-    cicHistory.toSorted(
-      compareByFieldOrder(
-        sortCancelIdleCallback.field,
-        sortCancelIdleCallback.order,
-      ),
-    )
-  );
+let {
+  cicHistory,
+  caption = '',
+}: {
+  cicHistory: ICancelIdleCallbackHistory[];
+  caption?: string;
+} = $props();
+const { sortCancelIdleCallback } = useConfigState();
+const sortedMetrics = $derived.by(() =>
+  cicHistory.toSorted(
+    compareByFieldOrder(
+      sortCancelIdleCallback.field,
+      sortCancelIdleCallback.order,
+    ),
+  )
+);
 
-  function updateSort(
-    field: keyof ICancelIdleCallbackHistory,
-    order: ESortOrder,
-  ) {
-    sortCancelIdleCallback.field = field;
-    sortCancelIdleCallback.order = order;
-    saveLocalStorage({ sortCancelIdleCallback });
-  }
+function updateSort(
+  field: keyof ICancelIdleCallbackHistory,
+  order: ESortOrder,
+) {
+  sortCancelIdleCallback.field = field;
+  sortCancelIdleCallback.order = order;
+  saveLocalStorage({ sortCancelIdleCallback });
+}
 </script>
 
 <table data-navigation-tag={caption}>

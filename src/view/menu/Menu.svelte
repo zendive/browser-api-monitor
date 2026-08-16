@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Version from './Version.svelte';
-  import TogglePanels from './TogglePanels.svelte';
-  import DevReload from './DevReload.svelte';
-  import TogglePause from './TogglePause.svelte';
-  import UpdatePace from './UpdatePace.svelte';
-  import DevDumpTelemetry from './DevDumpTelemetry.svelte';
-  import DevStats from './DevStats.svelte';
+import Version from './Version.svelte';
+import TogglePanels from './TogglePanels.svelte';
+import DevReload from './DevReload.svelte';
+import TogglePause from './TogglePause.svelte';
+import UpdatePace from './UpdatePace.svelte';
+import DevDumpTelemetry from './DevDumpTelemetry.svelte';
+import DevStats from './DevStats.svelte';
 </script>
 
 <div class="menu">
@@ -32,14 +32,14 @@
 </div>
 
 <style lang="scss">
-  .menu {
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    height: 1.5rem;
+.menu {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  height: 1.5rem;
 
-    .-spring {
-      flex-grow: 1;
-    }
+  .-spring {
+    flex-grow: 1;
   }
+}
 </style>

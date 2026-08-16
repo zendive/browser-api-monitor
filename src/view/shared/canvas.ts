@@ -1,11 +1,22 @@
-/**
+/*
  * Module assumption:
- * - Coordinate system of canvas html element
+ * - Coordinate system of a web page / canvas element
+ *
+ *            -(y)             * (vector's rotation
+ *              ^ (to left)  /      direction angle)
+ *              |    +θ  /  (to right)
+ *              |     /        -θ
+ *              |  /
+ *  -(x) <----(0,0)-------------> +(x)
+ *              |
+ *              |
+ *              V
+ *            +(y)
  */
 
 export const PI = 3.141592653589793;
-export const PI2 = 6.283185307179586;
-export const PId2 = 1.5707963267948966;
+export const twoPI = 6.283185307179586;
+export const halfPI = 1.5707963267948966;
 
 /**
  * Round floating point with custom precision
@@ -19,14 +30,14 @@ export function fround(n: number, precision?: number) {
  * Degrees to radians
  */
 export function deg2rad(deg: number) {
-  return ((deg % 360) / 360) * PI2;
+  return ((deg % 360) / 360) * twoPI;
 }
 
 /**
  * Radians to degrees
  */
 export function rad2deg(rad: number) {
-  return ((rad % PI2) / PI2) * 360;
+  return ((rad % twoPI) / twoPI) * 360;
 }
 
 class XY {
@@ -125,6 +136,19 @@ export class Vector extends XY {
     super(x, y);
   }
 
+  static toNorth(length: number) {
+    return new Vector(0, -Math.abs(length));
+  }
+  static toEast(length: number) {
+    return new Vector(Math.abs(length), 0);
+  }
+  static toSouth(length: number) {
+    return new Vector(0, Math.abs(length));
+  }
+  static toWest(length: number) {
+    return new Vector(-Math.abs(length), 0);
+  }
+
   /**
    * Get point where vector points from `base` point of view
    * Assuming base(x,y) refers to v(0,0) of `this` vector
@@ -134,9 +158,10 @@ export class Vector extends XY {
   }
 
   /**
-   * Rotate at specific angle
-   * produced vector may contain float epsilon errors
-   * @note: positive `radAngle` means counterclockwise
+   * Rotate at specific angle to the left or right depending
+   * on the positive or negative sign of the angle respectfully
+   *
+   * @note: produced vector may contain float epsilon errors
    */
   rotate(radAngle: number) {
     const cos = Math.cos(-radAngle);
@@ -148,11 +173,29 @@ export class Vector extends XY {
     );
   }
 
-  rotateLeft() {
+  /**
+   * Rotate counterclockwise at specific `radAngle`
+   *
+   * @note: produced vector may contain float epsilon errors
+   */
+  rotateLeft(radAngle: number) {
+    return this.rotate(Math.abs(radAngle));
+  }
+
+  /**
+   * Rotate clockwise at specific `radAngle`
+   *
+   * @note: produced vector may contain float epsilon errors
+   */
+  rotateRight(radAngle: number) {
+    return this.rotate(-Math.abs(radAngle));
+  }
+
+  rotateHalfPiLeft() {
     return this.set(-this.y, this.x);
   }
 
-  rotateRight() {
+  rotateHalfPiRight() {
     return this.set(this.y, -this.x);
   }
 
@@ -180,12 +223,12 @@ export class Vector extends XY {
   }
 
   /**
-   * Get angle of vector relative to X axis in range [0 ... α ... PI2] counterclockwise
+   * Get angle of vector relative to X axis in range [0 ... α ... twoPI] counterclockwise
    */
   get angleWithX() {
     const angle = Math.atan2(-this.y, this.x);
 
-    return (angle < 0) ? angle + PI2 : angle;
+    return (angle < 0) ? angle + twoPI : angle;
   }
 
   angle(v: Vector) {

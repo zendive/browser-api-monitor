@@ -1,58 +1,58 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
-  import { NOOP } from '../../api/const.ts';
+import type { Snippet } from 'svelte';
+import { NOOP } from '../../api/const.ts';
 
-  let {
-    title = '',
-    description = '',
-    eventClose = NOOP,
-    eventToggle = NOOP,
-    children,
-  }: {
-    title?: string;
-    description?: string;
-    eventClose?: () => void;
-    eventToggle?: (e: ToggleEvent) => void;
-    children?: Snippet;
-  } = $props();
-  let showContent: boolean = $state(false);
-  let selfEl: HTMLDialogElement;
+let {
+  title = '',
+  description = '',
+  eventClose = NOOP,
+  eventToggle = NOOP,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  eventClose?: () => void;
+  eventToggle?: (e: ToggleEvent) => void;
+  children?: Snippet;
+} = $props();
+let showContent: boolean = $state(false);
+let selfEl: HTMLDialogElement;
 
-  export function show() {
-    selfEl.showModal();
-    document.addEventListener('keydown', onKeyboardEvent, {
-      capture: true,
-    });
-    selfEl.addEventListener('click', onSelfClick);
-    showContent = true;
+export function show() {
+  selfEl.showModal();
+  document.addEventListener('keydown', onKeyboardEvent, {
+    capture: true,
+  });
+  selfEl.addEventListener('click', onSelfClick);
+  showContent = true;
+}
+
+export function close() {
+  selfEl.close();
+}
+
+function onSelfClick(e: MouseEvent) {
+  if (e.currentTarget === e.target) {
+    close();
   }
+}
 
-  export function hide() {
-    selfEl.close();
+function onKeyboardEvent(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    close();
   }
+}
 
-  function onSelfClick(e: MouseEvent) {
-    if (e.currentTarget === e.target) {
-      hide();
-    }
-  }
-
-  function onKeyboardEvent(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      hide();
-    }
-  }
-
-  function onClose() {
-    document.removeEventListener('keydown', onKeyboardEvent, {
-      capture: true,
-    });
-    selfEl.removeEventListener('click', onSelfClick);
-    showContent = false;
-    eventClose();
-  }
+function onClose() {
+  document.removeEventListener('keydown', onKeyboardEvent, {
+    capture: true,
+  });
+  selfEl.removeEventListener('click', onSelfClick);
+  showContent = false;
+  eventClose();
+}
 </script>
 
 <dialog
@@ -76,7 +76,7 @@
       class="close-icon"
       onclick={(e) => {
         e.preventDefault();
-        hide();
+        close();
       }}
     ><span class="icon -remove"></span></a>
   </header>
@@ -87,27 +87,27 @@
 </dialog>
 
 <style lang="scss">
-  dialog {
-    background-color: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
+dialog {
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
 
-    header {
-      display: flex;
-      flex-wrap: nowrap;
-      padding-bottom: 0.5rem;
+  header {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
 
-      .title {
-        flex-grow: 1;
-        font-size: large;
-        .description {
-          font-size: x-small;
-        }
-      }
-
-      .close-icon {
-        text-decoration: none;
+    .title {
+      flex-grow: 1;
+      font-size: large;
+      .description {
+        font-size: x-small;
       }
     }
+
+    .close-icon {
+      text-decoration: none;
+    }
   }
+}
 </style>

@@ -1,34 +1,34 @@
 <script lang="ts">
-  import {
-    type IPostTask,
-    PostTaskFacts,
-  } from '../../../wrapper/SchedulerWrapper.ts';
-  import { delayTooltip } from '../../shared/util.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
+import {
+  type IPostTask,
+  PostTaskFacts,
+} from '../../../wrapper/SchedulerWrapper.ts';
+import { delayTooltip } from '../../shared/util.ts';
+import Variable from '../../shared/Variable.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import CellBypass from '../shared/CellBypass.svelte';
+import CellFacts from '../shared/CellFacts.svelte';
+import CellSelfTime from '../shared/CellSelfTime.svelte';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import type { ESortOrder } from '../../../api/const.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { metrics }: { metrics: IPostTask[] } = $props();
-  const { sortPostTask } = useConfigState();
-  const sortedMetrics = $derived.by(() =>
-    metrics.toSorted(
-      compareByFieldOrder(sortPostTask.field, sortPostTask.order),
-    )
-  );
+let { metrics }: { metrics: IPostTask[] } = $props();
+const { sortPostTask } = useConfigState();
+const sortedMetrics = $derived.by(() =>
+  metrics.toSorted(
+    compareByFieldOrder(sortPostTask.field, sortPostTask.order),
+  )
+);
 
-  function updateSort(field: keyof IPostTask, order: ESortOrder) {
-    sortPostTask.field = field;
-    sortPostTask.order = order;
-    saveLocalStorage({ sortPostTask });
-  }
+function updateSort(field: keyof IPostTask, order: ESortOrder) {
+  sortPostTask.field = field;
+  sortPostTask.order = order;
+  saveLocalStorage({ sortPostTask });
+}
 </script>
 
 <table data-navigation-tag="scheduler.postTask">

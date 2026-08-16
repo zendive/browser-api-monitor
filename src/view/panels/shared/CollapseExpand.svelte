@@ -1,17 +1,17 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+import type { Snippet } from 'svelte';
 
-  let { isExpanded, onClick, class: className = '', children }: {
-    isExpanded: boolean;
-    onClick: () => void;
-    class?: string;
-    children?: Snippet;
-  } = $props();
+let { isExpanded, onClick, class: className = '', children }: {
+  isExpanded: boolean;
+  onClick: () => void;
+  class?: string;
+  children?: Snippet;
+} = $props();
 
-  function _onClick(e: MouseEvent) {
-    e.preventDefault();
-    onClick();
-  }
+function _onClick(e: MouseEvent) {
+  e.preventDefault();
+  onClick();
+}
 </script>
 
 <a

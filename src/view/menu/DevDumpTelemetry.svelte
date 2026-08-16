@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
+import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
 
-  const ts = useTelemetryState();
+const ts = useTelemetryState();
 
-  function dump() {
-    console.log(ts.telemetry);
-  }
+function dump() {
+  console.log(ts.telemetry);
+}
 </script>
 
 <button

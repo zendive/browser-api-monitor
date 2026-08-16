@@ -1,45 +1,42 @@
 <script lang="ts">
-  import {
-    EvalFacts,
-    type IEvalHistory,
-  } from '../../../wrapper/EvalWrapper.ts';
-  import Variable from '../../shared/Variable.svelte';
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
+import { EvalFacts, type IEvalHistory } from '../../../wrapper/EvalWrapper.ts';
+import Variable from '../../shared/Variable.svelte';
+import CellSelfTime from '../shared/CellSelfTime.svelte';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import CellBypass from '../shared/CellBypass.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CellFacts from '../shared/CellFacts.svelte';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import type { ESortOrder } from '../../../api/const.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
 
-  let { evalHistory }: { evalHistory: IEvalHistory[] } = $props();
-  const { sortEval } = useConfigState();
-  const sortedMetrics = $derived.by(() =>
-    evalHistory.toSorted(
-      compareByFieldOrder(sortEval.field, sortEval.order),
-    )
-  );
+let { evalHistory }: { evalHistory: IEvalHistory[] } = $props();
+const { sortEval } = useConfigState();
+const sortedMetrics = $derived.by(() =>
+  evalHistory.toSorted(
+    compareByFieldOrder(sortEval.field, sortEval.order),
+  )
+);
 
-  function updateSort(field: keyof IEvalHistory, order: ESortOrder) {
-    sortEval.field = field;
-    sortEval.order = order;
-    saveLocalStorage({ sortEval });
+function updateSort(field: keyof IEvalHistory, order: ESortOrder) {
+  sortEval.field = field;
+  sortEval.order = order;
+  saveLocalStorage({ sortEval });
+}
+
+function dynamicValue(value: unknown): string {
+  if (value === '⟪undefined⟫') {
+    return '';
+  } else if (typeof value === 'string') {
+    return value;
+  } else if (value && typeof value === 'object') {
+    return JSON.stringify(value);
   }
 
-  function dynamicValue(value: unknown): string {
-    if (value === '⟪undefined⟫') {
-      return '';
-    } else if (typeof value === 'string') {
-      return value;
-    } else if (value && typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-
-    return String(value);
-  }
+  return String(value);
+}
 </script>
 
 <table data-navigation-tag="Eval">
@@ -113,12 +110,12 @@
 </table>
 
 <style lang="scss">
-  .code {
-    max-width: 10rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+.code {
+  max-width: 10rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>

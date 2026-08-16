@@ -1,30 +1,30 @@
 <script lang="ts">
-  import CellSelfTime from '../shared/CellSelfTime.svelte';
-  import CellBypass from '../shared/CellBypass.svelte';
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import CellFacts from '../shared/CellFacts.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CellOnline from './CellOnline.svelte';
-  import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
-  import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
-  import {
-    type ETimerType,
-    type ISetTimerHistory,
-    SetTimerFacts,
-  } from '../../../wrapper/TimerWrapper.ts';
-  import { delayTooltip } from '../../shared/util.ts';
+import CellSelfTime from '../shared/CellSelfTime.svelte';
+import CellBypass from '../shared/CellBypass.svelte';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import CellFacts from '../shared/CellFacts.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CellOnline from './CellOnline.svelte';
+import CellTerminatableCalls from '../shared/CellTerminatableCalls.svelte';
+import type { TTerminatorsPopoverHelper } from '../shared/TerminatorPopoverHelper.svelte.ts';
+import {
+  type ETimerType,
+  type ISetTimerHistory,
+  SetTimerFacts,
+} from '../../../wrapper/TimerWrapper.ts';
+import { delayTooltip } from '../../shared/util.ts';
 
-  let {
-    metric,
-    timerType,
-    popoverId,
-    tph,
-  }: {
-    metric: ISetTimerHistory;
-    timerType: ETimerType;
-    popoverId: string;
-    tph: TTerminatorsPopoverHelper;
-  } = $props();
+let {
+  metric,
+  timerType,
+  popoverId,
+  tph,
+}: {
+  metric: ISetTimerHistory;
+  timerType: ETimerType;
+  popoverId: string;
+  tph: TTerminatorsPopoverHelper;
+} = $props();
 </script>
 
 <tr class="t-zebra">
@@ -58,6 +58,10 @@
       />
     {/if}
   </td>
-  <td><CellBypass traceId={metric.traceId} /></td>
-  <td><CellBreakpoint traceId={metric.traceId} /></td>
+  <td>
+    <CellBypass traceId={metric.traceId} />
+  </td>
+  <td>
+    <CellBreakpoint traceId={metric.traceId} />
+  </td>
 </tr>

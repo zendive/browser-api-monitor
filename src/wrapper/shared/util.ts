@@ -1,4 +1,3 @@
-import { TraceUtil } from './TraceUtil.ts';
 import type { IWorkerOptions } from '../WorkerWrapper.ts';
 import type { ISharedWorkerOptions } from '../SharedWorkerWrapper.ts';
 import { cloneObjectSafely } from '../../api/clone.ts';
@@ -12,8 +11,6 @@ export function validHandler(handler: unknown): handler is number {
 export function validTimerDelay(delay: unknown): delay is number {
   return delay === undefined || (Number.isFinite(delay) && <number> delay >= 0);
 }
-
-export const traceUtil = /*@__PURE__*/ new TraceUtil();
 
 export function parseWorkerOptions(
   options?: WorkerOptions,

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
-  import { delayTooltip } from '../../shared/util.ts';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import { postTimerCommand } from '../../../state/config.state.svelte.ts';
+import type { IOnlineTimerMetrics } from '../../../wrapper/TimerWrapper.ts';
+import { delayTooltip } from '../../shared/util.ts';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import { postTimerCommand } from '../../../state/config.state.svelte.ts';
 
-  let { metric }: { metric: IOnlineTimerMetrics } = $props();
+let { metric }: { metric: IOnlineTimerMetrics } = $props();
 </script>
 
 <tr class="t-zebra">
@@ -26,7 +26,7 @@
 </tr>
 
 <style lang="scss">
-  a:hover {
-    text-decoration: line-through;
-  }
+a:hover {
+  text-decoration: line-through;
+}
 </style>

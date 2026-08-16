@@ -23,7 +23,7 @@ describe('IdleWrapper', () => {
       const handler = requestIdleCallback((o) => {
         typeOfArgument = typeof o.didTimeout;
         resolve(handler);
-      });
+      }, { timeout: 10 });
     });
     const rec = Array.from(apiIdle.ricHistory.values())[0];
 

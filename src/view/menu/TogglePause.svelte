@@ -1,10 +1,10 @@
 <script lang="ts">
-  import {
-    togglePause,
-    useConfigState,
-  } from '../../state/config.state.svelte.ts';
+import {
+  togglePause,
+  useConfigState,
+} from '../../state/config.state.svelte.ts';
 
-  const config = useConfigState();
+const config = useConfigState();
 </script>
 
 <button

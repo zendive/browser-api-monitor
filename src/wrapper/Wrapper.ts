@@ -29,12 +29,11 @@ import {
   updateWorkerCallsPerSecond,
   wrapWorker,
 } from './WorkerWrapper.ts';
-import { traceUtil } from './shared/util.ts';
 import {
   type ISchedulerTelemetry,
   SchedulerWrapper,
 } from './SchedulerWrapper.ts';
-import type { EWrapperCallstackType } from './shared/TraceUtil.ts';
+import { Tracer } from './shared/Tracer.ts';
 import {
   collectSharedWorkerHistory,
   type ISharedWorkerTelemetry,
@@ -79,8 +78,9 @@ const apiAnimation = new AnimationWrapper();
 const apiIdle = new IdleWrapper();
 const apiScheduler = new SchedulerWrapper();
 
-const setCallstackType = callableOnce((type: EWrapperCallstackType) => {
-  traceUtil.callstackType = type;
+const applyTracerConfig = callableOnce((config: TConfig) => {
+  Tracer.callstackType = config.wrapperCallstackType;
+  Tracer.setStackTraceLimit(config.stackTraceLimit);
 });
 
 const wrapApis = callableOnce(() => {
@@ -103,13 +103,13 @@ const wrapApis = callableOnce(() => {
 
 export function applyConfig(config: TConfig) {
   panels = panelsArray2Map(config.panels);
-  setCallstackType(config.wrapperCallstackType);
+  applyTracerConfig(config);
   wrapApis();
 }
 
 export function applySession(session: TSession) {
-  traceUtil.debug = new Set(session.debug);
-  traceUtil.bypass = new Set(session.bypass);
+  Tracer.debug = new Set(session.debug);
+  Tracer.bypass = new Set(session.bypass);
 }
 
 export function onEachSecond() {

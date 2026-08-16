@@ -5,7 +5,7 @@ import {
   saveLocalStorage,
   type TConfig,
 } from '../api/storage/storage.local.ts';
-import { EWrapperCallstackType } from '../wrapper/shared/TraceUtil.ts';
+import { EWrapperCallstackType } from '../wrapper/shared/Tracer.ts';
 import type { ETimerType } from '../wrapper/TimerWrapper.ts';
 
 let config: TConfig = $state(DEFAULT_CONFIG);
@@ -63,4 +63,8 @@ export async function togglePanelVisibility(index: number) {
 
 export function postTimerCommand(type: ETimerType, handler: number) {
   postPort({ msg: EMsg.TIMER_COMMAND, type, handler });
+}
+
+export async function setStackTraceLimit(value: number) {
+  await saveLocalStorage({ stackTraceLimit: value });
 }

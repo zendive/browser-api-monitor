@@ -8,14 +8,13 @@ import {
 import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
-import { type ITraceable, TraceUtil } from './shared/TraceUtil.ts';
+import { type ITraceable, Tracer } from './shared/Tracer.ts';
 import {
   atTheEventDetectAutoremove,
   getEventHandlerLinksKey,
   isEventListenerObject,
   parseMediaFieldValue,
   type TEventHandlerLinks,
-  traceUtil,
 } from './shared/util.ts';
 
 export interface IMediaTelemetry {
@@ -258,12 +257,12 @@ export class MediaWrapper {
         return;
       }
 
-      const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+      const { traceId, trace } = Tracer.getCallstack();
       const methodMetric = eventModel.ael.getOrInsertComputed(
-        callstack.traceId,
+        traceId,
         () => ({
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -299,8 +298,8 @@ export class MediaWrapper {
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
-          if (traceUtil.shouldPass(methodMetric.traceId)) {
-            if (traceUtil.shouldPause(methodMetric.traceId)) {
+          if (Tracer.shouldPass(methodMetric.traceId)) {
+            if (Tracer.shouldPause(methodMetric.traceId)) {
               debugger;
             }
             listener.call(el, ...args);
@@ -320,8 +319,8 @@ export class MediaWrapper {
           let eventSelfTime: null | number = null;
           const start = performance.now();
 
-          if (traceUtil.shouldPass(methodMetric.traceId)) {
-            if (traceUtil.shouldPause(methodMetric.traceId)) {
+          if (Tracer.shouldPass(methodMetric.traceId)) {
+            if (Tracer.shouldPause(methodMetric.traceId)) {
               debugger;
             }
             listener.handleEvent(...args);
@@ -360,12 +359,12 @@ export class MediaWrapper {
         return;
       }
 
-      const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+      const { traceId, trace } = Tracer.getCallstack();
       const methodMetric = eventModel.rel.getOrInsertComputed(
-        callstack.traceId,
+        traceId,
         () => ({
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           facts: Fact.pure,
@@ -388,8 +387,8 @@ export class MediaWrapper {
         );
       }
 
-      if (traceUtil.shouldPass(methodMetric.traceId)) {
-        if (traceUtil.shouldPause(methodMetric.traceId)) {
+      if (Tracer.shouldPass(methodMetric.traceId)) {
+        if (Tracer.shouldPause(methodMetric.traceId)) {
           debugger;
         }
         model.nativeRel(

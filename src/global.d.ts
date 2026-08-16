@@ -1,12 +1,10 @@
-import 'svelte/elements';
+export {};
 
 declare module 'svelte/elements' {
   export interface HTMLAttributes<T> {
     'interestfor'?: string;
   }
 }
-
-export {};
 
 declare global {
   const __development__: boolean;
@@ -26,5 +24,16 @@ declare global {
     description: string;
     details: string[];
     isError: boolean;
+  }
+
+  /**
+   * Does not exist in ts-types, safe for Chrome though
+   */
+  interface ErrorConstructor {
+    stackTraceLimit: number;
+    captureStackTrace: (
+      targetObject: { stack: string },
+      instance2avoid: unknown,
+    ) => void;
   }
 }

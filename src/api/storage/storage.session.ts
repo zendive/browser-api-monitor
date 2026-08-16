@@ -7,7 +7,8 @@ const DEFAULT_SESSION = {
   debug: <string[]> [],
   bypass: <string[]> [],
 };
-const DEFAULT_SESSION_KEYS_LENGTH = Object.keys(DEFAULT_SESSION).length;
+const DEFAULT_SESSION_KEYS_LENGTH =
+  /*@__PURE__*/ (() => Object.keys(DEFAULT_SESSION).length)();
 export function enableSessionInContentScript() {
   return session.setAccessLevel({
     accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS',

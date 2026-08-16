@@ -1,6 +1,6 @@
 <script lang="ts">
   import TraceLink from './TraceLink.svelte';
-  import { type ITrace } from '../../../wrapper/shared/TraceUtil.ts';
+  import { type ITrace } from '../../../wrapper/shared/Tracer.ts';
   import { useTelemetryState } from '../../../state/telemetry.state.svelte.ts';
   import { getDomainDescriptor } from './traceDomain.ts';
 

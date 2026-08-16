@@ -1,31 +1,31 @@
 <script lang="ts">
-  import type { TMediaCommand } from '../../../wrapper/MediaWrapper.ts';
-  import { EMsg, postPort } from '../../../api/communication.ts';
-  import { autoclick } from '../shared/directive.ts';
+import type { TMediaCommand } from '../../../wrapper/MediaWrapper.ts';
+import { EMsg, postPort } from '../../../api/communication.ts';
+import { autoclick } from '../shared/directive.ts';
 
-  let {
-    mediaId,
-    paused,
-  }: {
-    mediaId: string;
-    paused: unknown;
-  } = $props();
-  const playPauseTitle = $derived.by(() =>
-    paused ? `media.play()` : `media.pause()`
-  );
-  const playPauseIcon = $derived.by(() => paused ? '-play' : '-pause');
+let {
+  mediaId,
+  paused,
+}: {
+  mediaId: string;
+  paused: unknown;
+} = $props();
+const playPauseTitle = $derived.by(() =>
+  paused ? `media.play()` : `media.pause()`
+);
+const playPauseIcon = $derived.by(() => paused ? '-play' : '-pause');
 
-  function onMediaCommand(cmd: TMediaCommand) {
-    postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
+function onMediaCommand(cmd: TMediaCommand) {
+  postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd });
+}
+
+function onPlayPause() {
+  if (paused) {
+    postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'play' });
+  } else {
+    postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'pause' });
   }
-
-  function onPlayPause() {
-    if (paused) {
-      postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'play' });
-    } else {
-      postPort({ msg: EMsg.MEDIA_COMMAND, mediaId, cmd: 'pause' });
-    }
-  }
+}
 </script>
 
 <span class="media-commands">
@@ -82,10 +82,10 @@
 </span>
 
 <style lang="scss">
-  button {
-    border-right-color: var(--text-invert);
-    .icon {
-      background-color: var(--text-invert);
-    }
+button {
+  border-right-color: var(--text-invert);
+  .icon {
+    background-color: var(--text-invert);
   }
+}
 </style>

@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
-  import { startAnimation, updateAnimation } from './UpdatePaceTimeMap.ts';
-  import { onMount } from 'svelte';
+import { useTelemetryState } from '../../state/telemetry.state.svelte.ts';
+import { startAnimation, updateAnimation } from './UpdatePaceTimeMap.ts';
+import { onMount } from 'svelte';
 
-  let canvasEl: HTMLCanvasElement;
-  const ts = useTelemetryState();
+let canvasEl: HTMLCanvasElement;
+const ts = useTelemetryState();
 
-  $effect(() => void updateAnimation(ts.timeOfCollection));
+$effect(() => void updateAnimation(ts.timeOfCollection));
 
-  onMount(() => {
-    const ctx = canvasEl.getContext('2d');
-    return ctx && startAnimation(ctx);
-  });
+onMount(() => {
+  const ctx = canvasEl.getContext('2d');
+  return ctx && startAnimation(ctx);
+});
 </script>
 
 <div
@@ -22,14 +22,14 @@
 </div>
 
 <style lang="scss">
-  .time-map {
-    display: flex;
+.time-map {
+  display: flex;
 
-    canvas {
-      border-radius: 50%;
-      /* downscaled */
-      width: 1.25rem;
-      height: 1.25rem;
-    }
+  canvas {
+    border-radius: 50%;
+    /* downscaled */
+    width: 1.25rem;
+    height: 1.25rem;
   }
+}
 </style>

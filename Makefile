@@ -25,11 +25,16 @@ install:
 .PHONY: install-test-deps
 install-test-deps:
 	deno run -A npm:playwright install
-	deno run -A npm:playwright install-deps
+	# commented out as probably not needed
+	# deno run -A npm:playwright install-deps
 
 .PHONY: update
 update:
 	deno update --latest
+
+.PHONY: update-check
+update-check:
+	@deno outdated
 
 .PHONY: dev
 dev:

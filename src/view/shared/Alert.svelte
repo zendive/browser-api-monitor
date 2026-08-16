@@ -1,63 +1,63 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
-  import { NOOP } from '../../api/const.ts';
+import type { Snippet } from 'svelte';
+import { NOOP } from '../../api/const.ts';
 
-  let {
-    title = '',
-    dismissable = true,
-    class: className = '',
-    eventToggle = NOOP,
-    children,
-  }: {
-    title: string;
-    dismissable?: boolean;
-    class?: string;
-    eventToggle?: (e: ToggleEvent) => void;
-    children?: Snippet;
-  } = $props();
-  let selfEl: HTMLElement;
+let {
+  title = '',
+  dismissable = true,
+  class: className = '',
+  eventToggle = NOOP,
+  children,
+}: {
+  title: string;
+  dismissable?: boolean;
+  class?: string;
+  eventToggle?: (e: ToggleEvent) => void;
+  children?: Snippet;
+} = $props();
+let selfEl: HTMLElement;
 
-  export function show() {
-    selfEl.showPopover();
+export function show() {
+  selfEl.showPopover();
+}
+
+export function hide() {
+  selfEl.hidePopover();
+}
+
+function onToggle(e: ToggleEvent) {
+  if (!dismissable) {
+    return;
   }
 
-  export function hide() {
-    selfEl.hidePopover();
+  if (e.newState === 'open') {
+    document.addEventListener('keydown', onKeyboardEvent, {
+      capture: true,
+    });
+    document.addEventListener('click', onWindowClick);
+  } else if (e.newState === 'closed') {
+    document.removeEventListener('keydown', onKeyboardEvent, {
+      capture: true,
+    });
+    document.removeEventListener('click', onWindowClick);
   }
 
-  function onToggle(e: ToggleEvent) {
-    if (!dismissable) {
-      return;
-    }
+  eventToggle(e);
+}
 
-    if (e.newState === 'open') {
-      document.addEventListener('keydown', onKeyboardEvent, {
-        capture: true,
-      });
-      document.addEventListener('click', onWindowClick);
-    } else if (e.newState === 'closed') {
-      document.removeEventListener('keydown', onKeyboardEvent, {
-        capture: true,
-      });
-      document.removeEventListener('click', onWindowClick);
-    }
-
-    eventToggle(e);
+function onWindowClick(e: MouseEvent) {
+  if (selfEl && e.target && !selfEl.contains(e.target as Node)) {
+    hide();
   }
+}
 
-  function onWindowClick(e: MouseEvent) {
-    if (selfEl && e.target && !selfEl.contains(e.target as Node)) {
-      hide();
-    }
+function onKeyboardEvent(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    hide();
   }
-
-  function onKeyboardEvent(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      hide();
-    }
-  }
+}
 </script>
 
 <div
@@ -88,32 +88,32 @@
 </div>
 
 <style lang="scss">
-  .alert {
-    background-color: var(--bg-invert);
-    color: var(--text-invert);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 1rem;
-    max-width: 22rem;
+.alert {
+  background-color: var(--bg-invert);
+  color: var(--text-invert);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  max-width: 22rem;
 
-    header {
-      display: flex;
-      flex-wrap: nowrap;
-      padding-bottom: 0.5rem;
+  header {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
 
-      .title {
-        flex-grow: 1;
-        font-size: large;
-        font-weight: bold;
-      }
-
-      .icon {
-        background-color: var(--text-invert);
-      }
+    .title {
+      flex-grow: 1;
+      font-size: large;
+      font-weight: bold;
     }
 
-    footer {
-      font-size: medium;
+    .icon {
+      background-color: var(--text-invert);
     }
   }
+
+  footer {
+    font-size: medium;
+  }
+}
 </style>

@@ -3,11 +3,11 @@ import {
   Box,
   deg2rad,
   fround,
+  halfPI,
   PI,
-  PI2,
-  PId2,
   Point,
   rad2deg,
+  twoPI,
   Vector,
 } from '../src/view/shared/canvas.ts';
 
@@ -19,17 +19,17 @@ describe('module exports', () => {
 
   test('rad2deg', () => {
     expect(rad2deg(0)).toBe(0);
-    expect(rad2deg(PId2)).toBe(90);
+    expect(rad2deg(halfPI)).toBe(90);
     expect(rad2deg(PI)).toBe(180);
-    expect(rad2deg(PI + PId2)).toBe(270);
-    expect(rad2deg(PI2)).toBe(0);
+    expect(rad2deg(PI + halfPI)).toBe(270);
+    expect(rad2deg(twoPI)).toBe(0);
   });
 
   test('deg2rad', () => {
     expect(deg2rad(0)).toBe(0);
-    expect(deg2rad(90)).toBe(PId2);
+    expect(deg2rad(90)).toBe(halfPI);
     expect(deg2rad(180)).toBe(PI);
-    expect(deg2rad(270)).toBe(PI + PId2);
+    expect(deg2rad(270)).toBe(PI + halfPI);
     expect(deg2rad(360)).toBe(0);
   });
 });
@@ -76,13 +76,22 @@ describe('Point', () => {
     const p = new Point(2, 2);
     const base = new Point(4, 4);
 
-    p.rotate(PId2, base);
+    p.rotate(halfPI, base);
     expect(p.x).toBe(2);
     expect(p.y).toBe(6);
   });
 });
 
 describe('Vector', () => {
+  test('directional API', () => {
+    /*🤔*/ expect(0).not.toBe(-0);
+
+    expect(Vector.toNorth(1).rotateRight(halfPI).round().x).toBe(1);
+    expect(Vector.toEast(1).rotateLeft(PI).round().x).toBe(-1);
+    expect(Vector.toSouth(-1).rotateLeft(halfPI).round().x).toBe(1);
+    expect(Vector.toWest(-1).rotateRight(PI).round().x).toBe(1);
+  });
+
   test('rotate', () => {
     const p = new Point(2, 2);
     const base = new Point(4, 4);
@@ -91,7 +100,7 @@ describe('Vector', () => {
     expect(v.x).toBe(-2);
     expect(v.y).toBe(-2);
 
-    v.rotate(PId2).round();
+    v.rotate(halfPI).round();
     expect(v.x).toBe(-2);
     expect(v.y).toBe(2);
 
@@ -140,10 +149,9 @@ describe('Vector', () => {
     const ox = new Vector(1, 0); // 0-right
     const oy = new Vector(0, 1); // 0-down
 
-    expect(Math.round(rad2deg(new Vector(1, 1).angle(new Vector(-1, -1)))))
-      .toBe(
-        180,
-      );
+    expect(
+      Math.round(rad2deg(new Vector(1, 1).angle(new Vector(-1, -1)))),
+    ).toBe(180);
     expect(Math.round(rad2deg(v.set(1, -1).angle(ox)))).toBe(45);
     expect(Math.round(rad2deg(v.set(-1, -1).angle(ox)))).toBe(135);
     expect(Math.round(rad2deg(v.set(-1, 1).angle(ox)))).toBe(135);

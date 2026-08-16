@@ -48,4 +48,4 @@ Promise.all([
 });
 
 __development__ &&
-  console.log('api-monitor-cs-isolated.ts', performance.now());
+  console.debug('api-monitor-cs-isolated.ts', performance.now());

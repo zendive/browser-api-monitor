@@ -4,23 +4,19 @@
     REGEX_STACKTRACE_CLEAN_URL,
     REGEX_STACKTRACE_COLUMN_NUMBER,
     REGEX_STACKTRACE_LINE_NUMBER,
+    REGEX_STACKTRACE_LOCATION_URL,
     TAG_INVALID_CALLSTACK_LINK,
-  } from '../../../wrapper/shared/TraceUtil.ts';
+  } from '../../../wrapper/shared/Tracer.ts';
 
   let {
     name,
-    link = '',
+    link,
   }: {
     name: string | 0;
-    link?: string;
+    link: string;
   } = $props();
   let visited: boolean = $state(false);
-  let lineNumber = $derived.by(() =>
-    parseInt(link?.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'), 10)
-  );
-  let isSourceLess = $derived.by(
-    () => !Number.isFinite(lineNumber) || TAG_INVALID_CALLSTACK_LINK === link,
-  );
+  let isSourceLess = $derived.by(() => TAG_INVALID_CALLSTACK_LINK === link);
   let linkFormatted = $derived.by(() => {
     if (isSourceLess) {
       return link;
@@ -29,22 +25,30 @@
     try {
       const url = new URL(link);
       return url.pathname;
-    } catch (_e) {
+    } catch (_ignore) {
       return link.replace(REGEX_CUT_LINK_PROTOCOL, '');
     }
   });
 
   function showStackTraceResource() {
     const cleanUrl = link.replace(REGEX_STACKTRACE_CLEAN_URL, '$1');
-    const columnNumber = parseInt(
-      link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
-      10,
-    );
+    let line = 1, column = 1;
+
+    if (REGEX_STACKTRACE_LOCATION_URL.test(link)) {
+      line = parseInt(
+        link.replace(REGEX_STACKTRACE_LINE_NUMBER, '$1'),
+        10
+      );
+      column = parseInt(
+        link.replace(REGEX_STACKTRACE_COLUMN_NUMBER, '$1'),
+        10
+      );
+    }
 
     chrome?.devtools?.panels.openResource(
       cleanUrl,
-      lineNumber - 1,
-      columnNumber - 1,
+      line - 1,
+      column - 1,
       // @ts-expect-error: incomplete documentation for callback argument
       (acknowledge: IOpenResourceCallbackArgument) => {
         visited = !acknowledge.isError;

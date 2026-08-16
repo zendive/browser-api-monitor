@@ -1,39 +1,38 @@
 <script lang="ts">
-  import CellBreakpoint from '../shared/CellBreakpoint.svelte';
-  import Variable from '../../shared/Variable.svelte';
-  import CellCallstack from '../shared/CellCallstack.svelte';
-  import CollapseExpand from '../shared/CollapseExpand.svelte';
-  import ColumnSortable from '../shared/ColumnSortable.svelte';
-  import type { ESortOrder } from '../../../api/const.ts';
-  import type {
-    ISharedWorkerConstructorMetric,
-    ISharedWorkerTelemetryMetric,
-  } from '../../../wrapper/SharedWorkerWrapper.ts';
-  import { useConfigState } from '../../../state/config.state.svelte.ts';
-  import { compareByFieldOrder } from '../shared/comparator.ts';
-  import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
+import CellBreakpoint from '../shared/CellBreakpoint.svelte';
+import Variable from '../../shared/Variable.svelte';
+import CellCallstack from '../shared/CellCallstack.svelte';
+import CollapseExpand from '../shared/CollapseExpand.svelte';
+import ColumnSortable from '../shared/ColumnSortable.svelte';
+import type { ESortOrder } from '../../../api/const.ts';
+import type {
+  ISharedWorkerConstructorMetric,
+  ISharedWorkerTelemetryMetric,
+} from '../../../wrapper/SharedWorkerWrapper.ts';
+import { useConfigState } from '../../../state/config.state.svelte.ts';
+import { compareByFieldOrder } from '../shared/comparator.ts';
+import { saveLocalStorage } from '../../../api/storage/storage.local.ts';
 
-  let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } =
-    $props();
-  const { sortSharedWorkerConstructor } = useConfigState();
-  const constructorSortedMetrics = $derived.by(() =>
-    workerMetric.konstruktor.toSorted(
-      compareByFieldOrder(
-        sortSharedWorkerConstructor.field,
-        sortSharedWorkerConstructor.order,
-      ),
-    )
-  );
-  let isExpanded = $state(true);
+let { workerMetric }: { workerMetric: ISharedWorkerTelemetryMetric } = $props();
+const { sortSharedWorkerConstructor } = useConfigState();
+const constructorSortedMetrics = $derived.by(() =>
+  workerMetric.konstruktor.toSorted(
+    compareByFieldOrder(
+      sortSharedWorkerConstructor.field,
+      sortSharedWorkerConstructor.order,
+    ),
+  )
+);
+let isExpanded = $state(true);
 
-  function updateSort(
-    field: keyof ISharedWorkerConstructorMetric,
-    order: ESortOrder,
-  ) {
-    sortSharedWorkerConstructor.field = field;
-    sortSharedWorkerConstructor.order = order;
-    saveLocalStorage({ sortSharedWorkerConstructor });
-  }
+function updateSort(
+  field: keyof ISharedWorkerConstructorMetric,
+  order: ESortOrder,
+) {
+  sortSharedWorkerConstructor.field = field;
+  sortSharedWorkerConstructor.order = order;
+  saveLocalStorage({ sortSharedWorkerConstructor });
+}
 </script>
 
 <table>
@@ -72,20 +71,22 @@
   </thead>
 
   <tbody class:d-none={!isExpanded}>
-    {#each constructorSortedMetrics as metric (metric.traceId)}
+    {#each constructorSortedMetrics as {traceId, trace, options, calls} (traceId)}
       <tr class="t-zebra">
         <td class="wb-all">
-          <CellCallstack trace={metric.trace} />
+          <CellCallstack trace={trace} />
         </td>
         <td class="ta-c">
-          <div class="worker-name">{metric.options.name}</div>
+          <div class="worker-name" title={options.name}>{options.name}</div>
         </td>
-        <td class="ta-c">{metric.options.type}</td>
-        <td class="ta-c">{metric.options.credentials}</td>
-        <td class="ta-c">{metric.options.sameSiteCookies}</td>
-        <td class="ta-c">{metric.options.extendedLifetime}</td>
-        <td class="ta-c"><Variable value={metric.calls} /></td>
-        <td><CellBreakpoint traceId={metric.traceId} /></td>
+        <td class="ta-c">
+          <span title={options.type}>{options.type === 'module'? 'M': 'C'}</span>
+        </td>
+        <td class="ta-c">{options.credentials}</td>
+        <td class="ta-c">{options.sameSiteCookies}</td>
+        <td class="ta-c">{options.extendedLifetime}</td>
+        <td class="ta-c"><Variable value={calls} /></td>
+        <td><CellBreakpoint traceId={traceId} /></td>
       </tr>
     {/each}
   </tbody>

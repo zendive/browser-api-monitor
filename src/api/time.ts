@@ -122,7 +122,7 @@ type TTimerOptions =
   | ITimerTask;
 
 const timerApi = __mirror__
-  ? {
+  ? __mirror__ && {
     get setTimeout() {
       return globalThis.setTimeout.bind(globalThis);
     },

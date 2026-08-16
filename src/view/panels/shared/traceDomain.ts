@@ -1,4 +1,4 @@
-import type { ITrace } from '../../../wrapper/shared/TraceUtil.ts';
+import type { ITrace } from '../../../wrapper/shared/Tracer.ts';
 
 enum ETraceDomain {
   UNKNOWN,
@@ -7,6 +7,7 @@ enum ETraceDomain {
   EXTENSION,
   SNIPPET,
   WEBPACK,
+  URI_DATA,
 }
 
 const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
@@ -16,7 +17,7 @@ const REGEX_STACKTRACE_LINK_PROTOCOL = /*@__PURE__*/ new RegExp(
 function getDomain(trace: ITrace[], locationOrigin: string) {
   const firstLink = trace[0]?.link || '';
 
-  if (firstLink.startsWith(locationOrigin)) {
+  if (locationOrigin && firstLink.startsWith(locationOrigin)) {
     return ETraceDomain.SAME;
   } else if (REGEX_STACKTRACE_LINK_PROTOCOL.test(firstLink)) {
     return ETraceDomain.EXTERNAL;
@@ -26,6 +27,8 @@ function getDomain(trace: ITrace[], locationOrigin: string) {
     return ETraceDomain.SNIPPET;
   } else if (firstLink.startsWith('webpack://')) {
     return ETraceDomain.WEBPACK;
+  } else if (firstLink.startsWith('data:')) {
+    return ETraceDomain.URI_DATA;
   }
 
   return ETraceDomain.UNKNOWN;
@@ -48,6 +51,7 @@ const traceDomainUIMap: Map<ETraceDomain, IDomainDescriptor> =
       [ETraceDomain.EXTENSION, { icon: '-trace-extension', name: 'Extension' }],
       [ETraceDomain.SNIPPET, { icon: '-trace-extension', name: 'Snippet' }],
       [ETraceDomain.WEBPACK, { icon: '-trace-webpack', name: 'Webpack' }],
+      [ETraceDomain.URI_DATA, { icon: '-trace-uri-data', name: 'data: URI' }],
     ]))();
 
 export function getDomainDescriptor(

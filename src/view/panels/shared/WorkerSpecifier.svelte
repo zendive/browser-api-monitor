@@ -29,8 +29,6 @@
         ) {
           // try to open resource in another way
           globalThis.open(specifier, '_blank');
-        } else {
-          console.error(acknowledge);
         }
       },
     );

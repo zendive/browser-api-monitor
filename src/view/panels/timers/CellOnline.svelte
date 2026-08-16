@@ -1,25 +1,25 @@
 <script lang="ts">
-  import Variable from '../../shared/Variable.svelte';
-  import CellOnlinePopoverBody from './CellOnlinePopoverBody.svelte';
-  import type { ETimerType } from '../../../wrapper/TimerWrapper.ts';
+import Variable from '../../shared/Variable.svelte';
+import CellOnlinePopoverBody from './CellOnlinePopoverBody.svelte';
+import type { ETimerType } from '../../../wrapper/TimerWrapper.ts';
 
-  const {
-    traceId,
-    timerType,
-    popoverId,
-    online,
-  }: {
-    traceId: string;
-    timerType: ETimerType;
-    popoverId: string;
-    online: number;
-  } = $props();
-  const hintPopoverId = $derived.by(() => `${popoverId}_${traceId}`);
-  let popoverShown = $state(false);
+const {
+  traceId,
+  timerType,
+  popoverId,
+  online,
+}: {
+  traceId: string;
+  timerType: ETimerType;
+  popoverId: string;
+  online: number;
+} = $props();
+const hintPopoverId = $derived.by(() => `${popoverId}_${traceId}`);
+let popoverShown = $state(false);
 
-  function onToggle(e: ToggleEvent) {
-    popoverShown = e.newState === 'open';
-  }
+function onToggle(e: ToggleEvent) {
+  popoverShown = e.newState === 'open';
+}
 </script>
 
 <button
@@ -44,11 +44,11 @@
 </div>
 
 <style lang="scss">
-  .popover {
-    position-area: block-end span-inline-start;
-    max-height: 10rem;
-    background-color: var(--bg-popover);
-    border: 1px solid var(--attention);
-    padding: 0;
-  }
+.popover {
+  position-area: block-end span-inline-start;
+  max-height: 10rem;
+  background-color: var(--bg-popover);
+  border: 1px solid var(--attention);
+  padding: 0;
+}
 </style>

@@ -1,4 +1,4 @@
-import type { ITraceable } from './shared/TraceUtil.ts';
+import type { ITraceable } from './shared/Tracer.ts';
 import type { IPanel } from '../api/storage/storage.local.ts';
 import {
   atTheEventDetectAutoremove,
@@ -7,9 +7,8 @@ import {
   parseSharedWorkerOptions,
   parseWorkerSpecifier,
   type TEventHandlerLinks,
-  traceUtil,
 } from './shared/util.ts';
-import { TraceUtil } from './shared/TraceUtil.ts';
+import { Tracer } from './shared/Tracer.ts';
 import { trim2ms } from '../api/time.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import { WorkerAelFact, WorkerRelFact } from './WorkerWrapper.ts';
@@ -99,8 +98,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   readonly #eventHandlerLinks: TEventHandlerLinks = new Map();
 
   constructor(specifier: string | URL, options?: string | WorkerOptions) {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
-    if (traceUtil.shouldPause(callstack.traceId)) {
+    const { traceId, trace } = Tracer.getCallstack();
+    if (Tracer.shouldPause(traceId)) {
       debugger;
     }
     super(specifier, options);
@@ -110,8 +109,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       this.#specifier,
       () => {
         const constructorMetric = {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           options: parseSharedWorkerOptions(options),
           calls: 0,
@@ -140,11 +139,11 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     memoryTracker.register(this, this.#specifier);
 
     const methodMetric = this.#metric.konstruktor.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           options: parseSharedWorkerOptions(options),
           calls: 0,
@@ -181,13 +180,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   override set onerror(rhs: (e: ErrorEvent) => unknown | null) {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.onerror.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -208,8 +207,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       let eventSelfTime: null | number = null;
       let rv;
 
-      if (traceUtil.shouldPass(methodMetric.traceId)) {
-        if (traceUtil.shouldPause(methodMetric.traceId)) {
+      if (Tracer.shouldPass(methodMetric.traceId)) {
+        if (Tracer.shouldPause(methodMetric.traceId)) {
           debugger;
         }
         const start = performance.now();
@@ -224,13 +223,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portStart() {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portStart.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
         };
@@ -239,8 +238,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
     methodMetric.calls++;
 
-    if (traceUtil.shouldPass(callstack.traceId)) {
-      if (traceUtil.shouldPause(callstack.traceId)) {
+    if (Tracer.shouldPass(traceId)) {
+      if (Tracer.shouldPause(traceId)) {
         debugger;
       }
       this.#native.start();
@@ -248,13 +247,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portClose() {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portClose.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
         };
@@ -263,8 +262,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
 
     methodMetric.calls++;
 
-    if (traceUtil.shouldPass(callstack.traceId)) {
-      if (traceUtil.shouldPause(callstack.traceId)) {
+    if (Tracer.shouldPass(traceId)) {
+      if (Tracer.shouldPause(traceId)) {
         debugger;
       }
       this.#native.close();
@@ -272,11 +271,11 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
   }
 
   #portPostMessage(...args: Parameters<MessagePort['postMessage']>) {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     let selfTime = null;
 
-    if (traceUtil.shouldPass(callstack.traceId)) {
-      if (traceUtil.shouldPause(callstack.traceId)) {
+    if (Tracer.shouldPass(traceId)) {
+      if (Tracer.shouldPause(traceId)) {
         debugger;
       }
       const start = performance.now();
@@ -285,11 +284,11 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     }
 
     const methodMetric = this.#metric.portPostMessage.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           selfTime,
@@ -307,13 +306,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | AddEventListenerOptions,
   ) {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portAel.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           events: 0,
@@ -354,8 +353,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
         let eventSelfTime: null | number = null;
         const start = performance.now();
 
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
+        if (Tracer.shouldPass(methodMetric.traceId)) {
+          if (Tracer.shouldPause(methodMetric.traceId)) {
             debugger;
           }
           listener.call(this, e);
@@ -372,8 +371,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
         let eventSelfTime: null | number = null;
         const start = performance.now();
 
-        if (traceUtil.shouldPass(methodMetric.traceId)) {
-          if (traceUtil.shouldPause(methodMetric.traceId)) {
+        if (Tracer.shouldPass(methodMetric.traceId)) {
+          if (Tracer.shouldPause(methodMetric.traceId)) {
             debugger;
           }
           listener.handleEvent(e);
@@ -400,13 +399,13 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ) {
-    const callstack = traceUtil.getCallstack(new Error(TraceUtil.SIGNATURE));
+    const { traceId, trace } = Tracer.getCallstack();
     const methodMetric = this.#metric.portRel.getOrInsertComputed(
-      callstack.traceId,
+      traceId,
       () => {
         return {
-          traceId: callstack.traceId,
-          trace: callstack.trace,
+          traceId,
+          trace,
           firstSeen: performance.now(),
           calls: 0,
           facts: Fact.pure,
@@ -431,8 +430,8 @@ export class ApiMonitorSharedWorkerWrapper extends SharedWorker {
       return;
     }
 
-    if (traceUtil.shouldPass(methodMetric.traceId)) {
-      if (traceUtil.shouldPause(methodMetric.traceId)) {
+    if (Tracer.shouldPass(methodMetric.traceId)) {
+      if (Tracer.shouldPause(methodMetric.traceId)) {
         debugger;
       }
       this.#native.removeEventListener(

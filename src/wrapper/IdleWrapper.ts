@@ -1,11 +1,7 @@
 import type { IPanel } from '../api/storage/storage.local.ts';
 import { trim2ms } from '../api/time.ts';
-import {
-  type ICallstack,
-  type ITraceable,
-  TraceUtil,
-} from './shared/TraceUtil.ts';
-import { traceUtil, validHandler, validTimerDelay } from './shared/util.ts';
+import { type ICallstack, type ITraceable, Tracer } from './shared/Tracer.ts';
+import { validHandler, validTimerDelay } from './shared/util.ts';
 import { Fact, type TFact } from './shared/Fact.ts';
 import {
   cancelIdleCallback,
@@ -210,16 +206,15 @@ export class IdleWrapper {
       options?: IdleRequestOptions | undefined,
     ) {
       const delay = options?.timeout;
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err, fn);
+      const callstack = Tracer.getCallstack(fn);
 
       this.callCounter.requestIdleCallback++;
       const handler = this.native.requestIdleCallback((deadline) => {
         const start = performance.now();
         let selfTime = null;
 
-        if (traceUtil.shouldPass(callstack.traceId)) {
-          if (traceUtil.shouldPause(callstack.traceId)) {
+        if (Tracer.shouldPass(callstack.traceId)) {
+          if (Tracer.shouldPause(callstack.traceId)) {
             debugger;
           }
           fn(deadline);
@@ -239,14 +234,13 @@ export class IdleWrapper {
       this: IdleWrapper,
       handler: number,
     ) {
-      const err = new Error(TraceUtil.SIGNATURE);
-      const callstack = traceUtil.getCallstack(err);
+      const callstack = Tracer.getCallstack();
 
       this.#updateCicHistory(handler, callstack);
       this.callCounter.cancelIdleCallback++;
 
-      if (traceUtil.shouldPass(callstack.traceId)) {
-        if (traceUtil.shouldPause(callstack.traceId)) {
+      if (Tracer.shouldPass(callstack.traceId)) {
+        if (Tracer.shouldPause(callstack.traceId)) {
           debugger;
         }
         this.native.cancelIdleCallback(handler);
