@@ -61,7 +61,7 @@ To assess web application implementation correctness and to expedite issues disc
 
 - Gather callstack that is used to call every wrapped function:
   - Identify the origin of the callstack domain.
-  - Allow choosing the length of the collected trace:
+  - Control the length of the collected trace with configurable `Error.stackTraceLimit`. and then two display options:
     - **short** - just the nearest initiator (default).
     - **full** - from the root to the nearest initiator (from left to right).
 
